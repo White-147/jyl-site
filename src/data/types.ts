@@ -39,11 +39,16 @@ export interface CertItem {
   image: string
 }
 
+export interface AwardItem {
+  name: string
+  image: string
+}
+
 export interface EducationData {
   school: string
   degree: string
   period: string
   location: string
   certs: CertItem[]
-  awards: string[]
+  awards: AwardItem[]
 }
