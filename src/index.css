@@ -6,6 +6,19 @@
 @theme {
   --font-sans: "Inter", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
     "Noto Sans SC", system-ui, -apple-system, sans-serif;
+
+  /* 流体字号：min/max 用 rem（尊重浏览器缩放与用户字体设置），中间 rem+vw 渐变，
+     320px→1440px 平滑缩放，无断点跳跃；PC/平板/手机三端文本自适应 */
+  --text-xs: clamp(0.6875rem, 0.6563rem + 0.1563vw, 0.75rem);
+  --text-sm: clamp(0.8125rem, 0.7656rem + 0.2344vw, 0.875rem);
+  --text-base: clamp(0.9375rem, 0.875rem + 0.3125vw, 1rem);
+  --text-lg: clamp(1.0625rem, 1rem + 0.3125vw, 1.125rem);
+  --text-xl: clamp(1.1875rem, 1.0938rem + 0.4688vw, 1.25rem);
+  --text-2xl: clamp(1.3125rem, 1.1875rem + 0.625vw, 1.5rem);
+  --text-3xl: clamp(1.5rem, 1.3125rem + 0.9375vw, 1.875rem);
+  --text-4xl: clamp(1.75rem, 1.5rem + 1.25vw, 2.25rem);
+  --text-5xl: clamp(2rem, 1.625rem + 1.875vw, 3rem);
+  --text-6xl: clamp(2.25rem, 1.75rem + 2.5vw, 3.75rem);
 }
 
 html {
