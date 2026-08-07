@@ -75,7 +75,9 @@
         "ollama",
         "本地模型下载与启动",
         "MCP",
-        "本地多模态链路（SAM2 / VACE / Wan2.1）"
+        "本地多模态链路（SAM2 / VACE / Wan2.1）",
+        "llama.cpp / GGUF",
+        "本地 LLM Server（OpenAI 兼容 API）"
       ]
     },
     {
