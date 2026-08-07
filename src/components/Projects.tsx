@@ -10,33 +10,43 @@ const tagColor: Record<ProjectTag, string> = {
   大数据: 'bg-violet-50 text-violet-700 dark:bg-violet-500/10 dark:text-violet-300',
 }
 
-function ProjectCard({ project, delay }: { project: Project; delay: number }) {
+function ProjectRow({ project, index }: { project: Project; index: number }) {
+  // 相邻行左右交替，形成“全宽大卡”版式
+  const reverse = index % 2 === 1
+
   return (
-    <Reveal delay={delay} className="h-full">
-      <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all hover:-translate-y-1 hover:border-blue-300 hover:shadow-lg dark:border-slate-800 dark:bg-slate-900 dark:hover:border-blue-500/60">
-        {project.screenshot && (
-          <a href={project.link} target="_blank" rel="noreferrer" className="relative block overflow-hidden">
+    <Reveal>
+      <article className="group grid items-center gap-6 lg:grid-cols-2 lg:gap-12">
+        {/* 大截图 */}
+        <div className={`relative ${reverse ? 'lg:order-2' : ''}`}>
+          <a
+            href={project.link}
+            target="_blank"
+            rel="noreferrer"
+            className="block overflow-hidden rounded-2xl border border-slate-200 shadow-sm transition-all group-hover:border-blue-300 group-hover:shadow-lg dark:border-slate-800 dark:group-hover:border-blue-500/60"
+          >
             <img
               src={project.screenshot}
               alt={`${project.name} 界面截图`}
               loading="lazy"
-              className="aspect-video w-full object-cover object-top transition-transform duration-300 group-hover:scale-[1.03]"
+              className="aspect-[16/10] w-full object-cover object-top transition-transform duration-300 group-hover:scale-[1.02]"
             />
-            {project.highlight && (
-              <span className="absolute left-3 top-3 rounded-full bg-blue-700 px-2.5 py-0.5 text-xs font-semibold text-white shadow-sm dark:bg-blue-600">
-                重点作品
-              </span>
-            )}
           </a>
-        )}
+          {project.highlight && (
+            <span className="absolute left-4 top-4 rounded-full bg-blue-700 px-3 py-1 text-xs font-semibold text-white shadow-sm dark:bg-blue-600">
+              重点作品
+            </span>
+          )}
+        </div>
 
-        <div className="flex flex-1 flex-col p-5">
-          <div className="flex items-start justify-between gap-3">
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white">{project.name}</h3>
-            <span className="shrink-0 text-xs text-slate-400 dark:text-slate-500">{project.period}</span>
+        {/* 详情 */}
+        <div className={reverse ? 'lg:order-1' : ''}>
+          <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+            <h3 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">{project.name}</h3>
+            <span className="text-sm text-slate-400 dark:text-slate-500">{project.period}</span>
           </div>
 
-          <div className="mt-2 flex flex-wrap gap-1.5">
+          <div className="mt-3 flex flex-wrap gap-1.5">
             {project.tags.map((tag) => (
               <span key={tag} className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${tagColor[tag]}`}>
                 {tag}
@@ -44,34 +54,34 @@ function ProjectCard({ project, delay }: { project: Project; delay: number }) {
             ))}
           </div>
 
-          <p className="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-300">{project.summary}</p>
+          <p className="mt-4 text-base leading-relaxed text-slate-600 dark:text-slate-300">{project.summary}</p>
 
-          <ul className="mt-3 space-y-1.5">
+          <ul className="mt-4 space-y-2">
             {project.details.map((detail) => (
-              <li key={detail.slice(0, 16)} className="flex gap-2 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+              <li key={detail.slice(0, 16)} className="flex gap-2 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
                 <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-blue-500 dark:bg-blue-400" aria-hidden="true" />
                 {detail}
               </li>
             ))}
           </ul>
 
-          <div className="mt-4 flex flex-wrap gap-1.5">
+          <div className="mt-5 flex flex-wrap gap-1.5">
             {project.stack.map((item) => (
               <span
                 key={item}
-                className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-0.5 text-[11px] text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
               >
                 {item}
               </span>
             ))}
           </div>
 
-          <div className="mt-5 border-t border-slate-100 pt-4 dark:border-slate-800">
+          <div className="mt-5">
             <a
               href={project.link}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-1 text-sm font-semibold text-blue-700 transition-colors hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-blue-700 transition-colors hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
             >
               GitHub 仓库
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5" aria-hidden="true">
@@ -115,7 +125,7 @@ export default function Projects() {
         />
 
         {/* 岗位方向筛选 */}
-        <Reveal className="mt-8 flex flex-wrap gap-2">
+        <Reveal className="mt-10 flex flex-wrap gap-2">
           {(['全部', ...projectTags] as const).map((tag) => (
             <button
               key={tag}
@@ -133,9 +143,9 @@ export default function Projects() {
           ))}
         </Reveal>
 
-        <div className="mt-8 grid gap-6 md:grid-cols-2">
+        <div className="mt-12 space-y-14">
           {filtered.map((project, i) => (
-            <ProjectCard key={project.id} project={project} delay={(i % 2) * 100} />
+            <ProjectRow key={project.id} project={project} index={i} />
           ))}
         </div>
 

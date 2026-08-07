@@ -9,7 +9,7 @@ export default function Experience() {
         <SectionHeading
           eyebrow="工作经历"
           title="从业务交付到 AI 工具链"
-          description="数据质检、ERP 实施、高校实训与 AI 创作工具平台，都围绕「把规则和需求转成可执行、可交付的工程结果」。"
+          description="把规则和需求，转成可执行、可交付的工程结果。"
         />
 
         <div className="relative mt-12">

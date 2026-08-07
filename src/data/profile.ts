@@ -11,6 +11,7 @@ export const profile = {
   title: 'AI 应用平台型全栈工程师',
   subtitle: '数据科学与大数据技术本科 · 数据工程 / 业务系统交付 / Windows 原生桌面端工程化',
   email: 'jyl20010105@gmail.com',
+  phone: '18652353910',
   github: 'https://github.com/White-147',
   githubLabel: 'github.com/White-147',
   resumeUrl: '/resume.pdf',
@@ -36,6 +37,7 @@ export const profile = {
   title: string
   subtitle: string
   email: string
+  phone: string
   github: string
   githubLabel: string
   resumeUrl: string

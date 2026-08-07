@@ -9,24 +9,24 @@ export default function Skills() {
         <SectionHeading
           eyebrow="技能栈"
           title="跨端、跨栈的工程能力"
-          description="按工程领域分组展示，均为真实使用过的技术（不使用无依据的熟练度百分比）。"
+          description="按工程领域分组展示，均为真实工作与项目中实际使用过的技术。"
         />
 
-        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-12 space-y-5">
           {skillGroups.map((group, i) => (
-            <Reveal key={group.title} delay={(i % 3) * 100}>
-              <div className="h-full rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-colors hover:border-blue-300 dark:border-slate-800 dark:bg-slate-800 dark:hover:border-blue-500/60">
-                <div className="flex items-center gap-2.5">
-                  <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50 text-xs font-bold text-blue-700 dark:bg-blue-500/10 dark:text-blue-400">
+            <Reveal key={group.title} delay={(i % 2) * 80}>
+              <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-colors hover:border-blue-300 sm:p-7 dark:border-slate-800 dark:bg-slate-800 dark:hover:border-blue-500/60">
+                <div className="flex items-center gap-3">
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-sm font-bold text-blue-700 dark:bg-blue-500/10 dark:text-blue-400">
                     {String(i + 1).padStart(2, '0')}
                   </span>
-                  <h3 className="text-base font-bold text-slate-900 dark:text-white">{group.title}</h3>
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white">{group.title}</h3>
                 </div>
-                <div className="mt-4 flex flex-wrap gap-1.5">
+                <div className="mt-4 flex flex-wrap gap-2">
                   {group.items.map((item) => (
                     <span
                       key={item}
-                      className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
+                      className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
                     >
                       {item}
                     </span>

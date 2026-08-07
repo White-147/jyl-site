@@ -57,7 +57,7 @@ export default function Contact() {
                 </a>
               </div>
               <p className="mt-8 text-xs text-slate-400 dark:text-slate-500">
-                邮箱：{profile.email} · GitHub：{profile.githubLabel}
+                邮箱：{profile.email} · 电话：{profile.phone} · GitHub：{profile.githubLabel}
               </p>
             </div>
           </div>
