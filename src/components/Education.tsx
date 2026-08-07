@@ -7,7 +7,7 @@ import SectionHeading from './SectionHeading'
 
 const education = educationData.education as EducationData
 
-/** 证明徽章：圆形缩略图 + 名称，点击放大查看（灯箱，与项目截图交互一致） */
+/** 证明卡片：点击放大查看（灯箱，与项目截图交互一致） */
 function ProofCard({ item, onOpen }: { item: CertItem; onOpen: (item: CertItem) => void }) {
   return (
     <button
@@ -15,20 +15,31 @@ function ProofCard({ item, onOpen }: { item: CertItem; onOpen: (item: CertItem) 
       onClick={() => onOpen(item)}
       aria-label={`放大查看 ${item.name}`}
       title="点击放大查看"
-      className="group flex cursor-zoom-in items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3 text-left transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-900 dark:hover:border-blue-500/60"
+      className="group block cursor-zoom-in overflow-hidden rounded-xl border border-slate-200 bg-slate-50 text-left transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-900 dark:hover:border-blue-500/60"
     >
-      <img
-        src={item.image}
-        alt={`${item.name} 缩略图`}
-        loading="lazy"
-        className="h-14 w-14 shrink-0 rounded-full object-cover ring-2 ring-blue-100 transition-transform duration-300 group-hover:scale-105 dark:ring-blue-500/30"
-      />
-      <span className="min-w-0">
-        <span className="block text-sm font-semibold leading-snug text-slate-800 dark:text-slate-100">
-          {item.name}
+      <div className="relative overflow-hidden bg-white dark:bg-slate-950">
+        <img
+          src={item.image}
+          alt={`${item.name} 证明`}
+          loading="lazy"
+          className="aspect-[3/4] w-full object-cover object-top transition-transform duration-300 group-hover:scale-[1.04]"
+        />
+        {/* 放大提示：hover 时浮现 */}
+        <span
+          className="absolute inset-0 flex items-center justify-center bg-slate-900/0 transition-colors group-hover:bg-slate-900/25"
+          aria-hidden="true"
+        >
+          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white/95 text-slate-700 opacity-0 shadow-lg transition-opacity group-hover:opacity-100">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
+              <circle cx="11" cy="11" r="7" />
+              <path d="m21 21-4.35-4.35M11 8v6M8 11h6" />
+            </svg>
+          </span>
         </span>
-        <span className="mt-0.5 block text-xs text-slate-400 dark:text-slate-500">点击查看原图</span>
-      </span>
+      </div>
+      <p className="px-3 py-2.5 text-center text-xs font-medium leading-relaxed text-slate-600 dark:text-slate-300">
+        {item.name}
+      </p>
     </button>
   )
 }
