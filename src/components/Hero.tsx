@@ -72,6 +72,18 @@ export default function Hero() {
             </span>
           ))}
         </p>
+
+        {/* 技术栈标签：招聘者 5 秒扫描核心技能 */}
+        <ul className="mt-7 flex max-w-2xl flex-wrap items-center justify-center gap-2">
+          {profile.heroTags.map((tag) => (
+            <li
+              key={tag}
+              className="rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-300"
+            >
+              {tag}
+            </li>
+          ))}
+        </ul>
       </div>
 
       {/* 头像放大查看 */}
