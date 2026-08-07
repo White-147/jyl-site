@@ -74,7 +74,7 @@ export default function Hero() {
         </p>
 
         {/* 移动端：主按钮整行 + 次按钮并排；桌面端：单行排列 */}
-        <div className="mt-6 grid w-full max-w-sm grid-cols-2 gap-3 sm:mt-8 sm:flex sm:w-auto sm:max-w-none sm:flex-wrap sm:items-center sm:justify-center">
+        <div className="mt-6 sm:mt-8">
           <a
             href="#projects"
             className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-700 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-500"
