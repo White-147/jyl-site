@@ -59,25 +59,36 @@ export const skillGroups: SkillGroup[] = [
     ],
   },
   {
-    title: 'AI 与模型 API',
+    title: '模型与 API 接入',
     items: [
-      'Python',
-      'FastAPI',
-      'Selenium',
-      'Python Sidecar',
-      'Agent / Skills',
-      'agentscope',
-      'External API Profile',
       'OpenAI-compatible API',
+      'External API Profile',
       'Vertex Gemini / Veo',
       'Qwen-Omni',
       '云雾 AI',
       'PixVerse',
       'Provider 配置',
+      '模型发现与连接测试',
+    ],
+  },
+  {
+    title: '本地模型与工具链',
+    items: [
+      'Python',
+      'FastAPI',
+      'Python Sidecar',
+      'Agent / Skills',
+      'agentscope',
       'LM Studio',
+      'ollama',
+      '本地模型下载与启动',
       'MCP',
       '本地多模态链路（SAM2 / VACE / Wan2.1）',
     ],
+  },
+  {
+    title: '电脑与网络维护',
+    items: ['办公网络搭建', '路由器 / 交换机设置', 'Windows / Linux 系统维护', '杀毒软件部署', '电脑硬件故障排查', '打印机 / 扫描仪维护', '账号与共享管理', '数据备份'],
   },
   {
     title: '桌面与本地化',
@@ -85,11 +96,11 @@ export const skillGroups: SkillGroup[] = [
   },
   {
     title: '媒体与文档处理',
-    items: ['FFmpeg', 'OCR（Tesseract）', 'PDF（Poppler）', 'NLP（HanLP / LTP）', '音频数据处理'],
+    items: ['FFmpeg', 'OCR（Tesseract）', 'PDF（Poppler）', 'NLP（HanLP / LTP）', '配音字幕', '音频数据处理'],
   },
   {
     title: '工程化与测试',
-    items: ['Git / GitHub', 'GitHub Actions', 'Vitest', 'xUnit', 'Playwright', 'Synthetic E2E', 'Vite 构建', 'Linux / Ubuntu', 'Docker 基础'],
+    items: ['Git / GitHub', 'GitHub Actions', 'Vitest', 'xUnit', 'Playwright', 'Synthetic E2E', 'Selenium', 'Vite 构建', 'Linux / Ubuntu', 'Docker 基础'],
   },
   {
     title: '文档与培训',

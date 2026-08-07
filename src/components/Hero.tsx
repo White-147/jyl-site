@@ -29,6 +29,15 @@ export default function Hero() {
           求职中 · 到岗时间可沟通
         </span>
 
+        {/* 头像 */}
+        <img
+          src="/images/avatar-blue.webp"
+          alt="蒋宇龙证件照"
+          width={400}
+          height={560}
+          className="h-28 w-28 rounded-full object-cover shadow-lg ring-4 ring-blue-100 sm:h-32 sm:w-32 dark:ring-blue-500/20"
+        />
+
         <h1 className="mt-6 text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl dark:text-white">
           {profile.name}
         </h1>

@@ -1,13 +1,20 @@
-// 教育背景与证书（取自个人画像与简历）
+// 教育背景、证书与竞赛荣誉（图片为可点击验真的扫描件/成绩单）
+
+export interface CertItem {
+  name: string
+  image: string
+}
 
 export const education = {
   school: '淮阴师范学院',
   degree: '本科 · 数据科学与大数据技术',
   period: '2019/09 – 2023/06',
   location: '江苏淮安',
-  certs: ['大学英语四级 CET-4', '工业互联网平台开发工程师（初级）'],
-  awards: [
-    '第十二届蓝桥杯全国软件和信息技术专业人才大赛 C/C++ 程序设计江苏赛区 三等奖',
-    '全国大学生电子商务「创新、创意及创业」挑战赛江苏赛区 三等奖',
+  certs: [
+    { name: '大学英语四级 CET-4', image: '/certificates/cet4.webp' },
+    { name: '工业互联网平台开发工程师（初级）', image: '/certificates/industry.webp' },
+    { name: '蓝桥杯 C/C++ 程序设计 · 江苏赛区三等奖', image: '/certificates/bluebridge.webp' },
   ],
+  // 竞赛荣誉（三创赛证明待补充，仅保留文字）
+  awards: ['第十一届 全国大学生电子商务「创新、创意及创业」挑战赛 · 江苏赛区 三等奖'],
 } as const
