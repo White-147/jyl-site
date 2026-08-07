@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import projectsData from '../data/projects.json'
 import profile from '../data/profile.json'
 import type { Project, ProjectTag } from '../data/types'
+import { useIsMobile } from '../hooks/useIsMobile'
 import Reveal from './Reveal'
 import SectionHeading from './SectionHeading'
 
@@ -17,6 +18,12 @@ const tagColor: Record<ProjectTag, string> = {
 function ProjectRow({ project, index }: { project: Project; index: number }) {
   // 相邻行左右交替，形成“全宽大卡”版式
   const reverse = index % 2 === 1
+  // 移动端默认只显示前 2 条要点，减少阅读疲劳；桌面端完整显示
+  const isMobile = useIsMobile()
+  const [open, setOpen] = useState(false)
+  const collapsed = isMobile && !open
+  const shownDetails = collapsed ? project.details.slice(0, 2) : project.details
+  const hiddenCount = project.details.length - shownDetails.length
 
   return (
     <Reveal>
@@ -61,13 +68,39 @@ function ProjectRow({ project, index }: { project: Project; index: number }) {
           <p className="mt-4 text-base leading-relaxed text-slate-600 dark:text-slate-300">{project.summary}</p>
 
           <ul className="mt-4 space-y-2">
-            {project.details.map((detail) => (
+            {shownDetails.map((detail) => (
               <li key={detail.slice(0, 16)} className="flex gap-2 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
                 <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-blue-500 dark:bg-blue-400" aria-hidden="true" />
                 {detail}
               </li>
             ))}
           </ul>
+
+          {/* 移动端：折叠/展开更多要点 */}
+          {isMobile && hiddenCount > 0 && (
+            <button
+              type="button"
+              onClick={() => setOpen(true)}
+              className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-blue-700 transition-colors hover:text-blue-800 sm:hidden dark:text-blue-400 dark:hover:text-blue-300"
+            >
+              展开全部要点（{hiddenCount} 条）
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5" aria-hidden="true">
+                <path d="m6 9 6 6 6-6" />
+              </svg>
+            </button>
+          )}
+          {isMobile && open && (
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-blue-700 transition-colors hover:text-blue-800 sm:hidden dark:text-blue-400 dark:hover:text-blue-300"
+            >
+              收起要点
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5" aria-hidden="true">
+                <path d="m18 15-6-6-6 6" />
+              </svg>
+            </button>
+          )}
 
           <div className="mt-5 flex flex-wrap gap-1.5">
             {project.stack.map((item) => (
