@@ -206,7 +206,7 @@ export default function Projects() {
   )
 
   return (
-    <section id="projects" className="scroll-mt-16 bg-white py-20 sm:py-24 dark:bg-slate-950">
+    <section id="projects" className="scroll-mt-16 bg-white py-10 sm:py-24 dark:bg-slate-950">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <SectionHeading
           eyebrow="项目作品"

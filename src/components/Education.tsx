@@ -48,7 +48,7 @@ export default function Education() {
   const [viewing, setViewing] = useState<CertItem | null>(null)
 
   return (
-    <section id="education" className="scroll-mt-16 bg-slate-50 py-20 sm:py-24 dark:bg-slate-900">
+    <section id="education" className="scroll-mt-16 bg-slate-50 py-10 sm:py-24 dark:bg-slate-900">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <SectionHeading eyebrow="教育背景" title="教育经历与证书" />
 
