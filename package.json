@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build",
+    "db:seed": "node scripts/seed-db.mjs",
+    "db:export": "node scripts/export-db.mjs",
+    "build": "npm run db:export && tsc --noEmit && vite build",
     "preview": "vite preview"
   },
   "dependencies": {

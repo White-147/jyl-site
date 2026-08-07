@@ -1,4 +1,4 @@
-import { profile } from '../data/profile'
+import profile from '../data/profile.json'
 import Reveal from './Reveal'
 import SectionHeading from './SectionHeading'
 

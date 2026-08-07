@@ -1,12 +1,19 @@
-import { profile } from '../data/profile'
+import profile from '../data/profile.json'
 
 export default function Hero() {
   return (
     <section id="top" className="relative overflow-hidden">
-      {/* 背景装饰：柔和光斑 + 网格 */}
+      {/* 背景装饰：柔和光斑（微浮动）+ 网格 */}
       <div className="pointer-events-none absolute inset-0" aria-hidden="true">
-        <div className="absolute -top-24 left-1/2 h-96 w-96 -translate-x-1/2 rounded-full bg-blue-500/10 blur-3xl dark:bg-blue-500/15" />
-        <div className="absolute right-0 top-1/3 h-72 w-72 rounded-full bg-sky-400/10 blur-3xl dark:bg-sky-400/10" />
+        <div className="absolute -top-24 left-1/2 -translate-x-1/2">
+          <div className="h-96 w-96 rounded-full bg-blue-500/10 blur-3xl animate-hero-float dark:bg-blue-500/15" />
+        </div>
+        <div className="absolute right-0 top-1/3">
+          <div
+            className="h-72 w-72 rounded-full bg-sky-400/10 blur-3xl animate-hero-float dark:bg-sky-400/10"
+            style={{ animationDelay: '-5.5s' }}
+          />
+        </div>
         <div
           className="absolute inset-0 opacity-[0.35] dark:opacity-20"
           style={{

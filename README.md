@@ -18,27 +18,43 @@ npm run preview  # 预览生产构建
 ## 目录结构
 
 ```
+_archive/                 # ★ 原始素材归档（备份用，已随仓库上传 GitHub）
+  avatars/                #   证件照原图
+  certs/                  #   证书/成绩单/奖牌原图
+  project-screenshots/    #   项目截图原图
+  resumes/                #   简历 PDF 原件
+database/
+  portfolio.db            # ★ SQLite 内容库（内容源）
+scripts/
+  seed-db.mjs             #   JSON → 数据库（npm run db:seed）
+  export-db.mjs           #   数据库 → JSON（npm run db:export）
 public/
-  resume.pdf              # 简历（替换为最新版即可）
-  projects/*.webp         # 项目截图（来自各仓库 docs/assets/screenshots）
-  favicon.svg
+  resume.pdf              # 站点简历（最新版覆盖即可）
+  projects/*.webp         # 项目截图（构建资源）
+  images/ certificates/   # 头像、证书缩略图（构建资源）
 src/
-  data/                   # ★ 所有内容都在这几个文件里改
-    profile.ts            #   个人信息、关于我、关键数据、联系方式
-    projects.ts           #   项目（名称/标签/时间/简介/要点/技术栈/链接/截图）
-    skills.ts             #   技能分组
-    experience.ts         #   工作经历
-    education.ts          #   教育背景与证书
+  data/*.json             # 构建数据（由数据库导出生成，勿手改）
+  data/types.ts           # 数据类型定义
   components/             # 页面组件
 ```
 
-## 内容维护
+## 内容维护（数据流）
 
-所有内容均为纯数据驱动：改 `src/data/*.ts` 后刷新页面即可，无需改动组件。
+**内容源头是 `database/portfolio.db`（SQLite）**，构建时自动从数据库导出 JSON：
 
-- 换简历：覆盖 `public/resume.pdf`
-- 换项目截图：把新图放到 `public/projects/`，在 `projects.ts` 里改 `screenshot` 字段
-- 新增岗位方向标签：改 `projects.ts` 的 `projectTags` 和 `ProjectTag` 类型
+```bash
+npm run db:seed    # 用 src/data/*.json 重建/覆盖数据库（改内容时先改 JSON 再 seed）
+npm run db:export  # 从数据库导出 JSON（npm run build 会自动执行）
+npm run build      # = db:export + 类型检查 + 构建
+```
+
+日常改内容的两种方式：
+
+1. **改 JSON → 入库**：编辑 `src/data/*.json`（或直接改数据库），执行 `npm run db:seed` 同步到库；
+2. **改数据库 → 出 JSON**：直接用 SQLite 工具改 `database/portfolio.db`，执行 `npm run db:export` 重新生成 JSON。
+
+换简历：覆盖 `public/resume.pdf`（原件归档在 `_archive/resumes/`）。
+新增证书/头像：压缩后的 WebP 放 `public/` 对应目录，原图放入 `_archive/` 对应目录，再改 `education.json` 或相关数据。
 
 ## 部署到 Vercel
 

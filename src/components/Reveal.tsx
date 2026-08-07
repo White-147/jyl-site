@@ -6,7 +6,7 @@ interface RevealProps {
   className?: string
 }
 
-/** 进入视口时渐显上滑（IntersectionObserver 实现，轻量无依赖） */
+/** 滚动渐显：每次进入视口都会重新触发（离开后再次进入会重新播放动画） */
 export default function Reveal({ children, delay = 0, className = '' }: RevealProps) {
   const ref = useRef<HTMLDivElement>(null)
   const [visible, setVisible] = useState(false)
@@ -21,10 +21,7 @@ export default function Reveal({ children, delay = 0, className = '' }: RevealPr
     const io = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setVisible(true)
-            io.disconnect()
-          }
+          setVisible(entry.isIntersecting)
         })
       },
       { threshold: 0.08, rootMargin: '0px 0px -32px 0px' },
