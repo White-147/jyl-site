@@ -6,7 +6,7 @@
   ],
   "projects": [
     {
-      "id": "localllmserver",
+      "id": "local-llm-server",
       "name": "Local LLM Server",
       "tags": [
         "AI 应用"
@@ -32,7 +32,7 @@
       "screenshot": "projects/local-llm-server.webp"
     },
     {
-      "id": "milustudio",
+      "id": "milu-studio",
       "name": "MiLuStudio",
       "tags": [
         "AI 应用"
@@ -58,11 +58,10 @@
         "FFmpeg"
       ],
       "link": "https://github.com/White-147/MiLuStudio",
-      "screenshot": "projects/milustudio.webp",
-      "highlight": true
+      "screenshot": "projects/milu-studio.webp"
     },
     {
-      "id": "xiaolouai",
+      "id": "xiao-lou-ai",
       "name": "XiaoLouAI",
       "tags": [
         "AI 应用"
@@ -88,10 +87,10 @@
         "SAM2"
       ],
       "link": "https://github.com/White-147/XiaoLouAI",
-      "screenshot": "projects/xiaolouai.webp"
+      "screenshot": "projects/xiao-lou-ai.webp"
     },
     {
-      "id": "miluassistantweb",
+      "id": "milu-assistant-web",
       "name": "MiLuAssistantWeb",
       "tags": [
         "AI 应用"
@@ -117,7 +116,7 @@
       "screenshot": "projects/milu-assistant-web.webp"
     },
     {
-      "id": "miluassistantdesktop",
+      "id": "milu-assistant-desktop",
       "name": "MiLuAssistantDesktop",
       "tags": [
         "AI 应用"
@@ -140,7 +139,7 @@
       "screenshot": "projects/milu-assistant-desktop.webp"
     },
     {
-      "id": "bookrecommendation",
+      "id": "book-recommendation",
       "name": "BookRecommendation",
       "tags": [
         "大数据"
@@ -168,7 +167,7 @@
       "screenshot": "projects/book-recommendation.webp"
     },
     {
-      "id": "shoprecommendation",
+      "id": "shop-recommendation",
       "name": "ShopRecommendation",
       "tags": [
         "企业系统"
