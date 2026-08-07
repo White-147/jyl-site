@@ -1,0 +1,169 @@
+{
+  "projectTags": [
+    "AI 应用",
+    "大数据",
+    "企业系统"
+  ],
+  "projects": [
+    {
+      "id": "milustudio",
+      "name": "MiLuStudio",
+      "tags": [
+        "AI 应用"
+      ],
+      "period": "2026/05 – 至今",
+      "summary": "Windows 本地优先的 AI 漫剧生产 Agent：从中文故事/小说片段到 StoryGraph、角色设定、分镜、图片/视频提示词、配音字幕、媒体质检与导出包的 15 步可审阅、可回放生产链路。",
+      "details": [
+        "React 19 + Vite + TypeScript 工作台，Electron 桌面宿主 + NSIS 安装包交付",
+        ".NET 10 Control API + EF Core + SQLite + 本地 Worker + Python 3.13 Skills 运行时编排",
+        "External API Profile Center：OpenAI-compatible /chat/completions、Gemini-like generateContent、多认证方式、连接测试与 dry-run/live_text 边界",
+        "FFmpeg / Tesseract OCR / Poppler / HanLP 本地运行时；provider 真实调用默认关闭，本地优先、安全边界完善"
+      ],
+      "stack": [
+        "React 19",
+        "TypeScript",
+        "Vite",
+        ".NET 10",
+        "ASP.NET Core",
+        "SQLite",
+        "Python Skills",
+        "Electron",
+        "NSIS",
+        "FFmpeg"
+      ],
+      "link": "https://github.com/White-147/MiLuStudio",
+      "screenshot": "/projects/milustudio.webp",
+      "highlight": true
+    },
+    {
+      "id": "xiaolouai",
+      "name": "XiaoLouAI",
+      "tags": [
+        "AI 应用"
+      ],
+      "period": "2026/04 – 2026/05",
+      "summary": "Windows 原生多模态 AI 创作与资产协同平台：图片/视频创作、剧本分镜、素材资产、Agent Canvas、Playground、企业后台与钱包/API Center。",
+      "details": [
+        "React 19 + Vite + Tailwind + Three.js 前端；.NET 8 Minimal API Control Plane + PostgreSQL（canonical tables、SKIP LOCKED、LISTEN/NOTIFY）",
+        "Vertex Gemini 图片生成链路与 Vertex Veo 视频模型配置，Qwen-Omni 视频反推提示词前端/API 联调，云雾 AI 与 PixVerse OpenAPI 直连配置",
+        "ClosedApiWorker / LocalModelWorkerService 两种 Windows Service Worker 边界，对象存储抽象与公网访问硬化",
+        "人物替换本地 SAM2 + VACE/Wan2.1 链路调通，处理进度卡顿、Python 子进程超时与进程树清理"
+      ],
+      "stack": [
+        "React 19",
+        "TypeScript",
+        "Vite",
+        "Tailwind CSS",
+        ".NET 8",
+        "PostgreSQL",
+        "Vertex Gemini/Veo",
+        "Qwen-Omni",
+        "PixVerse",
+        "SAM2"
+      ],
+      "link": "https://github.com/White-147/XiaoLouAI",
+      "screenshot": "/projects/xiaolouai.webp"
+    },
+    {
+      "id": "miluassistantweb",
+      "name": "MiLuAssistantWeb",
+      "tags": [
+        "AI 应用"
+      ],
+      "period": "2026/04 – 2026/05",
+      "summary": "基于 CoPaw/QwenPaw（AgentScope 体系）二开的 MiLu AI 助手 Web 版：模型配置、Skills、记忆、多 Agent 与 MCP 工具一站式。",
+      "details": [
+        "Python 3.10-3.13 + FastAPI + agentscope 运行时，React + Ant Design 管理控制台",
+        "provider/model CRUD、模型发现与连接测试，支持 LM Studio / MiLu Local / OpenAI-compatible 多源配置",
+        "整理品牌资源、Skills 菜单、workspace 与多通道接入（Discord/Telegram/钉钉/飞书/企业微信等）"
+      ],
+      "stack": [
+        "Python",
+        "FastAPI",
+        "agentscope",
+        "React",
+        "Ant Design",
+        "LM Studio",
+        "Skills",
+        "MCP"
+      ],
+      "link": "https://github.com/White-147/MiLuAssistantWeb",
+      "screenshot": "/projects/miluassistantweb.webp"
+    },
+    {
+      "id": "miluassistantdesktop",
+      "name": "MiLuAssistantDesktop",
+      "tags": [
+        "AI 应用"
+      ],
+      "period": "2026/04 – 2026/05",
+      "summary": "基于 MiLuAssistantWeb 的 Windows 桌面安装版：Electron + NSIS 将 Python 后端与 Web 控制台封装为可双击安装的桌面应用。",
+      "details": [
+        "Electron 35 + electron-builder + NSIS 中英双语安装器，C# 启动器/卸载器",
+        "启动时自动初始化 milu 工作区、寻找空闲端口拉起本地 Python 后端、加载本地 Web UI",
+        "系统托盘常驻、退出回收，用户数据隔离在 %LOCALAPPDATA%"
+      ],
+      "stack": [
+        "Electron",
+        "electron-builder",
+        "NSIS",
+        "C#",
+        "嵌入式 Python"
+      ],
+      "link": "https://github.com/White-147/MiLuAssistantDesktop",
+      "screenshot": "/projects/miluassistantdesktop.webp"
+    },
+    {
+      "id": "bookrecommendation",
+      "name": "BookRecommendation",
+      "tags": [
+        "大数据"
+      ],
+      "period": "2022/11 – 2023/04",
+      "summary": "本科毕业设计：基于借阅大数据的图书推荐系统，覆盖学生用户、馆藏图书、借阅行为与推荐计算的完整链路。",
+      "details": [
+        "Vue 2.6 + Element UI + ECharts 前端；Spring Boot 2.3 + MyBatis-Plus + Spring Security/JWT + Kafka 后端",
+        "Selenium 补充图书数据，MySQL 存储业务与特征数据",
+        "Hadoop/HDFS + Hive + Spark SQL/Spark Streaming 定期计算；行为权重（浏览 0.15/收藏 0.25/借阅 0.60）+ 皮尔逊相似度 + 物品协同过滤"
+      ],
+      "stack": [
+        "Vue 2",
+        "Element UI",
+        "Java",
+        "Spring Boot",
+        "MyBatis-Plus",
+        "Kafka",
+        "Spark SQL",
+        "Hive",
+        "Hadoop",
+        "协同过滤"
+      ],
+      "link": "https://github.com/White-147/BookRecommendation",
+      "screenshot": "/projects/bookrecommendation.webp"
+    },
+    {
+      "id": "shoprecommendation",
+      "name": "ShopRecommendation",
+      "tags": [
+        "企业系统"
+      ],
+      "period": "2022/01 – 2022/02",
+      "summary": "Java Web 课程电商推荐系统：完整商城业务流程 + 支付宝沙箱支付 + 推荐商品展示。",
+      "details": [
+        "Spring Boot 2.5 + Spring MVC + Thymeleaf + Spring Data JPA/Hibernate + Bootstrap 分层实现",
+        "商品浏览/搜索/收藏/购物车/收货地址/订单结算全流程，支付宝沙箱 SDK 支付接入",
+        "数据库连接与支付密钥等 11 项配置全部环境变量化（.env.example）"
+      ],
+      "stack": [
+        "Java",
+        "Spring Boot",
+        "Thymeleaf",
+        "Spring Data JPA",
+        "MySQL",
+        "支付宝沙箱"
+      ],
+      "link": "https://github.com/White-147/ShopRecommendation",
+      "screenshot": "/projects/shoprecommendation.webp"
+    }
+  ]
+}

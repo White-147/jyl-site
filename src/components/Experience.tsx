@@ -1,6 +1,9 @@
-import { experiences } from '../data/experience'
+import experienceData from '../data/experience.json'
+import type { Experience } from '../data/types'
 import Reveal from './Reveal'
 import SectionHeading from './SectionHeading'
+
+const experiences = experienceData.experiences as Experience[]
 
 export default function Experience() {
   return (

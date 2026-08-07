@@ -1,12 +1,15 @@
-import { education } from '../data/education'
+import educationData from '../data/education.json'
+import type { EducationData } from '../data/types'
 import Reveal from './Reveal'
 import SectionHeading from './SectionHeading'
+
+const education = educationData.education as EducationData
 
 export default function Education() {
   return (
     <section id="education" className="scroll-mt-16 bg-slate-50 py-20 sm:py-24 dark:bg-slate-900">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
-        <SectionHeading eyebrow="教育背景" title="教育经历、证书与荣誉" />
+        <SectionHeading eyebrow="教育背景" title="教育经历与证书" />
 
         {/* 学校信息 */}
         <Reveal className="mt-12">
@@ -39,12 +42,12 @@ export default function Education() {
                   <path d="M8 7h8M8 11h8M8 15h5" />
                 </svg>
               </span>
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white">证书与成绩证明</h3>
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white">证书证明</h3>
               <span className="ml-auto text-xs text-slate-400 dark:text-slate-500">点击图片可查看原件</span>
             </div>
 
             {/* 证书墙：缩略图卡片，点击新窗口验真 */}
-            <div className="mt-5 grid gap-4 sm:grid-cols-3">
+            <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {education.certs.map((cert) => (
                 <a
                   key={cert.name}

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { profile } from '../data/profile'
+import profile from '../data/profile.json'
 import ThemeToggle from './ThemeToggle'
 
 const navLinks = [

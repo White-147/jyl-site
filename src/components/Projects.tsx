@@ -1,8 +1,12 @@
 import { useMemo, useState } from 'react'
-import { projects, projectTags, type Project, type ProjectTag } from '../data/projects'
-import { profile } from '../data/profile'
+import projectsData from '../data/projects.json'
+import profile from '../data/profile.json'
+import type { Project, ProjectTag } from '../data/types'
 import Reveal from './Reveal'
 import SectionHeading from './SectionHeading'
+
+const projectTags = projectsData.projectTags as ProjectTag[]
+const projects = projectsData.projects as Project[]
 
 const tagColor: Record<ProjectTag, string> = {
   'AI 应用': 'bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-300',

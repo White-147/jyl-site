@@ -40,3 +40,24 @@ body {
     transition: none;
   }
 }
+
+/* Hero 背景光斑微浮动（克制式装饰动效） */
+@keyframes hero-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-14px);
+  }
+}
+
+.animate-hero-float {
+  animation: hero-float 11s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-hero-float {
+    animation: none;
+  }
+}
