@@ -25,14 +25,14 @@ export default function Contact() {
               </p>
               <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
                 <a
-                  href={`mailto:${profile.email}`}
+                  href={`mailto:${profile.emailQq}`}
                   className="inline-flex items-center gap-2 rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-500"
                 >
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden="true">
                     <rect x="2" y="4" width="20" height="16" rx="2" />
                     <path d="m22 7-10 6L2 7" />
                   </svg>
-                  {profile.email}
+                  {profile.emailQq}
                 </a>
                 <a
                   href={profile.github}
@@ -57,13 +57,13 @@ export default function Contact() {
                 </a>
               </div>
               <p className="mt-8 text-xs text-slate-400 dark:text-slate-500">
-                邮箱：
-                <a href={`mailto:${profile.email}`} className="underline decoration-slate-300 underline-offset-2 hover:text-blue-600 dark:decoration-slate-600">
-                  {profile.email}
-                </a>
-                {' · '}QQ 邮箱：
+                QQ 邮箱：
                 <a href={`mailto:${profile.emailQq}`} className="underline decoration-slate-300 underline-offset-2 hover:text-blue-600 dark:decoration-slate-600">
                   {profile.emailQq}
+                </a>
+                {' · '}Gmail（备用）：
+                <a href={`mailto:${profile.email}`} className="underline decoration-slate-300 underline-offset-2 hover:text-blue-600 dark:decoration-slate-600">
+                  {profile.email}
                 </a>
                 {' · '}GitHub：
                 <a href={profile.github} target="_blank" rel="noreferrer" className="underline decoration-slate-300 underline-offset-2 hover:text-blue-600 dark:decoration-slate-600">

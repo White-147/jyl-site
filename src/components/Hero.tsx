@@ -38,7 +38,11 @@ export default function Hero() {
         <p className="mt-2 text-sm font-medium text-slate-500 dark:text-slate-400">{profile.subtitle}</p>
 
         <p className="mt-6 max-w-2xl text-base leading-relaxed text-slate-600 dark:text-slate-300">
-          {profile.hero}
+          {profile.heroLines.map((line) => (
+            <span key={line} className="block">
+              {line}
+            </span>
+          ))}
         </p>
 
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">

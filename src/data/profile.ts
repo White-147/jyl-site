@@ -15,8 +15,11 @@ export const profile = {
   github: 'https://github.com/White-147',
   githubLabel: 'github.com/White-147',
   resumeUrl: '/resume.pdf',
-  // 一句话定位（Hero 主标题下的副标题）
-  hero: '从大数据与业务系统交付起步，逐步转向 AI 创作工具平台开发，能独立把前端、后端、数据与桌面端交付串起来。',
+  // 首页介绍（每项一行，保证不折行）
+  heroLines: [
+    '从大数据与业务系统交付起步，逐步转向 AI 创作工具平台开发。',
+    '能独立把前端、后端、数据与桌面端交付串起来，形成可验证的项目。',
+  ],
   // 关于我
   about: [
     '数据科学与大数据技术本科，早期围绕 Java / MySQL / Hadoop / Spark / Hive / Kafka 完成数据采集、清洗、后端接口与推荐计算的全链路项目，也曾参与 ERP 实施、AI 训练数据质检与高校大数据实训。',
@@ -41,7 +44,7 @@ export const profile = {
   github: string
   githubLabel: string
   resumeUrl: string
-  hero: string
+  heroLines: string[]
   about: string[]
   stats: Stat[]
 }
