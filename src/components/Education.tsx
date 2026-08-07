@@ -86,7 +86,7 @@ export default function Education() {
               <h3 className="text-lg font-bold text-slate-900 dark:text-white">证书</h3>
               <span className="ml-auto text-xs text-slate-400 dark:text-slate-500">点击图片可放大查看</span>
             </div>
-            <div className="mt-5 grid gap-4 sm:grid-cols-2">
+            <div className="mt-5 grid grid-cols-2 gap-3 sm:gap-4">
               {education.certs.map((cert) => (
                 <ProofCard key={cert.name} item={cert} onOpen={setViewing} />
               ))}
@@ -107,7 +107,7 @@ export default function Education() {
               <h3 className="text-lg font-bold text-slate-900 dark:text-white">奖项</h3>
               <span className="ml-auto text-xs text-slate-400 dark:text-slate-500">点击图片可放大查看</span>
             </div>
-            <div className="mt-5 grid gap-4 sm:grid-cols-2">
+            <div className="mt-5 grid grid-cols-2 gap-3 sm:gap-4">
               {education.awards.map((award) => (
                 <ProofCard key={award.name} item={award} onOpen={setViewing} />
               ))}
