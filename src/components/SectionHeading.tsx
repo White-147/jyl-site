@@ -1,9 +1,10 @@
+import type { ReactNode } from 'react'
 import Reveal from './Reveal'
 
 interface SectionHeadingProps {
   eyebrow: string
   title: string
-  description?: string
+  description?: ReactNode
 }
 
 export default function SectionHeading({ eyebrow, title, description }: SectionHeadingProps) {

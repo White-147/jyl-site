@@ -99,11 +99,20 @@ export default function Projects() {
         <SectionHeading
           eyebrow="项目作品"
           title="近期项目与代表作品"
-          description="按岗位方向筛选查看。更多仓库可访问 GitHub："
+          description={
+            <>
+              按岗位方向筛选查看 · 更多项目见{' '}
+              <a
+                href={profile.github}
+                target="_blank"
+                rel="noreferrer"
+                className="font-medium text-blue-700 underline decoration-blue-300 underline-offset-4 hover:text-blue-800 dark:text-blue-400 dark:decoration-blue-500/50 dark:hover:text-blue-300"
+              >
+                {profile.githubLabel}
+              </a>
+            </>
+          }
         />
-        <p className="-mt-4 max-w-2xl text-sm text-slate-500 dark:text-slate-400">
-          {profile.githubLabel}
-        </p>
 
         {/* 岗位方向筛选 */}
         <Reveal className="mt-8 flex flex-wrap gap-2">

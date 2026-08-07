@@ -6,7 +6,7 @@ export default function About() {
   return (
     <section id="about" className="scroll-mt-16 bg-slate-50 py-20 sm:py-24 dark:bg-slate-900">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
-        <SectionHeading eyebrow="关于我" title="把 AI 应用、数据与桌面端交付串起来的全栈工程师" />
+        <SectionHeading eyebrow="关于我" title="AI 应用 · 企业系统 · 数据工程" />
 
         <div className="mt-12 grid gap-10 lg:grid-cols-5">
           {/* 文字 */}
