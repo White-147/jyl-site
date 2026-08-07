@@ -73,18 +73,10 @@ export default function Hero() {
           ))}
         </p>
 
-        {/* 移动端：主按钮整行 + 次按钮并排；桌面端：单行排列 */}
-        <div className="mt-6 sm:mt-8">
-          <a
-            href="#projects"
-            className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-700 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-500"
-          >
-            查看项目
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden="true">
-              <path d="M12 5v14M19 12l-7 7-7-7" />
-            </svg>
-          </a>
-        </div>
+        {/* 首屏不设 CTA：导航栏「项目」入口 + 滚动进入内容区（极简排版，留白即设计） */}
+        <p className="mt-8 text-xs font-medium tracking-widest text-slate-400 dark:text-slate-500">
+          向下滚动查看项目 ↓
+        </p>
       </div>
 
       {/* 头像放大查看 */}
