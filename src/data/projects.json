@@ -88,7 +88,7 @@
         "MCP"
       ],
       "link": "https://github.com/White-147/MiLuAssistantWeb",
-      "screenshot": "projects/miluassistantweb.webp"
+      "screenshot": "projects/milu-assistant-web.webp"
     },
     {
       "id": "miluassistantdesktop",
@@ -111,7 +111,7 @@
         "嵌入式 Python"
       ],
       "link": "https://github.com/White-147/MiLuAssistantDesktop",
-      "screenshot": "projects/miluassistantdesktop.webp"
+      "screenshot": "projects/milu-assistant-desktop.webp"
     },
     {
       "id": "bookrecommendation",
@@ -139,7 +139,7 @@
         "协同过滤"
       ],
       "link": "https://github.com/White-147/BookRecommendation",
-      "screenshot": "projects/bookrecommendation.webp"
+      "screenshot": "projects/book-recommendation.webp"
     },
     {
       "id": "shoprecommendation",
@@ -163,7 +163,7 @@
         "支付宝沙箱"
       ],
       "link": "https://github.com/White-147/ShopRecommendation",
-      "screenshot": "projects/shoprecommendation.webp"
+      "screenshot": "projects/shop-recommendation.webp"
     }
   ]
 }

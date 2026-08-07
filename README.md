@@ -19,10 +19,10 @@ npm run preview  # 预览生产构建
 
 ```
 _archive/                 # ★ 原始素材归档（备份用，已随仓库上传 GitHub）
-  avatars/                #   证件照原图
+  avatars/                #   证件照原图（avatar-blue / avatar-white）
   certs/                  #   证书/成绩单/奖牌原图
   project-screenshots/    #   项目截图原图
-  resumes/                #   简历 PDF 原件
+  resumes/                #   简历 PDF 原件（保留中文原名）
 database/
   portfolio.db            # ★ SQLite 内容库（内容源）
 scripts/
@@ -55,6 +55,13 @@ npm run build      # = db:export + 类型检查 + 构建
 
 换简历：覆盖 `public/resume.pdf`（原件归档在 `_archive/resumes/`）。
 新增证书/头像：压缩后的 WebP 放 `public/` 对应目录，原图放入 `_archive/` 对应目录，再改 `education.json` 或相关数据。
+
+## 图片与命名规范
+
+- 站点图片统一放 `public/` 下，按类型分目录：`projects/`、`certificates/`、`images/`（头像）
+- **命名规则**：小写 kebab-case（连字符分隔）；产品名保持紧凑（`milustudio`、`xiaolouai`），通用词用连字符（`milu-assistant-web`、`book-recommendation`、`cet-4`、`sanchuang-medal`）
+- `_archive/` 归档文件与 `public/` 站点文件一一对应、命名一致（简历 PDF 除外，保留原名便于识别）
+- 数据源为 SQLite（`database/portfolio.db`），其中存储的图片路径与 `public/` 实际文件名严格一致；新增/改名图片后执行 `npm run db:seed` 同步
 
 ## 部署到 Vercel
 

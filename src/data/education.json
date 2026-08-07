@@ -7,11 +7,11 @@
     "certs": [
       {
         "name": "大学英语四级 CET-4",
-        "image": "certificates/cet4.webp"
+        "image": "certificates/cet-4.webp"
       },
       {
         "name": "工业互联网平台开发工程师（初级）",
-        "image": "certificates/industry.webp"
+        "image": "certificates/industrial-internet.webp"
       }
     ],
     "awards": [
@@ -21,7 +21,7 @@
       },
       {
         "name": "第十一届 中国大学生电子商务「创新、创意及创业」挑战赛 江苏赛区 三等奖",
-        "image": "certificates/sanchuangsai-medal.webp"
+        "image": "certificates/sanchuang-medal.webp"
       }
     ]
   }
