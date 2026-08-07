@@ -72,11 +72,11 @@ export default function About() {
 
           {/* 关键数据：手机端 3 列紧凑展示，一屏可看完 */}
           <Reveal delay={120} className="lg:col-span-2">
-            <div className="grid grid-cols-3 gap-2 sm:grid-cols-2 sm:gap-3">
+            <div className="grid grid-cols-3 gap-1.5 sm:grid-cols-2 sm:gap-3">
               {stats.map((stat) => (
                 <div
                   key={stat.label}
-                  className="rounded-2xl border border-slate-200 bg-white p-2.5 text-center shadow-sm dark:border-slate-700 dark:bg-slate-800"
+                  className="rounded-2xl border border-slate-200 bg-white p-2 text-center shadow-sm dark:border-slate-700 dark:bg-slate-800"
                 >
                   <StatValue stat={stat} />
                   <div className="mt-1 text-[11px] leading-snug break-words text-slate-500 sm:text-xs dark:text-slate-400">

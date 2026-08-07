@@ -20,8 +20,8 @@ export default function Contact() {
               }}
             />
             <div className="relative">
-              <p className="text-lg leading-relaxed text-slate-600 dark:text-slate-300">
-                欢迎通过邮件或 GitHub 联系我，也可以直接下载简历查看完整信息。
+              <p className="text-lg leading-relaxed break-words text-slate-600 dark:text-slate-300">
+                欢迎通过邮件或 GitHub 联系我，也可直接下载简历。
               </p>
               <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
                 <a
