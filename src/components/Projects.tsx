@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import projectsData from '../data/projects.json'
 import profile from '../data/profile.json'
 import type { Project, ProjectTag } from '../data/types'
@@ -21,20 +21,32 @@ function ProjectRow({ project, index }: { project: Project; index: number }) {
   // 移动端默认只显示前 2 条要点，减少阅读疲劳；桌面端完整显示
   const isMobile = useIsMobile()
   const [open, setOpen] = useState(false)
+  const [lightbox, setLightbox] = useState(false)
   const collapsed = isMobile && !open
   const shownDetails = collapsed ? project.details.slice(0, 2) : project.details
   const hiddenCount = project.details.length - shownDetails.length
 
+  // 灯箱：ESC 关闭
+  useEffect(() => {
+    if (!lightbox) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setLightbox(false)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [lightbox])
+
   return (
     <Reveal>
       <article className="group grid items-center gap-6 lg:grid-cols-2 lg:gap-12">
-        {/* 大截图 */}
+        {/* 大截图：点击放大查看（灯箱），不直接跳转 */}
         <div className={`relative ${reverse ? 'lg:order-2' : ''}`}>
-          <a
-            href={project.link}
-            target="_blank"
-            rel="noreferrer"
-            className="block overflow-hidden rounded-2xl border border-slate-200 shadow-sm transition-all group-hover:border-blue-300 group-hover:shadow-lg dark:border-slate-800 dark:group-hover:border-blue-500/60"
+          <button
+            type="button"
+            onClick={() => setLightbox(true)}
+            aria-label={`放大查看 ${project.name} 界面截图`}
+            title="点击放大查看界面"
+            className="relative block w-full cursor-zoom-in overflow-hidden rounded-2xl border border-slate-200 shadow-sm transition-all group-hover:border-blue-300 group-hover:shadow-lg dark:border-slate-800 dark:group-hover:border-blue-500/60"
           >
             <img
               src={project.screenshot}
@@ -42,7 +54,19 @@ function ProjectRow({ project, index }: { project: Project; index: number }) {
               loading="lazy"
               className="aspect-[16/10] w-full object-cover object-top transition-transform duration-300 group-hover:scale-[1.02]"
             />
-          </a>
+            {/* 放大提示：hover 时浮现 */}
+            <span
+              className="absolute inset-0 flex items-center justify-center bg-slate-900/0 transition-colors group-hover:bg-slate-900/25"
+              aria-hidden="true"
+            >
+              <span className="flex h-12 w-12 items-center justify-center rounded-full bg-white/95 text-slate-700 opacity-0 shadow-lg transition-opacity group-hover:opacity-100">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
+                  <circle cx="11" cy="11" r="7" />
+                  <path d="m21 21-4.35-4.35M11 8v6M8 11h6" />
+                </svg>
+              </span>
+            </span>
+          </button>
           {project.highlight && (
             <span className="absolute left-4 top-4 rounded-full bg-blue-700 px-3 py-1 text-xs font-semibold text-white shadow-sm dark:bg-blue-600">
               重点作品
@@ -50,10 +74,71 @@ function ProjectRow({ project, index }: { project: Project; index: number }) {
           )}
         </div>
 
+        {/* 灯箱：放大查看项目界面 */}
+        {lightbox && (
+          <div
+            className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-950/90 p-4 backdrop-blur-sm"
+            role="dialog"
+            aria-modal="true"
+            aria-label={`${project.name} 界面截图（放大）`}
+            onClick={() => setLightbox(false)}
+          >
+            <div className="relative max-h-full max-w-4xl" onClick={(e) => e.stopPropagation()}>
+              <img
+                src={project.screenshot}
+                alt={`${project.name} 界面截图（放大）`}
+                className="max-h-[78vh] w-auto rounded-lg shadow-2xl"
+              />
+              <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+                <p className="text-sm font-medium text-slate-200">{project.name} · 界面截图</p>
+                <div className="flex items-center gap-2">
+                  <a
+                    href={project.link}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-blue-700 px-3.5 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-500"
+                  >
+                    GitHub 仓库
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5" aria-hidden="true">
+                      <path d="M7 17 17 7M7 7h10v10" />
+                    </svg>
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => setLightbox(false)}
+                    className="rounded-lg border border-slate-500 px-3.5 py-2 text-sm font-semibold text-slate-200 transition-colors hover:border-slate-300 hover:text-white"
+                  >
+                    关闭
+                  </button>
+                </div>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setLightbox(false)}
+              aria-label="关闭放大视图"
+              className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-slate-200 transition-colors hover:bg-white/20 hover:text-white"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="h-5 w-5" aria-hidden="true">
+                <path d="M18 6 6 18M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        )}
+
         {/* 详情 */}
         <div className={reverse ? 'lg:order-1' : ''}>
           <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-            <h3 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">{project.name}</h3>
+            <h3 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+              <a
+                href={project.link}
+                target="_blank"
+                rel="noreferrer"
+                className="transition-colors hover:text-blue-700 dark:hover:text-blue-400"
+              >
+                {project.name}
+              </a>
+            </h3>
             <span className="text-sm text-slate-400 dark:text-slate-500">{project.period}</span>
           </div>
 
@@ -118,9 +203,9 @@ function ProjectRow({ project, index }: { project: Project; index: number }) {
               href={project.link}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-1.5 text-sm font-semibold text-blue-700 transition-colors hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-500"
             >
-              GitHub 仓库
+              查看项目
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5" aria-hidden="true">
                 <path d="M7 17 17 7M7 7h10v10" />
               </svg>
