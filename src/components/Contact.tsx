@@ -57,7 +57,18 @@ export default function Contact() {
                 </a>
               </div>
               <p className="mt-8 text-xs text-slate-400 dark:text-slate-500">
-                邮箱：{profile.email} · 电话：{profile.phone} · GitHub：{profile.githubLabel}
+                邮箱：
+                <a href={`mailto:${profile.email}`} className="underline decoration-slate-300 underline-offset-2 hover:text-blue-600 dark:decoration-slate-600">
+                  {profile.email}
+                </a>
+                {' · '}QQ 邮箱：
+                <a href={`mailto:${profile.emailQq}`} className="underline decoration-slate-300 underline-offset-2 hover:text-blue-600 dark:decoration-slate-600">
+                  {profile.emailQq}
+                </a>
+                {' · '}GitHub：
+                <a href={profile.github} target="_blank" rel="noreferrer" className="underline decoration-slate-300 underline-offset-2 hover:text-blue-600 dark:decoration-slate-600">
+                  {profile.githubLabel}
+                </a>
               </p>
             </div>
           </div>
