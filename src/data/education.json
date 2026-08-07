@@ -12,18 +12,17 @@
       {
         "name": "工业互联网平台开发工程师（初级）",
         "image": "/certificates/industry.webp"
-      },
-      {
-        "name": "蓝桥杯 C/C++ 程序设计 · 江苏赛区三等奖",
-        "image": "/certificates/bluebridge.webp"
-      },
-      {
-        "name": "三创赛 · 江苏赛区三等奖（奖牌）",
-        "image": "/certificates/sanchuangsai-medal.webp"
       }
     ],
     "awards": [
-      "第十一届 全国大学生电子商务「创新、创意及创业」挑战赛 · 江苏赛区 三等奖"
+      {
+        "name": "第十二届 蓝桥杯全国软件和信息技术专业人才大赛 江苏赛区 三等奖",
+        "image": "/certificates/bluebridge.webp"
+      },
+      {
+        "name": "第十一届 中国大学生电子商务「创新、创意及创业」挑战赛 江苏赛区 三等奖",
+        "image": "/certificates/sanchuangsai-medal.webp"
+      }
     ]
   }
 }

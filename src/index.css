@@ -41,6 +41,28 @@ body {
   }
 }
 
+/* 技能 chips 交错浮现（父级 .reveal-group 进入视口后逐个显示） */
+.reveal-group .chip {
+  opacity: 0;
+  transform: translateY(6px);
+  transition:
+    opacity 0.4s ease,
+    transform 0.4s ease;
+}
+
+.reveal-group.visible .chip {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal-group .chip {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
 /* Hero 背景光斑微浮动（克制式装饰动效） */
 @keyframes hero-float {
   0%,
