@@ -3,6 +3,7 @@ import projectsData from '../data/projects.json'
 import profile from '../data/profile.json'
 import type { Project, ProjectTag } from '../data/types'
 import { useIsMobile } from '../hooks/useIsMobile'
+import Lightbox from './Lightbox'
 import Reveal from './Reveal'
 import SectionHeading from './SectionHeading'
 
@@ -74,56 +75,35 @@ function ProjectRow({ project, index }: { project: Project; index: number }) {
           )}
         </div>
 
-        {/* 灯箱：放大查看项目界面 */}
-        {lightbox && (
-          <div
-            className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-950/90 p-4 backdrop-blur-sm"
-            role="dialog"
-            aria-modal="true"
-            aria-label={`${project.name} 界面截图（放大）`}
-            onClick={() => setLightbox(false)}
+        {/* 灯箱：放大查看项目界面（与证书/奖项共用同一交互） */}
+        {lightbox && project.screenshot && (
+          <Lightbox
+            src={project.screenshot}
+            alt={`${project.name} 界面截图（放大）`}
+            onClose={() => setLightbox(false)}
           >
-            <div className="relative max-h-full max-w-4xl" onClick={(e) => e.stopPropagation()}>
-              <img
-                src={project.screenshot}
-                alt={`${project.name} 界面截图（放大）`}
-                className="max-h-[78vh] w-auto rounded-lg shadow-2xl"
-              />
-              <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-                <p className="text-sm font-medium text-slate-200">{project.name} · 界面截图</p>
-                <div className="flex items-center gap-2">
-                  <a
-                    href={project.link}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-1.5 rounded-lg bg-blue-700 px-3.5 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-500"
-                  >
-                    GitHub 仓库
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5" aria-hidden="true">
-                      <path d="M7 17 17 7M7 7h10v10" />
-                    </svg>
-                  </a>
-                  <button
-                    type="button"
-                    onClick={() => setLightbox(false)}
-                    className="rounded-lg border border-slate-500 px-3.5 py-2 text-sm font-semibold text-slate-200 transition-colors hover:border-slate-300 hover:text-white"
-                  >
-                    关闭
-                  </button>
-                </div>
-              </div>
+            <p className="text-sm font-medium text-slate-200">{project.name} · 界面截图</p>
+            <div className="flex items-center gap-2">
+              <a
+                href={project.link}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-blue-700 px-3.5 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-500"
+              >
+                GitHub 仓库
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5" aria-hidden="true">
+                  <path d="M7 17 17 7M7 7h10v10" />
+                </svg>
+              </a>
+              <button
+                type="button"
+                onClick={() => setLightbox(false)}
+                className="rounded-lg border border-slate-500 px-3.5 py-2 text-sm font-semibold text-slate-200 transition-colors hover:border-slate-300 hover:text-white"
+              >
+                关闭
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={() => setLightbox(false)}
-              aria-label="关闭放大视图"
-              className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-slate-200 transition-colors hover:bg-white/20 hover:text-white"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="h-5 w-5" aria-hidden="true">
-                <path d="M18 6 6 18M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
+          </Lightbox>
         )}
 
         {/* 详情 */}
