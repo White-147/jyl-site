@@ -1,35 +1,52 @@
+import { useState } from 'react'
 import educationData from '../data/education.json'
 import type { CertItem, EducationData } from '../data/types'
+import Lightbox from './Lightbox'
 import Reveal from './Reveal'
 import SectionHeading from './SectionHeading'
 
 const education = educationData.education as EducationData
 
-/** 证明图片卡片：点击新窗口查看原件 */
-function ProofCard({ item }: { item: CertItem }) {
+/** 证明卡片：点击放大查看（灯箱，与项目截图交互一致） */
+function ProofCard({ item, onOpen }: { item: CertItem; onOpen: (item: CertItem) => void }) {
   return (
-    <a
-      href={item.image}
-      target="_blank"
-      rel="noreferrer"
-      className="group block overflow-hidden rounded-xl border border-slate-200 bg-slate-50 transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-900 dark:hover:border-blue-500/60"
+    <button
+      type="button"
+      onClick={() => onOpen(item)}
+      aria-label={`放大查看 ${item.name}`}
+      title="点击放大查看"
+      className="group block cursor-zoom-in overflow-hidden rounded-xl border border-slate-200 bg-slate-50 text-left transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-900 dark:hover:border-blue-500/60"
     >
-      <div className="overflow-hidden bg-white dark:bg-slate-950">
+      <div className="relative overflow-hidden bg-white dark:bg-slate-950">
         <img
           src={item.image}
           alt={`${item.name} 证明`}
           loading="lazy"
           className="aspect-[3/4] w-full object-cover object-top transition-transform duration-300 group-hover:scale-[1.04]"
         />
+        {/* 放大提示：hover 时浮现 */}
+        <span
+          className="absolute inset-0 flex items-center justify-center bg-slate-900/0 transition-colors group-hover:bg-slate-900/25"
+          aria-hidden="true"
+        >
+          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white/95 text-slate-700 opacity-0 shadow-lg transition-opacity group-hover:opacity-100">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
+              <circle cx="11" cy="11" r="7" />
+              <path d="m21 21-4.35-4.35M11 8v6M8 11h6" />
+            </svg>
+          </span>
+        </span>
       </div>
       <p className="px-3 py-2.5 text-center text-xs font-medium leading-relaxed text-slate-600 dark:text-slate-300">
         {item.name}
       </p>
-    </a>
+    </button>
   )
 }
 
 export default function Education() {
+  const [viewing, setViewing] = useState<CertItem | null>(null)
+
   return (
     <section id="education" className="scroll-mt-16 bg-slate-50 py-20 sm:py-24 dark:bg-slate-900">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
@@ -67,11 +84,11 @@ export default function Education() {
                 </svg>
               </span>
               <h3 className="text-lg font-bold text-slate-900 dark:text-white">证书</h3>
-              <span className="ml-auto text-xs text-slate-400 dark:text-slate-500">点击图片可查看原件</span>
+              <span className="ml-auto text-xs text-slate-400 dark:text-slate-500">点击图片可放大查看</span>
             </div>
             <div className="mt-5 grid gap-4 sm:grid-cols-2">
               {education.certs.map((cert) => (
-                <ProofCard key={cert.name} item={cert} />
+                <ProofCard key={cert.name} item={cert} onOpen={setViewing} />
               ))}
             </div>
           </div>
@@ -88,16 +105,30 @@ export default function Education() {
                 </svg>
               </span>
               <h3 className="text-lg font-bold text-slate-900 dark:text-white">奖项</h3>
-              <span className="ml-auto text-xs text-slate-400 dark:text-slate-500">点击图片可查看原件</span>
+              <span className="ml-auto text-xs text-slate-400 dark:text-slate-500">点击图片可放大查看</span>
             </div>
             <div className="mt-5 grid gap-4 sm:grid-cols-2">
               {education.awards.map((award) => (
-                <ProofCard key={award.name} item={award} />
+                <ProofCard key={award.name} item={award} onOpen={setViewing} />
               ))}
             </div>
           </div>
         </Reveal>
       </div>
+
+      {/* 证书/奖项灯箱 */}
+      {viewing && (
+        <Lightbox src={viewing.image} alt={`${viewing.name}（放大）`} onClose={() => setViewing(null)}>
+          <p className="text-sm font-medium text-slate-200">{viewing.name}</p>
+          <button
+            type="button"
+            onClick={() => setViewing(null)}
+            className="rounded-lg border border-slate-500 px-3.5 py-2 text-sm font-semibold text-slate-200 transition-colors hover:border-slate-300 hover:text-white"
+          >
+            关闭
+          </button>
+        </Lightbox>
+      )}
     </section>
   )
 }
