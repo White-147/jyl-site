@@ -32,7 +32,7 @@
         "FFmpeg"
       ],
       "link": "https://github.com/White-147/MiLuStudio",
-      "screenshot": "/projects/milustudio.webp",
+      "screenshot": "projects/milustudio.webp",
       "highlight": true
     },
     {
@@ -62,7 +62,7 @@
         "SAM2"
       ],
       "link": "https://github.com/White-147/XiaoLouAI",
-      "screenshot": "/projects/xiaolouai.webp"
+      "screenshot": "projects/xiaolouai.webp"
     },
     {
       "id": "miluassistantweb",
@@ -88,7 +88,7 @@
         "MCP"
       ],
       "link": "https://github.com/White-147/MiLuAssistantWeb",
-      "screenshot": "/projects/miluassistantweb.webp"
+      "screenshot": "projects/miluassistantweb.webp"
     },
     {
       "id": "miluassistantdesktop",
@@ -111,7 +111,7 @@
         "嵌入式 Python"
       ],
       "link": "https://github.com/White-147/MiLuAssistantDesktop",
-      "screenshot": "/projects/miluassistantdesktop.webp"
+      "screenshot": "projects/miluassistantdesktop.webp"
     },
     {
       "id": "bookrecommendation",
@@ -139,7 +139,7 @@
         "协同过滤"
       ],
       "link": "https://github.com/White-147/BookRecommendation",
-      "screenshot": "/projects/bookrecommendation.webp"
+      "screenshot": "projects/bookrecommendation.webp"
     },
     {
       "id": "shoprecommendation",
@@ -163,7 +163,7 @@
         "支付宝沙箱"
       ],
       "link": "https://github.com/White-147/ShopRecommendation",
-      "screenshot": "/projects/shoprecommendation.webp"
+      "screenshot": "projects/shoprecommendation.webp"
     }
   ]
 }

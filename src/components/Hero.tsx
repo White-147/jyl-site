@@ -38,7 +38,7 @@ export default function Hero() {
 
         {/* 头像 */}
         <img
-          src="/images/avatar-blue.webp"
+          src="images/avatar-blue.webp"
           alt="蒋宇龙证件照"
           width={400}
           height={560}
