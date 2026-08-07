@@ -19,30 +19,30 @@
   "stats": [
     {
       "value": "8",
-      "label": "公开项目仓库（GitHub）"
+      "label": "公开项目仓库"
     },
     {
       "value": "4",
-      "label": "AI 创作工具链项目"
+      "label": "AI 工具链项目"
     },
     {
       "value": "800",
       "suffix": "条/日",
-      "label": "ERP 高峰期业务信息核对录入"
+      "label": "高峰期信息核对"
     },
     {
       "value": "500",
       "suffix": "+ 条/日",
-      "label": "音频训练数据质检"
+      "label": "音频数据质检"
     },
     {
       "value": "200",
       "suffix": "+",
-      "label": "学生开发与环境问题处理"
+      "label": "学生问题处理"
     },
     {
       "value": "4",
-      "label": "数据处理/质检合作方培训指导"
+      "label": "质检合作方培训"
     }
   ]
 }

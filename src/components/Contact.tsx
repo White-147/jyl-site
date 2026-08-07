@@ -56,19 +56,26 @@ export default function Contact() {
                   下载简历
                 </a>
               </div>
-              <p className="mt-8 text-xs text-slate-400 dark:text-slate-500">
-                QQ 邮箱：
-                <a href={`mailto:${profile.emailQq}`} className="underline decoration-slate-300 underline-offset-2 hover:text-blue-600 dark:decoration-slate-600">
-                  {profile.emailQq}
-                </a>
-                {' · '}Gmail（备用）：
-                <a href={`mailto:${profile.email}`} className="underline decoration-slate-300 underline-offset-2 hover:text-blue-600 dark:decoration-slate-600">
-                  {profile.email}
-                </a>
-                {' · '}GitHub：
-                <a href={profile.github} target="_blank" rel="noreferrer" className="underline decoration-slate-300 underline-offset-2 hover:text-blue-600 dark:decoration-slate-600">
-                  {profile.githubLabel}
-                </a>
+              {/* 联系方式：手动三行，三端排版一致 */}
+              <p className="mx-auto mt-8 max-w-md space-y-1.5 text-xs leading-relaxed text-slate-400 dark:text-slate-500">
+                <span className="block">
+                  QQ 邮箱：
+                  <a href={`mailto:${profile.emailQq}`} className="underline decoration-slate-300 underline-offset-2 hover:text-blue-600 dark:decoration-slate-600">
+                    {profile.emailQq}
+                  </a>
+                </span>
+                <span className="block">
+                  Gmail（备用）：
+                  <a href={`mailto:${profile.email}`} className="underline decoration-slate-300 underline-offset-2 hover:text-blue-600 dark:decoration-slate-600">
+                    {profile.email}
+                  </a>
+                </span>
+                <span className="block">
+                  GitHub：
+                  <a href={profile.github} target="_blank" rel="noreferrer" className="underline decoration-slate-300 underline-offset-2 hover:text-blue-600 dark:decoration-slate-600">
+                    {profile.githubLabel}
+                  </a>
+                </span>
               </p>
             </div>
           </div>

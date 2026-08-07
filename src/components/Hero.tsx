@@ -26,7 +26,7 @@ export default function Hero() {
         />
       </div>
 
-      <div className="relative mx-auto flex max-w-6xl flex-col items-center px-4 pb-24 pt-20 text-center sm:px-6 sm:pt-28">
+      <div className="relative mx-auto flex max-w-6xl flex-col items-center px-4 pb-14 pt-10 text-center sm:px-6 sm:pb-20 sm:pt-20">
         {/* 求职状态徽标 */}
         <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-400">
           <span className="relative flex h-2 w-2">
@@ -45,10 +45,10 @@ export default function Hero() {
           className="h-28 w-28 rounded-full object-cover shadow-lg ring-4 ring-blue-100 sm:h-32 sm:w-32 dark:ring-blue-500/20"
         />
 
-        <h1 className="mt-6 text-5xl font-extrabold tracking-tight text-slate-900 text-balance dark:text-white">
+        <h1 className="mt-5 text-5xl font-extrabold tracking-tight text-slate-900 text-balance dark:text-white">
           {profile.name}
         </h1>
-        <p className="mt-3 text-3xl font-bold tracking-tight text-blue-700 text-balance dark:text-blue-400">
+        <p className="mt-2 text-3xl font-bold tracking-tight text-blue-700 text-balance dark:text-blue-400">
           {profile.title}
         </p>
         <p className="mt-2 text-sm font-medium text-slate-500 dark:text-slate-400">{profile.subtitle}</p>
@@ -62,7 +62,7 @@ export default function Hero() {
         </p>
 
         {/* 移动端：主按钮整行 + 次按钮并排；桌面端：单行排列 */}
-        <div className="mt-8 grid w-full max-w-sm grid-cols-2 gap-3 sm:flex sm:w-auto sm:max-w-none sm:flex-wrap sm:items-center sm:justify-center">
+        <div className="mt-6 grid w-full max-w-sm grid-cols-2 gap-3 sm:mt-8 sm:flex sm:w-auto sm:max-w-none sm:flex-wrap sm:items-center sm:justify-center">
           <a
             href="#projects"
             className="col-span-2 inline-flex items-center justify-center gap-2 rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-800 sm:col-span-auto dark:bg-blue-600 dark:hover:bg-blue-500"
