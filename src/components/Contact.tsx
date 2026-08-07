@@ -6,7 +6,7 @@ export default function Contact() {
   return (
     <section id="contact" className="scroll-mt-16 bg-white py-20 sm:py-24 dark:bg-slate-950">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
-        <SectionHeading eyebrow="联系方式" title="对项目感兴趣，或想聊聊工作机会？" />
+        <SectionHeading eyebrow="联系方式" title="对项目或工作机会感兴趣？" />
 
         <Reveal delay={100} className="mt-12">
           <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-slate-50 p-8 text-center sm:p-12 dark:border-slate-800 dark:bg-slate-900">
