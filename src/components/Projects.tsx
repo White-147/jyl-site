@@ -119,12 +119,14 @@ function ProjectRow({ project, index }: { project: Project; index: number }) {
                 {project.name}
               </a>
             </h3>
-            {project.tags.map((tag) => (
-              <span key={tag} className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${tagColor[tag]}`}>
-                {tag}
-              </span>
-            ))}
-            <span className="ml-auto text-sm text-slate-400 dark:text-slate-500">{project.period}</span>
+            <div className="flex items-center gap-x-3">
+              {project.tags.map((tag) => (
+                <span key={tag} className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${tagColor[tag]}`}>
+                  {tag}
+                </span>
+              ))}
+              <span className="text-sm text-slate-400 dark:text-slate-500">{project.period}</span>
+            </div>
           </div>
 
           <p className="mt-4 text-base leading-relaxed text-slate-600 dark:text-slate-300">{project.summary}</p>
