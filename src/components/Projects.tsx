@@ -108,7 +108,7 @@ function ProjectRow({ project, index }: { project: Project; index: number }) {
 
         {/* 详情 */}
         <div className={reverse ? 'lg:order-1' : ''}>
-          <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
             <h3 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
               <a
                 href={project.link}
@@ -119,15 +119,12 @@ function ProjectRow({ project, index }: { project: Project; index: number }) {
                 {project.name}
               </a>
             </h3>
-            <span className="text-sm text-slate-400 dark:text-slate-500">{project.period}</span>
-          </div>
-
-          <div className="mt-3 flex flex-wrap gap-1.5">
             {project.tags.map((tag) => (
               <span key={tag} className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${tagColor[tag]}`}>
                 {tag}
               </span>
             ))}
+            <span className="ml-auto text-sm text-slate-400 dark:text-slate-500">{project.period}</span>
           </div>
 
           <p className="mt-4 text-base leading-relaxed text-slate-600 dark:text-slate-300">{project.summary}</p>
