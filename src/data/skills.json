@@ -76,8 +76,12 @@
         "本地模型下载与启动",
         "MCP",
         "本地多模态链路（SAM2 / VACE / Wan2.1）",
-        "llama.cpp / GGUF",
-        "本地 LLM Server（OpenAI 兼容 API）"
+        "llama.cpp / llama-server",
+        "GGUF 量化（Q4_K_M）",
+        "CUDA 混合推理（GPU 卸载 + CPU 线程）",
+        "FlashAttention / 长上下文调优",
+        "本地 LLM Server（OpenAI 兼容 API）",
+        "推理性能实测"
       ]
     },
     {
