@@ -1,6 +1,10 @@
+import { useState } from 'react'
 import profile from '../data/profile.json'
+import Lightbox from './Lightbox'
 
 export default function Hero() {
+  const [showAvatar, setShowAvatar] = useState(false)
+
   return (
     <section id="top" className="relative overflow-hidden">
       {/* 背景装饰：柔和光斑（微浮动）+ 网格 */}
@@ -36,14 +40,22 @@ export default function Hero() {
           求职中 · 到岗时间可沟通
         </span>
 
-        {/* 头像 */}
-        <img
-          src="images/avatar-blue.webp"
-          alt="蒋宇龙证件照"
-          width={400}
-          height={560}
-          className="h-28 w-28 rounded-full object-cover shadow-lg ring-4 ring-blue-100 sm:h-32 sm:w-32 dark:ring-blue-500/20"
-        />
+        {/* 头像（点击放大查看） */}
+        <button
+          type="button"
+          onClick={() => setShowAvatar(true)}
+          className="group relative mt-1 cursor-zoom-in rounded-full outline-none focus-visible:ring-4 focus-visible:ring-blue-400/60"
+          aria-label="放大查看头像"
+          title="点击放大查看"
+        >
+          <img
+            src="images/avatar-blue.webp"
+            alt="蒋宇龙证件照"
+            width={400}
+            height={560}
+            className="h-28 w-28 rounded-full object-cover shadow-lg ring-4 ring-blue-100 transition-transform group-hover:scale-105 sm:h-32 sm:w-32 dark:ring-blue-500/20"
+          />
+        </button>
 
         <h1 className="mt-5 text-5xl font-extrabold tracking-tight text-slate-900 text-balance dark:text-white">
           {profile.name}
@@ -95,6 +107,15 @@ export default function Hero() {
           </a>
         </div>
       </div>
+
+      {/* 头像放大查看 */}
+      {showAvatar && (
+        <Lightbox
+          src="images/avatar-blue.webp"
+          alt="蒋宇龙证件照"
+          onClose={() => setShowAvatar(false)}
+        />
+      )}
     </section>
   )
 }

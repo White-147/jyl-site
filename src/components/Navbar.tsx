@@ -18,9 +18,13 @@ export default function Navbar() {
       <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
         {/* 品牌 */}
         <a href="#top" className="flex items-center gap-2 text-lg font-bold text-slate-900 dark:text-white">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-700 text-sm font-bold text-white dark:bg-blue-600">
-            蒋
-          </span>
+          <img
+            src="images/avatar-blue.webp"
+            alt="蒋宇龙"
+            width={400}
+            height={560}
+            className="h-8 w-8 rounded-full object-cover ring-2 ring-blue-200 dark:ring-blue-500/30"
+          />
           <span className="hidden sm:inline">{profile.name}</span>
         </a>
 
