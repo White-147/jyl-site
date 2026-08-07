@@ -45,10 +45,10 @@ export default function Hero() {
           className="h-28 w-28 rounded-full object-cover shadow-lg ring-4 ring-blue-100 sm:h-32 sm:w-32 dark:ring-blue-500/20"
         />
 
-        <h1 className="mt-6 text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl dark:text-white">
+        <h1 className="mt-6 text-5xl font-extrabold tracking-tight text-slate-900 text-balance dark:text-white">
           {profile.name}
         </h1>
-        <p className="mt-3 text-2xl font-bold tracking-tight text-blue-700 sm:text-3xl dark:text-blue-400">
+        <p className="mt-3 text-3xl font-bold tracking-tight text-blue-700 text-balance dark:text-blue-400">
           {profile.title}
         </p>
         <p className="mt-2 text-sm font-medium text-slate-500 dark:text-slate-400">{profile.subtitle}</p>
