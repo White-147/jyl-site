@@ -6,12 +6,38 @@
   ],
   "projects": [
     {
+      "id": "localllmserver",
+      "name": "Local LLM Server",
+      "tags": [
+        "AI 应用"
+      ],
+      "period": "2026/08",
+      "summary": "Windows 本地大模型推理服务：基于 llama.cpp 部署 DeepSeek-Coder-V2-Lite-Instruct（Q4_K_M 量化，10.3GB），对外提供 OpenAI 兼容 API，数据完全本地处理。",
+      "details": [
+        "llama.cpp llama-server 部署 GGUF 量化模型，RTX 3060 Laptop 6GB 显存限制下 GPU 部分卸载（-ngl 5）+ CPU 混合推理，实测生成速度约 14 tok/s",
+        "16K 上下文 + FlashAttention 调优，实测运行内存约 13.8GB；模型加载后 5 秒内即可响应",
+        "OpenAI 兼容 /v1/models 与 /v1/chat/completions 接口，可直接接入各类 OpenAI 客户端与框架",
+        "参数化启动脚本 + 连通性自检脚本，README 含选型对比（llama.cpp / Ollama / vLLM）、参数说明与常见问题"
+      ],
+      "stack": [
+        "llama.cpp",
+        "GGUF",
+        "CUDA",
+        "DeepSeek-Coder-V2-Lite",
+        "OpenAI-compatible API",
+        "Windows",
+        "Batch"
+      ],
+      "link": "https://github.com/White-147/local-llm-server",
+      "screenshot": "projects/local-llm-server.webp"
+    },
+    {
       "id": "milustudio",
       "name": "MiLuStudio",
       "tags": [
         "AI 应用"
       ],
-      "period": "2026/05 – 至今",
+      "period": "2026/05 – 2026/06",
       "summary": "Windows 本地优先的 AI 漫剧生产 Agent：从中文故事/小说片段到 StoryGraph、角色设定、分镜、图片/视频提示词、配音字幕、媒体质检与导出包的 15 步可审阅、可回放生产链路。",
       "details": [
         "React 19 + Vite + TypeScript 工作台，Electron 桌面宿主 + NSIS 安装包交付",
@@ -33,33 +59,6 @@
       ],
       "link": "https://github.com/White-147/MiLuStudio",
       "screenshot": "projects/milustudio.webp",
-      "highlight": true
-    },
-    {
-      "id": "localllmserver",
-      "name": "Local LLM Server",
-      "tags": [
-        "AI 应用"
-      ],
-      "period": "2026/08 – 至今",
-      "summary": "Windows 本地大模型推理服务：基于 llama.cpp 部署 DeepSeek-Coder-V2-Lite-Instruct（Q4_K_M 量化，10.3GB），对外提供 OpenAI 兼容 API，数据完全本地处理。",
-      "details": [
-        "llama.cpp llama-server 部署 GGUF 量化模型，RTX 3060 Laptop 6GB 显存限制下 GPU 部分卸载（-ngl 5）+ CPU 混合推理，实测生成速度约 14 tok/s",
-        "16K 上下文 + FlashAttention 调优，实测运行内存约 13.8GB；模型加载后 5 秒内即可响应",
-        "OpenAI 兼容 /v1/models 与 /v1/chat/completions 接口，可直接接入各类 OpenAI 客户端与框架",
-        "参数化启动脚本 + 连通性自检脚本，README 含选型对比（llama.cpp / Ollama / vLLM）、参数说明与常见问题"
-      ],
-      "stack": [
-        "llama.cpp",
-        "GGUF",
-        "CUDA",
-        "DeepSeek-Coder-V2-Lite",
-        "OpenAI-compatible API",
-        "Windows",
-        "Batch"
-      ],
-      "link": "https://github.com/White-147/local-llm-server",
-      "screenshot": "projects/local-llm-server.webp",
       "highlight": true
     },
     {
@@ -97,7 +96,7 @@
       "tags": [
         "AI 应用"
       ],
-      "period": "2026/04 – 2026/05",
+      "period": "2026/05",
       "summary": "基于 CoPaw/QwenPaw（AgentScope 体系）二开的 MiLu AI 助手 Web 版：模型配置、Skills、记忆、多 Agent 与 MCP 工具于一体。",
       "details": [
         "Python 3.10-3.13 + FastAPI + agentscope 运行时，React + Ant Design 管理控制台",
@@ -123,7 +122,7 @@
       "tags": [
         "AI 应用"
       ],
-      "period": "2026/04 – 2026/05",
+      "period": "2026/05",
       "summary": "基于 MiLuAssistantWeb 的 Windows 桌面安装版：Electron + NSIS 将 Python 后端与 Web 控制台封装为可双击安装的桌面应用。",
       "details": [
         "Electron 35 + electron-builder + NSIS 中英双语安装器，C# 启动器/卸载器",

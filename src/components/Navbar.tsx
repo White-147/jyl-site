@@ -18,21 +18,13 @@ export default function Navbar() {
       <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
         {/* 品牌 */}
         <a href="#top" className="flex items-center gap-2 text-lg font-bold text-slate-900 dark:text-white">
-          <svg
-            viewBox="0 0 64 24"
-            className="h-6 w-16 text-blue-700 dark:text-blue-400"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="5.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <path d="M13 5v13h-4" />
-            <path d="M27 5l6 9 6-9" />
-            <path d="M33 14v4" />
-            <path d="M47 5v13h12" />
-          </svg>
+          <img
+            src="images/logo-jyl.png"
+            alt="JYL"
+            width={839}
+            height={463}
+            className="h-6 w-auto object-contain"
+          />
           <span className="hidden sm:inline">{profile.name}</span>
         </a>
 
