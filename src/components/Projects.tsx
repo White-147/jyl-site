@@ -213,15 +213,18 @@ export default function Projects() {
           title="近期项目与代表作品"
           description={
             <>
-              按岗位方向筛选查看 · 更多项目见{' '}
-              <a
-                href={profile.github}
-                target="_blank"
-                rel="noreferrer"
-                className="font-medium text-blue-700 underline decoration-blue-300 underline-offset-4 hover:text-blue-800 dark:text-blue-400 dark:decoration-blue-500/50 dark:hover:text-blue-300"
-              >
-                {profile.githubLabel}
-              </a>
+              <span className="block">按岗位方向筛选查看</span>
+              <span className="block">
+                更多项目见{' '}
+                <a
+                  href={profile.github}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="font-medium text-blue-700 underline decoration-blue-300 underline-offset-4 hover:text-blue-800 dark:text-blue-400 dark:decoration-blue-500/50 dark:hover:text-blue-300"
+                >
+                  {profile.githubLabel}
+                </a>
+              </span>
             </>
           }
         />
