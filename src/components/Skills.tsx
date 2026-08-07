@@ -7,7 +7,7 @@ const skillGroups = skillsData.skillGroups as SkillGroup[]
 
 export default function Skills() {
   return (
-    <section id="skills" className="scroll-mt-16 bg-slate-50 py-20 sm:py-24 dark:bg-slate-900">
+    <section id="skills" className="scroll-mt-16 bg-slate-50 py-10 sm:py-24 dark:bg-slate-900">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <SectionHeading
           eyebrow="技能区"

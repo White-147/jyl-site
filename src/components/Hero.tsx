@@ -30,7 +30,7 @@ export default function Hero() {
         />
       </div>
 
-      <div className="relative mx-auto flex max-w-6xl flex-col items-center px-4 pb-14 pt-10 text-center sm:px-6 sm:pb-20 sm:pt-20">
+      <div className="relative mx-auto flex max-w-6xl flex-col items-center px-4 pb-10 pt-10 text-center sm:px-6 sm:pb-24 sm:pt-20">
         {/* 求职状态徽标 */}
         <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-400">
           <span className="relative flex h-2 w-2">
@@ -71,11 +71,6 @@ export default function Hero() {
               {line}
             </span>
           ))}
-        </p>
-
-        {/* 首屏不设 CTA：导航栏「项目」入口 + 滚动进入内容区（极简排版，留白即设计） */}
-        <p className="mt-8 text-xs font-medium tracking-widest text-slate-400 dark:text-slate-500">
-          向下滚动查看项目 ↓
         </p>
       </div>
 
