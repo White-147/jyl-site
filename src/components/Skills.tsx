@@ -10,7 +10,7 @@ export default function Skills() {
     <section id="skills" className="scroll-mt-16 bg-slate-50 py-20 sm:py-24 dark:bg-slate-900">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <SectionHeading
-          eyebrow="技术栈"
+          eyebrow="技能区"
           title="跨端、跨栈的工程能力"
           description="按工程领域分组展示，均为真实工作与项目中实际使用过的技术。"
         />
