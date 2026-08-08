@@ -112,138 +112,6 @@ body {
   user-select: none;
 }
 
-@import "tailwindcss";
-
-/* 深色模式：class 策略（html.dark 下启用 dark: 变体） */
-@custom-variant dark (&:where(.dark, .dark *));
-
-@theme {
-  --font-sans: "Inter", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
-    "Noto Sans SC", system-ui, -apple-system, sans-serif;
-
-  /* 流体字号：min/max 用 rem（尊重浏览器缩放与用户字体设置），中间 rem+vw 渐变，
-     320px→1440px 平滑缩放，无断点跳跃；PC/平板/手机三端文本自适应 */
-  --text-xs: clamp(0.6875rem, 0.6563rem + 0.1563vw, 0.75rem);
-  --text-sm: clamp(0.8125rem, 0.7656rem + 0.2344vw, 0.875rem);
-  --text-base: clamp(0.9375rem, 0.875rem + 0.3125vw, 1rem);
-  --text-lg: clamp(1.0625rem, 1rem + 0.3125vw, 1.125rem);
-  --text-xl: clamp(1.1875rem, 1.0938rem + 0.4688vw, 1.25rem);
-  --text-2xl: clamp(1.3125rem, 1.1875rem + 0.625vw, 1.5rem);
-  --text-3xl: clamp(1.5rem, 1.3125rem + 0.9375vw, 1.875rem);
-  --text-4xl: clamp(1.75rem, 1.5rem + 1.25vw, 2.25rem);
-  --text-5xl: clamp(2rem, 1.625rem + 1.875vw, 3rem);
-  --text-6xl: clamp(2.25rem, 1.75rem + 2.5vw, 3.75rem);
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  @apply antialiased;
-}
-
-/* 滚动渐显动画（Reveal 组件） */
-.reveal {
-  opacity: 0;
-  transform: translateY(24px);
-  transition:
-    opacity 0.6s ease,
-    transform 0.6s ease;
-}
-
-.reveal.visible {
-  opacity: 1;
-  transform: none;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-  .reveal {
-    opacity: 1;
-    transform: none;
-    transition: none;
-  }
-}
-
-/* 技能 chips 交错浮现（父级 .reveal-group 进入视口后逐个显示） */
-.reveal-group .chip {
-  opacity: 0;
-  transform: translateY(6px);
-  transition:
-    opacity 0.4s ease,
-    transform 0.4s ease;
-}
-
-.reveal-group.visible .chip {
-  opacity: 1;
-  transform: none;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .reveal-group .chip {
-    opacity: 1;
-    transform: none;
-    transition: none;
-  }
-}
-
-/* Hero 背景光斑微浮动（克制式装饰动效） */
-@keyframes hero-float {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-14px);
-  }
-}
-
-.animate-hero-float {
-  animation: hero-float 11s ease-in-out infinite;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .animate-hero-float {
-    animation: none;
-  }
-}
-
-/* 图片防下载（移动端）：禁止 iOS / 微信 WKWebView 长按图片弹出「存储图像」菜单，
-   Android 长按保存走 contextmenu 事件，已由 App.tsx 全局拦截 */
-img {
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  user-select: none;
-}
-
-/* 全站只读：禁止文本选择与复制（配合 App.tsx 的 contextmenu/dragstart/copy 拦截，
-   图片右键、拖拽、移动端长按保存/复制均不可用；mailto/下载链接不受影响） */
-body {
-  -webkit-user-select: none;
-  user-select: none;
-}
-
-/* 全站背景层：多层柔光 radial 渐变光斑 + 极浅噪点颗粒纹理（不抢内容，消除纯色平淡感） */
-body {
-  background-color: #f8fafc;
-  background-image:
-    radial-gradient(55% 45% at 75% 5%, rgb(59 130 246 / 0.13), transparent 70%),
-    radial-gradient(45% 40% at 12% 45%, rgb(14 165 233 / 0.14), transparent 70%),
-    radial-gradient(40% 35% at 82% 92%, rgb(99 102 241 / 0.13), transparent 70%),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
-}
-.dark body {
-  background-color: #020617;
-  background-image:
-    radial-gradient(55% 45% at 75% 5%, rgb(59 130 246 / 0.16), transparent 70%),
-    radial-gradient(45% 40% at 12% 45%, rgb(99 102 241 / 0.13), transparent 70%),
-    radial-gradient(40% 35% at 82% 92%, rgb(14 165 233 / 0.14), transparent 70%),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.065'/%3E%3C/svg%3E");
-}
-
 /* 全站连续背景：统一底色 + 多层柔光光斑 + 颗粒纹理（光效全页一致，板块内容以卡片浮起） */
 body {
   background-color: #fafbfc;
@@ -312,4 +180,11 @@ body::before {
   0% { transform: translateY(0); opacity: 0.15; }
   30% { opacity: 0.7; }
   100% { transform: translateY(-26px); opacity: 0.1; }
+}
+
+/* Hero 首屏高度：优先 small viewport（移动端地址栏收起后高度准确），
+   旧版 Safari（<15.4）不支持 svh 时回退 vh，避免高度失效 */
+.hero-viewport {
+  min-height: calc(100vh - 4rem);
+  min-height: calc(100svh - 4rem);
 }

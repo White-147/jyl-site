@@ -10,7 +10,7 @@ export default function MobileTabBar() {
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-50 border-t border-slate-200/70 bg-white/85 pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden dark:border-slate-800/70 dark:bg-slate-950/85"
+      className="fixed inset-x-0 bottom-0 z-50 border-t border-slate-200/70 bg-white/85 pb-[env(safe-area-inset-bottom)] backdrop-blur-sm md:hidden dark:border-slate-800/70 dark:bg-slate-950/85"
       aria-label="移动端导航"
     >
       <div className="mx-auto flex max-w-md items-stretch justify-around">

@@ -8,7 +8,6 @@ import Experience from './components/Experience'
 import Education from './components/Education'
 import Contact from './components/Contact'
 import Footer from './components/Footer'
-import ScrollProgress from './components/ScrollProgress'
 import BackToTop from './components/BackToTop'
 import MobileTabBar from './components/MobileTabBar'
 import SideDotsNav from './components/SideDotsNav'
@@ -32,7 +31,6 @@ export default function App() {
 
   return (
     <div className="min-h-screen font-sans text-slate-900 dark:text-slate-100">
-      <ScrollProgress />
       <Navbar />
       <main>
         <Hero />

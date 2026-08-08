@@ -1,17 +1,12 @@
 import profile from '../data/profile.json'
-import { useScrollSpy } from '../hooks/useScrollSpy'
-import { SECTIONS } from '../data/navigation'
 import ThemeToggle from './ThemeToggle'
 
-const navLinks = SECTIONS.map((s) => ({ href: `#${s.id}`, label: s.shortLabel }))
-
+/** 移动端顶部胶囊导航（md:hidden）：仅品牌 + 主题切换；
+ *  区块导航由底部 Tab Bar（移动端）与右侧玻璃管导航（PC）承担 */
 export default function Navbar() {
-  const active = useScrollSpy(['about', 'projects', 'skills', 'experience', 'education', 'contact'])
-
   return (
     <header className="sticky top-0 z-50 md:hidden">
-      <nav className="mx-auto mt-3 flex h-14 max-w-3xl items-center justify-between rounded-2xl border border-slate-200/70 bg-white/85 px-4 shadow-sm backdrop-blur-md dark:border-slate-800/70 dark:bg-slate-950/85 sm:px-5">
-        {/* 品牌 */}
+      <nav className="mx-auto mt-3 flex h-14 max-w-3xl items-center justify-between rounded-2xl border border-slate-200/70 bg-white/85 px-4 shadow-sm backdrop-blur-sm dark:border-slate-800/70 dark:bg-slate-950/85 sm:px-5">
         {/* 品牌 */}
         <a href="#top" className="flex items-center gap-2 text-lg font-bold text-slate-900 dark:text-white">
           <img
@@ -24,43 +19,8 @@ export default function Navbar() {
           <span className="hidden sm:inline">{profile.name}</span>
         </a>
 
-        {/* 桌面导航 */}
-        <div className="hidden items-center gap-1 md:flex">
-          {navLinks.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              aria-current={active === link.href.slice(1) ? 'page' : undefined}
-              className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                active === link.href.slice(1)
-                  ? 'bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400'
-                  : 'text-slate-600 hover:bg-slate-100 hover:text-blue-700 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-blue-400'
-              }`}
-            >
-              {link.label}
-            </a>
-          ))}
-          <a
-            href={profile.github}
-            target="_blank"
-            rel="noreferrer"
-            aria-label="GitHub"
-            title="GitHub"
-            className="ml-1 inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
-          >
-            <svg viewBox="0 0 16 16" fill="currentColor" className="h-5 w-5" aria-hidden="true">
-              <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z" />
-            </svg>
-          </a>
-          <div className="ml-1">
-            <ThemeToggle />
-          </div>
-        </div>
-
-        {/* 移动端：仅主题切换（区块导航由底部 Tab Bar 承担） */}
-        <div className="flex items-center md:hidden">
-          <ThemeToggle />
-        </div>
+        {/* 仅主题切换（区块导航由底部 Tab Bar 承担） */}
+        <ThemeToggle />
       </nav>
     </header>
   )
