@@ -15,7 +15,7 @@ function ProofCard({ item, onOpen }: { item: CertItem; onOpen: (item: CertItem) 
       onClick={() => onOpen(item)}
       aria-label={`放大查看 ${item.name}`}
       title="点击放大查看"
-      className="group block cursor-zoom-in overflow-hidden rounded-xl border border-slate-200 bg-slate-50 text-left transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-900 dark:hover:border-blue-500/60"
+      className="group block cursor-zoom-in overflow-hidden rounded-xl border border-slate-200 bg-slate-50 text-left transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-900/85 dark:hover:border-blue-500/60"
     >
       <div className="relative overflow-hidden bg-white dark:bg-slate-950">
         <img
@@ -48,7 +48,7 @@ export default function Education() {
   const [viewing, setViewing] = useState<CertItem | null>(null)
 
   return (
-    <section id="education" className="scroll-mt-16 bg-slate-50 py-10 sm:py-24 dark:bg-slate-900">
+    <section id="education" className="scroll-mt-16 bg-slate-50/85 py-10 sm:py-24 dark:bg-slate-900/85">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <SectionHeading eyebrow="教育背景" title="教育经历与证书" />
 

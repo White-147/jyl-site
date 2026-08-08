@@ -4,7 +4,7 @@ import SectionHeading from './SectionHeading'
 
 export default function Contact() {
   return (
-    <section id="contact" className="scroll-mt-16 bg-white py-10 sm:py-24 dark:bg-slate-950">
+    <section id="contact" className="scroll-mt-16 bg-white/85 py-10 sm:py-24 dark:bg-slate-950/85">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <SectionHeading eyebrow="联系方式" title="对项目或工作机会感兴趣？" />
 

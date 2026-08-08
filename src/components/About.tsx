@@ -56,7 +56,7 @@ export default function About() {
   const stats = profile.stats as Stat[]
 
   return (
-    <section id="about" className="scroll-mt-16 bg-slate-50 py-10 sm:py-24 dark:bg-slate-900">
+    <section id="about" className="scroll-mt-16 bg-slate-50/85 py-10 sm:py-24 dark:bg-slate-900/85">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <SectionHeading eyebrow="关于我" title="AI 应用 · 企业系统 · 数据工程" />
 
