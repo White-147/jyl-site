@@ -96,3 +96,11 @@ body {
     animation: none;
   }
 }
+
+/* 图片防下载（移动端）：禁止 iOS / 微信 WKWebView 长按图片弹出「存储图像」菜单，
+   Android 长按保存走 contextmenu 事件，已由 App.tsx 全局拦截 */
+img {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
