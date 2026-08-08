@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import profile from '../data/profile.json'
 import { useScrollSpy } from '../hooks/useScrollSpy'
 import ThemeToggle from './ThemeToggle'
@@ -12,7 +11,6 @@ const navLinks = [
 ]
 
 export default function Navbar() {
-  const [open, setOpen] = useState(false)
   const active = useScrollSpy(['about', 'projects', 'skills', 'experience', 'education', 'contact'])
 
   return (
@@ -64,52 +62,11 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* 移动端：主题切换 + 汉堡菜单 */}
-        <div className="flex items-center gap-2 md:hidden">
+        {/* 移动端：仅主题切换（区块导航由底部 Tab Bar 承担） */}
+        <div className="flex items-center md:hidden">
           <ThemeToggle />
-          <button
-            type="button"
-            onClick={() => setOpen((o) => !o)}
-            aria-label={open ? '关闭菜单' : '打开菜单'}
-            aria-expanded={open}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
-          >
-            {open ? (
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="h-5 w-5" aria-hidden="true">
-                <path d="M18 6 6 18M6 6l12 12" />
-              </svg>
-            ) : (
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="h-5 w-5" aria-hidden="true">
-                <path d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            )}
-          </button>
         </div>
       </nav>
-
-      {/* 移动端菜单 */}
-      {open && (
-        <div className="mx-3 mt-1 rounded-2xl border border-slate-200/70 bg-white px-4 pb-4 pt-2 shadow-sm md:hidden dark:border-slate-800/70 dark:bg-slate-950">
-          {navLinks.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              onClick={() => setOpen(false)}
-              className="block rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-blue-700 dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-blue-400"
-            >
-              {link.label}
-            </a>
-          ))}
-          <a
-            href={profile.github}
-            target="_blank"
-            rel="noreferrer"
-            className="block rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
-          >
-            GitHub ↗
-          </a>
-        </div>
-      )}
     </header>
   )
 }
