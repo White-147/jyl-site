@@ -33,9 +33,11 @@ function ModeIcon({ mode, className }: { mode: ThemeMode; className?: string }) 
 export default function ThemeToggle({
   placement = 'down',
   variant = 'square',
+  label,
 }: {
   placement?: 'up' | 'down' | 'left'
-  variant?: 'square' | 'dot'
+  variant?: 'square' | 'dot' | 'row'
+  label?: string
 }) {
   const [theme, setTheme] = useState<ThemeMode>(() => {
     try {
@@ -78,6 +80,78 @@ export default function ThemeToggle({
     return () => document.removeEventListener('click', close)
   }, [open])
 
+  if (variant === 'row') {
+    return (
+      <div className="relative">
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation()
+            setOpen((o) => !o)
+          }}
+          aria-label={`主题：${MODE_META[theme].label}（${MODE_META[theme].desc}），点击选择`}
+          aria-expanded={open}
+          className="group flex items-center justify-end gap-2.5 pr-[4px] transition-transform duration-200 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)] hover:scale-110"
+        >
+          {label && (
+            <span className="w-12 text-right text-xs text-slate-400 transition-colors group-hover:text-blue-700 dark:text-slate-500 dark:group-hover:text-blue-400">
+              {label}
+            </span>
+          )}
+          <ModeIcon
+            mode={theme}
+            className="h-4 w-4 shrink-0 text-slate-500 transition-colors group-hover:text-blue-700 dark:text-slate-400 dark:group-hover:text-blue-400"
+          />
+        </button>
+
+        {open && (
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className={`absolute z-50 w-36 overflow-hidden rounded-xl border border-slate-200/70 bg-white/90 shadow-lg backdrop-blur-md dark:border-slate-700 dark:bg-slate-800/90 ${
+              placement === 'left' ? 'bottom-0 right-full mr-2' : placement === 'up' ? 'bottom-full right-0 mb-2' : 'top-full right-0 mt-2'
+            }`}
+            role="menu"
+            aria-label="选择主题模式"
+          >
+            {MODES.map((mode) => {
+              const isCurrent = mode === theme
+              return (
+                <button
+                  key={mode}
+                  type="button"
+                  role="menuitemradio"
+                  aria-checked={isCurrent}
+                  onClick={() => {
+                    setTheme(mode)
+                    setOpen(false)
+                  }}
+                  className={`flex w-full items-center gap-2.5 px-3 py-2.5 text-left text-sm transition-colors ${
+                    isCurrent
+                      ? 'bg-blue-50 font-semibold text-blue-700 dark:bg-blue-500/10 dark:text-blue-400'
+                      : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700'
+                  }`}
+                >
+                  <ModeIcon mode={mode} className="h-4 w-4 shrink-0" />
+                  <span className="flex-1">
+                    <span className="block leading-tight">{MODE_META[mode].label}</span>
+                    <span className="block text-[10px] font-normal text-slate-400 dark:text-slate-500">
+                      {MODE_META[mode].desc}
+                    </span>
+                  </span>
+                  {isCurrent && (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5" aria-hidden="true">
+                      <path d="M20 6 9 17l-5-5" />
+                    </svg>
+                  )}
+                </button>
+              )
+            })}
+          </div>
+        )}
+      </div>
+    )
+  }
+
   return (
     <div className="relative">
       <button
@@ -105,7 +179,7 @@ export default function ThemeToggle({
             placement === 'up'
               ? 'bottom-full right-0 mb-2'
               : placement === 'left'
-                ? 'right-full top-1/2 mr-2 -translate-y-1/2'
+                ? 'bottom-0 right-full mr-2'
                 : 'top-full right-0 mt-2'
           }`}
           role="menu"

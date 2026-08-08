@@ -111,12 +111,9 @@ export default function SideDotsNav() {
         })}
       </div>
 
-      {/* 管外底部：主题切换（无外框图标 + 左侧常驻提示） */}
+      {/* 管外底部：主题切换（整行可点，与节点行同构） */}
       <div className="absolute bottom-7 right-0">
-        <div className="flex items-center justify-end gap-2.5 pr-[4px]">
-          <span className="w-12 text-right text-xs text-slate-400 dark:text-slate-500">主题</span>
-          <ThemeToggle placement="left" variant="dot" />
-        </div>
+        <ThemeToggle placement="left" variant="row" label="主题" />
       </div>
     </nav>
   )
