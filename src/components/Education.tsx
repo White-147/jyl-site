@@ -8,7 +8,15 @@ import SectionHeading from './SectionHeading'
 const education = educationData.education as EducationData
 
 /** 证明卡片：点击放大查看（灯箱，与项目截图交互一致） */
-function ProofCard({ item, onOpen }: { item: CertItem; onOpen: (item: CertItem) => void }) {
+function ProofCard({
+  item,
+  type,
+  onOpen,
+}: {
+  item: CertItem
+  type?: '证书' | '奖项'
+  onOpen: (item: CertItem) => void
+}) {
   return (
     <button
       type="button"
@@ -28,7 +36,15 @@ function ProofCard({ item, onOpen }: { item: CertItem; onOpen: (item: CertItem) 
         <span className="block text-sm font-semibold leading-snug text-slate-800 dark:text-slate-100">
           {item.name}
         </span>
-        <span className="mt-1 block text-xs text-slate-400 dark:text-slate-500">点击查看证明图片</span>
+        <span className="mt-1 flex flex-wrap items-center gap-x-1.5 text-xs text-slate-400 dark:text-slate-500">
+          {type && (
+            <span className={type === '证书' ? 'font-medium text-blue-600 dark:text-blue-400' : 'font-medium text-amber-600 dark:text-amber-400'}>
+              {type}
+            </span>
+          )}
+          {item.date && <span>{item.date}</span>}
+          <span>· 点击查看证明图片</span>
+        </span>
       </span>
       <svg
         viewBox="0 0 24 24"
@@ -55,10 +71,11 @@ export default function Education() {
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <SectionHeading eyebrow="教育背景" title="教育经历与证书" />
 
-        {/* 学校信息 */}
-        <Reveal className="mt-12">
-          <div className="flex flex-col gap-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-8 dark:border-slate-800 dark:bg-slate-800">
-            <div className="flex items-center gap-5">
+        {/* 教育背景 + 证书/奖项（bento：学校竖卡 + 证明 2x2） */}
+        <div className="mt-5 grid gap-5 sm:mt-12 lg:grid-cols-3">
+          {/* 学校竖卡 */}
+          <Reveal className="lg:col-span-1">
+            <div className="glass-card-strong flex h-full flex-col justify-center gap-5 rounded-2xl p-6 sm:p-8">
               <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6" aria-hidden="true">
                   <path d="M22 10 12 5 2 10l10 5 10-5z" />
@@ -73,51 +90,20 @@ export default function Education() {
                 </p>
               </div>
             </div>
-          </div>
-        </Reveal>
+          </Reveal>
 
-        {/* 证书 */}
-        <Reveal delay={80} className="mt-6">
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8 dark:border-slate-800 dark:bg-slate-800">
-            <div className="flex items-center gap-3">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5" aria-hidden="true">
-                  <rect x="4" y="3" width="16" height="18" rx="2" />
-                  <path d="M8 7h8M8 11h8M8 15h5" />
-                </svg>
-              </span>
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white">证书</h3>
-              <span className="ml-auto text-xs text-slate-400 dark:text-slate-500">点击图片可放大查看</span>
-            </div>
-            <div className="mt-5 grid grid-cols-2 gap-3 sm:gap-4">
+          {/* 证书 + 奖项 2x2 */}
+          <Reveal delay={120} className="lg:col-span-2">
+            <div className="grid h-full grid-cols-1 content-start gap-3 sm:grid-cols-2 sm:gap-4">
               {education.certs.map((cert) => (
-                <ProofCard key={cert.name} item={cert} onOpen={setViewing} />
+                <ProofCard key={cert.name} type="证书" item={cert} onOpen={setViewing} />
               ))}
-            </div>
-          </div>
-        </Reveal>
-
-        {/* 奖项 */}
-        <Reveal delay={160} className="mt-6">
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8 dark:border-slate-800 dark:bg-slate-800">
-            <div className="flex items-center gap-3">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5" aria-hidden="true">
-                  <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18M4 22h16M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
-                  <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
-                </svg>
-              </span>
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white">奖项</h3>
-              <span className="ml-auto text-xs text-slate-400 dark:text-slate-500">点击图片可放大查看</span>
-            </div>
-            <div className="mt-5 grid grid-cols-2 gap-3 sm:gap-4">
               {education.awards.map((award) => (
-                <ProofCard key={award.name} item={award} onOpen={setViewing} />
+                <ProofCard key={award.name} type="奖项" item={award} onOpen={setViewing} />
               ))}
             </div>
-          </div>
-        </Reveal>
-      </div>
+          </Reveal>
+        </div>      </div>
 
       {/* 证书/奖项灯箱 */}
       {viewing && (
