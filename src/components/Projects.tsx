@@ -108,7 +108,8 @@ function ProjectRow({ project, index }: { project: Project; index: number }) {
 
         {/* 详情 */}
         <div className={`glass-card-strong rounded-2xl p-5 sm:p-6 ${reverse ? 'lg:order-1' : ''}`}>
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+          {/* 标题两行固定：名称独占一行，标签+时间+查看项目一行（三端一致，不随宽度换行） */}
+          <div className="flex flex-col gap-2">
             <h3 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
               <a
                 href={project.link}
@@ -119,25 +120,25 @@ function ProjectRow({ project, index }: { project: Project; index: number }) {
                 {project.name}
               </a>
             </h3>
-            <div className="flex items-center gap-x-3">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
               {project.tags.map((tag) => (
                 <span key={tag} className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${tagColor[tag]}`}>
                   {tag}
                 </span>
               ))}
               <span className="text-sm text-slate-400 dark:text-slate-500">{project.period}</span>
+              <a
+                href={project.link}
+                target="_blank"
+                rel="noreferrer"
+                className="ml-auto inline-flex items-center gap-1 rounded-lg border border-blue-200 bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 transition-colors hover:border-blue-400 hover:bg-blue-100 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-300 dark:hover:bg-blue-500/20"
+              >
+                查看项目
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5" aria-hidden="true">
+                  <path d="M7 17 17 7M7 7h10v10" />
+                </svg>
+              </a>
             </div>
-            <a
-              href={project.link}
-              target="_blank"
-              rel="noreferrer"
-              className="ml-auto inline-flex items-center gap-1 rounded-lg border border-blue-200 bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 transition-colors hover:border-blue-400 hover:bg-blue-100 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-300 dark:hover:bg-blue-500/20"
-            >
-              查看项目
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5" aria-hidden="true">
-                <path d="M7 17 17 7M7 7h10v10" />
-              </svg>
-            </a>
           </div>
 
           <p className="mt-4 text-base leading-relaxed text-slate-600 dark:text-slate-300">{project.summary}</p>
