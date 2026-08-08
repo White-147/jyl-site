@@ -307,12 +307,9 @@ body::before {
   border-color: rgb(148 163 184 / 0.16);
 }
 
-/* 玻璃管阅读液柱：流动渐变（背景位置循环）+ 液面气泡浮动 */
-@keyframes liquid-flow {
-  0% { background-position: 50% 0%; }
-  100% { background-position: 50% 200%; }
-}
-@keyframes bubble-rise {
-  0%, 100% { transform: translateY(0); opacity: 0.45; }
-  50% { transform: translateY(-3px); opacity: 0.95; }
+/* 玻璃管阅读液柱（深色模式）：粒子缓慢上浮 + 呼吸闪烁（液体微粒感） */
+@keyframes particle-drift {
+  0% { transform: translateY(0); opacity: 0.15; }
+  30% { opacity: 0.7; }
+  100% { transform: translateY(-26px); opacity: 0.1; }
 }
