@@ -78,7 +78,7 @@ function ExperienceItem({ exp, index }: { exp: Experience; index: number }) {
 
 export default function Experience() {
   return (
-    <section id="experience" className="scroll-mt-16 bg-white/85 py-10 sm:py-24 dark:bg-slate-950/85">
+    <section id="experience" className="scroll-mt-16 bg-white/70 py-10 sm:py-24 dark:bg-slate-950/70">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <SectionHeading
           eyebrow="工作经历"
