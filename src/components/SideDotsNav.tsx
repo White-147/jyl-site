@@ -67,11 +67,38 @@ export default function SideDotsNav() {
         className="fixed bottom-14 right-[21px] top-14 w-2 overflow-hidden rounded-full border border-white/60 bg-white/40 shadow-[inset_0_0_6px_rgba(59,130,246,0.4),0_0_10px_rgba(59,130,246,0.15)] backdrop-blur-sm dark:border-white/20 dark:bg-white/10"
         aria-hidden="true"
       >
-        {/* 阅读进度液柱：从底部随阅读进度上升（温度计效果） */}
+        {/* 阅读进度液柱：从顶部向下延伸；流动渐变 + 液面气泡（液体流动感） */}
         <div
-          className="absolute bottom-0 left-0 right-0 rounded-t-full bg-gradient-to-t from-blue-600 to-sky-400 shadow-[0_0_8px_rgba(59,130,246,0.55)] transition-[height] duration-150 ease-out"
+          className="absolute left-0 right-0 top-0 overflow-hidden rounded-b-full shadow-[0_0_8px_rgba(59,130,246,0.55)] transition-[height] duration-150 ease-out"
           style={{ height: `${progress}%` }}
-        />
+        >
+          {/* 流动渐变主体（背景位置循环 = 液体持续流动） */}
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage:
+                'linear-gradient(180deg, #2563eb 0%, #38bdf8 50%, #2563eb 100%)',
+              backgroundSize: '100% 200%',
+              animation: 'liquid-flow 3.5s linear infinite',
+            }}
+          />
+          {/* 液面高光线 */}
+          <div className="absolute inset-x-0 bottom-0 h-px bg-white/80" aria-hidden="true" />
+          {/* 液面气泡（缓慢浮动） */}
+          {[0, 1, 2].map((i) => (
+            <span
+              key={i}
+              className="absolute bottom-1 rounded-full bg-white/70"
+              style={{
+                left: `${22 + i * 26}%`,
+                width: i === 1 ? 3 : 2,
+                height: i === 1 ? 3 : 2,
+                animation: `bubble-rise 2.4s ease-in-out ${i * 0.7}s infinite`,
+              }}
+              aria-hidden="true"
+            />
+          ))}
+        </div>
       </div>
 
       {/* 管外顶部：返回顶部（↑ 图标 + 左侧常驻提示） */}
