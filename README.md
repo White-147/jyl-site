@@ -4,7 +4,7 @@
 
 - **技术栈**：React 19 + TypeScript + Vite + Tailwind CSS 4
 - **特性**：单页滚动式布局、浅色/深色模式切换、项目按岗位方向筛选（AI 应用 / 企业系统 / 大数据）、简历 PDF 下载、移动端适配
-- **部署**：Vercel（免费）
+- **部署**：GitHub Pages（GitHub Actions 自动构建）
 
 ## 本地运行
 
@@ -63,11 +63,12 @@ npm run build      # = db:export + 类型检查 + 构建
 - `_archive/` 归档文件与 `public/` 站点文件一一对应、命名一致（简历 PDF 除外，保留原名便于识别）
 - 数据源为 SQLite（`database/portfolio.db`），其中存储的图片路径与 `public/` 实际文件名严格一致；新增/改名图片后执行 `npm run db:seed` 同步
 
-## 部署到 Vercel
+## 部署到 GitHub Pages
 
-1. 推送到 GitHub（仓库名如 `portfolio`）
-2. 打开 https://vercel.com/new ，导入该仓库
-3. Framework Preset 选择 **Vite**，其余默认，点 Deploy
-4. 部署完成后获得 `*.vercel.app` 域名，可在 Settings → Domains 绑定自定义域名
+仓库已配置 GitHub Actions（`.github/workflows/deploy.yml`），推送到 `main` 分支即自动构建并部署：
 
-> 注意：`vercel.app` 域名在国内访问可能不稳定，如需稳定国内访问可考虑绑定已备案域名，或使用 GitHub Pages 作为备选部署方式（`npm run build` 后把 `dist/` 推到 `gh-pages` 分支）。
+1. 构建流程：`npm ci` → `npm run build`（自动执行 `db:export` 从数据库导出 JSON，再做类型检查与打包）
+2. 部署流程：`upload-pages-artifact` 上传 `dist/`，`deploy-pages` 发布到 GitHub Pages
+3. 访问地址：https://white-147.github.io/jyl-site/
+
+> 如需自定义域名：在仓库 Settings → Pages 中绑定已备案域名；如切换 Vercel/Netlify 部署，将根目录 `_redirects`/配置文件与 Actions 工作流一并调整即可。
