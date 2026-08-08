@@ -37,6 +37,7 @@ export interface Experience {
 export interface CertItem {
   name: string
   image: string
+  date?: string
 }
 
 export interface AwardItem {
