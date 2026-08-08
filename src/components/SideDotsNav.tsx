@@ -11,15 +11,15 @@ export default function SideDotsNav() {
   const active = useScrollSpy(SECTION_IDS)
   const [positions, setPositions] = useState<number[]>(SECTIONS.map(() => 0))
   const [progress, setProgress] = useState(0)
-  // 深色模式液柱粒子：固定伪随机参数（位置/大小/时长/延迟），仅 dark 下显示
+  // 深色模式液柱粒子：36 个均匀铺满整个液柱（位置/大小/时长/延迟伪随机，仅 dark 下显示）
   const particles = useMemo(
     () =>
-      Array.from({ length: 14 }, (_, i) => ({
-        left: (i * 7.3 + 3) % 92,
-        size: i % 3 === 0 ? 3 : 2,
-        duration: 2.6 + (i % 5) * 0.7,
-        delay: (i * 0.83) % 3,
-        bottom: (i * 11 + 5) % 88,
+      Array.from({ length: 36 }, (_, i) => ({
+        left: (i * 2.8 + 1.5) % 95,
+        bottom: (i * 2.75 + 3) % 90,
+        size: i % 4 === 0 ? 3 : i % 2 === 0 ? 2 : 1,
+        duration: 1.8 + ((i * 7) % 10) * 0.3,
+        delay: ((i * 13) % 10) / 3,
       })),
     [],
   )
