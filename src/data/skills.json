@@ -74,8 +74,6 @@
         "Python Sidecar",
         "Agent / Skills",
         "agentscope",
-        "LM Studio",
-        "ollama",
         "本地模型下载与启动",
         "MCP",
         "本地多模态链路（SAM2 / VACE / Wan2.1）",
