@@ -10,6 +10,7 @@ import Contact from './components/Contact'
 import Footer from './components/Footer'
 import ScrollProgress from './components/ScrollProgress'
 import BackToTop from './components/BackToTop'
+import MobileTabBar from './components/MobileTabBar'
 
 export default function App() {
   // 全站只读保护：阻止右键菜单、拖拽、复制与文本选择（覆盖图片与文本；
@@ -43,6 +44,7 @@ export default function App() {
       </main>
       <Footer />
       <BackToTop />
+      <MobileTabBar />
     </div>
   )
 }
