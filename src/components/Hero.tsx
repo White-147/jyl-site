@@ -28,6 +28,11 @@ export default function Hero() {
             WebkitMaskImage: 'radial-gradient(ellipse 70% 60% at 50% 40%, black, transparent)',
           }}
         />
+        {/* 底部浅渐变光晕：与下一板块柔和过渡，增强首屏层次 */}
+        <div
+          className="absolute inset-x-0 bottom-0 h-36 bg-gradient-to-t from-blue-500/10 to-transparent sm:h-44"
+          aria-hidden="true"
+        />
       </div>
 
       <div className="relative mx-auto flex min-h-[calc(100svh-4rem)] max-w-6xl flex-col items-center justify-center px-4 pb-10 pt-10 text-center sm:px-6 sm:pb-24 sm:pt-20">

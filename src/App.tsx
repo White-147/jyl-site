@@ -12,19 +12,19 @@ import ScrollProgress from './components/ScrollProgress'
 import BackToTop from './components/BackToTop'
 
 export default function App() {
-  // 图片防下载：阻止对图片的右键菜单与拖拽（事件委托，覆盖全部 <img>）
+  // 全站只读保护：阻止右键菜单、拖拽、复制与文本选择（覆盖图片与文本；
+  // 图片在 CSS 层另有 -webkit-touch-callout 拦截移动端长按保存菜单）
   useEffect(() => {
-    const prevent = (e: Event) => {
-      const target = e.target as HTMLElement | null
-      if (target instanceof HTMLImageElement) {
-        e.preventDefault()
-      }
-    }
+    const prevent = (e: Event) => e.preventDefault()
     document.addEventListener('contextmenu', prevent)
     document.addEventListener('dragstart', prevent)
+    document.addEventListener('copy', prevent)
+    document.addEventListener('selectstart', prevent)
     return () => {
       document.removeEventListener('contextmenu', prevent)
       document.removeEventListener('dragstart', prevent)
+      document.removeEventListener('copy', prevent)
+      document.removeEventListener('selectstart', prevent)
     }
   }, [])
 

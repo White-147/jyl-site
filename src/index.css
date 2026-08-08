@@ -104,3 +104,10 @@ img {
   -webkit-user-select: none;
   user-select: none;
 }
+
+/* 全站只读：禁止文本选择与复制（配合 App.tsx 的 contextmenu/dragstart/copy 拦截，
+   图片右键、拖拽、移动端长按保存/复制均不可用；mailto/下载链接不受影响） */
+body {
+  -webkit-user-select: none;
+  user-select: none;
+}
