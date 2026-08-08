@@ -28,8 +28,15 @@ function ModeIcon({ mode, className }: { mode: ThemeMode; className?: string }) 
   )
 }
 
-/** 三态主题切换（下拉三选一）：自动（默认，跟随系统）/ 浅色 / 深色 */
-export default function ThemeToggle({ placement = 'down' }: { placement?: 'up' | 'down' }) {
+/** 三态主题切换（下拉三选一）：自动（默认，跟随系统）/ 浅色 / 深色。
+ *  placement: up/down/left（下拉弹出方向）；variant: square 方钮 / dot 圆形小钮 */
+export default function ThemeToggle({
+  placement = 'down',
+  variant = 'square',
+}: {
+  placement?: 'up' | 'down' | 'left'
+  variant?: 'square' | 'dot'
+}) {
   const [theme, setTheme] = useState<ThemeMode>(() => {
     try {
       const saved = localStorage.getItem('theme')
@@ -82,16 +89,24 @@ export default function ThemeToggle({ placement = 'down' }: { placement?: 'up' |
         aria-label={`主题：${MODE_META[theme].label}（${MODE_META[theme].desc}），点击选择`}
         title={`主题：${MODE_META[theme].label}（${MODE_META[theme].desc}）`}
         aria-expanded={open}
-        className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition-colors hover:border-blue-300 hover:text-blue-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-blue-500 dark:hover:text-blue-400"
+        className={`inline-flex items-center justify-center text-slate-600 transition-all duration-200 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)] hover:text-blue-700 dark:text-slate-300 dark:hover:text-blue-400 ${
+          variant === 'dot'
+            ? 'h-3 w-3 rounded-full bg-white shadow-[inset_0_0_3px_rgba(59,130,246,0.5)] ring-2 ring-slate-300 hover:scale-125 hover:bg-blue-600 hover:ring-blue-300 dark:bg-slate-300 dark:ring-slate-500 dark:hover:bg-blue-400'
+            : 'h-9 w-9 rounded-lg border border-slate-200 bg-white hover:border-blue-300 dark:border-slate-700 dark:bg-slate-800 dark:hover:border-blue-500'
+        }`}
       >
-        <ModeIcon mode={theme} className="h-4.5 w-4.5" />
+        <ModeIcon mode={theme} className={variant === 'dot' ? 'h-2 w-2 text-slate-600 dark:text-slate-800' : 'h-4.5 w-4.5'} />
       </button>
 
       {open && (
         <div
           onClick={(e) => e.stopPropagation()}
-          className={`absolute right-0 z-50 w-36 overflow-hidden rounded-xl border border-slate-200/70 bg-white/90 shadow-lg backdrop-blur-md dark:border-slate-700 dark:bg-slate-800/90 ${
-            placement === 'up' ? 'bottom-full mb-2' : 'top-full mt-2'
+          className={`absolute z-50 w-36 overflow-hidden rounded-xl border border-slate-200/70 bg-white/90 shadow-lg backdrop-blur-md dark:border-slate-700 dark:bg-slate-800/90 ${
+            placement === 'up'
+              ? 'bottom-full right-0 mb-2'
+              : placement === 'left'
+                ? 'right-full top-1/2 mr-2 -translate-y-1/2'
+                : 'top-full right-0 mt-2'
           }`}
           role="menu"
           aria-label="选择主题模式"
