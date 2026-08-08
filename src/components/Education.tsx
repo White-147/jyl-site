@@ -23,20 +23,21 @@ function ProofCard({
       onClick={() => onOpen(item)}
       aria-label={`放大查看 ${item.name} 证明`}
       title="点击查看证明图片"
-      className="glass-card group flex w-full cursor-zoom-in items-center gap-4 rounded-2xl p-4 text-left transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md dark:hover:border-blue-500/60"
+      className="glass-card group flex w-full cursor-zoom-in flex-col gap-2.5 rounded-2xl p-4 text-left transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md dark:hover:border-blue-500/60"
     >
-      {/* 缩略图：辅助证明，点击放大查看原件 */}
-      <img
-        src={item.image}
-        alt={`${item.name} 证明缩略图`}
-        loading="lazy"
-        className="h-14 w-14 shrink-0 rounded-xl object-cover ring-1 ring-slate-200 transition-transform duration-300 group-hover:scale-105 dark:ring-slate-600"
-      />
-      <span className="min-w-0 flex-1">
-        <span className="block text-sm font-semibold leading-snug text-slate-800 dark:text-slate-100">
-          {item.name}
-        </span>
-        <span className="mt-1 flex flex-wrap items-center gap-x-1.5 text-xs text-slate-400 dark:text-slate-500">
+      {/* 名称优先：整行全宽，避免长名称换行挤字 */}
+      <span className="block text-sm font-semibold leading-snug text-slate-800 dark:text-slate-100">
+        {item.name}
+      </span>
+      <span className="flex items-center gap-2.5">
+        {/* 缩略图：辅助证明，点击放大查看原件 */}
+        <img
+          src={item.image}
+          alt={`${item.name} 证明缩略图`}
+          loading="lazy"
+          className="h-9 w-9 shrink-0 rounded-lg object-cover ring-1 ring-slate-200 transition-transform duration-300 group-hover:scale-105 dark:ring-slate-600"
+        />
+        <span className="flex flex-wrap items-center gap-x-1.5 text-xs text-slate-400 dark:text-slate-500">
           {type && (
             <span className={type === '证书' ? 'font-medium text-blue-600 dark:text-blue-400' : 'font-medium text-amber-600 dark:text-amber-400'}>
               {type}

@@ -41,7 +41,7 @@ export default function BackToTop() {
       onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
-      className={`fixed bottom-5 right-5 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-blue-700 text-white shadow-lg transition-all duration-300 hover:scale-110 hover:bg-blue-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-300 sm:h-14 sm:w-14 dark:bg-blue-600 dark:hover:bg-blue-500 dark:focus-visible:ring-blue-500/40 ${
+      className={`fixed bottom-20 right-5 md:bottom-5 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-blue-700 text-white shadow-lg transition-all duration-300 hover:scale-110 hover:bg-blue-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-300 sm:h-14 sm:w-14 dark:bg-blue-600 dark:hover:bg-blue-500 dark:focus-visible:ring-blue-500/40 ${
         show ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-4 opacity-0'
       }`}
     >
