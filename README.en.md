@@ -20,7 +20,7 @@
 
 A personal job-hunting portfolio single-page app. Positioned as an "AI application full-stack engineer", it showcases verifiable projects such as MiLuStudio, XiaoLouAI, SyLabAI, and LocalLLMServer across three focus areas — data engineering, business system delivery, and Windows native desktop engineering — with project filtering by direction (AI Apps / Enterprise Systems / Big Data), light/dark theme switching, and a one-click download of the latest resume PDF.
 
-Live at **https://white-147.github.io/jyl-site/**. Content is driven by a SQLite database (`database/portfolio.db`) as the single source of truth; builds export it to JSON automatically, and pushing to `main` triggers GitHub Actions to build and deploy to GitHub Pages.
+Live at [https://white-147.github.io/jyl-site/](https://white-147.github.io/jyl-site/). Content is driven by a SQLite database (`database/portfolio.db`) as the single source of truth; builds export it to JSON automatically, and pushing to `main` triggers GitHub Actions to build and deploy to GitHub Pages.
 
 > Note: site content and the resume stay aligned (real projects and real company names). Raw assets (avatars, certificates, project screenshots) are archived in `_archive/` (committed for backup and later use).
 
