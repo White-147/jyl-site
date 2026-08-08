@@ -7,7 +7,7 @@ export default function Contact() {
   return (
     <section id="contact" className="relative scroll-mt-16 py-10 sm:py-24">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
-        <SectionHeading eyebrow={SECTIONS.find((s) => s.id === 'contact')?.label ?? '联系方式'} title="对项目或工作机会感兴趣？" />
+        <SectionHeading eyebrow={SECTIONS.find((s) => s.id === 'contact')?.label ?? '联系方式'} title="期待与您交流" />
 
         <Reveal delay={100} className="mt-12">
           <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-slate-50 p-8 text-center sm:p-12 dark:border-slate-800 dark:bg-slate-900">
