@@ -10,6 +10,7 @@ import ThemeToggle from './ThemeToggle'
 export default function SideDotsNav() {
   const active = useScrollSpy(SECTION_IDS)
   const [positions, setPositions] = useState<number[]>(SECTIONS.map(() => 0))
+  const [progress, setProgress] = useState(0)
 
   // 测量各板块在页面中的纵向位置比例（图片有固定宽高比，高度稳定；窗口变化时重测）
   useEffect(() => {
@@ -26,7 +27,34 @@ export default function SideDotsNav() {
     }
     measure()
     window.addEventListener('resize', measure)
-    return () => window.removeEventListener('resize', measure)
+    // 内容高度变化（板块增减/文案调整）时自动重测节点位置
+    const ro = new ResizeObserver(measure)
+    ro.observe(document.body)
+    return () => {
+      window.removeEventListener('resize', measure)
+      ro.disconnect()
+    }
+  }, [])
+
+  // 阅读进度：液柱高度 = 已读百分比（rAF 节流，滚动/窗口变化时更新）
+  useEffect(() => {
+    let raf = 0
+    const update = () => {
+      cancelAnimationFrame(raf)
+      raf = requestAnimationFrame(() => {
+        const doc = document.documentElement
+        const max = doc.scrollHeight - doc.clientHeight
+        setProgress(max > 0 ? (window.scrollY / max) * 100 : 0)
+      })
+    }
+    update()
+    window.addEventListener('scroll', update, { passive: true })
+    window.addEventListener('resize', update)
+    return () => {
+      cancelAnimationFrame(raf)
+      window.removeEventListener('scroll', update)
+      window.removeEventListener('resize', update)
+    }
   }, [])
 
   return (
@@ -35,10 +63,16 @@ export default function SideDotsNav() {
       className="fixed bottom-0 right-4 top-0 z-40 hidden md:flex"
     >
       {/* 玻璃管：顶部图标与底部主题之间贯穿（光纤质感） */}
-      <span
-        className="fixed bottom-14 right-[21px] top-14 w-2 rounded-full border border-white/60 bg-white/40 shadow-[inset_0_0_6px_rgba(59,130,246,0.4),0_0_10px_rgba(59,130,246,0.15)] backdrop-blur-sm dark:border-white/20 dark:bg-white/10"
+      <div
+        className="fixed bottom-14 right-[21px] top-14 w-2 overflow-hidden rounded-full border border-white/60 bg-white/40 shadow-[inset_0_0_6px_rgba(59,130,246,0.4),0_0_10px_rgba(59,130,246,0.15)] backdrop-blur-sm dark:border-white/20 dark:bg-white/10"
         aria-hidden="true"
-      />
+      >
+        {/* 阅读进度液柱：从底部随阅读进度上升（温度计效果） */}
+        <div
+          className="absolute bottom-0 left-0 right-0 rounded-t-full bg-gradient-to-t from-blue-600 to-sky-400 shadow-[0_0_8px_rgba(59,130,246,0.55)] transition-[height] duration-150 ease-out"
+          style={{ height: `${progress}%` }}
+        />
+      </div>
 
       {/* 管外顶部：返回顶部（↑ 图标 + 左侧常驻提示） */}
       <div className="absolute right-0 top-7">

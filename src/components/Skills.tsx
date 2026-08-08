@@ -1,4 +1,5 @@
 import skillsData from '../data/skills.json'
+import { SECTIONS } from '../data/navigation'
 import type { SkillGroup } from '../data/types'
 import Reveal from './Reveal'
 import SectionHeading from './SectionHeading'
@@ -10,7 +11,7 @@ export default function Skills() {
     <section id="skills" className="relative scroll-mt-16 py-10 sm:py-24">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <SectionHeading
-          eyebrow="技能区"
+          eyebrow={SECTIONS.find((s) => s.id === 'skills')?.label ?? '技能区'}
           title="跨端、跨栈的工程能力"
           description="按工程领域分组展示，均为真实工作与项目中实际使用过的技术。"
         />

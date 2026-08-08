@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { SECTIONS } from '../data/navigation'
 import profile from '../data/profile.json'
 import type { Stat } from '../data/types'
 import Reveal from './Reveal'
@@ -58,7 +59,7 @@ export default function About() {
   return (
     <section id="about" className="relative scroll-mt-16 py-10 sm:py-24">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
-        <SectionHeading eyebrow="关于我" title="AI 应用 · 企业系统 · 数据工程" />
+        <SectionHeading eyebrow={SECTIONS.find((s) => s.id === 'about')?.label ?? '关于我'} title="AI 应用 · 企业系统 · 数据工程" />
 
         <div className="mt-5 grid gap-5 sm:mt-12 sm:gap-6 lg:grid-cols-4">
           {/* 简介大卡（bento 主块） */}
