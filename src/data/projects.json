@@ -6,8 +6,8 @@
   ],
   "projects": [
     {
-      "id": "local-llm-server",
-      "name": "Local LLM Server",
+      "id": "local-llmserver",
+      "name": "LocalLLMServer",
       "tags": [
         "AI 应用"
       ],
@@ -28,8 +28,8 @@
         "Windows",
         "Batch"
       ],
-      "link": "https://github.com/White-147/local-llm-server",
-      "screenshot": "projects/local-llm-server.webp"
+      "link": "https://github.com/White-147/LocalLLMServer",
+      "screenshot": "projects/local-llmserver.webp"
     },
     {
       "id": "milu-studio",
