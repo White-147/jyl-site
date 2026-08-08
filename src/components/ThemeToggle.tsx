@@ -91,11 +91,11 @@ export default function ThemeToggle({
         aria-expanded={open}
         className={`inline-flex items-center justify-center text-slate-600 transition-all duration-200 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)] hover:text-blue-700 dark:text-slate-300 dark:hover:text-blue-400 ${
           variant === 'dot'
-            ? 'h-3 w-3 rounded-full bg-white shadow-[inset_0_0_3px_rgba(59,130,246,0.5)] ring-2 ring-slate-300 hover:scale-125 hover:bg-blue-600 hover:ring-blue-300 dark:bg-slate-300 dark:ring-slate-500 dark:hover:bg-blue-400'
+            ? 'h-4 w-4 hover:scale-110'
             : 'h-9 w-9 rounded-lg border border-slate-200 bg-white hover:border-blue-300 dark:border-slate-700 dark:bg-slate-800 dark:hover:border-blue-500'
         }`}
       >
-        <ModeIcon mode={theme} className={variant === 'dot' ? 'h-2 w-2 text-slate-600 dark:text-slate-800' : 'h-4.5 w-4.5'} />
+        <ModeIcon mode={theme} className={variant === 'dot' ? 'h-4 w-4' : 'h-4.5 w-4.5'} />
       </button>
 
       {open && (
