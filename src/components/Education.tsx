@@ -71,7 +71,7 @@ export default function Education() {
   return (
     <section id="education" className="relative scroll-mt-16 py-10 sm:py-24">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
-        <SectionHeading eyebrow={SECTIONS.find((s) => s.id === 'education')?.label ?? '教育背景'} title="教育经历与证书" />
+        <SectionHeading eyebrow={SECTIONS.find((s) => s.id === 'education')?.label ?? '教育背景'} title="教育经历 · 证书与奖项" />
 
         {/* 教育背景 + 证书/奖项（bento：学校竖卡 + 证明 2x2） */}
         <div className="mt-5 grid gap-5 sm:mt-12 lg:grid-cols-3">
