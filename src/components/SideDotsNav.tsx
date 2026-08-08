@@ -1,23 +1,15 @@
 import { useEffect, useState } from 'react'
 import { useScrollSpy } from '../hooks/useScrollSpy'
+import { SECTIONS, SECTION_IDS } from '../data/navigation'
 import ThemeToggle from './ThemeToggle'
-
-const sections = [
-  { id: 'about', label: '关于' },
-  { id: 'projects', label: '项目' },
-  { id: 'skills', label: '技能' },
-  { id: 'experience', label: '经历' },
-  { id: 'education', label: '教育' },
-  { id: 'contact', label: '联系' },
-]
 
 /** 右侧玻璃管进度导航（内容篇幅分布版）：
  *  管在顶部图标与底部主题之间贯穿（top-14/bottom-14，图标在管外）；
  *  节点按各板块在页面中的实际位置比例分布于管上（滚动进度感真实）；
  *  Dock 弹性动效：hover 文字+节点同放大，选中常驻放大。PC/平板显示。 */
 export default function SideDotsNav() {
-  const active = useScrollSpy(sections.map((s) => s.id))
-  const [positions, setPositions] = useState<number[]>(sections.map(() => 0))
+  const active = useScrollSpy(SECTION_IDS)
+  const [positions, setPositions] = useState<number[]>(SECTIONS.map(() => 0))
 
   // 测量各板块在页面中的纵向位置比例（图片有固定宽高比，高度稳定；窗口变化时重测）
   useEffect(() => {
@@ -25,7 +17,7 @@ export default function SideDotsNav() {
       const scrollH = document.documentElement.scrollHeight || document.body.scrollHeight
       if (!scrollH) return
       setPositions(
-        sections.map((sec) => {
+        SECTIONS.map((sec) => {
           const el = document.getElementById(sec.id)
           if (!el) return 0
           return ((el.getBoundingClientRect().top + window.scrollY) / scrollH) * 100
@@ -56,8 +48,8 @@ export default function SideDotsNav() {
           title="返回顶部"
           className="group flex items-center justify-end gap-2.5 pr-[4px] transition-transform duration-200 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)] hover:scale-110"
         >
-          <span className="w-12 text-right text-xs text-slate-400 transition-colors group-hover:text-blue-700 dark:text-slate-500 dark:group-hover:text-blue-400">
-            顶部
+          <span className="w-14 text-right text-xs text-slate-400 transition-colors group-hover:text-blue-700 dark:text-slate-500 dark:group-hover:text-blue-400">
+            返回顶部
           </span>
           <svg
             viewBox="0 0 24 24"
@@ -76,7 +68,7 @@ export default function SideDotsNav() {
 
       {/* 章节节点：按内容篇幅分布于管上（位置 = 板块在页面中的比例） */}
       <div className="absolute bottom-14 right-0 top-14">
-        {sections.map((sec, i) => {
+        {SECTIONS.map((sec, i) => {
           const isActive = active === sec.id
           return (
             <div key={sec.id} className="absolute right-0" style={{ top: `${positions[i]}%` }}>
@@ -89,7 +81,7 @@ export default function SideDotsNav() {
                 }`}
               >
                 <span
-                  className={`w-12 text-right text-xs transition-colors ${
+                  className={`w-14 text-right text-xs transition-colors ${
                     isActive
                       ? 'font-bold text-blue-700 dark:text-blue-400'
                       : 'text-slate-500 group-hover:text-slate-900 dark:text-slate-400 dark:group-hover:text-slate-100'

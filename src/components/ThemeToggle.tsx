@@ -94,7 +94,7 @@ export default function ThemeToggle({
           className="group flex items-center justify-end gap-2.5 pr-[4px] transition-transform duration-200 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)] hover:scale-110"
         >
           {label && (
-            <span className="w-12 text-right text-xs text-slate-400 transition-colors group-hover:text-blue-700 dark:text-slate-500 dark:group-hover:text-blue-400">
+            <span className="w-14 text-right text-xs text-slate-400 transition-colors group-hover:text-blue-700 dark:text-slate-500 dark:group-hover:text-blue-400">
               {label}
             </span>
           )}
