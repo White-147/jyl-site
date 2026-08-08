@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useScrollSpy } from '../hooks/useScrollSpy'
 import { SECTIONS, SECTION_IDS } from '../data/navigation'
 import ThemeToggle from './ThemeToggle'
@@ -11,6 +11,18 @@ export default function SideDotsNav() {
   const active = useScrollSpy(SECTION_IDS)
   const [positions, setPositions] = useState<number[]>(SECTIONS.map(() => 0))
   const [progress, setProgress] = useState(0)
+  // 深色模式液柱粒子：固定伪随机参数（位置/大小/时长/延迟），仅 dark 下显示
+  const particles = useMemo(
+    () =>
+      Array.from({ length: 14 }, (_, i) => ({
+        left: (i * 7.3 + 3) % 92,
+        size: i % 3 === 0 ? 3 : 2,
+        duration: 2.6 + (i % 5) * 0.7,
+        delay: (i * 0.83) % 3,
+        bottom: (i * 11 + 5) % 88,
+      })),
+    [],
+  )
 
   // 测量各板块在页面中的纵向位置比例（图片有固定宽高比，高度稳定；窗口变化时重测）
   useEffect(() => {
@@ -67,37 +79,35 @@ export default function SideDotsNav() {
         className="fixed bottom-14 right-[21px] top-14 w-2 overflow-hidden rounded-full border border-white/60 bg-white/40 shadow-[inset_0_0_6px_rgba(59,130,246,0.4),0_0_10px_rgba(59,130,246,0.15)] backdrop-blur-sm dark:border-white/20 dark:bg-white/10"
         aria-hidden="true"
       >
-        {/* 阅读进度液柱：从顶部向下延伸；流动渐变 + 液面气泡（液体流动感） */}
+        {/* 阅读进度液柱：从顶部向下延伸。
+            浅色模式：收敛的静态蓝渐变条；深色模式：整个液柱内流动粒子（赛博感） */}
         <div
-          className="absolute left-0 right-0 top-0 overflow-hidden rounded-b-full shadow-[0_0_8px_rgba(59,130,246,0.55)] transition-[height] duration-150 ease-out"
+          className="absolute left-0 right-0 top-0 overflow-hidden rounded-b-full transition-[height] duration-150 ease-out"
           style={{ height: `${progress}%` }}
         >
-          {/* 流动渐变主体（背景位置循环 = 液体持续流动） */}
+          {/* 渐变主体：浅色静态蓝条（收敛）；深色加深为粒子底 */}
           <div
-            className="absolute inset-0"
-            style={{
-              backgroundImage:
-                'linear-gradient(180deg, #2563eb 0%, #38bdf8 50%, #2563eb 100%)',
-              backgroundSize: '100% 200%',
-              animation: 'liquid-flow 3.5s linear infinite',
-            }}
+            className="absolute inset-0 bg-gradient-to-b from-blue-600 to-sky-400 opacity-90 dark:from-blue-700 dark:to-cyan-500/80 dark:opacity-40"
+            aria-hidden="true"
           />
-          {/* 液面高光线 */}
-          <div className="absolute inset-x-0 bottom-0 h-px bg-white/80" aria-hidden="true" />
-          {/* 液面气泡（缓慢浮动） */}
-          {[0, 1, 2].map((i) => (
-            <span
-              key={i}
-              className="absolute bottom-1 rounded-full bg-white/70"
-              style={{
-                left: `${22 + i * 26}%`,
-                width: i === 1 ? 3 : 2,
-                height: i === 1 ? 3 : 2,
-                animation: `bubble-rise 2.4s ease-in-out ${i * 0.7}s infinite`,
-              }}
-              aria-hidden="true"
-            />
-          ))}
+          {/* 深色模式：液柱内流动粒子（上浮 + 呼吸闪烁） */}
+          <div className="absolute inset-0 hidden dark:block" aria-hidden="true">
+            {particles.map((p, i) => (
+              <span
+                key={i}
+                className="absolute rounded-full bg-cyan-200 shadow-[0_0_4px_rgba(103,232,249,0.9)]"
+                style={{
+                  left: `${p.left}%`,
+                  bottom: `${p.bottom}%`,
+                  width: p.size,
+                  height: p.size,
+                  animation: `particle-drift ${p.duration}s ease-in-out ${p.delay}s infinite`,
+                }}
+              />
+            ))}
+          </div>
+          {/* 液面高光线（深色模式更亮） */}
+          <div className="absolute inset-x-0 bottom-0 h-px bg-white/70 dark:bg-cyan-200/90" aria-hidden="true" />
         </div>
       </div>
 
