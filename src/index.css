@@ -306,3 +306,13 @@ body::before {
   background: rgb(15 23 42 / 0.72);
   border-color: rgb(148 163 184 / 0.16);
 }
+
+/* 玻璃管阅读液柱：流动渐变（背景位置循环）+ 液面气泡浮动 */
+@keyframes liquid-flow {
+  0% { background-position: 50% 0%; }
+  100% { background-position: 50% 200%; }
+}
+@keyframes bubble-rise {
+  0%, 100% { transform: translateY(0); opacity: 0.45; }
+  50% { transform: translateY(-3px); opacity: 0.95; }
+}
