@@ -209,7 +209,7 @@ export default function Projects() {
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <SectionHeading
           eyebrow={SECTIONS.find((s) => s.id === 'projects')?.label ?? '项目作品'}
-          title="近期项目"
+          title="项目经历"
           description={
             <>
               <span className="block">按岗位方向筛选查看</span>

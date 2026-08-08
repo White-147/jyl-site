@@ -26,7 +26,7 @@ export const SECTIONS: SectionDef[] = [
   },
   {
     id: 'skills',
-    label: '技能区',
+    label: '专业技能',
     shortLabel: '技能',
     icon: 'M13 2 3 14h7l-1 8 10-12h-7l1-8z',
   },

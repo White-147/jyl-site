@@ -104,7 +104,7 @@
       "summary": "基于 CoPaw/QwenPaw（AgentScope 体系）二开的 MiLu AI 助手 Web 版：模型配置、Skills、记忆、多 Agent 与 MCP 工具于一体。",
       "details": [
         "Python 3.10-3.13 + FastAPI + agentscope 运行时，React + Ant Design 管理控制台",
-        "provider/model CRUD、模型发现与连接测试，支持 LM Studio / MiLu Local / OpenAI-compatible 多源配置",
+        "provider/model CRUD、模型发现与连接测试，支持 MiLu Local / OpenAI-compatible 多源配置",
         "整理品牌资源、Skills 菜单、workspace 与多通道接入（Discord/Telegram/钉钉/飞书/企业微信等）"
       ],
       "stack": [
@@ -117,7 +117,6 @@
         "Vite",
         "Ant Design",
         "Zustand",
-        "LM Studio",
         "Skills",
         "MCP",
         "多渠道接入"
