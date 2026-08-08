@@ -107,7 +107,7 @@ function ProjectRow({ project, index }: { project: Project; index: number }) {
         )}
 
         {/* 详情 */}
-        <div className={reverse ? 'lg:order-1' : ''}>
+        <div className={`glass-card-strong rounded-2xl p-5 sm:p-6 ${reverse ? 'lg:order-1' : ''}`}>
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
             <h3 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
               <a
@@ -205,7 +205,7 @@ export default function Projects() {
   )
 
   return (
-    <section id="projects" className="scroll-mt-16 bg-white/70 py-10 sm:py-24 dark:bg-slate-950/70">
+    <section id="projects" className="relative scroll-mt-16 py-10 sm:py-24">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <SectionHeading
           eyebrow="项目作品"

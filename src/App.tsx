@@ -29,7 +29,7 @@ export default function App() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-white font-sans text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+    <div className="min-h-screen font-sans text-slate-900 dark:text-slate-100">
       <ScrollProgress />
       <Navbar />
       <main>

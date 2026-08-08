@@ -7,7 +7,7 @@ const skillGroups = skillsData.skillGroups as SkillGroup[]
 
 export default function Skills() {
   return (
-    <section id="skills" className="scroll-mt-16 bg-slate-50/70 py-10 sm:py-24 dark:bg-slate-900/70">
+    <section id="skills" className="relative scroll-mt-16 py-10 sm:py-24">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <SectionHeading
           eyebrow="技能区"
@@ -31,7 +31,7 @@ export default function Skills() {
                     <span
                       key={item}
                       style={{ transitionDelay: `${j * 30}ms` }}
-                      className="chip rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-300"
+                      className="chip rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm text-slate-600 dark:border-slate-700 dark:bg-gradient-to-b dark:from-slate-900 dark:via-slate-900 dark:via-70% dark:to-slate-950/70 dark:text-slate-300"
                     >
                       {item}
                     </span>
