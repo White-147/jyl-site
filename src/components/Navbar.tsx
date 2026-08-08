@@ -16,8 +16,9 @@ export default function Navbar() {
   const active = useScrollSpy(['about', 'projects', 'skills', 'experience', 'education', 'contact'])
 
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-200/70 bg-white/80 backdrop-blur-md dark:border-slate-800/70 dark:bg-slate-950/80">
-      <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
+    <header className="sticky top-0 z-50">
+      <nav className="mx-auto mt-3 flex h-14 max-w-3xl items-center justify-between rounded-2xl border border-slate-200/70 bg-white/85 px-4 shadow-sm backdrop-blur-md dark:border-slate-800/70 dark:bg-slate-950/85 sm:px-5">
+        {/* 品牌 */}
         {/* 品牌 */}
         <a href="#top" className="flex items-center gap-2 text-lg font-bold text-slate-900 dark:text-white">
           <img
@@ -88,7 +89,7 @@ export default function Navbar() {
 
       {/* 移动端菜单 */}
       {open && (
-        <div className="border-t border-slate-200/70 bg-white px-4 pb-4 pt-2 md:hidden dark:border-slate-800/70 dark:bg-slate-950">
+        <div className="mx-3 mt-1 rounded-2xl border border-slate-200/70 bg-white px-4 pb-4 pt-2 shadow-sm md:hidden dark:border-slate-800/70 dark:bg-slate-950">
           {navLinks.map((link) => (
             <a
               key={link.href}

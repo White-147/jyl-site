@@ -127,6 +127,17 @@ function ProjectRow({ project, index }: { project: Project; index: number }) {
               ))}
               <span className="text-sm text-slate-400 dark:text-slate-500">{project.period}</span>
             </div>
+            <a
+              href={project.link}
+              target="_blank"
+              rel="noreferrer"
+              className="ml-auto inline-flex items-center gap-1 rounded-lg border border-blue-200 bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 transition-colors hover:border-blue-400 hover:bg-blue-100 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-300 dark:hover:bg-blue-500/20"
+            >
+              查看项目
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5" aria-hidden="true">
+                <path d="M7 17 17 7M7 7h10v10" />
+              </svg>
+            </a>
           </div>
 
           <p className="mt-4 text-base leading-relaxed text-slate-600 dark:text-slate-300">{project.summary}</p>
@@ -177,19 +188,6 @@ function ProjectRow({ project, index }: { project: Project; index: number }) {
             ))}
           </div>
 
-          <div className="mt-5">
-            <a
-              href={project.link}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-1.5 rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-500"
-            >
-              查看项目
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5" aria-hidden="true">
-                <path d="M7 17 17 7M7 7h10v10" />
-              </svg>
-            </a>
-          </div>
         </div>
       </article>
     </Reveal>

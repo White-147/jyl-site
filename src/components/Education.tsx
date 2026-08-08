@@ -46,20 +46,20 @@ function ProofCard({
           {item.date && <span>{item.date}</span>}
           <span>· 点击查看证明图片</span>
         </span>
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="ml-auto h-5 w-5 shrink-0 text-slate-400 transition-colors group-hover:text-blue-600 dark:text-slate-500 dark:group-hover:text-blue-400"
+          aria-hidden="true"
+        >
+          <circle cx="11" cy="11" r="7" />
+          <path d="m21 21-4.35-4.35M11 8v6M8 11h6" />
+        </svg>
       </span>
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="h-5 w-5 shrink-0 text-slate-400 transition-colors group-hover:text-blue-600 dark:text-slate-500 dark:group-hover:text-blue-400"
-        aria-hidden="true"
-      >
-        <circle cx="11" cy="11" r="7" />
-        <path d="m21 21-4.35-4.35M11 8v6M8 11h6" />
-      </svg>
     </button>
   )
 }
