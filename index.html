@@ -12,12 +12,14 @@
     />
     <title>蒋宇龙 · AI 应用平台型全栈工程师</title>
     <script>
-      // 主题初始化：默认浅色，避免深色模式刷新闪烁
+      // 主题初始化：默认自动（跟随系统深浅色），避免首屏闪烁
       ;(function () {
         try {
-          if (localStorage.getItem('theme') === 'dark') {
-            document.documentElement.classList.add('dark')
-          }
+          var t = localStorage.getItem('theme') || 'auto'
+          var dark =
+            t === 'dark' ||
+            (t === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches)
+          if (dark) document.documentElement.classList.add('dark')
         } catch (e) {}
       })()
     </script>
