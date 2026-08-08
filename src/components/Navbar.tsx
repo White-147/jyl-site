@@ -1,14 +1,9 @@
 import profile from '../data/profile.json'
 import { useScrollSpy } from '../hooks/useScrollSpy'
+import { SECTIONS } from '../data/navigation'
 import ThemeToggle from './ThemeToggle'
 
-const navLinks = [
-  { href: '#about', label: '关于' },
-  { href: '#projects', label: '项目' },
-  { href: '#skills', label: '技能' },
-  { href: '#experience', label: '经历' },
-  { href: '#contact', label: '联系' },
-]
+const navLinks = SECTIONS.map((s) => ({ href: `#${s.id}`, label: s.shortLabel }))
 
 export default function Navbar() {
   const active = useScrollSpy(['about', 'projects', 'skills', 'experience', 'education', 'contact'])
