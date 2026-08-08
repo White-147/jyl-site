@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { SECTIONS } from '../data/navigation'
 import experienceData from '../data/experience.json'
 import type { Experience } from '../data/types'
 import { useIsMobile } from '../hooks/useIsMobile'
@@ -81,7 +82,7 @@ export default function Experience() {
     <section id="experience" className="relative scroll-mt-16 py-10 sm:py-24">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <SectionHeading
-          eyebrow="工作经历"
+          eyebrow={SECTIONS.find((s) => s.id === 'experience')?.label ?? '工作经历'}
           title="从业务交付到 AI 工具链"
           description="把规则和需求，转成可执行、可交付的工程结果。"
         />

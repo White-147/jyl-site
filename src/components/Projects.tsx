@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { SECTIONS } from '../data/navigation'
 import projectsData from '../data/projects.json'
 import profile from '../data/profile.json'
 import type { Project, ProjectTag } from '../data/types'
@@ -207,7 +208,7 @@ export default function Projects() {
     <section id="projects" className="relative scroll-mt-16 py-10 sm:py-24">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <SectionHeading
-          eyebrow="项目作品"
+          eyebrow={SECTIONS.find((s) => s.id === 'projects')?.label ?? '项目作品'}
           title="近期项目与代表作品"
           description={
             <>
