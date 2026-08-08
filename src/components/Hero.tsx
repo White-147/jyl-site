@@ -7,8 +7,15 @@ export default function Hero() {
 
   return (
     <section id="top" className="relative overflow-hidden">
-      {/* 背景装饰：柔和光斑（微浮动）+ 网格 */}
-      <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+      {/* 背景装饰：柔和光斑（微浮动）+ 网格（底部渐隐，与全站 body 背景无缝交接） */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        aria-hidden="true"
+        style={{
+          maskImage: 'linear-gradient(to bottom, black 72%, transparent 100%)',
+          WebkitMaskImage: 'linear-gradient(to bottom, black 72%, transparent 100%)',
+        }}
+      >
         <div className="absolute -top-24 left-1/2 -translate-x-1/2">
           <div className="h-96 w-96 rounded-full bg-blue-500/10 blur-3xl animate-hero-float dark:bg-blue-500/15" />
         </div>

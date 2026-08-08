@@ -13,33 +13,36 @@ function ProofCard({ item, onOpen }: { item: CertItem; onOpen: (item: CertItem) 
     <button
       type="button"
       onClick={() => onOpen(item)}
-      aria-label={`放大查看 ${item.name}`}
-      title="点击放大查看"
-      className="group block cursor-zoom-in overflow-hidden rounded-xl border border-slate-200 bg-slate-50 text-left transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-900/70 dark:hover:border-blue-500/60"
+      aria-label={`放大查看 ${item.name} 证明`}
+      title="点击查看证明图片"
+      className="glass-card group flex w-full cursor-zoom-in items-center gap-4 rounded-2xl p-4 text-left transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md dark:hover:border-blue-500/60"
     >
-      <div className="relative overflow-hidden bg-white dark:bg-slate-950">
-        <img
-          src={item.image}
-          alt={`${item.name} 证明`}
-          loading="lazy"
-          className="aspect-[3/4] w-full object-cover object-top transition-transform duration-300 group-hover:scale-[1.04]"
-        />
-        {/* 放大提示：hover 时浮现 */}
-        <span
-          className="absolute inset-0 flex items-center justify-center bg-slate-900/0 transition-colors group-hover:bg-slate-900/25"
-          aria-hidden="true"
-        >
-          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white/95 text-slate-700 opacity-0 shadow-lg transition-opacity group-hover:opacity-100">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
-              <circle cx="11" cy="11" r="7" />
-              <path d="m21 21-4.35-4.35M11 8v6M8 11h6" />
-            </svg>
-          </span>
+      {/* 缩略图：辅助证明，点击放大查看原件 */}
+      <img
+        src={item.image}
+        alt={`${item.name} 证明缩略图`}
+        loading="lazy"
+        className="h-14 w-14 shrink-0 rounded-xl object-cover ring-1 ring-slate-200 transition-transform duration-300 group-hover:scale-105 dark:ring-slate-600"
+      />
+      <span className="min-w-0 flex-1">
+        <span className="block text-sm font-semibold leading-snug text-slate-800 dark:text-slate-100">
+          {item.name}
         </span>
-      </div>
-      <p className="px-3 py-2.5 text-center text-xs font-medium leading-relaxed text-slate-600 dark:text-slate-300">
-        {item.name}
-      </p>
+        <span className="mt-1 block text-xs text-slate-400 dark:text-slate-500">点击查看证明图片</span>
+      </span>
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="h-5 w-5 shrink-0 text-slate-400 transition-colors group-hover:text-blue-600 dark:text-slate-500 dark:group-hover:text-blue-400"
+        aria-hidden="true"
+      >
+        <circle cx="11" cy="11" r="7" />
+        <path d="m21 21-4.35-4.35M11 8v6M8 11h6" />
+      </svg>
     </button>
   )
 }
@@ -48,7 +51,7 @@ export default function Education() {
   const [viewing, setViewing] = useState<CertItem | null>(null)
 
   return (
-    <section id="education" className="scroll-mt-16 bg-slate-50/70 py-10 sm:py-24 dark:bg-slate-900/70">
+    <section id="education" className="relative scroll-mt-16 py-10 sm:py-24">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <SectionHeading eyebrow="教育背景" title="教育经历与证书" />
 
