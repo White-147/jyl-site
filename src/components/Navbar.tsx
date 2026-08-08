@@ -14,7 +14,7 @@ export default function Navbar() {
   const active = useScrollSpy(['about', 'projects', 'skills', 'experience', 'education', 'contact'])
 
   return (
-    <header className="sticky top-0 z-50">
+    <header className="sticky top-0 z-50 md:hidden">
       <nav className="mx-auto mt-3 flex h-14 max-w-3xl items-center justify-between rounded-2xl border border-slate-200/70 bg-white/85 px-4 shadow-sm backdrop-blur-md dark:border-slate-800/70 dark:bg-slate-950/85 sm:px-5">
         {/* 品牌 */}
         {/* 品牌 */}
