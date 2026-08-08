@@ -63,6 +63,35 @@
       "screenshot": "projects/milu-studio.webp"
     },
     {
+      "id": "sylab-ai",
+      "name": "SyLabAI",
+      "tags": [
+        "AI 应用"
+      ],
+      "period": "2026/06",
+      "summary": "独立开发的实验 AI 助手 Demo：基于 C#/ASP.NET Core/.NET 10 构建 Control API，实现文档管理、切片检索、知识库问答（带引用溯源）与任务卡生成，支持内网 Windows Server 部署。",
+      "details": [
+        "React + TypeScript 前端工作台，覆盖工作台总览、资料中心、来源检索、实验记录、工艺路径、任务交付与运行边界七类界面",
+        "C#/.NET 10 分层架构（Application/Domain/Infrastructure），DeepSeek API 经 OpenAI-compatible adapter 接入，默认演示模式离线运行",
+        "XML 处理文档导入解析，SQL Server 关键词检索优先并保留来源、页码、章节等追溯信息",
+        "知识库问答返回引用与证据、路径建议保留依据/假设/风险点与人工复核状态，RESTful WebService 接口实现数据同步"
+      ],
+      "stack": [
+        "C#",
+        "ASP.NET Core",
+        ".NET 10",
+        "React",
+        "TypeScript",
+        "Vite",
+        "SQL Server",
+        "DeepSeek API",
+        "XML",
+        "WebService"
+      ],
+      "link": "https://github.com/White-147/SyLabAI",
+      "screenshot": "projects/sylab-ai.webp"
+    },
+    {
       "id": "xiao-lou-ai",
       "name": "XiaoLouAI",
       "tags": [
