@@ -23,6 +23,10 @@ export interface Project {
   demoUrl?: string
   /** 演示提示（如测试账号），显示为按钮 title */
   demoNote?: string
+  /** 下载地址（桌面安装包 Release 链接） */
+  downloadUrl?: string
+  /** 下载提示（如安装包说明），显示为按钮 title */
+  downloadNote?: string
 }
 
 export interface SkillGroup {

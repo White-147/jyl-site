@@ -35,6 +35,8 @@ const projects = db
     ...(r.screenshot ? { screenshot: r.screenshot } : {}),
     ...(r.demo_url ? { demoUrl: r.demo_url } : {}),
     ...(r.demo_note ? { demoNote: r.demo_note } : {}),
+    ...(r.download_url ? { downloadUrl: r.download_url } : {}),
+    ...(r.download_note ? { downloadNote: r.download_note } : {}),
     ...(r.highlight ? { highlight: true } : {}),
   }))
 write('projects.json', { projectTags: [...new Set(projects.flatMap((p) => p.tags))], projects })

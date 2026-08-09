@@ -176,7 +176,9 @@
         "PowerShell"
       ],
       "link": "https://github.com/White-147/MiLuAssistantDesktop",
-      "screenshot": "projects/milu-assistant-desktop.webp"
+      "screenshot": "projects/milu-assistant-desktop.webp",
+      "downloadUrl": "https://github.com/White-147/MiLuAssistantDesktop/releases/tag/v1.0.1",
+      "downloadNote": "Windows 安装包（Inno Setup，约 213MB）"
     },
     {
       "id": "book-recommendation",
