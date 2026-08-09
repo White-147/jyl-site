@@ -167,6 +167,20 @@ function ProjectRow({ project, index }: { project: Project; index: number }) {
                   </svg>
                 </a>
               )}
+              {project.downloadUrl && (
+                <a
+                  href={project.downloadUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  title={project.downloadNote}
+                  className="inline-flex items-center gap-1 rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700 transition-colors hover:border-amber-400 hover:bg-amber-100 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300 dark:hover:bg-amber-500/20"
+                >
+                  下载安装版
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5" aria-hidden="true">
+                    <path d="M12 3v12m0 0 4-4m-4 4-4-4M4 21h16" />
+                  </svg>
+                </a>
+              )}
             </div>
           </div>
 
