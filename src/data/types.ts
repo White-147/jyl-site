@@ -19,6 +19,10 @@ export interface Project {
   link: string
   screenshot?: string
   highlight?: boolean
+  /** 在线演示地址（部署的前端入口） */
+  demoUrl?: string
+  /** 演示提示（如测试账号），显示为按钮 title */
+  demoNote?: string
 }
 
 export interface SkillGroup {

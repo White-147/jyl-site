@@ -189,7 +189,8 @@
       "details": [
         "Vue 2.6 + Element UI + ECharts 前端；Spring Boot 2.3 + MyBatis-Plus + Spring Security/JWT + Kafka 后端",
         "Selenium 补充图书数据，MySQL 存储业务与特征数据",
-        "Hadoop/HDFS + Hive + Spark SQL/Spark Streaming 定期计算；行为权重（浏览 0.15/收藏 0.25/借阅 0.60）+ 皮尔逊相似度 + 物品协同过滤"
+        "Hadoop/HDFS + Hive + Spark SQL/Spark Streaming 定期计算；行为权重（浏览 0.15/收藏 0.25/借阅 0.60）+ 皮尔逊相似度 + 物品协同过滤",
+        "已部署在线演示：GitHub Pages 前端 + Render 容器后端 + TiDB Cloud Serverless 云数据库（测试账号 2020001 / 123456）"
       ],
       "stack": [
         "Spring Boot",
@@ -208,7 +209,9 @@
         "协同过滤"
       ],
       "link": "https://github.com/White-147/BookRecommendation",
-      "screenshot": "projects/book-recommendation.webp"
+      "screenshot": "projects/book-recommendation.webp",
+      "demoUrl": "https://white-147.github.io/BookRecommendation/",
+      "demoNote": "测试账号 2020001 / 123456（免费实例首次打开约需 30s 冷启动）"
     },
     {
       "id": "shop-recommendation",
