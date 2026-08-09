@@ -33,6 +33,8 @@ const projects = db
     stack: JSON.parse(r.stack),
     link: r.link,
     ...(r.screenshot ? { screenshot: r.screenshot } : {}),
+    ...(r.demo_url ? { demoUrl: r.demo_url } : {}),
+    ...(r.demo_note ? { demoNote: r.demo_note } : {}),
     ...(r.highlight ? { highlight: true } : {}),
   }))
 write('projects.json', { projectTags: [...new Set(projects.flatMap((p) => p.tags))], projects })
