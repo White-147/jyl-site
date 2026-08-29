@@ -19,12 +19,20 @@
       "text": "完成 Java/MySQL/Hadoop/Spark/Kafka 数据全链路项目，也参与 ERP 实施、AI 数据质检与高校实训。"
     },
     {
-      "phase": "近期",
-      "text": "聚焦 Windows 原生 AI 创作工具链（MiLuStudio / XiaoLouAI 等），扩展本地大模型部署（Ollama / llama.cpp，本地跑通 Qwen3.6-35B、DeepSeek-Coder-V2 与 Gemma4 等模型）与 agent 工具链实践。"
+      "phase": "近期 · AI 工具链",
+      "text": "聚焦 Windows 原生 AI 创作工具链（MiLuStudio / XiaoLouAI 等），能独立串通前端、后端、数据与桌面端交付。"
     },
     {
-      "phase": "日常",
-      "text": "使用 Cursor、Codex 与 DeepSeek Harness（DSH）辅助代码检索、架构梳理、重构设计与阶段验证，结合 Claude Opus / Sonnet、GPT-5.5 等模型辅助开发；也曾使用 Qoder 辅助开发与验证。"
+      "phase": "近期 · 本地模型",
+      "text": "扩展本地大模型部署（Ollama / llama.cpp），本地跑通 Qwen3.6-35B、DeepSeek-Coder-V2 与 Gemma4 等模型。"
+    },
+    {
+      "phase": "日常 · 开发协作",
+      "text": "使用 Cursor、Codex、Qoder 与 DeepSeek Harness（DSH）辅助代码检索、架构梳理、重构设计与阶段验证。"
+    },
+    {
+      "phase": "日常 · 模型辅助",
+      "text": "结合 Claude Opus / Sonnet、GPT-5.5 等模型辅助开发与验证。"
     }
   ],
   "stats": [
