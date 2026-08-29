@@ -31,7 +31,8 @@ export interface Project {
 export interface AboutPara {
   /** 阶段标签（早期 / 近期 / 日常） */
   phase: string
-  text: string
+  /** 该阶段下的自然段（段首由 phase 彩色强调） */
+  texts: string[]
 }
 
 export interface SkillGroup {
