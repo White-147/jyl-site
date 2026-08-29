@@ -62,7 +62,7 @@ export default function Hero() {
         />
       </div>
 
-      <div className="hero-viewport relative mx-auto flex max-w-6xl flex-col justify-center px-4 pb-12 pt-8 sm:px-6 sm:pb-24 sm:pt-14">
+      <div className="hero-viewport relative mx-auto flex max-w-6xl flex-col justify-start px-4 pb-12 pt-10 sm:justify-center sm:px-6 sm:pb-24 sm:pt-14">
         <div className="max-w-4xl">
           {/* 求职状态徽标 */}
           <span
@@ -104,8 +104,22 @@ export default function Hero() {
           >
             {profile.title}
           </p>
-          <p data-hero="fade" className="mt-2 text-sm font-medium text-slate-500 sm:text-base dark:text-slate-400">
+          <p data-hero="fade" className="mt-2 text-sm font-medium text-slate-500 dark:text-slate-400">
             {profile.subtitle}
+          </p>
+          {/* 方向行：移动端每行一项；桌面一行 + 圆点分隔（替代原技术栈标签，通解且不重复） */}
+          <p
+            data-hero="fade"
+            className="mt-1.5 flex flex-col gap-1 text-sm font-medium text-slate-500 sm:mt-2 sm:flex-row sm:items-center sm:gap-2.5 dark:text-slate-400"
+          >
+            {profile.directions.map((dir, i) => (
+              <span key={dir} className="flex items-center gap-2.5">
+                {i > 0 && (
+                  <span className="hidden h-1 w-1 shrink-0 rounded-full bg-slate-400/70 sm:inline-block" aria-hidden="true" />
+                )}
+                {dir}
+              </span>
+            ))}
           </p>
 
           <p data-hero="fade" className="mt-6 max-w-4xl text-base leading-relaxed text-slate-600 dark:text-slate-300">
@@ -133,18 +147,6 @@ export default function Hero() {
 }`}
             </code>
           </div>
-
-          {/* 技术栈标签：招聘者 5 秒扫描核心技能 */}
-          <ul data-hero="fade" className="mt-6 flex max-w-2xl flex-wrap items-center gap-2">
-            {profile.heroTags.map((tag) => (
-              <li
-                key={tag}
-                className="rounded-full border border-brand-200 bg-brand-50 px-3 py-1 text-xs font-medium text-brand-700 dark:border-brand-500/30 dark:bg-brand-500/10 dark:text-brand-300"
-              >
-                {tag}
-              </li>
-            ))}
-          </ul>
 
           {/* 主行动：简历下载 + 查看项目（招聘者 5 秒路径；移动端并排两列一屏可见） */}
           <div data-hero="fade" className="mt-8 grid grid-cols-2 gap-3 sm:flex sm:items-center">
