@@ -117,10 +117,19 @@ export default function About() {
               <div className="mt-4 space-y-4">
                 {about.map((para) => (
                   <div key={para.phase}>
-                    <p className="text-sm font-semibold text-brand-600 dark:text-brand-300">{para.phase}</p>
-                    <p className="mt-1 text-base leading-snug text-slate-600 text-pretty sm:leading-relaxed dark:text-slate-300">
-                      {para.text}
-                    </p>
+                    {para.texts.map((text, i) => (
+                      <p
+                        key={text.slice(0, 12)}
+                        className={`text-base leading-snug text-slate-600 text-pretty sm:leading-relaxed dark:text-slate-300 ${
+                          i === 0 ? '' : 'mt-1.5'
+                        }`}
+                      >
+                        {i === 0 && (
+                          <span className="font-semibold text-brand-600 dark:text-brand-300">{para.phase} </span>
+                        )}
+                        {text}
+                      </p>
+                    ))}
                   </div>
                 ))}
               </div>
