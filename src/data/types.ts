@@ -35,6 +35,15 @@ export interface AboutPara {
   texts: string[]
 }
 
+/** About 能力链路卡：数字引用 stats 数组下标（statIdx 与 stats 一一对应） */
+export interface AboutLink {
+  title: string
+  tag: string
+  desc: string
+  /** [第 1 个数字, 第 2 个数字] 在 stats 中的下标 */
+  statIdx: [number, number]
+}
+
 export interface SkillGroup {
   title: string
   items: string[]

@@ -18,7 +18,7 @@
   <img src="./docs/assets/screenshots/overview.png" alt="个人作品集网站首页截图" width="900">
 </p>
 
-个人求职作品集单页应用。项目以「AI 应用平台型全栈工程师」为定位，围绕数据工程、业务系统交付与 Windows 原生桌面端工程化三条主线，集中展示 MiLuStudio、XiaoLouAI、SyLabAI、LocalLLMServer 等可验证项目，并提供项目方向筛选（AI 应用 / 企业系统 / 大数据）、明暗主题切换与最新简历 PDF 下载。
+个人求职作品集单页应用。项目以「AI 应用平台型全栈工程师」为定位，围绕数据工程、业务系统交付与 Windows 原生桌面端工程化三条主线，集中展示 MiLuStudio、XiaoLouAI、SyLabAI 等可验证项目，并提供项目方向筛选（AI 应用 / 企业系统 / 大数据）、技能模糊搜索、明暗主题切换与最新简历 PDF 下载。
 
 当前站点已部署上线：[https://white-147.github.io/jyl-site/](https://white-147.github.io/jyl-site/)。内容以 SQLite 数据库（`database/portfolio.db`）为唯一内容源，构建时自动导出为 JSON 并打包，推送到 `main` 分支即通过 GitHub Actions 自动构建部署到 GitHub Pages。
 
@@ -26,11 +26,13 @@
 
 ## 项目功能
 
-- 单页滚动式布局，浅色 / 深色模式切换
+- 单页滚动式布局，浅色 / 深色模式切换（跟随系统或手动，状态栏配色同步）
 - 项目按岗位方向筛选：AI 应用 / 企业系统 / 大数据
-- 项目卡片：技术栈、要点、GitHub 链接与截图
+- 项目索引列表：行号 + 缩略图 + 技术栈展开/收起 + 要点折叠 + 灯箱放大
+- 技能分组展示：12 个工程领域分组、模糊搜索（大小写/符号/空格归一）、高频快捷标签
+- About 阶段化叙事：早期 / 近期 / 日常 + 三条能力链路数字卡片
 - 简历 PDF 一键下载（`public/resume.pdf`，随投递版本更新）
-- 移动端适配
+- 移动端适配：底部 Tab Bar、安全区、置顶胶囊导航、单列布局
 - 内容驱动：SQLite 数据库 → 构建时导出 JSON → 打包部署
 
 ## 技术栈
@@ -38,8 +40,10 @@
 | 模块 | 技术 |
 | --- | --- |
 | 前端 | React 19、TypeScript、Vite、Tailwind CSS 4 |
+| 动效 | GSAP（ScrollTrigger）+ IntersectionObserver，全站尊重 `prefers-reduced-motion` |
+| 字体 | Noto Sans SC + JetBrains Mono（站点用字子集化，`scripts/subset-fonts.mjs` 生成） |
 | 数据 | SQLite（`database/portfolio.db`，内容源） |
-| 脚本 | Node.js（seed / export 数据同步脚本） |
+| 脚本 | Node.js（seed / export / subset-fonts 数据与字体管线） |
 | 部署 | GitHub Pages + GitHub Actions（`deploy.yml`） |
 
 ## 系统架构
@@ -52,6 +56,8 @@ flowchart LR
     Build --> Dist["dist/"]
     Dist -->|upload-pages-artifact| Pages["GitHub Pages\n自动部署"]
 ```
+
+站点内容与展示完全分离：内容（项目、技能、经历、文案）全部来自 `src/data/*.json`，组件只负责渲染与交互；内容变更通过 `db:seed` / `db:export` 双向同步，改数据不碰代码。
 
 ## 目录结构
 
@@ -102,11 +108,13 @@ npm run build      # = db:export + 类型检查 + 构建
 
 日常改内容的两种方式：
 
-1. **改 JSON → 入库**：编辑 `src/data/*.json`（或直接改数据库），执行 `npm run db:seed` 同步到库；
+1. **改 JSON → 入库**：编辑 `src/data/*.json`，执行 `npm run db:seed` 同步到库；
 2. **改数据库 → 出 JSON**：直接用 SQLite 工具改 `database/portfolio.db`，执行 `npm run db:export` 重新生成 JSON。
 
 换简历：覆盖 `public/resume.pdf`（原件归档在 `_archive/resumes/`）。
 新增证书/头像：压缩后的 WebP 放 `public/` 对应目录，原图放入 `_archive/` 对应目录，再改 `education.json` 或相关数据。
+
+> 新增或修改站点文案后，请重新运行 `node scripts/subset-fonts.mjs` 生成最新字体子集（新用字不在子集内会回退到系统字体）。
 
 ## 图片与命名规范
 
@@ -125,23 +133,18 @@ npm run build      # = db:export + 类型检查 + 构建
 
 > 如需自定义域名：在仓库 Settings → Pages 中绑定已备案域名；如切换 Vercel/Netlify 部署，将根目录 `_redirects`/配置文件与 Actions 工作流一并调整即可。
 
-## 设计系统（2026-08 改版）
+## 设计系统
 
 - **视觉基调「青玉 · 深空青」**：主色青玉（teal `#0f766e`）+ 高亮碧青（cyan），浅色冷白微青底、深色深青黑底；深浅两套色彩同族，深色粒子液柱与浅色主色统一。
 - **字体**：标题与正文 Noto Sans SC（自托管子集，`scripts/subset-fonts.mjs` 按站点用字生成 4 个字重 woff2），代码与数字点缀 JetBrains Mono（latin 子集）。**新增文案后需重新运行子集化脚本**。
 - **动效**：GSAP（Hero 入场序列 + About 链路连接线 scrub），全站尊重 `prefers-reduced-motion`；其余滚动渐显由 IntersectionObserver 驱动。
-- **版式特色**：Hero 编辑式排版（名字超大两行 + 头像签名章 + 等宽代码彩蛋）；项目区「旗舰大卡 + 紧凑列表」差异化；About 三条能力链路带上下文数字。
+- **版式特色**：Hero 编辑式排版（名字超大两行 + 头像签名章 + 等宽代码彩蛋）；项目区「编辑索引行」差异化；技能区模糊搜索 + 桌面双列均衡；About 阶段化叙事 + 能力链路数字卡。
 
 ## 项目亮点
 
 - 内容驱动架构：SQLite 单一内容源，JSON 由构建导出，改数据不碰代码。
 - 与简历同口径：站点简历下载与投递版保持同步更新，公司名、项目名、时间线一致。
 - 数据流脚本化：`db:seed` / `db:export` 双向同步，内容维护成本低。
+- 字体子集化管线：站点用字打包为每个字重单个 woff2（约 113KB），首屏字体开销可控。
+- 全站可访问性：键盘焦点可见、ARIA 标注、`prefers-reduced-motion` 降级、安全区适配。
 - 自动化部署：推送即构建发布（GitHub Actions + GitHub Pages），无需手动操作。
-
-## 后续可改进方向
-
-- 绑定自定义域名（国内访问更稳定）。
-- 补充 SEO 与访问统计（站点地图、搜索引擎收录）。
-- 增加英文版站点内容。
-- 补充更多项目实测截图与演示视频。
