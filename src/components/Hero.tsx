@@ -120,17 +120,17 @@ export default function Hero() {
             </span>
           </p>
 
-          {/* 代码风彩蛋：等宽字体，克制点缀（与 AI 工程师身份呼应；移动端隐藏——面向非技术读者保持通解） */}
+          {/* 代码风彩蛋：等宽字体、单一灰调（淡化存在感，仅内行会意）；
+              键 = 全链路能力域，值与方向全英文；按多行字面量书写，无横向滚动；移动端隐藏 */}
           <div data-hero="fade" className="mt-6 hidden sm:block">
-            <code className="block max-w-full overflow-x-auto font-mono text-xs leading-relaxed text-slate-500 sm:text-[13px] dark:text-slate-400">
-              <span className="select-none text-slate-400 dark:text-slate-500">const</span> me ={' '}
-              {'{'} <span className="text-slate-400 dark:text-slate-500">stack</span>: ['
-              <span className="text-brand-700 dark:text-cyan-400">Java</span>', '
-              <span className="text-brand-700 dark:text-cyan-400">React</span>', '
-              <span className="text-brand-700 dark:text-cyan-400">.NET</span>', '
-              <span className="text-brand-700 dark:text-cyan-400">Python</span>'],{' '}
-              <span className="text-slate-400 dark:text-slate-500">focus</span>: '
-              <span className="text-brand-700 dark:text-cyan-400">AI 创作工具链</span>' {'}'}
+            <code className="block max-w-full overflow-x-auto whitespace-pre font-mono text-xs leading-relaxed text-slate-400 dark:text-slate-500">
+              {`const me = {
+  data: ['Spark', 'Hive', 'Kafka'],
+  api: ['Java', '.NET', 'Python'],
+  fe: ['React', 'TypeScript'],
+  native: ['Electron', 'Win32'],
+  aim: 'AI toolchain',
+}`}
             </code>
           </div>
 
