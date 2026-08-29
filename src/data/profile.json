@@ -11,7 +11,7 @@
     "从大数据与业务系统交付起步，逐步转向 AI 创作工具平台开发。",
     "能把前端、后端 Control API、数据边界与 Windows 桌面端交付串成可验证的项目。"
   ],
-  "heroLineMobile": "前端 · 后端 Control API · 数据边界 · 桌面端交付",
+  "heroLineMobile": "从页面到桌面的全链路交付",
   "anchor": "数据科学与大数据技术本科",
   "about": [
     {
@@ -20,11 +20,11 @@
     },
     {
       "phase": "近期",
-      "text": "聚焦 Windows 原生 AI 创作工具链（MiLuStudio / XiaoLouAI 等），能独立串通前端、后端、数据与桌面端交付。"
+      "text": "聚焦 Windows 原生 AI 创作工具链（MiLuStudio / XiaoLouAI 等），扩展本地大模型部署（Ollama / llama.cpp，本地跑通 Qwen3.6-35B、DeepSeek-Coder-V2 与 Gemma4 等模型）与 agent 工具链实践。"
     },
     {
       "phase": "日常",
-      "text": "使用 Cursor 与 Codex 辅助代码检索、架构梳理、重构设计与阶段验证，结合 Claude Opus / Sonnet、GPT-5.5 等模型辅助开发；也曾使用 Qoder 辅助开发与验证。"
+      "text": "使用 Cursor、Codex 与 DeepSeek Harness（DSH）辅助代码检索、架构梳理、重构设计与阶段验证，结合 Claude Opus / Sonnet、GPT-5.5 等模型辅助开发；也曾使用 Qoder 辅助开发与验证。"
     }
   ],
   "stats": [
