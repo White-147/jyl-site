@@ -1,11 +1,75 @@
 @import "tailwindcss";
 
+/* 站点专用字体子集（node scripts/subset-fonts.mjs 生成，仅含站点用字）
+   Noto Sans SC 可变字重分别子集；JetBrains Mono 为 latin 子集 */
+@font-face {
+  font-family: "Noto Sans SC";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("./fonts/noto-sans-sc-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Noto Sans SC";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("./fonts/noto-sans-sc-500.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Noto Sans SC";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("./fonts/noto-sans-sc-700.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Noto Sans SC";
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url("./fonts/noto-sans-sc-900.woff2") format("woff2");
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("./fonts/jetbrains-mono-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("./fonts/jetbrains-mono-600.woff2") format("woff2");
+}
+
 /* 深色模式：class 策略（html.dark 下启用 dark: 变体） */
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --font-sans: "Inter", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
-    "Noto Sans SC", system-ui, -apple-system, sans-serif;
+  /* 字体：正文/标题优先 Noto Sans SC（自托管子集，三端字形统一），
+     等宽点缀 JetBrains Mono（Hero 代码彩蛋 / 数字），拉丁回退 Inter */
+  --font-sans: "Noto Sans SC", "Inter", "PingFang SC", "Hiragino Sans GB",
+    "Microsoft YaHei", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, "Liberation Mono",
+    monospace;
+
+  /* 青玉色板（2026-08 改版）：主色青玉 teal，高亮碧青 cyan，
+     深色模式与粒子液柱同族，深浅两套语言统一 */
+  --color-ink: #0f2e36; /* 浅色标题：深青墨 */
+  --color-ink-light: #e9f6f4; /* 深色标题：微青海白 */
+  --color-brand-50: #f0fdfa;
+  --color-brand-100: #ccfbf1;
+  --color-brand-200: #99f6e4;
+  --color-brand-300: #5eead4;
+  --color-brand-400: #2dd4bf;
+  --color-brand-500: #14b8a6;
+  --color-brand-600: #0d9488;
+  --color-brand-700: #0f766e;
+  --color-brand-800: #115e59;
+  --color-brand-900: #134e4a;
 
   /* 流体字号：min/max 用 rem（尊重浏览器缩放与用户字体设置），中间 rem+vw 渐变，
      320px→1440px 平滑缩放，无断点跳跃；PC/平板/手机三端文本自适应 */
@@ -19,6 +83,7 @@
   --text-4xl: clamp(1.75rem, 1.5rem + 1.25vw, 2.25rem);
   --text-5xl: clamp(2rem, 1.625rem + 1.875vw, 3rem);
   --text-6xl: clamp(2.25rem, 1.75rem + 2.5vw, 3.75rem);
+  --text-7xl: clamp(2.5rem, 1.875rem + 3.125vw, 4.25rem);
 }
 
 html {
@@ -112,21 +177,22 @@ body {
   user-select: none;
 }
 
-/* 全站连续背景：统一底色 + 多层柔光光斑 + 颗粒纹理（光效全页一致，板块内容以卡片浮起） */
+/* 全站连续背景：青玉基调 + 多层柔光光斑（teal/cyan）+ 颗粒纹理
+   （光效全页一致，板块内容以卡片浮起；深色为深青黑，与粒子液柱同族） */
 body {
-  background-color: #fafbfc;
+  background-color: #f6faf9;
   background-image:
-    radial-gradient(55% 45% at 75% 5%, rgb(59 130 246 / 0.17), transparent 70%),
-    radial-gradient(45% 40% at 12% 45%, rgb(14 165 233 / 0.14), transparent 70%),
-    radial-gradient(40% 35% at 82% 92%, rgb(99 102 241 / 0.11), transparent 70%),
+    radial-gradient(55% 45% at 75% 5%, rgb(20 184 166 / 0.14), transparent 70%),
+    radial-gradient(45% 40% at 12% 45%, rgb(8 145 178 / 0.12), transparent 70%),
+    radial-gradient(40% 35% at 82% 92%, rgb(13 148 136 / 0.10), transparent 70%),
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
 }
 .dark body {
-  background-color: #020617;
+  background-color: #04121a;
   background-image:
-    radial-gradient(55% 45% at 75% 5%, rgb(59 130 246 / 0.20), transparent 70%),
-    radial-gradient(45% 40% at 12% 45%, rgb(99 102 241 / 0.16), transparent 70%),
-    radial-gradient(40% 35% at 82% 92%, rgb(14 165 233 / 0.14), transparent 70%),
+    radial-gradient(55% 45% at 75% 5%, rgb(20 184 166 / 0.16), transparent 70%),
+    radial-gradient(45% 40% at 12% 45%, rgb(8 145 178 / 0.14), transparent 70%),
+    radial-gradient(40% 35% at 82% 92%, rgb(34 211 238 / 0.10), transparent 70%),
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.065'/%3E%3C/svg%3E");
 }
 
@@ -138,16 +204,16 @@ body::before {
   pointer-events: none;
   z-index: 0;
   background-image:
-    linear-gradient(to right, rgb(148 163 184 / 0.10) 1px, transparent 1px),
-    linear-gradient(to bottom, rgb(148 163 184 / 0.10) 1px, transparent 1px);
+    linear-gradient(to right, rgb(148 168 166 / 0.10) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(148 168 166 / 0.10) 1px, transparent 1px);
   background-size: 48px 48px;
   mask-image: radial-gradient(ellipse 90% 70% at 50% 15%, black, transparent 75%);
   -webkit-mask-image: radial-gradient(ellipse 90% 70% at 50% 15%, black, transparent 75%);
 }
 .dark body::before {
   background-image:
-    linear-gradient(to right, rgb(148 163 184 / 0.08) 1px, transparent 1px),
-    linear-gradient(to bottom, rgb(148 163 184 / 0.08) 1px, transparent 1px);
+    linear-gradient(to right, rgb(148 168 166 / 0.07) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(148 168 166 / 0.07) 1px, transparent 1px);
 }
 
 /* 玻璃拟态卡片（2026 Glassmorphism：tint + blur + 细亮边，配合全页光斑背景使用） */
@@ -156,11 +222,11 @@ body::before {
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgb(255 255 255 / 0.65);
-  box-shadow: 0 1px 2px rgb(15 23 42 / 0.05);
+  box-shadow: 0 1px 2px rgb(15 118 110 / 0.06);
 }
 .dark .glass-card {
-  background: rgb(15 23 42 / 0.55);
-  border-color: rgb(148 163 184 / 0.16);
+  background: rgb(8 30 42 / 0.55);
+  border-color: rgb(103 232 249 / 0.14);
 }
 /* 强玻璃：用于含正文的区域，tint 更高保证可读性 */
 .glass-card-strong {
@@ -168,11 +234,11 @@ body::before {
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border: 1px solid rgb(255 255 255 / 0.7);
-  box-shadow: 0 1px 2px rgb(15 23 42 / 0.05);
+  box-shadow: 0 1px 2px rgb(15 118 110 / 0.06);
 }
 .dark .glass-card-strong {
-  background: rgb(15 23 42 / 0.72);
-  border-color: rgb(148 163 184 / 0.16);
+  background: rgb(8 30 42 / 0.72);
+  border-color: rgb(103 232 249 / 0.14);
 }
 
 /* 玻璃管阅读液柱（深色模式）：粒子缓慢上浮 + 呼吸闪烁（液体微粒感） */
@@ -187,4 +253,9 @@ body::before {
 .hero-viewport {
   min-height: calc(100vh - 4rem);
   min-height: calc(100svh - 4rem);
+}
+
+/* 项目列表「查看要点」折叠箭头：展开后旋转（details[open] 原生状态） */
+details[open] .chevron-up-down {
+  transform: rotate(180deg);
 }

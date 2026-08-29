@@ -43,7 +43,7 @@ export default function BackToTop() {
       onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
-      className={`fixed bottom-20 right-5 z-50 flex h-12 w-12 items-center justify-center rounded-full border border-white/60 bg-white/75 text-blue-600 shadow-[0_6px_20px_rgba(59,130,246,0.28)] backdrop-blur-sm transition-all duration-300 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)] hover:scale-110 active:scale-90 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-300 sm:h-14 sm:w-14 md:hidden dark:border-white/15 dark:bg-slate-900/70 dark:text-blue-400 dark:focus-visible:ring-blue-500/40 ${
+      className={`fixed bottom-20 right-5 z-50 flex h-12 w-12 items-center justify-center rounded-full border border-white/60 bg-white/75 text-brand-600 shadow-[0_6px_20px_rgba(13,148,136,0.28)] backdrop-blur-sm transition-all duration-300 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)] hover:scale-110 active:scale-90 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-300 sm:h-14 sm:w-14 md:hidden dark:border-white/15 dark:bg-slate-900/70 dark:text-cyan-400 dark:focus-visible:ring-brand-500/40 ${
         show ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-4 opacity-0'
       }`}
     >
@@ -51,8 +51,8 @@ export default function BackToTop() {
       <svg viewBox="0 0 60 60" className="absolute inset-0 h-full w-full -rotate-90" aria-hidden="true">
         <defs>
           <linearGradient id="backtop-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#2563eb" />
-            <stop offset="100%" stopColor="#38bdf8" />
+            <stop offset="0%" stopColor="#0d9488" />
+            <stop offset="100%" stopColor="#22d3ee" />
           </linearGradient>
         </defs>
         <circle cx="30" cy="30" r={R} fill="none" stroke="currentColor" strokeOpacity="0.2" strokeWidth="3" />

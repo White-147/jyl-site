@@ -65,6 +65,10 @@ export default function ThemeToggle({
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', dark)
+    // 移动端状态栏/地址栏配色跟随站点主题（meta theme-color）
+    document.querySelectorAll('meta[name="theme-color"]').forEach((m) => {
+      m.setAttribute('content', dark ? '#04121a' : '#f6faf9')
+    })
     try {
       localStorage.setItem('theme', theme)
     } catch {
@@ -94,13 +98,13 @@ export default function ThemeToggle({
           className="group flex items-center justify-end gap-2.5 pr-[4px] transition-transform duration-200 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)] hover:scale-110"
         >
           {label && (
-            <span className="w-14 text-right text-xs text-slate-400 transition-colors group-hover:text-blue-700 dark:text-slate-500 dark:group-hover:text-blue-400">
+            <span className="w-14 text-right text-xs text-slate-400 transition-colors group-hover:text-brand-700 dark:text-slate-500 dark:group-hover:text-cyan-400">
               {label}
             </span>
           )}
           <ModeIcon
             mode={theme}
-            className="h-4 w-4 shrink-0 text-slate-500 transition-colors group-hover:text-blue-700 dark:text-slate-400 dark:group-hover:text-blue-400"
+            className="h-4 w-4 shrink-0 text-slate-500 transition-colors group-hover:text-brand-700 dark:text-slate-400 dark:group-hover:text-cyan-400"
           />
         </button>
 
@@ -127,7 +131,7 @@ export default function ThemeToggle({
                   }}
                   className={`flex w-full items-center gap-2.5 px-3 py-2.5 text-left text-sm transition-colors ${
                     isCurrent
-                      ? 'bg-blue-50 font-semibold text-blue-700 dark:bg-blue-500/10 dark:text-blue-400'
+                      ? 'bg-brand-50 font-semibold text-brand-700 dark:bg-brand-500/10 dark:text-cyan-400'
                       : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700'
                   }`}
                 >
@@ -163,10 +167,10 @@ export default function ThemeToggle({
         aria-label={`主题：${MODE_META[theme].label}（${MODE_META[theme].desc}），点击选择`}
         title={`主题：${MODE_META[theme].label}（${MODE_META[theme].desc}）`}
         aria-expanded={open}
-        className={`inline-flex items-center justify-center text-slate-600 transition-all duration-200 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)] hover:text-blue-700 dark:text-slate-300 dark:hover:text-blue-400 ${
+        className={`inline-flex items-center justify-center text-slate-600 transition-all duration-200 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)] hover:text-brand-700 dark:text-slate-300 dark:hover:text-cyan-400 ${
           variant === 'dot'
             ? 'h-4 w-4 hover:scale-110'
-            : 'h-9 w-9 rounded-lg border border-slate-200 bg-white hover:border-blue-300 dark:border-slate-700 dark:bg-slate-800 dark:hover:border-blue-500'
+            : 'h-9 w-9 rounded-lg border border-slate-200 bg-white hover:border-brand-300 dark:border-slate-700 dark:bg-slate-800 dark:hover:border-brand-500'
         }`}
       >
         <ModeIcon mode={theme} className={variant === 'dot' ? 'h-4 w-4' : 'h-4.5 w-4.5'} />
@@ -199,7 +203,7 @@ export default function ThemeToggle({
                 }}
                 className={`flex w-full items-center gap-2.5 px-3 py-2.5 text-left text-sm transition-colors ${
                   isCurrent
-                    ? 'bg-blue-50 font-semibold text-blue-700 dark:bg-blue-500/10 dark:text-blue-400'
+                    ? 'bg-brand-50 font-semibold text-brand-700 dark:bg-brand-500/10 dark:text-cyan-400'
                     : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700'
                 }`}
               >

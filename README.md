@@ -61,17 +61,20 @@ jyl-site/
 ├── database/
 │   └── portfolio.db          # ★ SQLite 内容库（内容源）
 ├── docs/
-│   └── assets/screenshots/   # 项目截图
+│   ├── assets/screenshots/   # 项目截图
+│   └── design/               # 设计过程文件（色板预览等）
 ├── public/
 │   ├── resume.pdf            # 站点简历（最新版覆盖即可）
 │   ├── projects/*.webp       # 项目截图（构建资源）
 │   └── images/ certificates/ # 头像、证书缩略图
 ├── scripts/
 │   ├── seed-db.mjs           #   JSON → 数据库（npm run db:seed）
-│   └── export-db.mjs         #   数据库 → JSON（npm run db:export）
+│   ├── export-db.mjs         #   数据库 → JSON（npm run db:export）
+│   └── subset-fonts.mjs      #   站点字体子集化（新增文案后重新运行）
 ├── src/
 │   ├── data/*.json           # 构建数据（由数据库导出生成，勿手改）
 │   ├── data/types.ts         # 数据类型定义
+│   ├── fonts/                # 站点专用字体子集（subset-fonts.mjs 生成）
 │   └── components/           # 页面组件
 ├── .github/workflows/deploy.yml
 ├── LICENSE
@@ -121,6 +124,13 @@ npm run build      # = db:export + 类型检查 + 构建
 3. 访问地址：https://white-147.github.io/jyl-site/
 
 > 如需自定义域名：在仓库 Settings → Pages 中绑定已备案域名；如切换 Vercel/Netlify 部署，将根目录 `_redirects`/配置文件与 Actions 工作流一并调整即可。
+
+## 设计系统（2026-08 改版）
+
+- **视觉基调「青玉 · 深空青」**：主色青玉（teal `#0f766e`）+ 高亮碧青（cyan），浅色冷白微青底、深色深青黑底；深浅两套色彩同族，深色粒子液柱与浅色主色统一。
+- **字体**：标题与正文 Noto Sans SC（自托管子集，`scripts/subset-fonts.mjs` 按站点用字生成 4 个字重 woff2），代码与数字点缀 JetBrains Mono（latin 子集）。**新增文案后需重新运行子集化脚本**。
+- **动效**：GSAP（Hero 入场序列 + About 链路连接线 scrub），全站尊重 `prefers-reduced-motion`；其余滚动渐显由 IntersectionObserver 驱动。
+- **版式特色**：Hero 编辑式排版（名字超大两行 + 头像签名章 + 等宽代码彩蛋）；项目区「旗舰大卡 + 紧凑列表」差异化；About 三条能力链路带上下文数字。
 
 ## 项目亮点
 

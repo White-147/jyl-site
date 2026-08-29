@@ -18,7 +18,6 @@ export interface Project {
   stack: string[]
   link: string
   screenshot?: string
-  highlight?: boolean
   /** 在线演示地址（部署的前端入口） */
   demoUrl?: string
   /** 演示提示（如测试账号），显示为按钮 title */
@@ -27,6 +26,12 @@ export interface Project {
   downloadUrl?: string
   /** 下载提示（如安装包说明），显示为按钮 title */
   downloadNote?: string
+}
+
+export interface AboutPara {
+  /** 阶段标签（早期 / 近期 / 日常） */
+  phase: string
+  text: string
 }
 
 export interface SkillGroup {
