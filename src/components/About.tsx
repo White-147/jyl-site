@@ -114,11 +114,11 @@ export default function About() {
           <Reveal>
             <div className="glass-card-strong h-full rounded-2xl p-6 sm:p-7">
               <p className="text-lg font-bold tracking-tight text-brand-700 dark:text-cyan-400">{anchor}</p>
-              <div className="mt-4 space-y-5">
+              <div className="mt-4 space-y-4">
                 {about.map((para) => (
                   <div key={para.phase}>
                     <p className="text-sm font-semibold text-brand-600 dark:text-brand-300">{para.phase}</p>
-                    <p className="mt-1 text-base leading-snug text-slate-600 sm:leading-relaxed dark:text-slate-300">
+                    <p className="mt-1 text-base leading-snug text-slate-600 text-pretty sm:leading-relaxed dark:text-slate-300">
                       {para.text}
                     </p>
                   </div>
