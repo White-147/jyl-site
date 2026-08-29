@@ -41,12 +41,19 @@ const projects = db
   }))
 write('projects.json', { projectTags: [...new Set(projects.flatMap((p) => p.tags))], projects })
 
-// skills
-const skillGroups = db
-  .prepare('SELECT group_name, items FROM skills ORDER BY rowid')
+// skills（多岗位模板聚合：岗位 → 分组 → 词条）
+const profiles = db.prepare('SELECT id, label, note FROM skill_profiles ORDER BY rowid').all()
+const skillRows = db
+  .prepare('SELECT profile_id, group_name, items FROM skills ORDER BY rowid')
   .all()
-  .map((r) => ({ title: r.group_name, items: JSON.parse(r.items) }))
-write('skills.json', { skillGroups })
+  .map((r) => ({ profileId: r.profile_id, title: r.group_name, items: JSON.parse(r.items) }))
+const skillProfiles = profiles.map((p) => ({
+  id: p.id,
+  label: p.label,
+  note: p.note,
+  groups: skillRows.filter((s) => s.profileId === p.id).map(({ title, items }) => ({ title, items })),
+}))
+write('skills.json', { skillProfiles })
 
 // experience
 const experiences = db
