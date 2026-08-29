@@ -113,18 +113,9 @@ function ProjectRow({ project, index }: { project: Project; index: number }) {
             )}
 
             <div className={reverse ? 'sm:order-1' : ''}>
-              {/* 标题行：项目名 + GitHub 入口图标（不再单独占行），右侧标签/时间 */}
+              {/* 标题行：项目名（纯文本）+ GitHub 入口图标（不重复链接，不单独占行），右侧标签/时间 */}
               <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                <h3 className="text-lg font-bold tracking-tight text-ink dark:text-ink-light">
-                  <a
-                    href={project.link}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="transition-colors hover:text-brand-700 dark:hover:text-cyan-400"
-                  >
-                    {project.name}
-                  </a>
-                </h3>
+                <h3 className="text-lg font-bold tracking-tight text-ink dark:text-ink-light">{project.name}</h3>
                 <a
                   href={project.link}
                   target="_blank"
