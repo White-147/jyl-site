@@ -16,6 +16,7 @@ db.exec(`
   DROP TABLE IF EXISTS profile;
   DROP TABLE IF EXISTS projects;
   DROP TABLE IF EXISTS skills;
+  DROP TABLE IF EXISTS skill_profiles;
   DROP TABLE IF EXISTS experience;
   DROP TABLE IF EXISTS education;
 
