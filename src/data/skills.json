@@ -1,167 +1,316 @@
 {
-  "skillGroups": [
+  "skillProfiles": [
     {
-      "title": "后端与平台",
-      "items": [
-        "Java",
-        "Spring Boot",
-        "Spring Security",
-        "Spring Data JPA",
-        "MyBatis-Plus",
-        "RESTful API",
-        "JWT",
-        "C++",
-        "C# / .NET 8/10",
-        "ASP.NET Core",
-        "EF Core",
-        "Swagger / Knife4j",
-        "Maven"
+      "id": "general",
+      "label": "通用",
+      "note": "",
+      "groups": [
+        {
+          "title": "能力主线",
+          "items": [
+            "AI 应用开发",
+            "全栈交付",
+            "数据工程",
+            "Windows 桌面端工程化"
+          ]
+        },
+        {
+          "title": "交付素养",
+          "items": [
+            "规则拆解与检查项",
+            "问题闭环",
+            "操作培训",
+            "文档与交付",
+            "多方协作"
+          ]
+        }
       ]
     },
     {
-      "title": "前端",
-      "items": [
-        "TypeScript",
-        "JavaScript",
-        "React 19",
-        "Vue 2",
-        "Vite",
-        "Tailwind CSS",
-        "Ant Design",
-        "Element UI",
-        "ECharts",
-        "Axios",
-        "Thymeleaf",
-        "HTML / CSS",
-        "Three.js",
-        "Zustand"
+      "id": "ai",
+      "label": "AI 全栈开发",
+      "note": "",
+      "groups": [
+        {
+          "title": "后端与平台",
+          "items": [
+            "Java",
+            "Spring Boot",
+            "Spring Security",
+            "Spring Data JPA",
+            "MyBatis-Plus",
+            "RESTful API",
+            "JWT",
+            "C++",
+            "C# / .NET 8/10",
+            "ASP.NET Core",
+            "EF Core",
+            "Swagger / Knife4j",
+            "Maven"
+          ]
+        },
+        {
+          "title": "前端",
+          "items": [
+            "TypeScript",
+            "JavaScript",
+            "React 19",
+            "Vue 2",
+            "Vite",
+            "Tailwind CSS",
+            "Ant Design",
+            "Element UI",
+            "ECharts",
+            "Axios",
+            "Thymeleaf",
+            "HTML / CSS",
+            "Three.js",
+            "Zustand"
+          ]
+        },
+        {
+          "title": "数据库与大数据",
+          "items": [
+            "MySQL",
+            "PostgreSQL",
+            "SQLite",
+            "SQL",
+            "Hadoop / HDFS",
+            "Hive",
+            "Spark SQL",
+            "Spark Streaming",
+            "Kafka",
+            "数据清洗与质检",
+            "协同过滤推荐",
+            "H2（内嵌）"
+          ]
+        },
+        {
+          "title": "模型与 API 接入",
+          "items": [
+            "OpenAI-compatible API",
+            "External API Profile",
+            "Vertex Gemini / Veo",
+            "Qwen-Omni",
+            "云雾 AI",
+            "PixVerse",
+            "Provider 配置",
+            "模型发现与连接测试"
+          ]
+        },
+        {
+          "title": "Python 与 AI 工程",
+          "items": [
+            "Python",
+            "FastAPI",
+            "Python Sidecar",
+            "Agent / Skills",
+            "agentscope",
+            "MCP"
+          ]
+        },
+        {
+          "title": "本地大模型部署",
+          "items": [
+            "llama.cpp / llama-server",
+            "Ollama",
+            "GGUF 量化（Q4_K_M / IQ2_M）",
+            "CUDA 混合推理",
+            "FlashAttention / 长上下文",
+            "LLM Server（OpenAI 兼容 API）",
+            "本地模型下载与启动",
+            "推理性能实测"
+          ]
+        },
+        {
+          "title": "桌面与本地化",
+          "items": [
+            "Electron",
+            "electron-builder",
+            "NSIS / Inno Setup",
+            "Windows Worker / Service",
+            "PowerShell",
+            "嵌入式 Python",
+            "C# 启动器",
+            "本地端口与进程管理"
+          ]
+        },
+        {
+          "title": "媒体与多模态",
+          "items": [
+            "FFmpeg",
+            "OCR（Tesseract）",
+            "PDF（Poppler）",
+            "NLP（HanLP / LTP）",
+            "配音字幕",
+            "音频数据处理",
+            "本地多模态链路（SAM2 / VACE / Wan2.1）"
+          ]
+        },
+        {
+          "title": "工程化与测试",
+          "items": [
+            "Git / GitHub",
+            "GitHub Actions",
+            "Vitest",
+            "xUnit",
+            "Playwright",
+            "Synthetic E2E",
+            "Selenium",
+            "Vite 构建",
+            "Linux / Ubuntu",
+            "Docker 基础"
+          ]
+        },
+        {
+          "title": "AI 编程协作",
+          "items": [
+            "Cursor Agent / Composer",
+            "Codex",
+            "Qoder",
+            "DeepSeek Harness（DSH）"
+          ]
+        }
       ]
     },
     {
-      "title": "数据库与大数据",
-      "items": [
-        "MySQL",
-        "PostgreSQL",
-        "SQLite",
-        "SQL",
-        "Hadoop / HDFS",
-        "Hive",
-        "Spark SQL",
-        "Spark Streaming",
-        "Kafka",
-        "数据清洗与质检",
-        "协同过滤推荐",
-        "H2（内嵌）"
+      "id": "erp",
+      "label": "ERP 实施",
+      "note": "",
+      "groups": [
+        {
+          "title": "系统测试与反馈",
+          "items": [
+            "ERP 定制系统测试",
+            "问题反馈与修复验证",
+            "流程验证",
+            "权限验证",
+            "数据核对"
+          ]
+        },
+        {
+          "title": "文档与归档",
+          "items": [
+            "施工文件电子归档",
+            "监理文件电子归档",
+            "文档排版",
+            "交付文档"
+          ]
+        },
+        {
+          "title": "现场实施服务",
+          "items": [
+            "出差上门洽谈",
+            "用户使用指导",
+            "售前支持",
+            "售中实施",
+            "售后维护"
+          ]
+        }
       ]
     },
     {
-      "title": "模型与 API 接入",
-      "items": [
-        "OpenAI-compatible API",
-        "External API Profile",
-        "Vertex Gemini / Veo",
-        "Qwen-Omni",
-        "云雾 AI",
-        "PixVerse",
-        "Provider 配置",
-        "模型发现与连接测试"
+      "id": "qa",
+      "label": "AI 数据质检",
+      "note": "",
+      "groups": [
+        {
+          "title": "数据质量核查",
+          "items": [
+            "音频数据质检",
+            "文本质检",
+            "图像数据质检",
+            "标注一致性",
+            "异常样本反馈"
+          ]
+        },
+        {
+          "title": "规则与协同",
+          "items": [
+            "规则拆解（800 字规则 1 小时内）",
+            "数据供给方对接",
+            "客户侧反馈",
+            "外包团队培训"
+          ]
+        },
+        {
+          "title": "工具与统计",
+          "items": [
+            "Excel",
+            "数据统计",
+            "Python 基础",
+            "样本整理"
+          ]
+        }
       ]
     },
     {
-      "title": "Python 与 AI 工程",
-      "items": [
-        "Python",
-        "FastAPI",
-        "Python Sidecar",
-        "Agent / Skills",
-        "agentscope",
-        "MCP"
+      "id": "tutor",
+      "label": "助教 / 培训",
+      "note": "",
+      "groups": [
+        {
+          "title": "课程讲解",
+          "items": [
+            "Java",
+            "MySQL",
+            "Linux",
+            "Hadoop / HDFS"
+          ]
+        },
+        {
+          "title": "实训交付",
+          "items": [
+            "环境搭建",
+            "代码调试",
+            "运行排错",
+            "项目验收",
+            "答辩与毕设材料审核"
+          ]
+        },
+        {
+          "title": "学生支持",
+          "items": [
+            "200+ 学生问题处理",
+            "100+ 人实训支持"
+          ]
+        }
       ]
     },
     {
-      "title": "本地媒体与多模态",
-      "items": [
-        "FFmpeg",
-        "OCR（Tesseract）",
-        "PDF（Poppler）",
-        "NLP（HanLP / LTP）",
-        "配音字幕",
-        "音频数据处理",
-        "本地多模态链路（SAM2 / VACE / Wan2.1）"
-      ]
-    },
-    {
-      "title": "本地大模型部署",
-      "items": [
-        "llama.cpp / llama-server",
-        "Ollama",
-        "GGUF 量化（Q4_K_M / IQ2_M）",
-        "CUDA 混合推理",
-        "FlashAttention / 长上下文",
-        "LLM Server（OpenAI 兼容 API）",
-        "本地模型下载与启动",
-        "推理性能实测"
-      ]
-    },
-    {
-      "title": "桌面与本地化",
-      "items": [
-        "Electron",
-        "electron-builder",
-        "NSIS / Inno Setup",
-        "Windows Worker / Service",
-        "PowerShell",
-        "嵌入式 Python",
-        "C# 启动器",
-        "本地端口与进程管理"
-      ]
-    },
-    {
-      "title": "工程化与测试",
-      "items": [
-        "Git / GitHub",
-        "GitHub Actions",
-        "Vitest",
-        "xUnit",
-        "Playwright",
-        "Synthetic E2E",
-        "Selenium",
-        "Vite 构建",
-        "Linux / Ubuntu",
-        "Docker 基础"
-      ]
-    },
-    {
-      "title": "AI 编程协作",
-      "items": [
-        "Cursor Agent / Composer",
-        "Codex",
-        "Qoder",
-        "DeepSeek Harness（DSH）"
-      ]
-    },
-    {
-      "title": "电脑与网络维护",
-      "items": [
-        "办公网络搭建",
-        "路由器 / 交换机设置",
-        "Windows / Linux 系统维护",
-        "杀毒软件部署",
-        "电脑硬件故障排查",
-        "打印机 / 扫描仪维护",
-        "账号与共享管理",
-        "数据备份"
-      ]
-    },
-    {
-      "title": "文档与培训",
-      "items": [
-        "技术文档",
-        "交付文档",
-        "操作手册",
-        "用户培训",
-        "项目报告",
-        "Office 办公"
+      "id": "other",
+      "label": "其他（过渡兼职）",
+      "note": "语音主播 / 游戏代肝 / 汽配厂流水线，均为短期过渡经历。",
+      "groups": [
+        {
+          "title": "语音主播（抖音 · 过渡）",
+          "items": [
+            "语音聊天互动",
+            "唱歌",
+            "游戏陪伴",
+            "表达与控场",
+            "直播复盘"
+          ]
+        },
+        {
+          "title": "游戏代肝（原神 · 过渡）",
+          "items": [
+            "地图探索度代肝",
+            "大世界任务规划",
+            "高效执行",
+            "账号安全（全程直播可追溯）"
+          ]
+        },
+        {
+          "title": "汽配厂普工（东山精密 · 过渡）",
+          "items": [
+            "汽车铝件流水线加工",
+            "冷凝件质量检查",
+            "可用件质量把关",
+            "质量异常上报",
+            "生产安全"
+          ]
+        }
       ]
     }
   ]

@@ -44,8 +44,16 @@ db.exec(`
 
   CREATE TABLE skills (
     rowid      INTEGER PRIMARY KEY AUTOINCREMENT,
-    group_name TEXT NOT NULL UNIQUE,
+    profile_id TEXT NOT NULL,
+    group_name TEXT NOT NULL,
     items      TEXT NOT NULL
+  );
+
+  CREATE TABLE skill_profiles (
+    rowid INTEGER PRIMARY KEY AUTOINCREMENT,
+    id    TEXT NOT NULL UNIQUE,
+    label TEXT NOT NULL,
+    note  TEXT NOT NULL DEFAULT ''
   );
 
   CREATE TABLE experience (
@@ -98,10 +106,14 @@ projects.forEach((p, i) =>
   ),
 )
 
-// skills
-const { skillGroups } = read('skills.json')
-const insSkill = db.prepare('INSERT INTO skills (group_name, items) VALUES (?, ?)')
-for (const g of skillGroups) insSkill.run(g.title, JSON.stringify(g.items))
+// skills（多岗位模板：岗位 → 分组 → 词条，均按数组顺序入库）
+const { skillProfiles } = read('skills.json')
+const insProf = db.prepare('INSERT INTO skill_profiles (id, label, note) VALUES (?, ?, ?)')
+const insSkill = db.prepare('INSERT INTO skills (profile_id, group_name, items) VALUES (?, ?, ?)')
+for (const p of skillProfiles) {
+  insProf.run(p.id, p.label, p.note ?? '')
+  for (const g of p.groups) insSkill.run(p.id, g.title, JSON.stringify(g.items))
+}
 
 // experience
 const { experiences } = read('experience.json')

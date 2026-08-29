@@ -49,6 +49,15 @@ export interface SkillGroup {
   items: string[]
 }
 
+/** 岗位技能画像：一个岗位一个模板（分组 + 词条） */
+export interface SkillProfile {
+  id: string
+  label: string
+  /** 岗位说明（如过渡兼职标注） */
+  note?: string
+  groups: SkillGroup[]
+}
+
 export interface Experience {
   company: string
   role: string

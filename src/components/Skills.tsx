@@ -1,14 +1,15 @@
 import { useMemo, useState } from 'react'
 import skillsData from '../data/skills.json'
 import { SECTIONS } from '../data/navigation'
-import type { SkillGroup } from '../data/types'
+import type { SkillProfile } from '../data/types'
 import Reveal from './Reveal'
 import SectionHeading from './SectionHeading'
 
-const skillGroups = skillsData.skillGroups as SkillGroup[]
+const skillProfiles = skillsData.skillProfiles as SkillProfile[]
 
-/** 快捷过滤标签（高频方向，点击即搜索） */
+/** 快捷过滤标签（高频方向，点击即搜索；仅含硬技术栈的岗位显示） */
 const QUICK_TAGS = ['Java', 'React', '.NET', 'Python', 'AI', '大数据', '数据库', '桌面']
+const QUICK_TAG_PROFILE_IDS = new Set(['general', 'ai'])
 
 /** 模糊 like 归一化：
  *  1) fold：小写 + NFKC（全角→半角）
@@ -27,18 +28,27 @@ function hits(query: string, text: string) {
 
 export default function Skills() {
   const [query, setQuery] = useState('')
+  const [activeId, setActiveId] = useState(skillProfiles[0]?.id ?? 'general')
+
+  const active = skillProfiles.find((p) => p.id === activeId) ?? skillProfiles[0]
 
   const filtered = useMemo(() => {
-    if (fold(query) === '') return skillGroups.map((g, idx) => ({ ...g, origIndex: idx }))
-    return skillGroups
+    if (!active) return []
+    if (fold(query) === '') return active.groups.map((g, idx) => ({ ...g, origIndex: idx }))
+    return active.groups
       .map((g, idx) => {
         const items = g.items.filter((item) => hits(query, item) || hits(query, g.title))
         return { ...g, items, origIndex: idx }
       })
       .filter((g) => g.items.length > 0)
-  }, [query])
+  }, [query, active])
 
   const totalHits = useMemo(() => filtered.reduce((n, g) => n + g.items.length, 0), [filtered])
+  const totalItems = useMemo(
+    () => (active ? active.groups.reduce((n, g) => n + g.items.length, 0) : 0),
+    [active],
+  )
+  const showQuickTags = QUICK_TAG_PROFILE_IDS.has(active?.id ?? '')
 
   return (
     <section id="skills" className="relative scroll-mt-16 py-10 sm:py-24">
@@ -46,7 +56,7 @@ export default function Skills() {
         <SectionHeading
           eyebrow={SECTIONS.find((s) => s.id === 'skills')?.label ?? '专业技能'}
           title="全栈工程与交付能力"
-          description="按工程领域分组展示，均为真实工作与项目中实际使用过的技术。输入关键词可快速过滤。"
+          description="按岗位方向切换技能画像；输入关键词可快速过滤，也可直接搜索技术栈。"
         />
 
         {/* 搜索框：模糊 like（大小写不敏感、c#/c++ 保留语义、去空格归一） */}
@@ -90,36 +100,77 @@ export default function Skills() {
               </button>
             )}
           </label>
-          {/* 高频快捷标签：点击即过滤 */}
-          <div className="mt-3 flex flex-wrap items-center gap-1.5">
-            {QUICK_TAGS.map((tag) => {
-              const active = fold(query) === fold(tag)
+
+          {/* 岗位模板切换：胶囊分段控件（与项目筛选同风格），移动端横向滑动 */}
+          <div
+            role="tablist"
+            aria-label="岗位技能画像"
+            className="mt-4 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          >
+            {skillProfiles.map((p) => {
+              const isActive = p.id === active?.id
               return (
                 <button
-                  key={tag}
+                  key={p.id}
                   type="button"
-                  onClick={() => setQuery(active ? '' : tag)}
-                  aria-pressed={active}
-                  className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors ${
-                    active
+                  role="tab"
+                  aria-selected={isActive}
+                  onClick={() => setActiveId(p.id)}
+                  className={`shrink-0 rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+                    isActive
                       ? 'bg-brand-700 text-white shadow-sm dark:bg-brand-600'
                       : 'border border-slate-300 bg-white text-slate-600 hover:border-brand-400 hover:text-brand-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-brand-500 dark:hover:text-cyan-400'
                   }`}
                 >
-                  {tag}
+                  {p.label}
                 </button>
               )
             })}
           </div>
+
+          {/* 岗位说明（如过渡兼职标注） */}
+          {active?.note && (
+            <p className="mt-2.5 text-xs leading-relaxed text-slate-400 dark:text-slate-500">{active.note}</p>
+          )}
+
+          {/* 高频快捷标签：点击即过滤（仅含硬技术栈的岗位显示） */}
+          {showQuickTags && (
+            <div className="mt-3 flex flex-wrap items-center gap-1.5">
+              {QUICK_TAGS.map((tag) => {
+                const tagActive = fold(query) === fold(tag)
+                return (
+                  <button
+                    key={tag}
+                    type="button"
+                    onClick={() => setQuery(tagActive ? '' : tag)}
+                    aria-pressed={tagActive}
+                    className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors ${
+                      tagActive
+                        ? 'bg-brand-700 text-white shadow-sm dark:bg-brand-600'
+                        : 'border border-slate-300 bg-white text-slate-600 hover:border-brand-400 hover:text-brand-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-brand-500 dark:hover:text-cyan-400'
+                    }`}
+                  >
+                    {tag}
+                  </button>
+                )
+              })}
+            </div>
+          )}
+
           {/* 结果计数（无障碍播报） */}
           <p aria-live="polite" className="mt-3 hidden text-xs text-slate-400 dark:text-slate-500">
-            {query !== '' ? `匹配到 ${totalHits} 项技术 · ${filtered.length} 个分组` : `共 ${skillGroups.reduce((n, g) => n + g.items.length, 0)} 项技术 · ${skillGroups.length} 个分组`}
+            {query !== ''
+              ? `匹配到 ${totalHits} 项 · ${filtered.length} 个分组`
+              : `共 ${totalItems} 项 · ${active?.groups.length ?? 0} 个分组`}
           </p>
         </Reveal>
 
-        {/* 分组卡片：桌面双列 grid（01|02、03|04 同行，Z 序阅读；同行等高对齐），移动端单列 */}
+        {/* 分组卡片：桌面双列 grid（01|02 同行，Z 序阅读；同行等高对齐），移动端单列 */}
         {filtered.length > 0 ? (
-          <div className="mt-8 space-y-5 sm:mt-10 lg:grid lg:grid-cols-2 lg:items-stretch lg:gap-5 lg:space-y-0">
+          <div
+            key={active?.id ?? 'empty'}
+            className="mt-8 space-y-5 sm:mt-10 lg:grid lg:grid-cols-2 lg:items-stretch lg:gap-5 lg:space-y-0"
+          >
             {filtered.map((group, i) => (
               <Reveal key={group.title} delay={(i % 2) * 80} className="reveal-group lg:h-full">
                 <div className="h-full rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-colors hover:border-brand-300 sm:p-7 dark:border-slate-800 dark:bg-slate-800 dark:hover:border-brand-500/60">
@@ -128,7 +179,9 @@ export default function Skills() {
                       {String(group.origIndex + 1).padStart(2, '0')}
                     </span>
                     <h3 className="text-lg font-bold text-ink dark:text-ink-light">{group.title}</h3>
-                    <span className="ml-auto shrink-0 text-xs text-slate-400 dark:text-slate-500">{group.items.length} 项</span>
+                    <span className="ml-auto shrink-0 text-xs text-slate-400 dark:text-slate-500">
+                      {group.items.length} 项
+                    </span>
                   </div>
                   {/* chips 逐个交错浮现（见 index.css .reveal-group .chip） */}
                   <div className="mt-4 flex flex-wrap gap-2">
