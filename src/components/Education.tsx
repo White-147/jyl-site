@@ -105,7 +105,8 @@ export default function Education() {
               ))}
             </div>
           </Reveal>
-        </div>      </div>
+        </div>
+      </div>
 
       {/* 证书/奖项灯箱 */}
       {viewing && (

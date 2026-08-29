@@ -3,7 +3,7 @@ import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { SECTIONS } from '../data/navigation'
 import profile from '../data/profile.json'
-import type { AboutPara, Stat } from '../data/types'
+import type { AboutLink, AboutPara, Stat } from '../data/types'
 import Reveal from './Reveal'
 import SectionHeading from './SectionHeading'
 
@@ -57,31 +57,10 @@ function StatValue({ stat }: { stat: Stat }) {
   )
 }
 
-/** 三条能力链路的数字编排（stats 顺序：0 仓库 / 1 AI 项目 / 2 信息核对 / 3 音频质检 / 4 学生问题 / 5 合作方） */
-const LINKS: { title: string; tag: string; desc: string; statIdx: [number, number] }[] = [
-  {
-    title: '数据工程链路',
-    tag: '数据',
-    desc: '从数据采集、清洗到质检与计算，把标注/质检规则拆成可执行的检查项。',
-    statIdx: [3, 2],
-  },
-  {
-    title: '业务交付链路',
-    tag: '交付',
-    desc: '问题复现、修复验证、操作培训与交付文档，形成可落地的交付闭环。',
-    statIdx: [4, 5],
-  },
-  {
-    title: 'AI 工具链',
-    tag: 'AI 应用',
-    desc: 'Windows 原生 AI 创作工具链：前端工作台、Control API、数据边界与桌面端交付。',
-    statIdx: [1, 0],
-  },
-]
-
 export default function About() {
   const stats = profile.stats as Stat[]
   const about = profile.about as AboutPara[]
+  const links = profile.aboutLinks as AboutLink[]
   const anchor = profile.anchor ?? '数据科学与大数据技术本科'
   const scope = useRef<HTMLElement>(null)
 
@@ -187,7 +166,7 @@ export default function About() {
             <div className="h-px w-full origin-left bg-gradient-to-r from-brand-200 via-brand-400 to-cyan-400/60 dark:from-brand-500/20 dark:via-brand-500/50 dark:to-cyan-400/50" data-about="pipe" />
           </div>
           <div className="grid gap-4 sm:grid-cols-3 sm:gap-5">
-            {LINKS.map((link, i) => (
+            {links.map((link, i) => (
               <Reveal key={link.title} delay={i * 110}>
                 <div className="group glass-card h-full rounded-2xl p-5 transition-all hover:-translate-y-0.5 hover:border-brand-300 hover:shadow-md sm:p-6 dark:hover:border-brand-500/50">
                   <div className="flex items-baseline justify-between gap-3">
