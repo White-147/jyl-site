@@ -120,8 +120,8 @@ export default function Hero() {
             </span>
           </p>
 
-          {/* 代码风彩蛋：等宽字体，克制点缀（与 AI 工程师身份呼应） */}
-          <div data-hero="fade" className="mt-6">
+          {/* 代码风彩蛋：等宽字体，克制点缀（与 AI 工程师身份呼应；移动端隐藏——面向非技术读者保持通解） */}
+          <div data-hero="fade" className="mt-6 hidden sm:block">
             <code className="block max-w-full overflow-x-auto font-mono text-xs leading-relaxed text-slate-500 sm:text-[13px] dark:text-slate-400">
               <span className="select-none text-slate-400 dark:text-slate-500">const</span> me ={' '}
               {'{'} <span className="text-slate-400 dark:text-slate-500">stack</span>: ['
@@ -146,8 +146,8 @@ export default function Hero() {
             ))}
           </ul>
 
-          {/* 主行动：简历下载 + 查看项目（招聘者 5 秒路径；移动端整行易点按） */}
-          <div data-hero="fade" className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+          {/* 主行动：简历下载 + 查看项目（招聘者 5 秒路径；移动端并排两列一屏可见） */}
+          <div data-hero="fade" className="mt-8 grid grid-cols-2 gap-3 sm:flex sm:items-center">
             <a
               href={profile.resumeUrl}
               download
