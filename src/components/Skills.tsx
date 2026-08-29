@@ -7,9 +7,9 @@ import SectionHeading from './SectionHeading'
 
 const skillProfiles = skillsData.skillProfiles as SkillProfile[]
 
-/** 快捷过滤标签（高频方向，点击即搜索；仅含硬技术栈的岗位显示） */
+/** 快捷过滤标签（高频方向，点击即搜索；仅硬技术栈分支「AI 全栈开发」显示） */
 const QUICK_TAGS = ['Java', 'React', '.NET', 'Python', 'AI', '大数据', '数据库', '桌面']
-const QUICK_TAG_PROFILE_IDS = new Set(['general', 'ai'])
+const QUICK_TAG_PROFILE_IDS = new Set(['ai'])
 
 /** 模糊 like 归一化：
  *  1) fold：小写 + NFKC（全角→半角）
