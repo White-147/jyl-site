@@ -55,7 +55,7 @@ export default function Skills() {
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <SectionHeading
           eyebrow={SECTIONS.find((s) => s.id === 'skills')?.label ?? '专业技能'}
-          title="全栈工程与交付能力"
+          title="岗位技能画像"
           description="按岗位方向切换技能画像；输入关键词可快速过滤，也可直接搜索技术栈。"
         />
 
