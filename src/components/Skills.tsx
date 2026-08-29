@@ -1,3 +1,4 @@
+import { useMemo, useState } from 'react'
 import skillsData from '../data/skills.json'
 import { SECTIONS } from '../data/navigation'
 import type { SkillGroup } from '../data/types'
@@ -6,42 +7,157 @@ import SectionHeading from './SectionHeading'
 
 const skillGroups = skillsData.skillGroups as SkillGroup[]
 
+/** 快捷过滤标签（高频方向，点击即搜索） */
+const QUICK_TAGS = ['Java', 'React', '.NET', 'Python', 'AI', '大数据', '数据库', '桌面']
+
+/** 模糊 like 归一化：
+ *  1) fold：小写 + NFKC（全角→半角）
+ *  2) compact：fold 后再去空格/连字符/点（"springboot" 命中 "Spring Boot"）
+ *  符号（# +）保留语义：c# 命中 C#，c++ 命中 C++，输 c 两端皆命中 */
+const fold = (s: string) => s.toLowerCase().normalize('NFKC').trim()
+const compact = (s: string) => fold(s).replace(/[\s\-_./\\]+/g, '')
+
+function hits(query: string, text: string) {
+  const q = fold(query)
+  if (q === '') return true
+  if (fold(text).includes(q)) return true
+  const cq = compact(query)
+  return cq !== '' && compact(text).includes(cq)
+}
+
 export default function Skills() {
+  const [query, setQuery] = useState('')
+
+  const filtered = useMemo(() => {
+    if (fold(query) === '') return skillGroups.map((g, idx) => ({ ...g, origIndex: idx }))
+    return skillGroups
+      .map((g, idx) => {
+        const items = g.items.filter((item) => hits(query, item) || hits(query, g.title))
+        return { ...g, items, origIndex: idx }
+      })
+      .filter((g) => g.items.length > 0)
+  }, [query])
+
+  const totalHits = useMemo(() => filtered.reduce((n, g) => n + g.items.length, 0), [filtered])
+
   return (
     <section id="skills" className="relative scroll-mt-16 py-10 sm:py-24">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <SectionHeading
           eyebrow={SECTIONS.find((s) => s.id === 'skills')?.label ?? '专业技能'}
           title="全栈工程与交付能力"
-          description="按工程领域分组展示，均为真实工作与项目中实际使用过的技术。"
+          description="按工程领域分组展示，均为真实工作与项目中实际使用过的技术。输入关键词可快速过滤。"
         />
 
-        <div className="mt-12 space-y-5">
-          {skillGroups.map((group, i) => (
-            <Reveal key={group.title} delay={(i % 2) * 80} className="reveal-group">
-              <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-colors hover:border-blue-300 sm:p-7 dark:border-slate-800 dark:bg-slate-800 dark:hover:border-blue-500/60">
-                <div className="flex items-center gap-3">
-                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-sm font-bold text-blue-700 dark:bg-blue-500/10 dark:text-blue-400">
-                    {String(i + 1).padStart(2, '0')}
-                  </span>
-                  <h3 className="text-lg font-bold text-slate-900 dark:text-white">{group.title}</h3>
-                </div>
-                {/* chips 逐个交错浮现（见 index.css .reveal-group .chip） */}
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {group.items.map((item, j) => (
-                    <span
-                      key={item}
-                      style={{ transitionDelay: `${j * 30}ms` }}
-                      className="chip rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm text-slate-600 dark:border-slate-700 dark:bg-gradient-to-b dark:from-slate-900 dark:via-slate-900 dark:via-70% dark:to-slate-950/70 dark:text-slate-300"
-                    >
-                      {item}
+        {/* 搜索框：模糊 like（大小写不敏感、c#/c++ 保留语义、去空格归一） */}
+        <Reveal className="mt-8">
+          <label className="relative block max-w-xl">
+            <span className="sr-only">搜索技术栈</span>
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="pointer-events-none absolute left-3.5 top-1/2 h-4.5 w-4.5 -translate-y-1/2 text-slate-400"
+              aria-hidden="true"
+            >
+              <circle cx="11" cy="11" r="7" />
+              <path d="m21 21-4.35-4.35" />
+            </svg>
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Escape') setQuery('')
+              }}
+              placeholder="搜索技术栈，如 Java / React / c++ / sql"
+              aria-label="搜索技术栈"
+              className="w-full rounded-xl border border-slate-300 bg-white py-2.5 pl-10 pr-10 text-base text-slate-700 shadow-sm outline-none transition-colors placeholder:text-slate-400 focus:border-brand-400 focus:ring-2 focus:ring-brand-400/30 sm:text-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:placeholder:text-slate-500 dark:focus:border-brand-500"
+            />
+            {query !== '' && (
+              <button
+                type="button"
+                onClick={() => setQuery('')}
+                aria-label="清空搜索"
+                className="absolute right-2 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-300"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="h-4 w-4" aria-hidden="true">
+                  <path d="M18 6 6 18M6 6l12 12" />
+                </svg>
+              </button>
+            )}
+          </label>
+          {/* 高频快捷标签：点击即过滤 */}
+          <div className="mt-3 flex flex-wrap items-center gap-1.5">
+            {QUICK_TAGS.map((tag) => {
+              const active = fold(query) === fold(tag)
+              return (
+                <button
+                  key={tag}
+                  type="button"
+                  onClick={() => setQuery(active ? '' : tag)}
+                  aria-pressed={active}
+                  className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors ${
+                    active
+                      ? 'bg-brand-700 text-white shadow-sm dark:bg-brand-600'
+                      : 'border border-slate-300 bg-white text-slate-600 hover:border-brand-400 hover:text-brand-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-brand-500 dark:hover:text-cyan-400'
+                  }`}
+                >
+                  {tag}
+                </button>
+              )
+            })}
+          </div>
+          {/* 结果计数（无障碍播报） */}
+          <p aria-live="polite" className="mt-3 hidden text-xs text-slate-400 dark:text-slate-500">
+            {query !== '' ? `匹配到 ${totalHits} 项技术 · ${filtered.length} 个分组` : `共 ${skillGroups.reduce((n, g) => n + g.items.length, 0)} 项技术 · ${skillGroups.length} 个分组`}
+          </p>
+        </Reveal>
+
+        {/* 分组卡片：桌面双列 grid（01|02、03|04 同行，Z 序阅读；同行等高对齐），移动端单列 */}
+        {filtered.length > 0 ? (
+          <div className="mt-8 space-y-5 sm:mt-10 lg:grid lg:grid-cols-2 lg:items-stretch lg:gap-5 lg:space-y-0">
+            {filtered.map((group, i) => (
+              <Reveal key={group.title} delay={(i % 2) * 80} className="reveal-group lg:h-full">
+                <div className="h-full rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-colors hover:border-brand-300 sm:p-7 dark:border-slate-800 dark:bg-slate-800 dark:hover:border-brand-500/60">
+                  <div className="flex items-center gap-3">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-sm font-bold text-brand-700 dark:bg-brand-500/10 dark:text-cyan-400">
+                      {String(group.origIndex + 1).padStart(2, '0')}
                     </span>
-                  ))}
+                    <h3 className="text-lg font-bold text-ink dark:text-ink-light">{group.title}</h3>
+                    <span className="ml-auto shrink-0 text-xs text-slate-400 dark:text-slate-500">{group.items.length} 项</span>
+                  </div>
+                  {/* chips 逐个交错浮现（见 index.css .reveal-group .chip） */}
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {group.items.map((item, j) => (
+                      <span
+                        key={item}
+                        style={{ transitionDelay: `${j * 30}ms` }}
+                        className="chip rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm text-slate-600 dark:border-slate-700 dark:bg-gradient-to-b dark:from-slate-900 dark:via-slate-900 dark:via-70% dark:to-slate-950/70 dark:text-slate-300"
+                      >
+                        {item}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            </Reveal>
-          ))}
-        </div>
+              </Reveal>
+            ))}
+          </div>
+        ) : (
+          <div className="mt-10 rounded-2xl border border-dashed border-slate-300 bg-white/60 p-10 text-center dark:border-slate-700 dark:bg-slate-900/60">
+            <p className="text-sm text-slate-500 dark:text-slate-400">未找到匹配的技术栈，换个关键词试试。</p>
+            <button
+              type="button"
+              onClick={() => setQuery('')}
+              className="mt-3 text-sm font-semibold text-brand-700 transition-colors hover:text-brand-800 dark:text-cyan-400 dark:hover:text-cyan-300"
+            >
+              清空搜索
+            </button>
+          </div>
+        )}
       </div>
     </section>
   )

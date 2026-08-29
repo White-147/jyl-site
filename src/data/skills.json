@@ -10,6 +10,7 @@
         "MyBatis-Plus",
         "RESTful API",
         "JWT",
+        "C++",
         "C# / .NET 8/10",
         "ASP.NET Core",
         "EF Core",
@@ -67,35 +68,39 @@
       ]
     },
     {
-      "title": "本地模型与工具链",
+      "title": "Python 与 AI 工程",
       "items": [
         "Python",
         "FastAPI",
         "Python Sidecar",
         "Agent / Skills",
         "agentscope",
-        "本地模型下载与启动",
-        "MCP",
-        "本地多模态链路（SAM2 / VACE / Wan2.1）",
-        "llama.cpp / llama-server",
-        "GGUF 量化（Q4_K_M）",
-        "CUDA 混合推理（GPU 卸载 + CPU 线程）",
-        "FlashAttention / 长上下文调优",
-        "本地 LLM Server（OpenAI 兼容 API）",
-        "推理性能实测"
+        "MCP"
       ]
     },
     {
-      "title": "电脑与网络维护",
+      "title": "本地媒体与多模态",
       "items": [
-        "办公网络搭建",
-        "路由器 / 交换机设置",
-        "Windows / Linux 系统维护",
-        "杀毒软件部署",
-        "电脑硬件故障排查",
-        "打印机 / 扫描仪维护",
-        "账号与共享管理",
-        "数据备份"
+        "FFmpeg",
+        "OCR（Tesseract）",
+        "PDF（Poppler）",
+        "NLP（HanLP / LTP）",
+        "配音字幕",
+        "音频数据处理",
+        "本地多模态链路（SAM2 / VACE / Wan2.1）"
+      ]
+    },
+    {
+      "title": "本地大模型部署",
+      "items": [
+        "llama.cpp / llama-server",
+        "Ollama",
+        "GGUF 量化（Q4_K_M / IQ2_M）",
+        "CUDA 混合推理",
+        "FlashAttention / 长上下文",
+        "LLM Server（OpenAI 兼容 API）",
+        "本地模型下载与启动",
+        "推理性能实测"
       ]
     },
     {
@@ -103,23 +108,12 @@
       "items": [
         "Electron",
         "electron-builder",
-        "NSIS",
+        "NSIS / Inno Setup",
         "Windows Worker / Service",
         "PowerShell",
         "嵌入式 Python",
         "C# 启动器",
         "本地端口与进程管理"
-      ]
-    },
-    {
-      "title": "媒体与文档处理",
-      "items": [
-        "FFmpeg",
-        "OCR（Tesseract）",
-        "PDF（Poppler）",
-        "NLP（HanLP / LTP）",
-        "配音字幕",
-        "音频数据处理"
       ]
     },
     {
@@ -134,8 +128,29 @@
         "Selenium",
         "Vite 构建",
         "Linux / Ubuntu",
-        "Docker 基础",
-        "Qoder"
+        "Docker 基础"
+      ]
+    },
+    {
+      "title": "AI 编程协作",
+      "items": [
+        "Cursor Agent / Composer",
+        "Codex",
+        "Qoder",
+        "DeepSeek Harness（DSH）"
+      ]
+    },
+    {
+      "title": "电脑与网络维护",
+      "items": [
+        "办公网络搭建",
+        "路由器 / 交换机设置",
+        "Windows / Linux 系统维护",
+        "杀毒软件部署",
+        "电脑硬件故障排查",
+        "打印机 / 扫描仪维护",
+        "账号与共享管理",
+        "数据备份"
       ]
     },
     {

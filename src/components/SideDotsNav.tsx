@@ -76,7 +76,7 @@ export default function SideDotsNav() {
     >
       {/* 玻璃管：顶部图标与底部主题之间贯穿（光纤质感） */}
       <div
-        className="fixed bottom-14 right-[21px] top-14 w-2 overflow-hidden rounded-full border border-white/60 bg-white/40 shadow-[inset_0_0_6px_rgba(59,130,246,0.4),0_0_10px_rgba(59,130,246,0.15)] backdrop-blur-sm dark:border-white/20 dark:bg-white/10"
+        className="fixed bottom-14 right-[21px] top-14 w-2 overflow-hidden rounded-full border border-white/60 bg-white/40 shadow-[inset_0_0_6px_rgba(13,148,136,0.4),0_0_10px_rgba(13,148,136,0.15)] backdrop-blur-sm dark:border-white/20 dark:bg-white/10"
         aria-hidden="true"
       >
         {/* 阅读进度液柱：从顶部向下延伸。
@@ -87,7 +87,7 @@ export default function SideDotsNav() {
         >
           {/* 渐变主体：浅色静态蓝条（收敛）；深色加深为粒子底 */}
           <div
-            className="absolute inset-0 bg-gradient-to-b from-blue-600 to-sky-400 opacity-90 dark:from-blue-700 dark:to-cyan-500/80 dark:opacity-40"
+            className="absolute inset-0 bg-gradient-to-b from-brand-600 to-cyan-400 opacity-90 dark:from-brand-700 dark:to-cyan-500/80 dark:opacity-40"
             aria-hidden="true"
           />
           {/* 深色模式：液柱内流动粒子（上浮 + 呼吸闪烁） */}
@@ -119,7 +119,7 @@ export default function SideDotsNav() {
           title="返回顶部"
           className="group flex items-center justify-end gap-2.5 pr-[4px] transition-transform duration-200 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)] hover:scale-110"
         >
-          <span className="w-14 text-right text-xs text-slate-400 transition-colors group-hover:text-blue-700 dark:text-slate-500 dark:group-hover:text-blue-400">
+          <span className="w-14 text-right text-xs text-slate-400 transition-colors group-hover:text-brand-700 dark:text-slate-500 dark:group-hover:text-cyan-400">
             返回顶部
           </span>
           <svg
@@ -129,7 +129,7 @@ export default function SideDotsNav() {
             strokeWidth="2.5"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="h-4 w-4 text-slate-500 transition-colors group-hover:text-blue-700 dark:text-slate-400 dark:group-hover:text-blue-400"
+            className="h-4 w-4 text-slate-500 transition-colors group-hover:text-brand-700 dark:text-slate-400 dark:group-hover:text-cyan-400"
             aria-hidden="true"
           >
             <path d="M12 19V5M5 12l7-7 7 7" />
@@ -154,8 +154,8 @@ export default function SideDotsNav() {
                 <span
                   className={`w-14 text-right text-xs transition-colors ${
                     isActive
-                      ? 'font-bold text-blue-700 dark:text-blue-400'
-                      : 'text-slate-500 group-hover:text-slate-900 dark:text-slate-400 dark:group-hover:text-slate-100'
+                      ? 'font-bold text-brand-700 dark:text-cyan-400'
+                      : 'text-slate-500 group-hover:text-ink dark:text-slate-400 dark:group-hover:text-slate-100'
                   }`}
                 >
                   {sec.label}
@@ -163,8 +163,8 @@ export default function SideDotsNav() {
                 <span
                   className={`h-2.5 w-2.5 shrink-0 rounded-full transition-all duration-200 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)] ${
                     isActive
-                      ? 'scale-125 bg-blue-700 shadow-[0_0_10px_rgba(59,130,246,0.6)] ring-4 ring-blue-200/70 dark:bg-blue-400 dark:ring-blue-500/20'
-                      : 'bg-white shadow-[inset_0_0_3px_rgba(59,130,246,0.5)] ring-2 ring-slate-300 group-hover:scale-125 group-hover:bg-blue-600 group-hover:ring-blue-300 dark:bg-slate-300 dark:ring-slate-500 dark:group-hover:bg-blue-400'
+                      ? 'scale-125 bg-brand-700 shadow-[0_0_10px_rgba(13,148,136,0.6)] ring-4 ring-brand-200/70 dark:bg-cyan-400 dark:ring-brand-500/20'
+                      : 'bg-white shadow-[inset_0_0_3px_rgba(13,148,136,0.5)] ring-2 ring-slate-300 group-hover:scale-125 group-hover:bg-brand-600 group-hover:ring-brand-300 dark:bg-slate-300 dark:ring-slate-500 dark:group-hover:bg-brand-400'
                   }`}
                   aria-hidden="true"
                 />

@@ -23,7 +23,7 @@ export default function MobileTabBar() {
               aria-current={isActive ? 'page' : undefined}
               className={`flex min-h-14 flex-1 flex-col items-center justify-center gap-0.5 text-[11px] font-medium transition-colors ${
                 isActive
-                  ? 'text-blue-700 dark:text-blue-400'
+                  ? 'text-brand-700 dark:text-cyan-400'
                   : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
               }`}
             >

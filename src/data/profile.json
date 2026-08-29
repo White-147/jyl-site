@@ -9,12 +9,23 @@
   "resumeUrl": "resume.pdf",
   "heroLines": [
     "从大数据与业务系统交付起步，逐步转向 AI 创作工具平台开发。",
-    "能独立把前端、后端、数据与桌面端交付串起来，形成可验证的项目。"
+    "能把前端、后端 Control API、数据边界与 Windows 桌面端交付串成可验证的项目。"
   ],
+  "heroLineMobile": "前端 · 后端 Control API · 数据边界 · 桌面端交付",
+  "anchor": "数据科学与大数据技术本科",
   "about": [
-    "数据科学与大数据技术本科，早期完成 Java/MySQL/Hadoop/Spark/Kafka 数据全链路项目，也参与 ERP 实施、AI 数据质检与高校实训。",
-    "近期聚焦 Windows 原生 AI 创作工具链（MiLuStudio / XiaoLouAI 等），能独立串通前端、后端、数据与桌面端交付。",
-    "日常使用 Cursor 与 Codex 辅助代码检索、架构梳理、重构设计与阶段验证，结合 Claude Opus / Sonnet、GPT-5.5 等模型辅助开发；也曾使用 Qoder（通义系，支持 Qwen / GLM / DeepSeek / Kimi / MiniMax 模型）辅助开发与验证。"
+    {
+      "phase": "早期",
+      "text": "完成 Java/MySQL/Hadoop/Spark/Kafka 数据全链路项目，也参与 ERP 实施、AI 数据质检与高校实训。"
+    },
+    {
+      "phase": "近期",
+      "text": "聚焦 Windows 原生 AI 创作工具链（MiLuStudio / XiaoLouAI 等），能独立串通前端、后端、数据与桌面端交付。"
+    },
+    {
+      "phase": "日常",
+      "text": "使用 Cursor 与 Codex 辅助代码检索、架构梳理、重构设计与阶段验证，结合 Claude Opus / Sonnet、GPT-5.5 等模型辅助开发；也曾使用 Qoder 辅助开发与验证。"
+    }
   ],
   "stats": [
     {
@@ -48,11 +59,9 @@
   "heroTags": [
     "Java",
     "Spring Boot",
+    "Python",
     "React",
     "TypeScript",
-    "Python",
-    ".NET",
-    "SQLite",
-    "llama.cpp"
+    ".NET"
   ]
 }

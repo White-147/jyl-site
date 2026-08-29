@@ -6,61 +6,6 @@
   ],
   "projects": [
     {
-      "id": "local-llmserver",
-      "name": "LocalLLMServer",
-      "tags": [
-        "AI 应用"
-      ],
-      "period": "2026/08",
-      "summary": "Windows 本地大模型推理服务：基于 llama.cpp 部署 DeepSeek-Coder-V2-Lite-Instruct（Q4_K_M 量化，10.3GB），对外提供 OpenAI 兼容 API，数据完全本地处理。",
-      "details": [
-        "llama.cpp llama-server 部署 GGUF 量化模型，RTX 3060 Laptop 6GB 显存限制下 GPU 部分卸载（-ngl 5）+ CPU 混合推理，实测生成速度约 14 tok/s",
-        "16K 上下文 + FlashAttention 调优，实测运行内存约 13.8GB；模型加载后 5 秒内即可响应",
-        "OpenAI 兼容 /v1/models 与 /v1/chat/completions 接口，可直接接入各类 OpenAI 客户端与框架",
-        "参数化启动脚本 + 连通性自检脚本，README 含选型对比（llama.cpp / Ollama / vLLM）、参数说明与常见问题"
-      ],
-      "stack": [
-        "llama.cpp",
-        "GGUF",
-        "CUDA",
-        "DeepSeek-Coder-V2-Lite",
-        "OpenAI-compatible API",
-        "Windows",
-        "Batch"
-      ],
-      "link": "https://github.com/White-147/LocalLLMServer",
-      "screenshot": "projects/local-llmserver.webp"
-    },
-    {
-      "id": "sylab-ai",
-      "name": "SyLabAI",
-      "tags": [
-        "AI 应用"
-      ],
-      "period": "2026/06",
-      "summary": "独立开发的实验 AI 助手 Demo：基于 C#/ASP.NET Core/.NET 10 构建 Control API，实现文档管理、切片检索、知识库问答（带引用溯源）与任务卡生成，支持内网 Windows Server 部署。",
-      "details": [
-        "React + TypeScript 前端工作台，覆盖工作台总览、资料中心、来源检索、实验记录、工艺路径、任务交付与运行边界七类界面",
-        "C#/.NET 10 分层架构（Application/Domain/Infrastructure），DeepSeek API 经 OpenAI-compatible adapter 接入，默认演示模式离线运行",
-        "XML 处理文档导入解析，SQL Server 关键词检索优先并保留来源、页码、章节等追溯信息",
-        "知识库问答返回引用与证据、路径建议保留依据/假设/风险点与人工复核状态，RESTful WebService 接口实现数据同步"
-      ],
-      "stack": [
-        "C#",
-        "ASP.NET Core",
-        ".NET 10",
-        "React",
-        "TypeScript",
-        "Vite",
-        "SQL Server",
-        "DeepSeek API",
-        "XML",
-        "WebService"
-      ],
-      "link": "https://github.com/White-147/SyLabAI",
-      "screenshot": "projects/sylab-ai.webp"
-    },
-    {
       "id": "milu-studio",
       "name": "MiLuStudio",
       "tags": [
@@ -160,16 +105,16 @@
         "AI 应用"
       ],
       "period": "2026/05",
-      "summary": "基于 MiLuAssistantWeb 的 Windows 桌面安装版：Electron + NSIS 将 Python 后端与 Web 控制台封装为可双击安装的桌面应用。",
+      "summary": "基于 MiLuAssistantWeb 的 Windows 桌面安装版：Electron + 安装器将 Python 后端与 Web 控制台封装为可双击安装的桌面应用。",
       "details": [
-        "Electron 35 + electron-builder + NSIS 中英双语安装器，C# 启动器/卸载器",
+        "Electron 35 + electron-builder + Inno Setup 6 中英双语安装器，C# 启动器/卸载器",
         "启动时自动初始化 milu 工作区、寻找空闲端口拉起本地 Python 后端、加载本地 Web UI",
         "系统托盘常驻、退出回收，用户数据隔离在 %LOCALAPPDATA%"
       ],
       "stack": [
         "Electron",
         "electron-builder",
-        "NSIS",
+        "NSIS / Inno Setup",
         "Node.js",
         "C# launcher",
         "嵌入式 Python",
@@ -179,6 +124,35 @@
       "screenshot": "projects/milu-assistant-desktop.webp",
       "downloadUrl": "https://github.com/White-147/MiLuAssistantDesktop/releases/tag/v1.0.1",
       "downloadNote": "Windows 安装包（Inno Setup，约 213MB）"
+    },
+    {
+      "id": "sylab-ai",
+      "name": "SyLabAI",
+      "tags": [
+        "AI 应用"
+      ],
+      "period": "2026/06",
+      "summary": "独立开发的实验 AI 助手 Demo：基于 C#/ASP.NET Core/.NET 10 构建 Control API，实现文档管理、切片检索、知识库问答（带引用溯源）与任务卡生成，支持内网 Windows Server 部署。",
+      "details": [
+        "React + TypeScript 前端工作台，覆盖工作台总览、资料中心、来源检索、实验记录、工艺路径、任务交付与运行边界七类界面",
+        "C#/.NET 10 分层架构（Application/Domain/Infrastructure），DeepSeek API 经 OpenAI-compatible adapter 接入，默认演示模式离线运行",
+        "XML 处理文档导入解析，SQL Server 关键词检索优先并保留来源、页码、章节等追溯信息",
+        "知识库问答返回引用与证据、路径建议保留依据/假设/风险点与人工复核状态，RESTful WebService 接口实现数据同步"
+      ],
+      "stack": [
+        "C#",
+        "ASP.NET Core",
+        ".NET 10",
+        "React",
+        "TypeScript",
+        "Vite",
+        "SQL Server",
+        "DeepSeek API",
+        "XML",
+        "WebService"
+      ],
+      "link": "https://github.com/White-147/SyLabAI",
+      "screenshot": "projects/sylab-ai.webp"
     },
     {
       "id": "book-recommendation",

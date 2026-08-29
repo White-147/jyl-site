@@ -24,7 +24,7 @@ function ProofCard({
       onClick={() => onOpen(item)}
       aria-label={`放大查看 ${item.name} 证明`}
       title="点击查看证明图片"
-      className="glass-card group flex w-full cursor-zoom-in flex-col gap-2.5 rounded-2xl p-4 text-left transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md dark:hover:border-blue-500/60"
+      className="glass-card group flex w-full cursor-zoom-in flex-col gap-2.5 rounded-2xl p-4 text-left transition-all hover:-translate-y-0.5 hover:border-brand-300 hover:shadow-md dark:hover:border-brand-500/60"
     >
       {/* 名称优先：整行全宽，避免长名称换行挤字 */}
       <span className="block text-sm font-semibold leading-snug text-slate-800 dark:text-slate-100">
@@ -40,7 +40,7 @@ function ProofCard({
         />
         <span className="flex flex-wrap items-center gap-x-1.5 text-xs text-slate-400 dark:text-slate-500">
           {type && (
-            <span className={type === '证书' ? 'font-medium text-blue-600 dark:text-blue-400' : 'font-medium text-amber-600 dark:text-amber-400'}>
+            <span className={type === '证书' ? 'font-medium text-brand-600 dark:text-cyan-400' : 'font-medium text-amber-600 dark:text-amber-400'}>
               {type}
             </span>
           )}
@@ -54,7 +54,7 @@ function ProofCard({
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className="ml-auto h-5 w-5 shrink-0 text-slate-400 transition-colors group-hover:text-blue-600 dark:text-slate-500 dark:group-hover:text-blue-400"
+          className="ml-auto h-5 w-5 shrink-0 text-slate-400 transition-colors group-hover:text-brand-600 dark:text-slate-500 dark:group-hover:text-cyan-400"
           aria-hidden="true"
         >
           <circle cx="11" cy="11" r="7" />
@@ -78,15 +78,15 @@ export default function Education() {
           {/* 学校竖卡 */}
           <Reveal className="lg:col-span-1">
             <div className="glass-card-strong flex h-full flex-col justify-center gap-5 rounded-2xl p-6 sm:p-8">
-              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400">
+              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-700 dark:bg-brand-500/10 dark:text-cyan-400">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6" aria-hidden="true">
                   <path d="M22 10 12 5 2 10l10 5 10-5z" />
                   <path d="M6 12v5c0 1.66 2.69 3 6 3s6-1.34 6-3v-5" />
                 </svg>
               </span>
               <div>
-                <h3 className="text-lg font-bold text-slate-900 dark:text-white">{education.school}</h3>
-                <p className="text-sm font-medium text-blue-700 dark:text-blue-400">{education.degree}</p>
+                <h3 className="text-lg font-bold text-ink dark:text-ink-light">{education.school}</h3>
+                <p className="text-sm font-medium text-brand-700 dark:text-cyan-400">{education.degree}</p>
                 <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
                   {education.period} · {education.location}
                 </p>
