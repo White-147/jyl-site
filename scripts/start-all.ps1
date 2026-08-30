@@ -12,7 +12,8 @@ $projects = @(
   @{ Name = 'ShopRecommendation'; Dir = "$Root\ShopRecommendation"; Cmd = '.\mvnw.cmd spring-boot:run'; Port = 9800; Log = "$LogDir\shop.log"; Url = 'http://localhost:9800/'; Note = 'H2 内嵌库免安装，演示账号 demo/123456' },
   @{ Name = 'MiLuStudio';          Dir = "$Root\MiLuStudio\apps\web"; Cmd = 'npm run dev:local'; Port = 5368; Log = "$LogDir\milustudio.log"; Url = 'http://localhost:5173/'; Note = 'Web 工作台 + .NET Control API + Python Skills（首次启动较慢）' },
   @{ Name = 'XiaoLouAI';           Dir = "$Root\XiaoLouAI\XIAOLOU-main"; Cmd = 'npm run dev'; Port = 3000; Log = "$LogDir\xiaolou.log"; Url = 'http://localhost:3000/'; Note = '创作平台前端（完整功能需另行启动 .NET 后端）' },
-  @{ Name = 'BookRecommendation';  Dir = "$Root\BookRecommendation\frontend"; Cmd = 'npm run serve'; Port = 8080; Log = "$LogDir\book.log"; Url = 'http://localhost:8080/'; Note = '前端登录页（推荐链路需 MySQL+Kafka+Hadoop，见仓库 README）' }
+  @{ Name = 'BookRecommendation-Backend'; Dir = "$Root\BookRecommendation\backend"; Cmd = '$env:SPRING_KAFKA_BOOTSTRAP_SERVERS="localhost:9092"; .\mvnw.cmd -q spring-boot:run'; Port = 8081; Log = "$LogDir\book-backend.log"; Url = 'http://localhost:8081/book_recommendation'; Note = '依赖本机 MySQL 服务（localhost:3306 root/root，建议先启动）与 JDK 8；Kafka 不可达时懒初始化仍可启动（预置推荐模式）' },
+  @{ Name = 'BookRecommendation';  Dir = "$Root\BookRecommendation\frontend"; Cmd = 'npm run serve'; Port = 8080; Log = "$LogDir\book.log"; Url = 'http://localhost:8080/'; Note = '前端登录页（大数据实时链路见仓库 scripts\start-book.ps1：MySQL+Kafka+Hive+Spark）' }
 )
 
 Write-Host ''
@@ -56,5 +57,6 @@ foreach ($p in $projects) {
 Write-Host ''
 Write-Host '演示提示：' -ForegroundColor Cyan
 Write-Host '  · ShopRecommendation：打开 http://localhost:9800/ ，登录 demo / 123456'
+Write-Host '  · BookRecommendation：打开 http://localhost:8080/ ，登录 2020001 / 123456（后端 http://localhost:8081/book_recommendation，需本机 MySQL 服务；大数据实时链路见 BookRecommendation 仓库 scripts\start-book.ps1）'
 Write-Host '  · 各项目日志位于 logs\ 目录；全部停止可关闭对应最小化窗口'
 Write-Host '==============================================' -ForegroundColor Cyan
