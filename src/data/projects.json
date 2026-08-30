@@ -34,7 +34,9 @@
         "FFmpeg"
       ],
       "link": "https://github.com/White-147/MiLuStudio",
-      "screenshot": "projects/milu-studio.webp"
+      "screenshot": "projects/milu-studio.webp",
+      "previewUrl": "preview/milu-studio/",
+      "previewNote": "静态界面预览：未部署后端，显示登录/本地服务未连接页"
     },
     {
       "id": "xiao-lou-ai",
@@ -66,7 +68,9 @@
         "对象存储"
       ],
       "link": "https://github.com/White-147/XiaoLouAI",
-      "screenshot": "projects/xiao-lou-ai.webp"
+      "screenshot": "projects/xiao-lou-ai.webp",
+      "previewUrl": "preview/xiao-lou-ai/",
+      "previewNote": "静态界面预览：界面可浏览，后端接口未部署"
     },
     {
       "id": "milu-assistant-web",
@@ -96,7 +100,9 @@
         "多渠道接入"
       ],
       "link": "https://github.com/White-147/MiLuAssistantWeb",
-      "screenshot": "projects/milu-assistant-web.webp"
+      "screenshot": "projects/milu-assistant-web.webp",
+      "previewUrl": "preview/milu-assistant-web/",
+      "previewNote": "静态界面预览：登录页可浏览，登录/模型接口未部署"
     },
     {
       "id": "milu-assistant-desktop",
@@ -152,7 +158,9 @@
         "WebService"
       ],
       "link": "https://github.com/White-147/SyLabAI",
-      "screenshot": "projects/sylab-ai.webp"
+      "screenshot": "projects/sylab-ai.webp",
+      "previewUrl": "preview/sylab-ai/",
+      "previewNote": "静态界面预览：界面可浏览，后端接口未部署（默认演示模式离线）"
     },
     {
       "id": "book-recommendation",
