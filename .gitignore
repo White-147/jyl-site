@@ -13,3 +13,6 @@ dist
 .idea
 .DS_Store
 *.suo
+
+# 字体全量源文件（subset-fonts.mjs 子集化输入，从 GitHub release 手动获取）
+scripts/fonts-src/

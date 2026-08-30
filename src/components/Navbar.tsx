@@ -16,7 +16,7 @@ export default function Navbar() {
             height={463}
             className="h-6 w-auto object-contain"
           />
-          <span className="hidden sm:inline">{profile.name}</span>
+          <span className="font-display hidden text-lg font-normal sm:inline">{profile.name}</span>
         </a>
 
         {/* 仅主题切换（区块导航由底部 Tab Bar 承担） */}
