@@ -263,6 +263,9 @@ export default function Projects() {
                   {profile.githubLabel}
                 </a>
               </span>
+              <span className="mt-1 block text-xs text-slate-400 dark:text-slate-500">
+                在线预览提供前端界面 · 完整代码见 GitHub
+              </span>
             </>
           }
         />
