@@ -16,6 +16,8 @@
       content="蒋宇龙 — AI 应用平台型全栈工程师。数据科学与大数据技术本科，兼具数据工程、业务系统交付与 Windows 原生桌面端工程化经验，熟悉本地大模型部署（Ollama / llama.cpp）与 AI 编程协作工具链。"
     />
     <title>蒋宇龙 · AI 应用平台型全栈工程师</title>
+    <!-- 头像预加载：React 挂载前即开始下载，挂载后瞬间可见（消除头像在关键路径末端的问题） -->
+    <link rel="preload" as="image" href="images/avatar-blue.webp" />
     <script>
       // 主题初始化：默认自动（跟随系统深浅色），避免首屏闪烁
       ;(function () {
@@ -30,7 +32,162 @@
     </script>
   </head>
   <body>
-    <div id="root"></div>
+    <!-- 首屏静态骨架：React 挂载前直接可见（消除 JS 加载期白屏）；
+         挂载后 createRoot 替换 #root 内容，<style> 常驻 body 兜底样式过渡 -->
+    <style id="hero-shell-style">
+      .hero-shell {
+        max-width: 72rem;
+        margin: 0 auto;
+        padding: 2.5rem 1rem 3rem;
+        min-height: 62vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        font-family: "PingFang SC", "Microsoft YaHei", system-ui, -apple-system, sans-serif;
+        color: #475569;
+        background-color: #fbfdfd;
+        background-image:
+          radial-gradient(ellipse 55% 42% at 50% 14%, rgba(45, 212, 191, 0.1), transparent 70%),
+          linear-gradient(to right, rgba(148, 168, 166, 0.1) 1px, transparent 1px),
+          linear-gradient(to bottom, rgba(148, 168, 166, 0.1) 1px, transparent 1px);
+        background-size: auto, 48px 48px, 48px 48px;
+      }
+      .dark .hero-shell {
+        color: #cbd5e1;
+        background-color: #07131c;
+        background-image:
+          radial-gradient(ellipse 55% 42% at 50% 14%, rgba(45, 212, 191, 0.12), transparent 70%),
+          linear-gradient(to right, rgba(148, 168, 166, 0.07) 1px, transparent 1px),
+          linear-gradient(to bottom, rgba(148, 168, 166, 0.07) 1px, transparent 1px);
+      }
+      .hero-shell .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        align-self: flex-start;
+        padding: 0.25rem 0.75rem;
+        border: 1px solid #a7f3d0;
+        border-radius: 9999px;
+        background: #ecfdf5;
+        color: #047857;
+        font-size: 0.75rem;
+        font-weight: 500;
+      }
+      .dark .hero-shell .eyebrow {
+        border-color: rgba(16, 185, 129, 0.3);
+        background: rgba(16, 185, 129, 0.1);
+        color: #34d399;
+      }
+      .hero-shell .dot {
+        width: 0.5rem;
+        height: 0.5rem;
+        border-radius: 9999px;
+        background: #10b981;
+        display: inline-block;
+      }
+      .hero-shell .m1 {
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+        margin-top: 1.5rem;
+      }
+      .hero-shell h1 {
+        font-size: 4.25rem;
+        line-height: 1.05;
+        font-weight: 900;
+        letter-spacing: -0.02em;
+        color: #0f2e36;
+        margin: 0;
+      }
+      .dark .hero-shell h1 { color: #e9f6f4; }
+      .hero-shell .avatar {
+        width: 6rem;
+        height: 6rem;
+        border-radius: 9999px;
+        object-fit: cover;
+        box-shadow: 0 4px 12px rgba(15, 46, 54, 0.12);
+        outline: 4px solid #ccfbf1;
+        outline-offset: -1px;
+      }
+      .dark .hero-shell .avatar { outline-color: rgba(20, 184, 166, 0.25); }
+      .hero-shell .s1 {
+        font-size: 2.25rem;
+        font-weight: 700;
+        color: #0f766e;
+        margin: 0.75rem 0 0;
+      }
+      .dark .hero-shell .s1 { color: #22d3ee; }
+      .hero-shell .s2,
+      .hero-shell .s3 {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #64748b;
+        margin: 0.5rem 0 0;
+      }
+      .dark .hero-shell .s2,
+      .dark .hero-shell .s3 { color: #94a3b8; }
+      .hero-shell .s4 {
+        font-size: 1rem;
+        line-height: 1.7;
+        color: #475569;
+        margin-top: 1.5rem;
+      }
+      .dark .hero-shell .s4 { color: #cbd5e1; }
+      .hero-shell .cta {
+        display: flex;
+        gap: 0.75rem;
+        margin-top: 2rem;
+      }
+      .hero-shell .btn-primary,
+      .hero-shell .btn-ghost {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.625rem 1.25rem;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-decoration: none;
+      }
+      .hero-shell .btn-primary { background: #0f766e; color: #fff; }
+      .hero-shell .btn-ghost {
+        border: 1px solid #5eead4;
+        background: #fff;
+        color: #0f766e;
+      }
+      .dark .hero-shell .btn-ghost {
+        background: #0f172a;
+        color: #5eead4;
+        border-color: rgba(45, 212, 191, 0.4);
+      }
+      @media (max-width: 640px) {
+        .hero-shell { padding: 1.5rem 1rem 2rem; }
+        .hero-shell h1 { font-size: 2.65rem; }
+        .hero-shell .s1 { font-size: 1.5rem; }
+        .hero-shell .avatar { width: 4rem; height: 4rem; }
+        .hero-shell .m1 { gap: 1rem; }
+        .hero-shell .cta { flex-direction: column; }
+        .hero-shell .btn-primary,
+        .hero-shell .btn-ghost { width: 100%; }
+      }
+    </style>
+    <div id="root">
+      <section class="hero-shell" aria-hidden="true">
+        <span class="eyebrow"><span class="dot"></span>求职中 · 到岗时间可沟通</span>
+        <div class="m1">
+          <h1>蒋宇龙</h1>
+          <img class="avatar" src="images/avatar-blue.webp" alt="" width="64" height="64" />
+        </div>
+        <p class="s1">AI 应用平台型全栈工程师</p>
+        <p class="s2">数据科学与大数据技术本科</p>
+        <p class="s3">数据工程 · 业务系统交付 · Windows 原生桌面端工程化</p>
+        <p class="s4">从页面到桌面的全链路交付</p>
+        <div class="cta">
+          <a class="btn-primary" href="resume.pdf" download>下载简历</a>
+          <a class="btn-ghost" href="#projects">查看项目</a>
+        </div>
+      </section>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

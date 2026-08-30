@@ -7,7 +7,8 @@ export default function Hero() {
   const [showAvatar, setShowAvatar] = useState(false)
   const scope = useRef<HTMLElement>(null)
 
-  // 首屏入场序列：克制式 fade-up + 轻交错（reduced-motion 时跳过，内容直接可见）
+  // 首屏入场序列：内容立即可见（首屏由 index.html 静态骨架兜底），仅保留轻微上移入场；
+  // 不透明度不做动画，避免与骨架切换时出现"消失再出现"（reduced-motion 时跳过）
   useLayoutEffect(() => {
     const el = scope.current
     if (!el) return
@@ -15,10 +16,9 @@ export default function Hero() {
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
       gsap.from('[data-hero="fade"]', {
         y: 18,
-        opacity: 0,
-        duration: 0.7,
+        duration: 0.45,
         ease: 'power2.out',
-        stagger: 0.09,
+        stagger: 0.06,
         delay: 0.05,
       })
     }, el)
