@@ -31,13 +31,21 @@
   font-display: swap;
   src: url("./fonts/noto-sans-sc-900.woff2") format("woff2");
 }
-/* 展示字体：得意黑（Smiley Sans，OFL 开源，斜切墨体）——名字/品牌/区块大标题 */
+/* 展示字体：得意黑（Smiley Sans，OFL 开源，斜切墨体）——区块大标题/品牌/定位短语 */
 @font-face {
   font-family: "Smiley Sans";
   font-style: normal;
   font-weight: 400;
   font-display: swap;
   src: url("./fonts/smiley-sans-oblique.woff2") format("woff2");
+}
+/* 名字专属：龙藏手书（Long Cang，SIL OFL 开源，流动行书）——仅 Hero 名字使用 */
+@font-face {
+  font-family: "Long Cang";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("./fonts/long-cang-regular.woff2") format("woff2");
 }
 /* 数字显示衬线：Fraunces（latin 子集）——统计/强调数字 */
 @font-face {
@@ -67,12 +75,14 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  /* 字体层：正文 Noto Sans SC（自托管子集）→ 展示层得意黑（名字/区块大标题）
-     → 数字层 Fraunces（统计/强调数字）→ 等宽点缀 Victor Mono（代码彩蛋/行号），拉丁回退 Inter */
+  /* 字体层：正文 Noto Sans SC（自托管子集）→ 展示层得意黑（区块大标题/品牌）
+     → 名字层龙藏手书（Hero 名字专属）→ 数字层 Fraunces → 等宽点缀 Victor Mono，拉丁回退 Inter */
   --font-sans: "Noto Sans SC", "Inter", "PingFang SC", "Hiragino Sans GB",
     "Microsoft YaHei", system-ui, -apple-system, sans-serif;
   --font-display: "Smiley Sans", "Noto Sans SC", "PingFang SC", "Microsoft YaHei",
     system-ui, sans-serif;
+  --font-handwrite: "Long Cang", "Smiley Sans", "Noto Sans SC", "PingFang SC",
+    "Microsoft YaHei", system-ui, sans-serif;
   --font-numeric: "Fraunces", "Georgia", "Times New Roman", serif;
   --font-mono: "Victor Mono", "SFMono-Regular", Consolas, "Liberation Mono",
     monospace;

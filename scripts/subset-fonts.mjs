@@ -1,6 +1,7 @@
 // 字体子集化管线：从站点源码提取用到的全部字符
 //  1. Noto Sans SC（正文，4 字重）→ 站点专用 woff2
-//  2. Smiley Sans 得意黑（标题展示，斜切墨体）→ 站点专用 woff2（源 5.7MB，裁剪后几十 KB）
+//  2a. Smiley Sans 得意黑（区块标题展示字母）→ 站点字符集子集 woff2（源 5.7MB）
+//  2b. Long Cang 龙藏手书（名字单独展示）→ 名字专用字符集子集 woff2（源 5MB）
 //  3. Fraunces（数字显示衬线）→ 复制 latin 子集
 //  4. Victor Mono（等宽点缀：代码彩蛋 / 行号，含 italic 变体）→ 复制 latin 子集
 // 用法：node scripts/subset-fonts.mjs
@@ -63,12 +64,20 @@ for (const [weight, file] of NOTO) {
   console.log(`✔ Noto Sans SC ${weight}: ${Math.round(buf.length / 1024)} KB`)
 }
 
-// 2. 得意黑 Smiley Sans（标题展示字体，斜切墨体）：全量 ttf → 站点字符集子集 woff2
+// 2a. 得意黑 Smiley Sans（区块标题展示，斜切墨体）：全量 ttf → 站点字符集子集 woff2
 const SMILEY_SRC = join(root, 'scripts', 'fonts-src', 'smiley-sans', 'SmileySans-Oblique.ttf')
 const smiley = await subsetFont(readFileSync(SMILEY_SRC), text, { targetFormat: 'woff2' })
 const smileyOut = join(root, 'src', 'fonts', 'smiley-sans-oblique.woff2')
 writeFileSync(smileyOut, smiley)
 console.log(`✔ Smiley Sans（得意黑）: ${Math.round(smiley.length / 1024)} KB`)
+
+// 2b. 龙藏手书 Long Cang（名字单独展示，流动行书）：名字用字 + 拉丁数字保底
+const LONG_CANG_CHARS = '蒋宇龙' + '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ ·，。'
+const LONG_CANG_SRC = join(root, 'scripts', 'fonts-src', 'longcang', 'LongCang-Regular.ttf')
+const longCang = await subsetFont(readFileSync(LONG_CANG_SRC), LONG_CANG_CHARS, { targetFormat: 'woff2' })
+const longCangOut = join(root, 'src', 'fonts', 'long-cang-regular.woff2')
+writeFileSync(longCangOut, longCang)
+console.log(`✔ Long Cang（龙藏手书）: ${Math.round(longCang.length / 1024)} KB（${LONG_CANG_CHARS.length} 字符）`)
 
 // 3. Fraunces（数字显示衬线）：latin 子集源直接复制（源已按 latin 裁剪）
 const FRAUNCES = ['fraunces-latin-500-normal.woff2']
