@@ -27,7 +27,7 @@ interface ProjectAction {
 }
 
 const actionLinkClass =
-  'inline-flex items-center gap-1 text-xs font-medium text-brand-700 transition-colors hover:text-brand-900 hover:underline underline-offset-4 decoration-brand-300 dark:text-cyan-400 dark:hover:text-cyan-300 dark:decoration-brand-500/50'
+  'inline-flex items-center gap-1 text-sm font-medium text-brand-700 transition-colors hover:text-brand-900 hover:underline underline-offset-4 decoration-brand-300 dark:text-cyan-400 dark:hover:text-cyan-300 dark:decoration-brand-500/50'
 
 function buildProjectActions(project: Project): ProjectAction[] {
   const actions: ProjectAction[] = []
@@ -47,13 +47,12 @@ function buildProjectActions(project: Project): ProjectAction[] {
   if (project.previewUrl) {
     actions.push({
       key: 'preview',
-      label: '在线预览',
+      label: '在线体验',
       title: project.previewNote,
       href: project.previewUrl,
       icon: (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5" aria-hidden="true">
-          <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
-          <circle cx="12" cy="12" r="3" />
+          <path d="M8 5v14l11-7z" />
         </svg>
       ),
     })
