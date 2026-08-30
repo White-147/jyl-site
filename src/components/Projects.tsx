@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, type ReactNode } from 'react'
 import { SECTIONS } from '../data/navigation'
 import projectsData from '../data/projects.json'
 import profile from '../data/profile.json'
@@ -16,54 +16,62 @@ const tagColor: Record<ProjectTag, string> = {
   大数据: 'bg-violet-50 text-violet-700 dark:bg-violet-500/10 dark:text-violet-300',
 }
 
-/** 项目补充动作行（在线体验 / 下载安装版；GitHub 入口已在标题行右侧图标，不再单独占行） */
-function ProjectActions({ project }: { project: Project }) {
-  return (
-    <div className="flex flex-wrap items-center gap-2">
-      {project.demoUrl && (
-        <a
-          href={project.demoUrl}
-          target="_blank"
-          rel="noreferrer"
-          title={project.demoNote}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-700 px-2.5 py-1 text-xs font-semibold text-white transition-colors hover:bg-emerald-800 dark:bg-emerald-600 dark:hover:bg-emerald-500"
-        >
-          在线体验
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5" aria-hidden="true">
-            <path d="M7 17 17 7M7 7h10v10" />
-          </svg>
-        </a>
-      )}
-      {project.previewUrl && (
-        <a
-          href={project.previewUrl}
-          target="_blank"
-          rel="noreferrer"
-          title={project.previewNote}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-sky-700 px-2.5 py-1 text-xs font-semibold text-white transition-colors hover:bg-sky-800 dark:bg-sky-600 dark:hover:bg-sky-500"
-        >
-          在线预览
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5" aria-hidden="true">
-            <path d="M7 17 17 7M7 7h10v10" />
-          </svg>
-        </a>
-      )}
-      {project.downloadUrl && (
-        <a
-          href={project.downloadUrl}
-          target="_blank"
-          rel="noreferrer"
-          title={project.downloadNote}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-amber-700 px-2.5 py-1 text-xs font-semibold text-white transition-colors hover:bg-amber-800 dark:bg-amber-600 dark:hover:bg-amber-500"
-        >
-          下载安装版
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5" aria-hidden="true">
-            <path d="M12 3v12m0 0 4-4m-4 4-4-4M4 21h16" />
-          </svg>
-        </a>
-      )}
-    </div>
-  )
+/** 项目动作元数据（数据驱动）：三类动作的样式统一从品牌色板派生，
+ *  功能靠图标 + 文案区分（不再各用一套色板）；GitHub 入口仍在标题行图标。 */
+interface ProjectAction {
+  key: 'demo' | 'preview' | 'download'
+  label: string
+  title?: string
+  href: string
+  icon: ReactNode
+}
+
+const actionLinkClass =
+  'inline-flex items-center gap-1 text-xs font-medium text-brand-700 transition-colors hover:text-brand-900 hover:underline underline-offset-4 decoration-brand-300 dark:text-cyan-400 dark:hover:text-cyan-300 dark:decoration-brand-500/50'
+
+function buildProjectActions(project: Project): ProjectAction[] {
+  const actions: ProjectAction[] = []
+  if (project.demoUrl) {
+    actions.push({
+      key: 'demo',
+      label: '在线体验',
+      title: project.demoNote,
+      href: project.demoUrl,
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5" aria-hidden="true">
+          <path d="M8 5v14l11-7z" />
+        </svg>
+      ),
+    })
+  }
+  if (project.previewUrl) {
+    actions.push({
+      key: 'preview',
+      label: '在线预览',
+      title: project.previewNote,
+      href: project.previewUrl,
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5" aria-hidden="true">
+          <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
+          <circle cx="12" cy="12" r="3" />
+        </svg>
+      ),
+    })
+  }
+  if (project.downloadUrl) {
+    actions.push({
+      key: 'download',
+      label: '安装版',
+      title: project.downloadNote,
+      href: project.downloadUrl,
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5" aria-hidden="true">
+          <path d="M12 3v12m0 0 4-4m-4 4-4-4M4 21h16" />
+        </svg>
+      ),
+    })
+  }
+  return actions
 }
 
 /** 项目索引行：行号 + 图（左右交错）+ 概要 + 要点折叠 + 技术栈展开 + 链接。
@@ -73,6 +81,7 @@ function ProjectRow({ project, index }: { project: Project; index: number }) {
   const [lightbox, setLightbox] = useState(false)
   const [stackOpen, setStackOpen] = useState(false)
   const shownStack = stackOpen ? project.stack : project.stack.slice(0, 5)
+  const projectActions = buildProjectActions(project)
 
   return (
     <Reveal>
@@ -154,23 +163,45 @@ function ProjectRow({ project, index }: { project: Project; index: number }) {
 
               <p className="mt-2.5 text-sm leading-relaxed text-slate-600 dark:text-slate-300">{project.summary}</p>
 
-              {project.details.length > 0 && (
-                <details className="group mt-2.5">
-                  <summary className="inline-flex cursor-pointer items-center gap-1 py-1 text-sm font-semibold text-brand-700 transition-colors hover:text-brand-800 dark:text-cyan-400 dark:hover:text-cyan-300">
-                    查看要点（{project.details.length} 条）
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="chevron-up-down h-3.5 w-3.5 transition-transform" aria-hidden="true">
-                      <path d="m6 9 6 6 6-6" />
-                    </svg>
-                  </summary>
-                  <ul className="mt-2 space-y-1.5">
-                    {project.details.map((detail) => (
-                      <li key={detail.slice(0, 16)} className="flex gap-2 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
-                        <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-brand-500 dark:bg-cyan-400" aria-hidden="true" />
-                        {detail}
-                      </li>
-                    ))}
-                  </ul>
-                </details>
+              {/* meta 行：查看要点（可折叠）与项目动作链接同层排列，动作不再独占一行 */}
+              {(project.details.length > 0 || projectActions.length > 0) && (
+                <div className="mt-2.5 flex flex-wrap items-center gap-x-5 gap-y-1.5">
+                  {project.details.length > 0 && (
+                    <details className="group">
+                      <summary className="inline-flex cursor-pointer items-center gap-1 py-1 text-sm font-semibold text-brand-700 transition-colors hover:text-brand-800 dark:text-cyan-400 dark:hover:text-cyan-300">
+                        查看要点（{project.details.length} 条）
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="chevron-up-down h-3.5 w-3.5 transition-transform" aria-hidden="true">
+                          <path d="m6 9 6 6 6-6" />
+                        </svg>
+                      </summary>
+                      <ul className="mt-2 space-y-1.5">
+                        {project.details.map((detail) => (
+                          <li key={detail.slice(0, 16)} className="flex gap-2 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
+                            <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-brand-500 dark:bg-cyan-400" aria-hidden="true" />
+                            {detail}
+                          </li>
+                        ))}
+                      </ul>
+                    </details>
+                  )}
+                  {projectActions.length > 0 && (
+                    <div className="flex flex-wrap items-center gap-x-3.5 gap-y-1.5">
+                      {projectActions.map((action) => (
+                        <a
+                          key={action.key}
+                          href={action.href}
+                          target="_blank"
+                          rel="noreferrer"
+                          title={action.title}
+                          className={actionLinkClass}
+                        >
+                          {action.icon}
+                          {action.label}
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                </div>
               )}
 
               {/* 技术栈：默认 5 项，可展开全部 / 收起（超 5 项才显示按钮） */}
@@ -197,12 +228,6 @@ function ProjectRow({ project, index }: { project: Project; index: number }) {
                   </button>
                 )}
               </div>
-
-              {(project.demoUrl || project.previewUrl || project.downloadUrl) && (
-                <div className="mt-3">
-                  <ProjectActions project={project} />
-                </div>
-              )}
             </div>
           </div>
         </div>
