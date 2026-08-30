@@ -92,7 +92,7 @@ export default function About() {
           {/* 简介卡：学历锚点 + 阶段化叙事（早期 / 近期 / 日常） */}
           <Reveal>
             <div className="glass-card-strong h-full rounded-2xl p-6 sm:p-7">
-              <p className="text-lg font-bold tracking-tight text-brand-700 dark:text-cyan-400">{anchor}</p>
+              <p className="font-display text-lg font-normal tracking-tight text-brand-700 dark:text-cyan-400">{anchor}</p>
               <div className="mt-4 space-y-4">
                 {about.map((para) => (
                   <div key={para.phase}>

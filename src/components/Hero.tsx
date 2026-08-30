@@ -100,7 +100,7 @@ export default function Hero() {
 
           <p
             data-hero="fade"
-            className="mt-3 text-2xl font-bold tracking-tight text-brand-700 text-balance sm:mt-4 sm:text-4xl dark:text-cyan-400"
+            className="font-display mt-3 text-2xl font-normal leading-[1.12] tracking-tight text-brand-700 text-balance sm:mt-4 sm:text-4xl dark:text-cyan-400"
           >
             {profile.title}
           </p>
