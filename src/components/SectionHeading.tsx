@@ -13,7 +13,7 @@ export default function SectionHeading({ eyebrow, title, description }: SectionH
       <p className="text-sm font-semibold uppercase tracking-widest text-brand-700 dark:text-cyan-400">
         {eyebrow}
       </p>
-      <h2 className="mt-2 text-3xl font-bold tracking-tight text-ink text-balance dark:text-ink-light">
+      <h2 className="font-display mt-2 text-3xl font-normal leading-[1.15] tracking-tight text-ink text-balance dark:text-ink-light">
         {title}
       </h2>
       {description && (

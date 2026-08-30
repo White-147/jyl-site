@@ -48,7 +48,7 @@ function StatValue({ stat }: { stat: Stat }) {
   }, [stat.value])
 
   return (
-    <div ref={ref} className="text-3xl font-black tracking-tight text-brand-700 sm:text-4xl dark:text-cyan-400">
+    <div ref={ref} className="font-numeric text-3xl font-medium tracking-tight text-brand-700 sm:text-4xl dark:text-cyan-400">
       {display}
       {stat.suffix && (
         <span className="ml-0.5 text-xs font-semibold text-slate-500 sm:text-sm dark:text-slate-400">{stat.suffix}</span>
@@ -126,7 +126,7 @@ export default function About() {
                     'radial-gradient(60% 60% at 85% 15%, rgb(20 184 166 / 0.18), transparent 70%), radial-gradient(50% 50% at 10% 90%, rgb(8 145 178 / 0.14), transparent 70%)',
                 }}
               />
-              <p className="relative text-xl font-black tracking-tight text-brand-700 sm:text-2xl dark:text-cyan-400">
+              <p className="font-display relative text-xl font-normal tracking-tight text-brand-700 sm:text-2xl dark:text-cyan-400">
                 AI 应用 · 企业系统 · 数据工程
               </p>
               <ul className="relative mt-5 space-y-4">

@@ -1,7 +1,8 @@
 @import "tailwindcss";
 
 /* 站点专用字体子集（node scripts/subset-fonts.mjs 生成，仅含站点用字）
-   Noto Sans SC 可变字重分别子集；JetBrains Mono 为 latin 子集 */
+   Noto Sans SC（正文）可变字重分别子集；Smiley Sans 得意黑（标题展示）为站点字符集裁剪；
+   Fraunces / Victor Mono 取 latin 子集 */
 @font-face {
   font-family: "Noto Sans SC";
   font-style: normal;
@@ -30,30 +31,50 @@
   font-display: swap;
   src: url("./fonts/noto-sans-sc-900.woff2") format("woff2");
 }
+/* 展示字体：得意黑（Smiley Sans，OFL 开源，斜切墨体）——名字/品牌/区块大标题 */
 @font-face {
-  font-family: "JetBrains Mono";
+  font-family: "Smiley Sans";
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url("./fonts/jetbrains-mono-400.woff2") format("woff2");
+  src: url("./fonts/smiley-sans-oblique.woff2") format("woff2");
+}
+/* 数字显示衬线：Fraunces（latin 子集）——统计/强调数字 */
+@font-face {
+  font-family: "Fraunces";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("./fonts/fraunces-latin-500.woff2") format("woff2");
+}
+/* 等宽点缀：Victor Mono（normal + italic 花体变体）——代码彩蛋 / 行号 / mono 元素 */
+@font-face {
+  font-family: "Victor Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("./fonts/victor-mono-latin-400-normal.woff2") format("woff2");
 }
 @font-face {
-  font-family: "JetBrains Mono";
-  font-style: normal;
-  font-weight: 600;
+  font-family: "Victor Mono";
+  font-style: italic;
+  font-weight: 400;
   font-display: swap;
-  src: url("./fonts/jetbrains-mono-600.woff2") format("woff2");
+  src: url("./fonts/victor-mono-latin-400-italic.woff2") format("woff2");
 }
 
 /* 深色模式：class 策略（html.dark 下启用 dark: 变体） */
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  /* 字体：正文/标题优先 Noto Sans SC（自托管子集，三端字形统一），
-     等宽点缀 JetBrains Mono（Hero 代码彩蛋 / 数字），拉丁回退 Inter */
+  /* 字体层：正文 Noto Sans SC（自托管子集）→ 展示层得意黑（名字/区块大标题）
+     → 数字层 Fraunces（统计/强调数字）→ 等宽点缀 Victor Mono（代码彩蛋/行号），拉丁回退 Inter */
   --font-sans: "Noto Sans SC", "Inter", "PingFang SC", "Hiragino Sans GB",
     "Microsoft YaHei", system-ui, -apple-system, sans-serif;
-  --font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, "Liberation Mono",
+  --font-display: "Smiley Sans", "Noto Sans SC", "PingFang SC", "Microsoft YaHei",
+    system-ui, sans-serif;
+  --font-numeric: "Fraunces", "Georgia", "Times New Roman", serif;
+  --font-mono: "Victor Mono", "SFMono-Regular", Consolas, "Liberation Mono",
     monospace;
 
   /* 青玉色板（2026-08 改版）：主色青玉 teal，高亮碧青 cyan，

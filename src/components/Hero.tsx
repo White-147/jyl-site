@@ -78,7 +78,7 @@ export default function Hero() {
 
           {/* 名字 + 头像签名章：编辑式排版（大头像弱化，作为签名元素融入排版） */}
           <div data-hero="fade" className="mt-6 flex items-center gap-5 sm:mt-8 sm:gap-8">
-            <h1 className="text-6xl font-black tracking-tight text-ink text-balance sm:text-7xl dark:text-ink-light">
+            <h1 className="font-display text-6xl font-normal leading-[1.08] tracking-tight text-ink text-balance sm:text-7xl dark:text-ink-light">
               {profile.name}
             </h1>
             <button
@@ -134,10 +134,10 @@ export default function Hero() {
             </span>
           </p>
 
-          {/* 代码风彩蛋：等宽字体、单一灰调（淡化存在感，仅内行会意）；
+          {/* 代码风彩蛋：等宽斜体（Victor Mono italic，低调花体点缀）、单一灰调（淡化存在感，仅内行会意）；
               键 = 全链路能力域，值与方向全英文；按多行字面量书写，无横向滚动；移动端隐藏 */}
           <div data-hero="fade" className="mt-6 hidden sm:block">
-            <code className="block max-w-full overflow-x-auto whitespace-pre font-mono text-xs leading-relaxed text-slate-400 dark:text-slate-500">
+            <code className="block max-w-full overflow-x-auto whitespace-pre font-mono italic text-xs leading-relaxed text-slate-400 dark:text-slate-500">
               {`const me = {
   data: ['Spark', 'Hive', 'Kafka'],
   api: ['Java', '.NET', 'Python'],

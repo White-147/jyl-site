@@ -1,5 +1,8 @@
-// 字体子集化管线：从站点源码提取用到的全部字符，将 Noto Sans SC（4 字重）
-// 裁剪为站点专用 woff2；JetBrains Mono 直接取 latin 子集。
+// 字体子集化管线：从站点源码提取用到的全部字符
+//  1. Noto Sans SC（正文，4 字重）→ 站点专用 woff2
+//  2. Smiley Sans 得意黑（标题展示，斜切墨体）→ 站点专用 woff2（源 5.7MB，裁剪后几十 KB）
+//  3. Fraunces（数字显示衬线）→ 复制 latin 子集
+//  4. Victor Mono（等宽点缀：代码彩蛋 / 行号，含 italic 变体）→ 复制 latin 子集
 // 用法：node scripts/subset-fonts.mjs
 // 内容更新（新增文字）后重新运行本脚本即可。
 import { readFileSync, writeFileSync, mkdirSync, readdirSync, statSync, copyFileSync } from 'node:fs'
@@ -60,11 +63,27 @@ for (const [weight, file] of NOTO) {
   console.log(`✔ Noto Sans SC ${weight}: ${Math.round(buf.length / 1024)} KB`)
 }
 
-// 3. JetBrains Mono：直接复制 latin 子集（源已按 latin 裁剪）
-for (const weight of [400, 600]) {
-  const src = join(root, 'node_modules', '@fontsource', 'jetbrains-mono', 'files', `jetbrains-mono-latin-${weight}-normal.woff2`)
-  const out = join(root, 'src', 'fonts', `jetbrains-mono-${weight}.woff2`)
+// 2. 得意黑 Smiley Sans（标题展示字体，斜切墨体）：全量 ttf → 站点字符集子集 woff2
+const SMILEY_SRC = join(root, 'scripts', 'fonts-src', 'smiley-sans', 'SmileySans-Oblique.ttf')
+const smiley = await subsetFont(readFileSync(SMILEY_SRC), text, { targetFormat: 'woff2' })
+const smileyOut = join(root, 'src', 'fonts', 'smiley-sans-oblique.woff2')
+writeFileSync(smileyOut, smiley)
+console.log(`✔ Smiley Sans（得意黑）: ${Math.round(smiley.length / 1024)} KB`)
+
+// 3. Fraunces（数字显示衬线）：latin 子集源直接复制（源已按 latin 裁剪）
+const FRAUNCES = ['fraunces-latin-500-normal.woff2']
+for (const file of FRAUNCES) {
+  const src = join(root, 'node_modules', '@fontsource', 'fraunces', 'files', file)
+  const out = join(root, 'src', 'fonts', file.replace('-normal', '').replace(/\.woff2$/, '.woff2'))
   copyFileSync(src, out)
-  console.log(`✔ JetBrains Mono ${weight}: ${Math.round(statSync(out).size / 1024)} KB`)
+  console.log(`✔ Fraunces ${file}: ${Math.round(statSync(out).size / 1024)} KB`)
+}
+
+// 4. Victor Mono（等宽点缀：代码彩蛋 / 行号 / mono 元素；含 italic 花体变体）
+for (const file of ['victor-mono-latin-400-normal.woff2', 'victor-mono-latin-400-italic.woff2']) {
+  const src = join(root, 'node_modules', '@fontsource', 'victor-mono', 'files', file)
+  const out = join(root, 'src', 'fonts', file.replace('victor-mono-latin-', 'victor-mono-latin-'))
+  copyFileSync(src, out)
+  console.log(`✔ Victor Mono ${file}: ${Math.round(statSync(out).size / 1024)} KB`)
 }
 console.log('完成：字体已输出到 src/fonts/')
