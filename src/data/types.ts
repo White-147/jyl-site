@@ -22,6 +22,10 @@ export interface Project {
   demoUrl?: string
   /** 演示提示（如测试账号），显示为按钮 title */
   demoNote?: string
+  /** 内嵌静态预览地址（jyl-site 内的前端静态产物，相对站点根路径） */
+  previewUrl?: string
+  /** 内嵌静态预览提示（如"界面预览，接口未部署"），显示为按钮 title */
+  previewNote?: string
   /** 下载地址（桌面安装包 Release 链接） */
   downloadUrl?: string
   /** 下载提示（如安装包说明），显示为按钮 title */
