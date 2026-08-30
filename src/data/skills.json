@@ -29,7 +29,9 @@
           "title": "数据管理",
           "items": [
             "SQL 查询",
-            "MySQL / SQL Server / PostgreSQL",
+            "MySQL",
+            "SQL Server",
+            "PostgreSQL",
             "数据核对与校验",
             "报表统计"
           ]
@@ -71,10 +73,13 @@
             "RESTful API",
             "JWT",
             "C++",
-            "C# / .NET 8/10",
+            "C#",
+            ".NET 8",
+            ".NET 10",
             "ASP.NET Core",
             "EF Core",
-            "Swagger / Knife4j",
+            "Swagger",
+            "Knife4j",
             "Maven"
           ]
         },
@@ -92,7 +97,8 @@
             "ECharts",
             "Axios",
             "Thymeleaf",
-            "HTML / CSS",
+            "HTML",
+            "CSS",
             "Three.js",
             "Zustand"
           ]
@@ -104,7 +110,8 @@
             "PostgreSQL",
             "SQLite",
             "SQL",
-            "Hadoop / HDFS",
+            "Hadoop",
+            "HDFS",
             "Hive",
             "Spark SQL",
             "Spark Streaming",
@@ -119,7 +126,8 @@
           "items": [
             "OpenAI-compatible API",
             "External API Profile",
-            "Vertex Gemini / Veo",
+            "Vertex Gemini",
+            "Veo",
             "Qwen-Omni",
             "云雾 AI",
             "PixVerse",
@@ -133,7 +141,8 @@
             "Python",
             "FastAPI",
             "Python Sidecar",
-            "Agent / Skills",
+            "Agent",
+            "Skills",
             "agentscope",
             "MCP"
           ]
@@ -141,7 +150,8 @@
         {
           "title": "本地大模型部署",
           "items": [
-            "llama.cpp / llama-server",
+            "llama.cpp",
+            "llama-server",
             "Ollama",
             "GGUF 量化（Q4_K_M / IQ2_M）",
             "CUDA 混合推理",
@@ -156,7 +166,8 @@
           "items": [
             "Electron",
             "electron-builder",
-            "NSIS / Inno Setup",
+            "NSIS",
+            "Inno Setup",
             "Windows Worker / Service",
             "PowerShell",
             "嵌入式 Python",
@@ -170,7 +181,8 @@
             "FFmpeg",
             "OCR（Tesseract）",
             "PDF（Poppler）",
-            "NLP（HanLP / LTP）",
+            "NLP（HanLP）",
+            "NLP（LTP）",
             "配音字幕",
             "音频数据处理",
             "本地多模态链路（SAM2 / VACE / Wan2.1）"
@@ -179,7 +191,8 @@
         {
           "title": "工程化与测试",
           "items": [
-            "Git / GitHub",
+            "Git",
+            "GitHub",
             "GitHub Actions",
             "Vitest",
             "xUnit",
@@ -187,14 +200,16 @@
             "Synthetic E2E",
             "Selenium",
             "Vite 构建",
-            "Linux / Ubuntu",
+            "Linux",
+            "Ubuntu",
             "Docker 基础"
           ]
         },
         {
           "title": "AI 编程协作",
           "items": [
-            "Cursor Agent / Composer",
+            "Cursor Agent",
+            "Cursor Composer",
             "Codex",
             "Qoder",
             "DeepSeek Harness（DSH）"
@@ -284,7 +299,8 @@
             "Java",
             "MySQL",
             "Linux",
-            "Hadoop / HDFS"
+            "Hadoop",
+            "HDFS"
           ]
         },
         {
