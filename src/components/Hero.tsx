@@ -78,7 +78,7 @@ export default function Hero() {
 
           {/* 名字 + 头像签名章：编辑式排版（大头像弱化，作为签名元素融入排版） */}
           <div data-hero="fade" className="mt-6 flex items-center gap-5 sm:mt-8 sm:gap-8">
-            <h1 className="font-display text-6xl font-normal leading-[1.08] tracking-tight text-ink text-balance sm:text-7xl dark:text-ink-light">
+            <h1 className="font-handwrite text-6xl font-normal leading-[1.08] tracking-tight text-ink text-balance sm:text-7xl dark:text-ink-light">
               {profile.name}
             </h1>
             <button
