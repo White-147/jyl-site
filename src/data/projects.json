@@ -223,7 +223,9 @@
         "Swagger"
       ],
       "link": "https://github.com/White-147/ShopRecommendation",
-      "screenshot": "projects/shop-recommendation.webp"
+      "screenshot": "projects/shop-recommendation.webp",
+      "demoUrl": "https://shoprecommendation.onrender.com/",
+      "demoNote": "演示账号 demo / 123456（免费实例首次打开约需 30s 冷启动）"
     }
   ]
 }
