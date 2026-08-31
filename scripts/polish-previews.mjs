@@ -119,12 +119,10 @@ html[data-theme="dark"] .demo-pollish-note,html.dark .demo-pollish-note,html.dar
     n.innerHTML = NOTE_HTML;
     var first = host.firstElementChild;
     if (first) host.insertBefore(n, first); else host.appendChild(n);
-    // 工作台类主内容区（自身 relative）：垂直居中布局下横条改为绝对定位贴主区顶部
+    // 工作台类主内容区：垂直居中布局下绝对定位会遮挡卡片标题，
+    // 统一采用文档流插入（横条置于内容区顶部，不遮挡内容）。
     if (/workspace-main/.test(String(host.className || ''))) {
-      n.style.position = 'absolute';
-      n.style.top = '12px';
-      n.style.left = '12px';
-      n.style.right = '12px';
+      n.style.margin = '12px 14px';
     }
   }
 
