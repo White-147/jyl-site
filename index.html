@@ -32,6 +32,11 @@
     </script>
   </head>
   <body>
+    <!-- 首屏 body 底色：内联兜底（与外部 CSS 一致），CSS 加载前不再白底、深浅随主题脚本同步 -->
+    <style id="theme-bg-inline">
+      body { background-color: #f6faf9; }
+      .dark body { background-color: #04121a; }
+    </style>
     <!-- 首屏静态骨架：React 挂载前直接可见（消除 JS 加载期白屏）；
          挂载后 createRoot 替换 #root 内容，<style> 常驻 body 兜底样式过渡 -->
     <style id="hero-shell-style">
@@ -46,19 +51,35 @@
         font-family: "PingFang SC", "Microsoft YaHei", system-ui, -apple-system, sans-serif;
         color: #475569;
         background-color: #fbfdfd;
+        position: relative;
+      }
+      .dark .hero-shell {
+        color: #cbd5e1;
+        background-color: #07131c;
+      }
+      /* 背景层（光斑+网格）：独立于背景色，CSS 应用后 0.9s 平滑淡入，
+         与外部 CSS 的全站背景无缝过渡（深色同步） */
+      .hero-shell::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        opacity: 0;
+        animation: demo-shell-fade 0.9s ease 0.12s forwards;
         background-image:
           radial-gradient(ellipse 55% 42% at 50% 14%, rgba(45, 212, 191, 0.1), transparent 70%),
           linear-gradient(to right, rgba(148, 168, 166, 0.1) 1px, transparent 1px),
           linear-gradient(to bottom, rgba(148, 168, 166, 0.1) 1px, transparent 1px);
         background-size: auto, 48px 48px, 48px 48px;
       }
-      .dark .hero-shell {
-        color: #cbd5e1;
-        background-color: #07131c;
+      .dark .hero-shell::before {
         background-image:
           radial-gradient(ellipse 55% 42% at 50% 14%, rgba(45, 212, 191, 0.12), transparent 70%),
           linear-gradient(to right, rgba(148, 168, 166, 0.07) 1px, transparent 1px),
           linear-gradient(to bottom, rgba(148, 168, 166, 0.07) 1px, transparent 1px);
+      }
+      @keyframes demo-shell-fade {
+        to { opacity: 1; }
       }
       .hero-shell .eyebrow {
         display: inline-flex;

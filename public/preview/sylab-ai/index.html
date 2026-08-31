@@ -21,7 +21,7 @@
   (document.body || document.documentElement).appendChild(badge);
 
   var NOTE = '<div style="margin:10px 0;padding:9px 14px;border:1px dashed rgba(94,234,212,.55);border-radius:10px;color:#5eead4;background:rgba(20,184,166,.07);font:500 13px/1.6 system-ui,-apple-system,sans-serif">演示模式 · 后端未部署：此处界面为在线美化展示，完整功能见 GitHub 仓库</div>';
-  var KEYWORDS = /未连接|未部署|加载失败|无法连接|请先启动后端|Control API|上下文加载失败|不能连接|连接失败|服务不可用|请求失败|There isn't a GitHub Pages|Site not found|404/i;
+  var KEYWORDS = /未连接|未部署|未加载|加载失败|无法连接|请先启动后端|Control API|上下文加载失败|不能连接|连接失败|服务不可用|请求失败|There isn't a GitHub Pages|Site not found|404/i;
 
   function apply() {
     var hits = document.querySelectorAll('[role="alert"],[role="status"],[class*="alert"],[class*="error"],[class*="warning"],[class*="banner"],[class*="notice"],[class*="message-box"]');
