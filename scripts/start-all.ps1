@@ -1,4 +1,4 @@
-﻿# start-all.ps1 — 一键启动可运行项目（面试演示用）
+# start-all.ps1 — 一键启动可运行项目（面试演示用）
 # 用法：双击 start-all.bat，或运行：
 #   powershell -ExecutionPolicy Bypass -File start-all.ps1
 # 脚本位于 D:\code\ 下（与各项目仓库平级），自动检测端口占用，已运行的会跳过。
@@ -13,7 +13,9 @@ $projects = @(
   @{ Name = 'MiLuStudio';          Dir = "$Root\MiLuStudio\apps\web"; Cmd = 'npm run dev:local'; Port = 5368; Log = "$LogDir\milustudio.log"; Url = 'http://localhost:5173/'; Note = 'Web 工作台 + .NET Control API + Python Skills（首次启动较慢）' },
   @{ Name = 'XiaoLouAI';           Dir = "$Root\XiaoLouAI\XIAOLOU-main"; Cmd = 'npm run dev'; Port = 3000; Log = "$LogDir\xiaolou.log"; Url = 'http://localhost:3000/'; Note = '创作平台前端（完整功能需另行启动 .NET 后端）' },
   @{ Name = 'BookRecommendation-Backend'; Dir = "$Root\BookRecommendation\backend"; Cmd = '$env:SPRING_KAFKA_BOOTSTRAP_SERVERS="localhost:9092"; .\mvnw.cmd -q spring-boot:run'; Port = 8081; Log = "$LogDir\book-backend.log"; Url = 'http://localhost:8081/book_recommendation'; Note = '依赖本机 MySQL 服务（localhost:3306 root/root，建议先启动）与 JDK 8；Kafka 不可达时懒初始化仍可启动（预置推荐模式）' },
-  @{ Name = 'BookRecommendation';  Dir = "$Root\BookRecommendation\frontend"; Cmd = 'npm run serve'; Port = 8080; Log = "$LogDir\book.log"; Url = 'http://localhost:8080/'; Note = '前端登录页（大数据实时链路见仓库 scripts\start-book.ps1：MySQL+Kafka+Hive+Spark）' }
+  @{ Name = 'BookRecommendation';  Dir = "$Root\BookRecommendation\frontend"; Cmd = 'npm run serve'; Port = 8080; Log = "$LogDir\book.log"; Url = 'http://localhost:8080/'; Note = '前端登录页（大数据实时链路见仓库 scripts\start-book.ps1：MySQL+Kafka+Hive+Spark）' },
+  @{ Name = 'SyLabAI';              Dir = "$Root\SyLabAI\apps\web"; Cmd = 'npm run dev -- --port 3100'; Port = 3100; Log = "$LogDir\sylabai.log"; Url = 'http://localhost:3100/'; Note = '实验 AI 助手前端（完整功能需 .NET 10 后端 + SQL Server）' },
+  @{ Name = 'MiLuAssistantWeb';    Dir = "$Root\MiLuAssistantWeb\console"; Cmd = 'npm run dev'; Port = 5173; Log = "$LogDir\miluweb.log"; Url = 'http://localhost:5173/'; Note = 'MiLu 助手控制台前端（模型配置需 Python 后端）' }
 )
 
 Write-Host ''

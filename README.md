@@ -31,6 +31,9 @@
 - 项目索引列表：行号 + 缩略图 + 技术栈展开/收起 + 要点折叠 + 灯箱放大
 - 技能分组展示：12 个工程领域分组、模糊搜索（大小写/符号/空格归一）、高频快捷标签
 - About 阶段化叙事：早期 / 近期 / 日常 + 三条能力链路数字卡片
+- **项目在线预览**：各项目的静态前端嵌入本站（`public/preview/`），卡片「在线体验」直达；无后端项目显示适配各项目风格的演示提示条（深浅色双态）
+- **演示模式**：BookRecommendation / MiLuStudio 采用构建开关（`VUE_APP_EMBEDDED_DEMO` / `VITE_EMBEDDED_DEMO`）内置示例数据，无后端也能直入登录后首页
+- **SPA fallback**：`404.html` 将深链刷新（BrowserRouter 子路由 / 遗留畸形 URL）兜底回所属应用入口
 - 简历 PDF 一键下载（`public/resume.pdf`，随投递版本更新）
 - 移动端适配：底部 Tab Bar、安全区、置顶胶囊导航、单列布局
 - 内容驱动：SQLite 数据库 → 构建时导出 JSON → 打包部署
@@ -41,9 +44,9 @@
 | --- | --- |
 | 前端 | React 19、TypeScript、Vite、Tailwind CSS 4 |
 | 动效 | GSAP（ScrollTrigger）+ IntersectionObserver，全站尊重 `prefers-reduced-motion` |
-| 字体 | Noto Sans SC + JetBrains Mono（站点用字子集化，`scripts/subset-fonts.mjs` 生成） |
+| 字体 | 五层字体体系：正文 Noto Sans SC、展示层得意黑（Smiley Sans）、名字柳建毛草、数字 Fraunces、等宽 Victor Mono（`scripts/subset-fonts.mjs` 子集化，均自托管） |
 | 数据 | SQLite（`database/portfolio.db`，内容源） |
-| 脚本 | Node.js（seed / export / subset-fonts 数据与字体管线） |
+| 脚本 | Node.js（seed / export / subset-fonts 数据与字体管线；polish-previews 预览页演示注入；start-all 面试演示一键启动） |
 | 部署 | GitHub Pages + GitHub Actions（`deploy.yml`） |
 
 ## 系统架构
@@ -71,12 +74,16 @@ jyl-site/
 │   └── design/               # 设计过程文件（色板预览等）
 ├── public/
 │   ├── resume.pdf            # 站点简历（最新版覆盖即可）
+│   ├── 404.html              # SPA fallback：深链刷新兜底回应用入口
+│   ├── preview/              # ★ 内嵌项目预览（各项目前端静态产物 + 演示注入）
 │   ├── projects/*.webp       # 项目截图（构建资源）
 │   └── images/ certificates/ # 头像、证书缩略图
 ├── scripts/
 │   ├── seed-db.mjs           #   JSON → 数据库（npm run db:seed）
 │   ├── export-db.mjs         #   数据库 → JSON（npm run db:export）
-│   └── subset-fonts.mjs      #   站点字体子集化（新增文案后重新运行）
+│   ├── subset-fonts.mjs      #   站点五层字体子集化（新增文案后重新运行）
+│   ├── polish-previews.mjs   #   预览页演示提示注入（重跑即覆盖更新）
+│   └── start-all.ps1 / .bat  #   面试演示：一键启动本站各项目（本地运行）
 ├── src/
 │   ├── data/*.json           # 构建数据（由数据库导出生成，勿手改）
 │   ├── data/types.ts         # 数据类型定义
@@ -86,6 +93,23 @@ jyl-site/
 ├── LICENSE
 └── README.md
 ```
+
+## 项目在线预览
+
+站点内嵌各项目前端（`public/preview/<id>/`，GitHub Pages 子路径直接服务），详情如下：
+
+| 项目 | 在线入口 | 数据来源 |
+| --- | --- | --- |
+| SyLabAI / XiaoLouAI / MiLuAssistantWeb | 静态前端 + 演示提示条 | 无后端（界面演示） |
+| MiLuStudio | 嵌入演示模式（`VITE_EMBEDDED_DEMO`） | 内置示例项目，直入工作台首页 |
+| BookRecommendation | 嵌入演示模式（`VUE_APP_EMBEDDED_DEMO`）+ 演示自动登录 | 内置示例数据（图书/推荐/借阅） |
+| ShopRecommendation | 独立 Render 部署（另有主页链接） | 完整后端 |
+
+配套机制：
+
+- **演示提示条**：`scripts/polish-previews.mjs` 向每个预览页注入「演示模式 · 后端未部署」提示（**按项目品牌配色、深浅色双态**），并将缺后端报错优雅替换；幂等，重跑即更新
+- **深链刷新兜底**：`public/404.html` 识别预览路径并跳回应用入口（BrowserRouter 应用刷新不再 404）
+- **演示模式开关**：各项目以构建时环境变量启用（不污染正常开发），如 `npx vite build --mode embedded` / `npm run build -- --mode embedded`
 
 ## 本地运行
 
@@ -136,7 +160,7 @@ npm run build      # = db:export + 类型检查 + 构建
 ## 设计系统
 
 - **视觉基调「青玉 · 深空青」**：主色青玉（teal `#0f766e`）+ 高亮碧青（cyan），浅色冷白微青底、深色深青黑底；深浅两套色彩同族，深色粒子液柱与浅色主色统一。
-- **字体**：标题与正文 Noto Sans SC（自托管子集，`scripts/subset-fonts.mjs` 按站点用字生成 4 个字重 woff2），代码与数字点缀 JetBrains Mono（latin 子集）。**新增文案后需重新运行子集化脚本**。
+- **字体五层体系**：正文 Noto Sans SC（自托管子集 4 字重）、展示层**得意黑**（区块标题/品牌）、名字**柳建毛草**（Hero 专属，草书）、数字 **Fraunces**（统计/强调数字）、等宽 **Victor Mono**（代码彩蛋/行号，含斜体变体）；`scripts/subset-fonts.mjs` 按站点用字子集化，新增文案后需重新运行。
 - **动效**：GSAP（Hero 入场序列 + About 链路连接线 scrub），全站尊重 `prefers-reduced-motion`；其余滚动渐显由 IntersectionObserver 驱动。
 - **版式特色**：Hero 编辑式排版（名字超大两行 + 头像签名章 + 等宽代码彩蛋）；项目区「编辑索引行」差异化；技能区模糊搜索 + 桌面双列均衡；About 阶段化叙事 + 能力链路数字卡。
 
@@ -145,6 +169,8 @@ npm run build      # = db:export + 类型检查 + 构建
 - 内容驱动架构：SQLite 单一内容源，JSON 由构建导出，改数据不碰代码。
 - 与简历同口径：站点简历下载与投递版保持同步更新，公司名、项目名、时间线一致。
 - 数据流脚本化：`db:seed` / `db:export` 双向同步，内容维护成本低。
-- 字体子集化管线：站点用字打包为每个字重单个 woff2（约 113KB），首屏字体开销可控。
+- 字体子集化管线：五层字体按站点用字打包为单个 woff2（得意黑 113KB / 柳建毛草 10KB / Fraunces 18KB / Victor Mono 16+21KB），首屏字体开销可控。
+- 项目在线预览：`public/preview/` 内嵌 5 个项目前端 + 演示模式开关，作品集内即可直达"登录后首页"。
+- SPA 刷新兜底：`404.html` 单文件解决 BrowserRouter 深链刷新 404。
 - 全站可访问性：键盘焦点可见、ARIA 标注、`prefers-reduced-motion` 降级、安全区适配。
 - 自动化部署：推送即构建发布（GitHub Actions + GitHub Pages），无需手动操作。
