@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>载入中…</title>
+</head>
+<body>
+<script>
+// GitHub Pages SPA fallback：404 路径（含 BrowserRouter 深链刷新）跳回所属应用入口，
+// 保证应用正常加载（不显示 404 页）；主站兜底回首页。
+(function () {
+  var p = location.pathname;
+  var m = p.match(/^(.*?\/preview\/[^/]+)\//);
+  if (m) {
+    location.replace(m[1] + '/');
+    return;
+  }
+  var seg = p.split('/').filter(Boolean);
+  location.replace(seg.length > 0 ? '/' + seg[0] + '/' : '/');
+})();
+</script>
+</body>
+</html>
