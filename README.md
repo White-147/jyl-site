@@ -15,7 +15,7 @@
 </p>
 
 <p align="center">
-  <img src="./docs/assets/screenshots/overview.png" alt="个人作品集网站首页截图" width="900">
+  <img src="./docs/assets/screenshots/overview.webp" alt="个人作品集网站首页截图" width="900">
 </p>
 
 个人求职作品集单页应用。项目以「AI 应用平台型全栈工程师」为定位，围绕数据工程、业务系统交付与 Windows 原生桌面端工程化三条主线，集中展示 MiLuStudio、XiaoLouAI、SyLabAI 等可验证项目，并提供项目方向筛选（AI 应用 / 企业系统 / 大数据）、技能模糊搜索、明暗主题切换与最新简历 PDF 下载。

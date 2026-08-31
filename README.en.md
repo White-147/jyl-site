@@ -15,7 +15,7 @@
 </p>
 
 <p align="center">
-  <img src="./docs/assets/screenshots/overview.png" alt="Portfolio site homepage screenshot" width="900">
+  <img src="./docs/assets/screenshots/overview.webp" alt="Portfolio site homepage screenshot" width="900">
 </p>
 
 A personal job-hunting portfolio single-page app. Positioned as an "AI application full-stack engineer", it showcases verifiable projects such as MiLuStudio, XiaoLouAI, SyLabAI, and LocalLLMServer across three focus areas — data engineering, business system delivery, and Windows native desktop engineering — with project filtering by direction (AI Apps / Enterprise Systems / Big Data), light/dark theme switching, and a one-click download of the latest resume PDF.
