@@ -12,9 +12,9 @@ const previewDir = join(root, 'public', 'preview')
 const MARKER = 'demo-pollish:v1'
 
 const STYLE = `<style id="demo-pollish">
-#demo-mode-badge{position:fixed;top:16px;right:16px;z-index:999999;display:inline-flex;align-items:center;gap:7px;padding:6px 14px;border-radius:9999px;background:rgba(15,118,110,.94);color:#fff;font:500 12.5px/1.4 system-ui,-apple-system,sans-serif;box-shadow:0 4px 16px rgba(15,46,54,.28);backdrop-filter:blur(4px);pointer-events:none;letter-spacing:.02em}
-#demo-mode-badge .dot{width:6px;height:6px;border-radius:9999px;background:#5eead4;box-shadow:0 0 7px #5eead4}
-@media (max-width:640px){#demo-mode-badge{top:10px;right:10px;font-size:11px;padding:5px 11px}}
+#demo-mode-badge{position:fixed;top:10px;left:50%;transform:translateX(-50%);z-index:999999;display:inline-flex;align-items:center;gap:7px;height:28px;padding:0 16px;border-radius:9999px;background:linear-gradient(90deg,rgba(15,118,110,.95),rgba(13,148,136,.95));color:#fff;font:500 12px/1 system-ui,-apple-system,sans-serif;letter-spacing:.04em;box-shadow:0 3px 14px rgba(15,46,54,.22);backdrop-filter:blur(6px);pointer-events:none}
+#demo-mode-badge .dot{width:6px;height:6px;border-radius:9999px;background:#5eead4;box-shadow:0 0 6px #5eead4}
+@media (max-width:640px){#demo-mode-badge{top:8px;font-size:11px;height:26px;padding:0 12px}}
 </style>`
 
 const SCRIPT = `<script id="demo-pollish">
@@ -25,7 +25,7 @@ const SCRIPT = `<script id="demo-pollish">
   (document.body || document.documentElement).appendChild(badge);
 
   var NOTE = '<div style="margin:10px 0;padding:9px 14px;border:1px dashed rgba(94,234,212,.55);border-radius:10px;color:#5eead4;background:rgba(20,184,166,.07);font:500 13px/1.6 system-ui,-apple-system,sans-serif">演示模式 · 后端未部署：此处界面为在线美化展示，完整功能见 GitHub 仓库</div>';
-  var KEYWORDS = /未连接|未部署|未加载|加载失败|无法连接|请先启动后端|Control API|上下文加载失败|不能连接|连接失败|服务不可用|请求失败|There isn't a GitHub Pages|Site not found|404/i;
+  var KEYWORDS = /未连接|未部署|未加载|加载.{0,15}失败|无法连接|请先启动后端|Control API|上下文加载失败|不能连接|连接失败|服务不可用|请求失败|There isn't a GitHub Pages|Site not found|404/i;
 
   function apply() {
     var hits = document.querySelectorAll('[role="alert"],[role="status"],[class*="alert"],[class*="error"],[class*="warning"],[class*="banner"],[class*="notice"],[class*="message-box"]');
