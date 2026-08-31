@@ -1,19 +1,23 @@
-<!doctype html>
-<html lang="zh-CN">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SyLabAI</title>
-    <script type="module" crossorigin src="./assets/index-CrUeWyg-.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-BPMJkHCZ.css">
-  <style id="demo-pollish">
+// 预览页演示美化注入：向 jyl-site/public/preview/*/index.html 注入
+//   1) 右上角「演示模式 · 后端未部署」徽章（固定浮标）
+//   2) 运行时美化规则：隐藏各项目自身"缺后端"报错提示并替换为演示说明
+//   幂等（含 marker 则跳过）；各项目重新构建复制进 preview 后重跑本脚本即可。
+// 用法：node scripts/polish-previews.mjs
+import { readFileSync, writeFileSync, existsSync } from 'node:fs'
+import { join, dirname } from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+const root = join(dirname(fileURLToPath(import.meta.url)), '..')
+const previewDir = join(root, 'public', 'preview')
+const MARKER = 'demo-pollish:v1'
+
+const STYLE = `<style id="demo-pollish">
 #demo-mode-badge{position:fixed;top:16px;right:16px;z-index:999999;display:inline-flex;align-items:center;gap:7px;padding:6px 14px;border-radius:9999px;background:rgba(15,118,110,.94);color:#fff;font:500 12.5px/1.4 system-ui,-apple-system,sans-serif;box-shadow:0 4px 16px rgba(15,46,54,.28);backdrop-filter:blur(4px);pointer-events:none;letter-spacing:.02em}
 #demo-mode-badge .dot{width:6px;height:6px;border-radius:9999px;background:#5eead4;box-shadow:0 0 7px #5eead4}
 @media (max-width:640px){#demo-mode-badge{top:10px;right:10px;font-size:11px;padding:5px 11px}}
-</style></head>
-  <body>
-    <div id="root"></div>
-  <script id="demo-pollish">
+</style>`
+
+const SCRIPT = `<script id="demo-pollish">
 (function () {
   var badge = document.createElement('div');
   badge.id = 'demo-mode-badge';
@@ -50,6 +54,27 @@
   setInterval(apply, 1200);
   new MutationObserver(apply).observe(document.documentElement, { childList: true, subtree: true });
 })();
-</script></body>
-</html>
+</script>`
 
+let done = 0
+for (const name of ['sylab-ai', 'xiao-lou-ai', 'milu-assistant-web', 'milu-studio']) {
+  const file = join(previewDir, name, 'index.html')
+  if (!existsSync(file)) {
+    console.log(`skip: ${name} (no index.html)`)
+    continue
+  }
+  let html = readFileSync(file, 'utf8')
+  if (html.includes(MARKER)) {
+    console.log(`skip: ${name} (already injected)`)
+    continue
+  }
+  html = html.replace('</head>', STYLE + '</head>').replace('</body>', SCRIPT + '</body>')
+  if (!html.includes(STYLE.slice(0, 30))) {
+    // 兼容无 </head>/</body> 的产物
+    html = STYLE + SCRIPT + html
+  }
+  writeFileSync(file, html)
+  done++
+  console.log(`injected: ${name}`)
+}
+console.log(`完成：${done} 个预览页已注入演示美化`)
