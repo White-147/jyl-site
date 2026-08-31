@@ -94,7 +94,7 @@ The site embeds project frontends under `public/preview/<id>/` (served directly 
 | Project | Online entry | Data source |
 | --- | --- | --- |
 | SyLabAI / XiaoLouAI / MiLuAssistantWeb | Static frontend + demo banner | None (UI showcase) |
-| MiLuStudio | Embedded demo mode (`VITE_EMBEDDED_DEMO`) | Built-in sample projects, lands on the workspace home |
+| MiLuStudio | Embedded demo mode (`VITE_EMBEDDED_DEMO`) | Built-in sample projects: parse cards + review cards + navigable progress panel (demo data, interactive local deterministic flow) |
 | BookRecommendation | Embedded demo mode (`VUE_APP_EMBEDDED_DEMO`) + demo auto-login | Built-in sample data (books / recommendations / borrows) |
 | ShopRecommendation | Separate Render deployment | Full backend |
 

@@ -101,13 +101,14 @@ jyl-site/
 | 项目 | 在线入口 | 数据来源 |
 | --- | --- | --- |
 | SyLabAI / XiaoLouAI / MiLuAssistantWeb | 静态前端 + 演示提示条 | 无后端（界面演示） |
-| MiLuStudio | 嵌入演示模式（`VITE_EMBEDDED_DEMO`） | 内置示例项目，直入工作台首页 |
+| MiLuStudio | 嵌入演示模式（`VITE_EMBEDDED_DEMO`） | 内置示例项目：解析卡 + 步骤审核卡 + 可跳转进度区（演示数据，本地确定性流程可交互） |
 | BookRecommendation | 嵌入演示模式（`VUE_APP_EMBEDDED_DEMO`）+ 演示自动登录 | 内置示例数据（图书/推荐/借阅） |
 | ShopRecommendation | 独立 Render 部署（另有主页链接） | 完整后端 |
 
 配套机制：
 
 - **演示提示条**：`scripts/polish-previews.mjs` 向每个预览页注入「演示模式 · 后端未部署」提示（**按项目品牌配色、深浅色双态**），并将缺后端报错优雅替换；幂等，重跑即更新
+- **预览图标**：每个预览页与 `404.html` 均声明 favicon + 180×180 apple-touch-icon（移动端历史页大图标），图标由 `scripts/gen-preview-icons.ps1` 从各项目 logo 生成（SyLabAI 使用韶远/Accela 徽标截取）
 - **深链刷新兜底**：`public/404.html` 识别预览路径并跳回应用入口（BrowserRouter 应用刷新不再 404）
 - **演示模式开关**：各项目以构建时环境变量启用（不污染正常开发），如 `npx vite build --mode embedded` / `npm run build -- --mode embedded`
 
