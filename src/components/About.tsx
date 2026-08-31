@@ -167,7 +167,7 @@ export default function About() {
               <Reveal key={link.title} delay={i * 110}>
                 <div className="group glass-card h-full rounded-2xl p-5 transition-all hover:-translate-y-0.5 hover:border-brand-300 hover:shadow-md sm:p-6 dark:hover:border-brand-500/50">
                   <div className="flex items-baseline justify-between gap-3">
-                    <h3 className="text-base font-bold text-ink dark:text-ink-light">{link.title}</h3>
+                    <h3 className="text-lg font-bold text-ink dark:text-ink-light">{link.title}</h3>
                     <span className="shrink-0 rounded-full bg-brand-50 px-2 py-0.5 text-[11px] font-semibold text-brand-700 dark:bg-brand-500/10 dark:text-brand-300">
                       {link.tag}
                     </span>
