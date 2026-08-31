@@ -36,7 +36,7 @@
       "link": "https://github.com/White-147/MiLuStudio",
       "screenshot": "projects/milu-studio.webp",
       "previewUrl": "preview/milu-studio/",
-      "previewNote": "静态界面预览：未部署后端，显示登录/本地服务未连接页"
+      "previewNote": "界面演示（嵌入示例数据）：后端未部署，工作台为 mock 数据"
     },
     {
       "id": "xiao-lou-ai",

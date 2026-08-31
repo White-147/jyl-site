@@ -28,10 +28,9 @@
         {
           "title": "数据管理",
           "items": [
-            "SQL 查询",
-            "MySQL",
-            "SQL Server",
-            "PostgreSQL",
+            "Excel 数据表格处理",
+            "数据导入导出",
+            "数据归档与检索",
             "数据核对与校验",
             "报表统计"
           ]
