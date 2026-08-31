@@ -56,13 +56,13 @@ export default function Skills() {
         <SectionHeading
           eyebrow={SECTIONS.find((s) => s.id === 'skills')?.label ?? '专业技能'}
           title="岗位技能画像"
-          description="按岗位方向切换技能画像；输入关键词可快速过滤，也可直接搜索技术栈。"
+          description="按岗位方向切换技能画像；输入关键词可快速筛选项目所需技能。"
         />
 
         {/* 搜索框：模糊 like（大小写不敏感、c#/c++ 保留语义、去空格归一） */}
         <Reveal className="mt-8">
           <label className="relative block max-w-xl">
-            <span className="sr-only">搜索技术栈</span>
+            <span className="sr-only">搜索技能</span>
             <svg
               viewBox="0 0 24 24"
               fill="none"
@@ -83,8 +83,8 @@ export default function Skills() {
               onKeyDown={(e) => {
                 if (e.key === 'Escape') setQuery('')
               }}
-              placeholder="搜索技术栈，如 Java / React / c++ / sql"
-              aria-label="搜索技术栈"
+              placeholder="输入关键词筛选技能"
+              aria-label="搜索技能"
               className="w-full rounded-xl border border-slate-300 bg-white py-2.5 pl-10 pr-10 text-base text-slate-700 shadow-sm outline-none transition-colors placeholder:text-slate-400 focus:border-brand-400 focus:ring-2 focus:ring-brand-400/30 sm:text-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:placeholder:text-slate-500 dark:focus:border-brand-500"
             />
             {query !== '' && (

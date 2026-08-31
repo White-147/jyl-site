@@ -55,6 +55,7 @@ for (const name of Object.keys(THEMES)) {
     continue
   }
   const t = THEMES[name]
+  const replaceOnly = name === 'xiao-lou-ai' ? 'true' : 'false' // XiaoLouAI：错误元素容器窄，仅隐藏、顶部统一全宽条
   const NOTE_CSS =
     `border:1px dashed ${t.border};border-radius:10px;color:${t.color};background:${t.bg};` +
     `font:500 13px/1.6 system-ui,-apple-system,sans-serif`
@@ -62,6 +63,7 @@ for (const name of Object.keys(THEMES)) {
   const SCRIPT = `<script id="demo-pollish">
 (function () {
   var NOTE_HTML = '<div class="demo-pollish-note" style="align-self:flex-start;flex:0 0 auto">演示模式 · 后端未部署：此处界面为在线美化展示，完整功能见 GitHub 仓库</div>';
+  var REPLACE_ONLY = ${replaceOnly};
   var KEYWORDS = /未连接|未部署|未加载|加载.{0,15}失败|无法连接|请先启动后端|Control API|上下文加载失败|不能连接|连接失败|服务不可用|请求失败|There isn't a GitHub Pages|Site not found|404/i;
 
   function apply() {
@@ -75,7 +77,7 @@ for (const name of Object.keys(THEMES)) {
       el2.__demoHandled = true;
       el2.style.display = 'none';
       var inTransient = !!el2.closest('[class*="notice"],[class*="message"],[class*="toast"]');
-      if (!inTransient) {
+      if (!inTransient && !REPLACE_ONLY) {
         el2.insertAdjacentHTML('afterend', NOTE_HTML);
         var nb = el2.nextElementSibling;
         if (nb) nb.__demoHandled = true;
@@ -100,7 +102,7 @@ for (const name of Object.keys(THEMES)) {
 
   // 顶部横条（独立 id）：容器出现前不插入；容器变化后自动归位（避免应用挂载时机的时序问题）
   function ensureTopNote() {
-    if (document.querySelector('.demo-pollish-note')) return; // 已有错误替换横条，不再重复
+    if (!REPLACE_ONLY && document.querySelector('.demo-pollish-note')) return; // 已有错误替换横条，不再重复
     var existing = document.getElementById('demo-mode-note');
     var host = findHost();
     if (host && existing && existing.parentElement !== host) {
