@@ -1,4 +1,4 @@
-import{r as s,j as e,b as c,a as d,s as v}from"./index-CrUeWyg-.js";import{P as E,a as x,F as u,K as p}from"./labUi-DZ7PJkIy.js";const y=`material: sample A + additive B
+import{r as s,j as e,b as c,a as d,s as v}from"./index-l8PshZ9h.js";import{P as E,a as x,F as u,K as p}from"./labUi-BFwEjP57.js";const y=`material: sample A + additive B
 temperature: 65-70 C
 time: 90 min
 observation: 黏度稳定，未见明显沉降

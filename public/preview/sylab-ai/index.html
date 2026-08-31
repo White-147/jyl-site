@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SyLabAI</title>
-    <script type="module" crossorigin src="./assets/index-CrUeWyg-.js"></script>
+    <script type="module" crossorigin src="./assets/index-l8PshZ9h.js"></script>
     <link rel="stylesheet" crossorigin href="./assets/index-BPMJkHCZ.css">
   <style id="demo-pollish">
 #demo-mode-badge{position:fixed;top:16px;right:16px;z-index:999999;display:inline-flex;align-items:center;gap:7px;padding:6px 14px;border-radius:9999px;background:rgba(15,118,110,.94);color:#fff;font:500 12.5px/1.4 system-ui,-apple-system,sans-serif;box-shadow:0 4px 16px rgba(15,46,54,.28);backdrop-filter:blur(4px);pointer-events:none;letter-spacing:.02em}
@@ -21,14 +21,14 @@
   (document.body || document.documentElement).appendChild(badge);
 
   var NOTE = '<div style="margin:10px 0;padding:9px 14px;border:1px dashed rgba(94,234,212,.55);border-radius:10px;color:#5eead4;background:rgba(20,184,166,.07);font:500 13px/1.6 system-ui,-apple-system,sans-serif">演示模式 · 后端未部署：此处界面为在线美化展示，完整功能见 GitHub 仓库</div>';
-  var KEYWORDS = /未连接|未部署|加载失败|无法连接|请先启动后端|Control API|上下文加载失败|不能连接|连接失败|服务不可用|请求失败/i;
+  var KEYWORDS = /未连接|未部署|加载失败|无法连接|请先启动后端|Control API|上下文加载失败|不能连接|连接失败|服务不可用|请求失败|There isn't a GitHub Pages|Site not found|404/i;
 
   function apply() {
-    var hits = document.querySelectorAll('[role="alert"],[role="status"],[class*="alert"],[class*="error"],[class*="warning"],[class*="banner"],[class*="notice"]');
+    var hits = document.querySelectorAll('[role="alert"],[role="status"],[class*="alert"],[class*="error"],[class*="warning"],[class*="banner"],[class*="notice"],[class*="message-box"]');
     hits.forEach(function (el) {
       if (!el || el.__demoHandled || el.id === 'demo-mode-badge') return;
       var t = (el.textContent || '');
-      if (t.length < 4 || t.length > 220) return;
+      if (t.length < 4 || t.length > 20000) return;
       if (!KEYWORDS.test(t)) return;
       var el2 = el.closest('[role="alert"],[role="status"],[class*="alert"],[class*="warning"],[class*="banner"]') || el;
       if (el2.__demoHandled) return;

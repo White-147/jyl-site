@@ -1,23 +1,23 @@
-// 预览页演示美化注入：向 jyl-site/public/preview/*/index.html 注入
-//   1) 右上角「演示模式 · 后端未部署」徽章（固定浮标）
-//   2) 运行时美化规则：隐藏各项目自身"缺后端"报错提示并替换为演示说明
-//   幂等（含 marker 则跳过）；各项目重新构建复制进 preview 后重跑本脚本即可。
-// 用法：node scripts/polish-previews.mjs
-import { readFileSync, writeFileSync, existsSync } from 'node:fs'
-import { join, dirname } from 'node:path'
-import { fileURLToPath } from 'node:url'
-
-const root = join(dirname(fileURLToPath(import.meta.url)), '..')
-const previewDir = join(root, 'public', 'preview')
-const MARKER = 'demo-pollish:v1'
-
-const STYLE = `<style id="demo-pollish">
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <link rel="icon" href="favicon.ico">
+    <title>book_recommendation</title>
+  <script defer src="js/chunk-vendors.js"></script><script defer src="js/app.js"></script><style id="demo-pollish">
 #demo-mode-badge{position:fixed;top:16px;right:16px;z-index:999999;display:inline-flex;align-items:center;gap:7px;padding:6px 14px;border-radius:9999px;background:rgba(15,118,110,.94);color:#fff;font:500 12.5px/1.4 system-ui,-apple-system,sans-serif;box-shadow:0 4px 16px rgba(15,46,54,.28);backdrop-filter:blur(4px);pointer-events:none;letter-spacing:.02em}
 #demo-mode-badge .dot{width:6px;height:6px;border-radius:9999px;background:#5eead4;box-shadow:0 0 7px #5eead4}
 @media (max-width:640px){#demo-mode-badge{top:10px;right:10px;font-size:11px;padding:5px 11px}}
-</style>`
-
-const SCRIPT = `<script id="demo-pollish">
+</style></head>
+  <body>
+    <noscript>
+      <strong>We're sorry but book_recommendation doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
+    </noscript>
+    <div id="app"></div>
+    <!-- built files will be auto injected -->
+  <script id="demo-pollish">
 (function () {
   var badge = document.createElement('div');
   badge.id = 'demo-mode-badge';
@@ -54,22 +54,5 @@ const SCRIPT = `<script id="demo-pollish">
   setInterval(apply, 1200);
   new MutationObserver(apply).observe(document.documentElement, { childList: true, subtree: true });
 })();
-</script>`
-
-let done = 0
-for (const name of ['sylab-ai', 'xiao-lou-ai', 'milu-assistant-web', 'milu-studio', 'book-recommendation']) {
-  const file = join(previewDir, name, 'index.html')
-  if (!existsSync(file)) {
-    console.log(`skip: ${name} (no index.html)`)
-    continue
-  }
-  let html = readFileSync(file, 'utf8')
-  // 清除旧版注入（幂等升级，规则更新后重跑即生效）
-  html = html.replace(/<style id="demo-pollish">[\s\S]*?<\/style>[\s]*/g, '')
-  html = html.replace(/<script id="demo-pollish">[\s\S]*?<\/script>[\s]*/g, '')
-  html = html.replace('</head>', STYLE + '</head>').replace('</body>', SCRIPT + '</body>')
-  writeFileSync(file, html)
-  done++
-  console.log(`injected: ${name}`)
-}
-console.log(`完成：${done} 个预览页已注入/更新演示美化`)
+</script></body>
+</html>
