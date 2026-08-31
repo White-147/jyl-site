@@ -11,27 +11,28 @@ import { fileURLToPath } from 'node:url'
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const previewDir = join(root, 'public', 'preview')
 
-// 各项目配色（边框/文字/背景，浅深两态）：适配品牌风格
+// 各项目配色（浅/深两态，边框/文字/背景）：适配品牌风格与各自深浅色切换机制
+//   MiLuStudio: html[data-theme="dark"] ｜ XiaoLouAI: html.dark ｜ console: html.dark-mode
 const THEMES = {
   'sylab-ai': {
-    border: 'rgba(59,130,246,.5)', color: '#3b82f6', bg: 'rgba(59,130,246,.07)',
-    darkColor: '#60a5fa',
+    light: { border: 'rgba(59,130,246,.5)', color: '#3b82f6', bg: 'rgba(59,130,246,.07)' },
+    dark: { border: 'rgba(96,165,250,.5)', color: '#60a5fa', bg: 'rgba(96,165,250,.08)' },
   },
   'xiao-lou-ai': {
-    border: 'rgba(217,119,6,.55)', color: '#d97706', bg: 'rgba(217,119,6,.08)',
-    darkColor: '#fbbf24',
+    light: { border: 'rgba(217,119,6,.5)', color: '#d97706', bg: 'rgba(217,119,6,.08)' },
+    dark: { border: 'rgba(251,191,36,.45)', color: '#fbbf24', bg: 'rgba(251,191,36,.08)' },
   },
   'milu-assistant-web': {
-    border: 'rgba(147,51,234,.5)', color: '#9333ea', bg: 'rgba(147,51,234,.08)',
-    darkColor: '#c084fc',
+    light: { border: 'rgba(147,51,234,.45)', color: '#9333ea', bg: 'rgba(147,51,234,.07)' },
+    dark: { border: 'rgba(192,132,252,.4)', color: '#c084fc', bg: 'rgba(192,132,252,.08)' },
   },
   'milu-studio': {
-    border: 'rgba(148,163,184,.5)', color: '#64748b', bg: 'rgba(148,163,184,.08)',
-    darkColor: '#cbd5e1',
+    light: { border: 'rgba(71,85,105,.45)', color: '#475569', bg: 'rgba(100,116,139,.07)' },
+    dark: { border: 'rgba(148,163,184,.5)', color: '#cbd5e1', bg: 'rgba(148,163,184,.08)' },
   },
   'book-recommendation': {
-    border: 'rgba(64,158,255,.5)', color: '#409eff', bg: 'rgba(64,158,255,.08)',
-    darkColor: '#60a5fa',
+    light: { border: 'rgba(64,158,255,.5)', color: '#409eff', bg: 'rgba(64,158,255,.08)' },
+    dark: { border: 'rgba(96,165,250,.5)', color: '#60a5fa', bg: 'rgba(96,165,250,.08)' },
   },
 }
 
@@ -56,10 +57,13 @@ for (const name of Object.keys(THEMES)) {
   }
   const t = THEMES[name]
   const replaceOnly = name === 'xiao-lou-ai' ? 'true' : 'false' // XiaoLouAI：错误元素容器窄，仅隐藏、顶部统一全宽条
-  const NOTE_CSS =
-    `border:1px dashed ${t.border};border-radius:10px;color:${t.color};background:${t.bg};` +
+  const noteCss = (c) =>
+    `border:1px dashed ${c.border};border-radius:10px;color:${c.color};background:${c.bg};` +
     `font:500 13px/1.6 system-ui,-apple-system,sans-serif`
-  const STYLE = `<style id="demo-pollish">\n.demo-pollish-note{margin:12px 14px;padding:9px 14px;${NOTE_CSS}}\n</style>`
+  const STYLE = `<style id="demo-pollish">
+.demo-pollish-note{margin:12px 14px;padding:9px 14px;${noteCss(t.light)}}
+html[data-theme="dark"] .demo-pollish-note,html.dark .demo-pollish-note,html.dark-mode .demo-pollish-note{${noteCss(t.dark)}}
+</style>`
   const SCRIPT = `<script id="demo-pollish">
 (function () {
   var NOTE_HTML = '<div class="demo-pollish-note" style="align-self:flex-start;flex:0 0 auto">演示模式 · 后端未部署：此处界面为在线美化展示，完整功能见 GitHub 仓库</div>';
