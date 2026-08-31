@@ -25,14 +25,14 @@ const SCRIPT = `<script id="demo-pollish">
   (document.body || document.documentElement).appendChild(badge);
 
   var NOTE = '<div style="margin:10px 0;padding:9px 14px;border:1px dashed rgba(94,234,212,.55);border-radius:10px;color:#5eead4;background:rgba(20,184,166,.07);font:500 13px/1.6 system-ui,-apple-system,sans-serif">演示模式 · 后端未部署：此处界面为在线美化展示，完整功能见 GitHub 仓库</div>';
-  var KEYWORDS = /未连接|未部署|加载失败|无法连接|请先启动后端|Control API|上下文加载失败|不能连接|连接失败|服务不可用|请求失败/i;
+  var KEYWORDS = /未连接|未部署|加载失败|无法连接|请先启动后端|Control API|上下文加载失败|不能连接|连接失败|服务不可用|请求失败|There isn't a GitHub Pages|Site not found|404/i;
 
   function apply() {
-    var hits = document.querySelectorAll('[role="alert"],[role="status"],[class*="alert"],[class*="error"],[class*="warning"],[class*="banner"],[class*="notice"]');
+    var hits = document.querySelectorAll('[role="alert"],[role="status"],[class*="alert"],[class*="error"],[class*="warning"],[class*="banner"],[class*="notice"],[class*="message-box"]');
     hits.forEach(function (el) {
       if (!el || el.__demoHandled || el.id === 'demo-mode-badge') return;
       var t = (el.textContent || '');
-      if (t.length < 4 || t.length > 220) return;
+      if (t.length < 4 || t.length > 20000) return;
       if (!KEYWORDS.test(t)) return;
       var el2 = el.closest('[role="alert"],[role="status"],[class*="alert"],[class*="warning"],[class*="banner"]') || el;
       if (el2.__demoHandled) return;
@@ -57,24 +57,19 @@ const SCRIPT = `<script id="demo-pollish">
 </script>`
 
 let done = 0
-for (const name of ['sylab-ai', 'xiao-lou-ai', 'milu-assistant-web', 'milu-studio']) {
+for (const name of ['sylab-ai', 'xiao-lou-ai', 'milu-assistant-web', 'milu-studio', 'book-recommendation']) {
   const file = join(previewDir, name, 'index.html')
   if (!existsSync(file)) {
     console.log(`skip: ${name} (no index.html)`)
     continue
   }
   let html = readFileSync(file, 'utf8')
-  if (html.includes(MARKER)) {
-    console.log(`skip: ${name} (already injected)`)
-    continue
-  }
+  // 清除旧版注入（幂等升级，规则更新后重跑即生效）
+  html = html.replace(/<style id="demo-pollish">[\s\S]*?<\/style>[\s]*/g, '')
+  html = html.replace(/<script id="demo-pollish">[\s\S]*?<\/script>[\s]*/g, '')
   html = html.replace('</head>', STYLE + '</head>').replace('</body>', SCRIPT + '</body>')
-  if (!html.includes(STYLE.slice(0, 30))) {
-    // 兼容无 </head>/</body> 的产物
-    html = STYLE + SCRIPT + html
-  }
   writeFileSync(file, html)
   done++
   console.log(`injected: ${name}`)
 }
-console.log(`完成：${done} 个预览页已注入演示美化`)
+console.log(`完成：${done} 个预览页已注入/更新演示美化`)

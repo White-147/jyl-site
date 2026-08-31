@@ -194,8 +194,8 @@
       ],
       "link": "https://github.com/White-147/BookRecommendation",
       "screenshot": "projects/book-recommendation.webp",
-      "demoUrl": "https://white-147.github.io/BookRecommendation/",
-      "demoNote": "测试账号 2020001 / 123456（免费实例首次打开约需 30s 冷启动）"
+      "previewUrl": "preview/book-recommendation/",
+      "previewNote": "界面演示（内置示例数据）：后端已停用，图书/推荐为演示数据"
     },
     {
       "id": "shop-recommendation",
