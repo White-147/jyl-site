@@ -126,7 +126,7 @@ export default function About() {
                     'radial-gradient(60% 60% at 85% 15%, rgb(20 184 166 / 0.18), transparent 70%), radial-gradient(50% 50% at 10% 90%, rgb(8 145 178 / 0.14), transparent 70%)',
                 }}
               />
-              <p className="font-display relative text-xl font-normal tracking-tight text-brand-700 sm:text-2xl dark:text-cyan-400">
+              <p className="font-display text-lg font-normal tracking-tight text-brand-700 dark:text-cyan-400">
                 AI 应用 · 企业系统 · 数据工程
               </p>
               <ul className="relative mt-5 space-y-4">
@@ -153,9 +153,6 @@ export default function About() {
                   </li>
                 ))}
               </ul>
-              <p className="relative mt-4 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
-                能独立把前端、后端 Control API、数据边界与 Windows 桌面端交付串起来。
-              </p>
             </div>
           </Reveal>
         </div>
