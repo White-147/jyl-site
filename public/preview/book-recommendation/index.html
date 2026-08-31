@@ -7,7 +7,7 @@
     <link rel="icon" href="favicon.ico">
     <title>book_recommendation</title>
   <script defer src="js/chunk-vendors.js"></script><script defer src="js/app.js"></script><style id="demo-pollish">
-.demo-pollish-note{margin:12px 14px;padding:9px 14px;border:1px dashed rgba(94,234,212,.55);border-radius:10px;color:#5eead4;background:rgba(20,184,166,.07);font:500 13px/1.6 system-ui,-apple-system,sans-serif}
+.demo-pollish-note{margin:12px 14px;padding:9px 14px;border:1px dashed rgba(64,158,255,.5);border-radius:10px;color:#409eff;background:rgba(64,158,255,.08);font:500 13px/1.6 system-ui,-apple-system,sans-serif}
 </style></head>
   <body>
     <noscript>
@@ -17,21 +17,19 @@
     <!-- built files will be auto injected -->
   <script id="demo-pollish">
 (function () {
-  var NOTE_HTML = '<div class="demo-pollish-note">演示模式 · 后端未部署：此处界面为在线美化展示，完整功能见 GitHub 仓库</div>';
+  var NOTE_HTML = '<div class="demo-pollish-note" style="align-self:flex-start;flex:0 0 auto">演示模式 · 后端未部署：此处界面为在线美化展示，完整功能见 GitHub 仓库</div>';
   var KEYWORDS = /未连接|未部署|未加载|加载.{0,15}失败|无法连接|请先启动后端|Control API|上下文加载失败|不能连接|连接失败|服务不可用|请求失败|There isn't a GitHub Pages|Site not found|404/i;
 
   function apply() {
     document.querySelectorAll('[role="alert"],[role="status"],[class*="alert"],[class*="error"],[class*="warning"],[class*="banner"],[class*="notice"],[class*="message-box"]').forEach(function (el) {
       if (!el || el.__demoHandled) return;
-      var t = (el.textContent || '');
-      if (t.length < 4 || t.length > 20000) return;
-      if (!KEYWORDS.test(t)) return;
+      var t2 = (el.textContent || '');
+      if (t2.length < 4 || t2.length > 20000) return;
+      if (!KEYWORDS.test(t2)) return;
       var el2 = el.closest('[role="alert"],[role="status"],[class*="alert"],[class*="warning"],[class*="banner"]') || el;
       if (el2.__demoHandled) return;
       el2.__demoHandled = true;
       el2.style.display = 'none';
-      // 瞬态弹层（message/notice/toast）内的错误只隐藏：插入的横条会随弹层消失，
-      // 持久说明由 ensureTopNote 负责插入主内容区
       var inTransient = !!el2.closest('[class*="notice"],[class*="message"],[class*="toast"]');
       if (!inTransient) {
         el2.insertAdjacentHTML('afterend', NOTE_HTML);
@@ -41,19 +39,11 @@
     });
   }
 
-  // 无错误替换横条时：在主内容区顶部插入同款横条（候选容器需可见，避免误插隐藏弹层）
-  function ensureTopNote() {
-    if (document.querySelector('.demo-pollish-note')) return;
-    var candidates = [
-      document.querySelector('main'),
-      document.querySelector('.ant-layout-content'),
-      document.querySelector('.page-content'),
-      document.querySelector('.workspace'),
-      document.querySelector('.app-content'),
-      document.querySelector('section'),
-    ];
-    candidates = candidates.concat(Array.prototype.slice.call(document.querySelectorAll('[class*="content"], [class*="main"]')));
-    var host = candidates.find(function (el) {
+  function findHost() {
+    var sels = ["main",".ant-layout-content",".page-content",".workspace-main",".workspace-project-main",".workspace",".app-content","section"];
+    var candidates = sels.map(function (s) { return document.querySelector(s); });
+    candidates = candidates.concat(Array.prototype.slice.call(document.querySelectorAll('[class*="content"], [class*="main"], [class*="shell"]')));
+    return candidates.find(function (el) {
       if (!el) return false;
       var cls = String(el.className || '');
       if (/notice|message|toast|popover|mask|overlay|modal|dropdown|popper|float/i.test(cls)) return false;
@@ -61,11 +51,31 @@
       if (cs.display === 'none' || cs.visibility === 'hidden') return false;
       var rect = el.getBoundingClientRect();
       return rect.width > 100 && rect.height > 40;
-    }) || document.body;
-    var note = document.createElement('div');
-    note.innerHTML = NOTE_HTML;
+    }) || null;
+  }
+
+  // 顶部横条（独立 id）：容器出现前不插入；容器变化后自动归位（避免应用挂载时机的时序问题）
+  function ensureTopNote() {
+    if (document.querySelector('.demo-pollish-note')) return; // 已有错误替换横条，不再重复
+    var existing = document.getElementById('demo-mode-note');
+    var host = findHost();
+    if (host && existing && existing.parentElement !== host) {
+      existing.remove();
+      existing = null;
+    }
+    if (existing || !host) return;
+    var n = document.createElement('div');
+    n.id = 'demo-mode-note';
+    n.innerHTML = NOTE_HTML;
     var first = host.firstElementChild;
-    if (first) host.insertBefore(note, first); else host.appendChild(note);
+    if (first) host.insertBefore(n, first); else host.appendChild(n);
+    // 工作台类主内容区（自身 relative）：垂直居中布局下横条改为绝对定位贴主区顶部
+    if (/workspace-main/.test(String(host.className || ''))) {
+      n.style.position = 'absolute';
+      n.style.top = '12px';
+      n.style.left = '12px';
+      n.style.right = '12px';
+    }
   }
 
   apply();
