@@ -71,13 +71,13 @@ const smileyOut = join(root, 'src', 'fonts', 'smiley-sans-oblique.woff2')
 writeFileSync(smileyOut, smiley)
 console.log(`✔ Smiley Sans（得意黑）: ${Math.round(smiley.length / 1024)} KB`)
 
-// 2b. 龙藏手书 Long Cang（名字单独展示，流动行书）：名字用字 + 拉丁数字保底
-const LONG_CANG_CHARS = '蒋宇龙' + '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ ·，。'
-const LONG_CANG_SRC = join(root, 'scripts', 'fonts-src', 'longcang', 'LongCang-Regular.ttf')
-const longCang = await subsetFont(readFileSync(LONG_CANG_SRC), LONG_CANG_CHARS, { targetFormat: 'woff2' })
-const longCangOut = join(root, 'src', 'fonts', 'long-cang-regular.woff2')
-writeFileSync(longCangOut, longCang)
-console.log(`✔ Long Cang（龙藏手书）: ${Math.round(longCang.length / 1024)} KB（${LONG_CANG_CHARS.length} 字符）`)
+// 2b. 柳建毛草 Liu Jian Mao Cao（名字单独展示，草书）：名字用字 + 拉丁数字保底
+const LIU_CHARS = '蒋宇龙' + '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ ·，。'
+const LIU_SRC = join(root, 'scripts', 'fonts-src', 'liujianmaocao', 'LiuJianMaoCao-Regular.ttf')
+const liu = await subsetFont(readFileSync(LIU_SRC), LIU_CHARS, { targetFormat: 'woff2' })
+const liuOut = join(root, 'src', 'fonts', 'liu-jian-mao-cao-regular.woff2')
+writeFileSync(liuOut, liu)
+console.log(`✔ Liu Jian Mao Cao（柳建毛草）: ${Math.round(liu.length / 1024)} KB（${LIU_CHARS.length} 字符）`)
 
 // 3. Fraunces（数字显示衬线）：latin 子集源直接复制（源已按 latin 裁剪）
 const FRAUNCES = ['fraunces-latin-500-normal.woff2']

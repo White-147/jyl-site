@@ -39,13 +39,13 @@
   font-display: swap;
   src: url("./fonts/smiley-sans-oblique.woff2") format("woff2");
 }
-/* 名字专属：龙藏手书（Long Cang，SIL OFL 开源，流动行书）——仅 Hero 名字使用 */
+/* 名字专属：柳建毛草（Liu Jian Mao Cao，SIL OFL 开源，草书飞白）——仅 Hero 名字使用 */
 @font-face {
-  font-family: "Long Cang";
+  font-family: "Liu Jian Mao Cao";
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url("./fonts/long-cang-regular.woff2") format("woff2");
+  src: url("./fonts/liu-jian-mao-cao-regular.woff2") format("woff2");
 }
 /* 数字显示衬线：Fraunces（latin 子集）——统计/强调数字 */
 @font-face {
@@ -81,7 +81,7 @@
     "Microsoft YaHei", system-ui, -apple-system, sans-serif;
   --font-display: "Smiley Sans", "Noto Sans SC", "PingFang SC", "Microsoft YaHei",
     system-ui, sans-serif;
-  --font-handwrite: "Long Cang", "Smiley Sans", "Noto Sans SC", "PingFang SC",
+  --font-handwrite: "Liu Jian Mao Cao", "Smiley Sans", "Noto Sans SC", "PingFang SC",
     "Microsoft YaHei", system-ui, sans-serif;
   --font-numeric: "Fraunces", "Georgia", "Times New Roman", serif;
   --font-mono: "Victor Mono", "SFMono-Regular", Consolas, "Liberation Mono",
