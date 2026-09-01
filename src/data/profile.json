@@ -22,21 +22,72 @@
     {
       "phase": "早期",
       "texts": [
-        "完成 Java/MySQL/Hadoop/Spark/Kafka 数据全链路项目，也参与 ERP 实施、AI 数据质检与高校实训。"
+        "数据科学与大数据技术本科。从 Java/MySQL、Hadoop/Spark/Kafka 的课程与毕业项目，到 ERP 实施、AI 训练数据质检和高校大数据实训，做过信息核对、数据校验、规则拆解、问题反馈与现场培训；图书推荐系统的数据采集、计算与展示链路也全程参与过。"
       ]
     },
     {
       "phase": "近期",
       "texts": [
-        "聚焦 Windows 原生 AI 创作工具链（MiLuStudio / XiaoLouAI 等），能独立串通前端、后端、数据与桌面端交付。",
-        "扩展本地大模型部署（Ollama / llama.cpp），本地跑通 Qwen3.6-35B、DeepSeek-Coder-V2 与 Gemma4 等模型。"
+        "参与 Windows 原生 AI 创作工具链：前端工作台、后端接口与数据边界、本地运行时与桌面安装包都能独立串通，交付的是可运行、可验证的版本（MiLuStudio / XiaoLouAI / MiLuAssistant 等）。"
       ]
     },
     {
       "phase": "日常",
       "texts": [
-        "使用 Cursor、Codex、Qoder 与 DeepSeek Harness（DSH）辅助代码检索、架构梳理、重构设计与阶段验证。",
-        "结合 Claude Opus / Sonnet、GPT-5.5 等模型辅助开发与验证。"
+        "用 Cursor / Codex 等 AI 编程助手辅助代码检索、架构梳理、重构设计与阶段验证，也借此快速进入陌生项目、保持交付质量；数据质检、实施培训与运维支持同样在协作与交付中发挥作用。"
+      ]
+    }
+  ],
+  "positions": [
+    {
+      "title": "AI 应用与工具链",
+      "desc": "AI 创作平台的前端工作台、后端接口、数据边界与桌面交付，含模型/API 接入与本地运行时。",
+      "keywords": [
+        "React / TypeScript",
+        ".NET / C#",
+        "Python Skills",
+        "OpenAI-compatible API",
+        "Vertex Gemini / Veo",
+        "Qwen-Omni",
+        "Electron",
+        "Inno Setup"
+      ]
+    },
+    {
+      "title": "企业系统与后端交付",
+      "desc": "从 ERP 实施到企业系统的测试、问题闭环与培训交付。",
+      "keywords": [
+        "Java / Spring Boot",
+        "Spring Security / JWT",
+        "MySQL / PostgreSQL",
+        "SQL Server",
+        "RESTful API",
+        "ERP 实施",
+        "交付文档"
+      ]
+    },
+    {
+      "title": "数据工程与推荐",
+      "desc": "采集、清洗、行为日志与推荐计算的完整链路。",
+      "keywords": [
+        "Hadoop / HDFS",
+        "Hive",
+        "Spark SQL / Streaming",
+        "Kafka",
+        "Selenium",
+        "协同过滤 / 皮尔逊"
+      ]
+    },
+    {
+      "title": "IT 支持与运维",
+      "desc": "网络搭建、设备维护、账号权限与数据安全，面向日常信息化支撑。",
+      "keywords": [
+        "Windows / Linux",
+        "办公网络",
+        "打印机 / 监控设备",
+        "备份与恢复",
+        "日志管理",
+        "操作培训"
       ]
     }
   ],
