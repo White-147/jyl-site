@@ -72,11 +72,14 @@ html[data-theme="dark"] .demo-pollish-note,html.dark .demo-pollish-note,html.dar
     n.innerHTML = NOTE_HTML;
     var first = host.firstElementChild;
     if (first) host.insertBefore(n, first); else host.appendChild(n);
-    // 工作台类主内容区：垂直居中布局下绝对定位会遮挡卡片标题，
-    // 统一采用文档流插入（横条置于内容区顶部，不遮挡内容）。
-    if (/workspace-main/.test(String(host.className || ''))) {
-      n.style.margin = '12px 14px';
-    }
+    // 顶部横条统一改为「悬浮浮层」，不占用文档流：
+    // 工作台/聊天等固定视口布局中，占流式横条会把内容挤出可视区（如 chat 输入区下移被裁）
+    if (getComputedStyle(host).position === 'static') host.style.position = 'relative';
+    n.style.position = 'absolute';
+    n.style.top = '12px';
+    n.style.left = '12px';
+    n.style.right = '12px';
+    n.style.zIndex = '30';
   }
 
   apply();
