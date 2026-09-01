@@ -130,7 +130,7 @@
       "screenshot": "projects/milu-assistant-desktop.webp",
       "downloadUrl": "https://github.com/White-147/MiLuAssistantDesktop/releases/download/v1.0.1/MiLuAssistantDesktop-Setup-1.0.1.exe",
       "downloadNote": "Windows 安装包（Inno Setup，约 213MB）· 点击直接下载；GitHub 直链下载受限时请稍后重试",
-      "downloadHint": "约 213MB · 点击直接下载 · GitHub 直链受限时稍后重试"
+      "downloadHint": "约 213MB · 点击直接下载 · GitHub 受限可稍后重试"
     },
     {
       "id": "sylab-ai",
