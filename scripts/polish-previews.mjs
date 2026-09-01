@@ -36,15 +36,16 @@ const THEMES = {
   },
 }
 
-// 主内容区候选（可见且非弹层）；milu-studio 特指工作台主区
+// 主内容区候选（可见且非弹层；优先内容容器，避开侧栏/导航/外层壳）：
+//   1) 工作台主区 2) 应用内容区 3) 页面内容区 4) 布局内容 5) 其它 main/section（跳过 app-shell 类外壳）
 const HOST_CANDIDATES = [
-  'main',
-  '.ant-layout-content',
-  '.page-content',
   '.workspace-main',
+  '.app-content',
+  '.page-content',
+  '.ant-layout-content',
   '.workspace-project-main',
   '.workspace',
-  '.app-content',
+  'main',
   'section',
 ]
 
@@ -97,6 +98,8 @@ html[data-theme="dark"] .demo-pollish-note,html.dark .demo-pollish-note,html.dar
       if (!el) return false;
       var cls = String(el.className || '');
       if (/notice|message|toast|popover|mask|overlay|modal|dropdown|popper|float/i.test(cls)) return false;
+      // 跳过外层壳（如 syLabAI 的 main.app-shell）与侧栏/导航，避免横条插到菜单左侧
+      if (/app-shell|side-rail|shell|sidebar|nav|sider|menu/i.test(cls)) return false;
       var cs = getComputedStyle(el);
       if (cs.display === 'none' || cs.visibility === 'hidden') return false;
       var rect = el.getBoundingClientRect();

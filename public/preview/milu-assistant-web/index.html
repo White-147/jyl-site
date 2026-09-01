@@ -3,7 +3,6 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="./logo.png" />
-    <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png?v=1" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MiLu Console</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -22,14 +21,14 @@
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Lato:wght@400;700&family=Newsreader:ital,wght@0,400;0,500;1,400&display=swap"
       />
     </noscript>
-    <script type="module" crossorigin src="./assets/index-DCR0taRc.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-CLoMrtZf.css">
+    <script type="module" crossorigin src="./assets/index-cnBw19KZ.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-BBduD0Sn.css">
   <style id="demo-pollish">
 .demo-pollish-note{margin:12px 14px;padding:9px 14px;border:1px dashed rgba(147,51,234,.45);border-radius:10px;color:#9333ea;background:rgba(147,51,234,.07);font:500 13px/1.6 system-ui,-apple-system,sans-serif}
 html[data-theme="dark"] .demo-pollish-note,html.dark .demo-pollish-note,html.dark-mode .demo-pollish-note{border:1px dashed rgba(192,132,252,.4);border-radius:10px;color:#c084fc;background:rgba(192,132,252,.08);font:500 13px/1.6 system-ui,-apple-system,sans-serif}
 </style></head>
   <body>
-    <div id="root"></div>
+    <div id="root"></div>
   <script id="demo-pollish">
 (function () {
   var NOTE_HTML = '<div class="demo-pollish-note" style="align-self:flex-start;flex:0 0 auto">演示模式 · 后端未部署：此处界面为在线美化展示，完整功能见 GitHub 仓库</div>';
@@ -56,13 +55,15 @@ html[data-theme="dark"] .demo-pollish-note,html.dark .demo-pollish-note,html.dar
   }
 
   function findHost() {
-    var sels = ["main",".ant-layout-content",".page-content",".workspace-main",".workspace-project-main",".workspace",".app-content","section"];
+    var sels = [".workspace-main",".app-content",".page-content",".ant-layout-content",".workspace-project-main",".workspace","main","section"];
     var candidates = sels.map(function (s) { return document.querySelector(s); });
     candidates = candidates.concat(Array.prototype.slice.call(document.querySelectorAll('[class*="content"], [class*="main"], [class*="shell"]')));
     return candidates.find(function (el) {
       if (!el) return false;
       var cls = String(el.className || '');
       if (/notice|message|toast|popover|mask|overlay|modal|dropdown|popper|float/i.test(cls)) return false;
+      // 跳过外层壳（如 syLabAI 的 main.app-shell）与侧栏/导航，避免横条插到菜单左侧
+      if (/app-shell|side-rail|shell|sidebar|nav|sider|menu/i.test(cls)) return false;
       var cs = getComputedStyle(el);
       if (cs.display === 'none' || cs.visibility === 'hidden') return false;
       var rect = el.getBoundingClientRect();

@@ -41,13 +41,15 @@ html[data-theme="dark"] .demo-pollish-note,html.dark .demo-pollish-note,html.dar
   }
 
   function findHost() {
-    var sels = ["main",".ant-layout-content",".page-content",".workspace-main",".workspace-project-main",".workspace",".app-content","section"];
+    var sels = [".workspace-main",".app-content",".page-content",".ant-layout-content",".workspace-project-main",".workspace","main","section"];
     var candidates = sels.map(function (s) { return document.querySelector(s); });
     candidates = candidates.concat(Array.prototype.slice.call(document.querySelectorAll('[class*="content"], [class*="main"], [class*="shell"]')));
     return candidates.find(function (el) {
       if (!el) return false;
       var cls = String(el.className || '');
       if (/notice|message|toast|popover|mask|overlay|modal|dropdown|popper|float/i.test(cls)) return false;
+      // 跳过外层壳（如 syLabAI 的 main.app-shell）与侧栏/导航，避免横条插到菜单左侧
+      if (/app-shell|side-rail|shell|sidebar|nav|sider|menu/i.test(cls)) return false;
       var cs = getComputedStyle(el);
       if (cs.display === 'none' || cs.visibility === 'hidden') return false;
       var rect = el.getBoundingClientRect();

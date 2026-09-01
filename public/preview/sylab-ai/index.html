@@ -6,7 +6,7 @@
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=1" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SyLabAI</title>
-    <script type="module" crossorigin src="./assets/index-BMtUCX3p.js"></script>
+    <script type="module" crossorigin src="./assets/index-DlWcYbvV.js"></script>
     <link rel="stylesheet" crossorigin href="./assets/index-s08S7NXN.css">
   <style id="demo-pollish">
 .demo-pollish-note{margin:12px 14px;padding:9px 14px;border:1px dashed rgba(59,130,246,.5);border-radius:10px;color:#3b82f6;background:rgba(59,130,246,.07);font:500 13px/1.6 system-ui,-apple-system,sans-serif}
@@ -40,13 +40,15 @@ html[data-theme="dark"] .demo-pollish-note,html.dark .demo-pollish-note,html.dar
   }
 
   function findHost() {
-    var sels = ["main",".ant-layout-content",".page-content",".workspace-main",".workspace-project-main",".workspace",".app-content","section"];
+    var sels = [".workspace-main",".app-content",".page-content",".ant-layout-content",".workspace-project-main",".workspace","main","section"];
     var candidates = sels.map(function (s) { return document.querySelector(s); });
     candidates = candidates.concat(Array.prototype.slice.call(document.querySelectorAll('[class*="content"], [class*="main"], [class*="shell"]')));
     return candidates.find(function (el) {
       if (!el) return false;
       var cls = String(el.className || '');
       if (/notice|message|toast|popover|mask|overlay|modal|dropdown|popper|float/i.test(cls)) return false;
+      // 跳过外层壳（如 syLabAI 的 main.app-shell）与侧栏/导航，避免横条插到菜单左侧
+      if (/app-shell|side-rail|shell|sidebar|nav|sider|menu/i.test(cls)) return false;
       var cs = getComputedStyle(el);
       if (cs.display === 'none' || cs.visibility === 'hidden') return false;
       var rect = el.getBoundingClientRect();

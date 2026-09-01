@@ -133,12 +133,9 @@ export default function About() {
               <ul className="relative mt-5 space-y-5">
                 {positions.map((item) => (
                   <li key={item.title}>
-                    <div className="flex gap-2.5 text-base leading-snug text-slate-600 sm:leading-relaxed dark:text-slate-300">
-                      <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-brand-500 dark:bg-cyan-400" aria-hidden="true" />
-                      <span>
-                        <strong className="font-semibold text-brand-600 dark:text-brand-300">{item.title}</strong>
-                        <span className="text-slate-600 dark:text-slate-300">：{item.desc}</span>
-                      </span>
+                    <div className="text-base leading-snug text-slate-600 sm:leading-relaxed dark:text-slate-300">
+                      <strong className="font-semibold text-brand-600 dark:text-brand-300">{item.title}</strong>
+                      <span className="text-slate-600 dark:text-slate-300">：{item.desc}</span>
                     </div>
                     <div className="mt-2 flex flex-wrap gap-1.5">
                       {item.keywords.map((tag) => (
