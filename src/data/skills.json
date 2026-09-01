@@ -103,24 +103,6 @@
           ]
         },
         {
-          "title": "数据库与大数据",
-          "items": [
-            "MySQL",
-            "PostgreSQL",
-            "SQLite",
-            "SQL",
-            "Hadoop",
-            "HDFS",
-            "Hive",
-            "Spark SQL",
-            "Spark Streaming",
-            "Kafka",
-            "数据清洗与质检",
-            "协同过滤推荐",
-            "H2（内嵌）"
-          ]
-        },
-        {
           "title": "模型与 API 接入",
           "items": [
             "OpenAI-compatible API",
@@ -212,6 +194,47 @@
             "Codex",
             "Qoder",
             "DeepSeek Harness（DSH）"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "data",
+      "label": "数据工程与大数据",
+      "note": "",
+      "groups": [
+        {
+          "title": "数据采集与清洗",
+          "items": [
+            "数据采集",
+            "Selenium 数据补充",
+            "数据清洗与质检",
+            "数据核对与校验"
+          ]
+        },
+        {
+          "title": "数据库",
+          "items": [
+            "MySQL",
+            "PostgreSQL",
+            "SQLite",
+            "SQL Server",
+            "SQL",
+            "索引与查询优化",
+            "数据备份与恢复",
+            "H2（内嵌）"
+          ]
+        },
+        {
+          "title": "大数据与推荐",
+          "items": [
+            "Hadoop / HDFS",
+            "Hive",
+            "Spark SQL",
+            "Spark Streaming",
+            "Kafka",
+            "行为日志与事件流",
+            "协同过滤推荐"
           ]
         }
       ]
