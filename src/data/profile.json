@@ -45,12 +45,8 @@
       "keywords": [
         "React / TypeScript",
         ".NET / C#",
-        "Python Skills",
         "OpenAI-compatible API",
-        "Vertex Gemini / Veo",
-        "Qwen-Omni",
-        "Electron",
-        "Inno Setup"
+        "Electron"
       ]
     },
     {
@@ -58,24 +54,17 @@
       "desc": "从 ERP 实施到企业系统的测试、问题闭环与培训交付。",
       "keywords": [
         "Java / Spring Boot",
-        "Spring Security / JWT",
         "MySQL / PostgreSQL",
-        "SQL Server",
-        "RESTful API",
-        "ERP 实施",
-        "交付文档"
+        "ERP 实施"
       ]
     },
     {
       "title": "数据工程与推荐",
       "desc": "采集、清洗、行为日志与推荐计算的完整链路。",
       "keywords": [
-        "Hadoop / HDFS",
-        "Hive",
-        "Spark SQL / Streaming",
-        "Kafka",
-        "Selenium",
-        "协同过滤 / 皮尔逊"
+        "Hadoop / Hive",
+        "Spark",
+        "Kafka"
       ]
     },
     {
@@ -83,10 +72,7 @@
       "desc": "网络搭建、设备维护、账号权限与数据安全，面向日常信息化支撑。",
       "keywords": [
         "Windows / Linux",
-        "办公网络",
-        "打印机 / 监控设备",
         "备份与恢复",
-        "日志管理",
         "操作培训"
       ]
     }
