@@ -27,7 +27,7 @@ interface ProjectAction {
 }
 
 const actionLinkClass =
-  'inline-flex items-center gap-1 text-sm font-medium text-brand-700 transition-colors hover:text-brand-900 hover:underline underline-offset-4 decoration-brand-300 dark:text-cyan-400 dark:hover:text-cyan-300 dark:decoration-brand-500/50'
+  'inline-flex items-center gap-1 whitespace-nowrap text-sm font-medium text-brand-700 transition-colors hover:text-brand-900 hover:underline underline-offset-4 decoration-brand-300 dark:text-cyan-400 dark:hover:text-cyan-300 dark:decoration-brand-500/50'
 
 function buildProjectActions(project: Project): ProjectAction[] {
   const actions: ProjectAction[] = []
@@ -186,7 +186,7 @@ function ProjectRow({ project, index }: { project: Project; index: number }) {
                   {projectActions.length > 0 && (
                     <div className="flex flex-wrap items-center gap-x-3.5 gap-y-1.5">
                       {projectActions.map((action) => (
-                        <span key={action.key} className="inline-flex items-center gap-2">
+                        <span key={action.key} className="inline-flex flex-wrap items-center gap-x-2 gap-y-0.5">
                           <a
                             href={action.href}
                             target="_blank"
@@ -198,7 +198,7 @@ function ProjectRow({ project, index }: { project: Project; index: number }) {
                             {action.label}
                           </a>
                           {action.key === 'download' && project.downloadHint && (
-                            <span className="text-xs leading-relaxed text-slate-400 dark:text-slate-500">
+                            <span className="block basis-full text-xs leading-relaxed text-slate-400 sm:basis-auto dark:text-slate-500">
                               {project.downloadHint}
                             </span>
                           )}
