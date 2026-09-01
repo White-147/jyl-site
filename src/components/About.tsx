@@ -136,7 +136,7 @@ export default function About() {
                     <div className="flex gap-2.5 text-base leading-snug text-slate-600 sm:leading-relaxed dark:text-slate-300">
                       <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-brand-500 dark:bg-cyan-400" aria-hidden="true" />
                       <span>
-                        <strong className="font-semibold text-ink dark:text-ink-light">{item.title}</strong>
+                        <strong className="font-semibold text-brand-600 dark:text-brand-300">{item.title}</strong>
                         <span className="text-slate-600 dark:text-slate-300">：{item.desc}</span>
                       </span>
                     </div>
