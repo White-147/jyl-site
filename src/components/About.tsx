@@ -3,7 +3,7 @@ import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { SECTIONS } from '../data/navigation'
 import profile from '../data/profile.json'
-import type { AboutLink, AboutPara, Stat } from '../data/types'
+import type { AboutLink, AboutPara, AboutPosition, Stat } from '../data/types'
 import Reveal from './Reveal'
 import SectionHeading from './SectionHeading'
 
@@ -61,6 +61,7 @@ export default function About() {
   const stats = profile.stats as Stat[]
   const about = profile.about as AboutPara[]
   const links = profile.aboutLinks as AboutLink[]
+  const positions = (profile.positions ?? []) as AboutPosition[]
   const anchor = profile.anchor ?? '数据科学与大数据技术本科'
   const scope = useRef<HTMLElement>(null)
 
@@ -115,7 +116,7 @@ export default function About() {
             </div>
           </Reveal>
 
-          {/* 定位卡：定位句 + 三条主线一句话（招聘者快速抓取定位） */}
+          {/* 多定位卡：四个岗位方向一句话定位 + 各方向关键词（招聘者快速抓取可投方向，与技能区画像互补） */}
           <Reveal delay={120}>
             <div className="glass-card-strong relative h-full overflow-hidden rounded-2xl p-6 sm:p-7">
               <div
@@ -127,21 +128,20 @@ export default function About() {
                 }}
               />
               <p className="font-display text-lg font-normal tracking-tight text-brand-700 dark:text-cyan-400">
-                AI 应用 · 企业系统 · 数据工程
+                多岗位定位 · 各方向均可验证
               </p>
-              <ul className="relative mt-5 space-y-4">
-                {[
-                  { line: '数据工程背景：采集、清洗、质检与推荐计算', tags: ['Spark', 'Hive', 'Kafka', 'Hadoop'] },
-                  { line: '企业系统交付：实施、测试、问题闭环与培训', tags: ['ERP', 'Selenium', 'MySQL', '协作交付'] },
-                  { line: 'Windows 原生 AI 创作工具链：Web、API、桌面端', tags: ['React', '.NET', 'Electron', 'Python Skills'] },
-                ].map((item) => (
-                  <li key={item.line.slice(0, 12)}>
+              <ul className="relative mt-5 space-y-5">
+                {positions.map((item) => (
+                  <li key={item.title}>
                     <div className="flex gap-2.5 text-base leading-snug text-slate-600 sm:leading-relaxed dark:text-slate-300">
                       <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-brand-500 dark:bg-cyan-400" aria-hidden="true" />
-                      {item.line}
+                      <span>
+                        <strong className="font-semibold text-ink dark:text-ink-light">{item.title}</strong>
+                        <span className="text-slate-600 dark:text-slate-300">：{item.desc}</span>
+                      </span>
                     </div>
                     <div className="mt-2 flex flex-wrap gap-1.5">
-                      {item.tags.map((tag) => (
+                      {item.keywords.map((tag) => (
                         <span
                           key={tag}
                           className="rounded-full border border-brand-200 bg-brand-50 px-2 py-0.5 text-[11px] font-medium text-brand-700 dark:border-brand-500/25 dark:bg-brand-500/10 dark:text-brand-300"

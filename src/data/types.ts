@@ -30,6 +30,8 @@ export interface Project {
   downloadUrl?: string
   /** 下载提示（如安装包说明），显示为按钮 title */
   downloadNote?: string
+  /** 下载动作可见文案提示（浅灰小字，与整体 meta 样式一致） */
+  downloadHint?: string
 }
 
 export interface AboutPara {
@@ -46,6 +48,13 @@ export interface AboutLink {
   desc: string
   /** [第 1 个数字, 第 2 个数字] 在 stats 中的下标 */
   statIdx: [number, number]
+}
+
+/** About 右侧多定位卡：一个岗位方向一条定位（结构与技能画像对齐） */
+export interface AboutPosition {
+  title: string
+  desc: string
+  keywords: string[]
 }
 
 export interface SkillGroup {

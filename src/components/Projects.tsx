@@ -186,17 +186,23 @@ function ProjectRow({ project, index }: { project: Project; index: number }) {
                   {projectActions.length > 0 && (
                     <div className="flex flex-wrap items-center gap-x-3.5 gap-y-1.5">
                       {projectActions.map((action) => (
-                        <a
-                          key={action.key}
-                          href={action.href}
-                          target="_blank"
-                          rel="noreferrer"
-                          title={action.title}
-                          className={actionLinkClass}
-                        >
-                          {action.icon}
-                          {action.label}
-                        </a>
+                        <span key={action.key} className="inline-flex items-center gap-2">
+                          <a
+                            href={action.href}
+                            target="_blank"
+                            rel="noreferrer"
+                            title={action.title}
+                            className={actionLinkClass}
+                          >
+                            {action.icon}
+                            {action.label}
+                          </a>
+                          {action.key === 'download' && project.downloadHint && (
+                            <span className="text-xs leading-relaxed text-slate-400 dark:text-slate-500">
+                              {project.downloadHint}
+                            </span>
+                          )}
+                        </span>
                       ))}
                     </div>
                   )}
