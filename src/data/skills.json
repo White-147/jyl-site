@@ -113,6 +113,7 @@
             "云雾 AI",
             "PixVerse",
             "Provider 配置",
+            "Ollama",
             "模型发现与连接测试"
           ]
         },
@@ -134,6 +135,8 @@
             "llama.cpp",
             "llama-server",
             "Ollama",
+            "Qwen3.8",
+            "Qwen3.6",
             "GGUF 量化（Q4_K_M / IQ2_M）",
             "CUDA 混合推理",
             "FlashAttention / 长上下文",
