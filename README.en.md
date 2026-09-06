@@ -1,6 +1,6 @@
 <h1 align="center">JYL Portfolio Site</h1>
 
-<p align="center">Personal job-hunting portfolio single-page app: AI application full-stack engineer covering data engineering, business system delivery, and Windows native desktop engineering.</p>
+<p align="center">Personal job-hunting portfolio single-page app: IT comprehensive role covering data engineering, business system delivery, and Windows native desktop engineering.</p>
 
 <p align="center">
   <a href="./README.md">简体中文</a> | <a href="./README.en.md">English</a>
@@ -18,7 +18,7 @@
   <img src="./docs/assets/screenshots/overview.webp" alt="Portfolio site homepage screenshot" width="900">
 </p>
 
-A personal job-hunting portfolio single-page app. Positioned as an "AI application full-stack engineer", it showcases verifiable projects such as MiLuStudio, XiaoLouAI, SyLabAI, and LocalLLMServer across three focus areas — data engineering, business system delivery, and Windows native desktop engineering — with project filtering by direction (AI Apps / Enterprise Systems / Big Data), light/dark theme switching, and a one-click download of the latest resume PDF.
+A personal job-hunting portfolio single-page app. Positioned as an "IT comprehensive role", it showcases verifiable projects such as MiLuStudio, XiaoLouAI, SyLabAI, and LocalLLMServer across three focus areas — data engineering, business system delivery, and Windows native desktop engineering — with project filtering by direction (AI Apps / Enterprise Systems / Big Data), light/dark theme switching, and a one-click download of the latest resume PDF.
 
 Live at [https://white-147.github.io/jyl-site/](https://white-147.github.io/jyl-site/). Content is driven by a SQLite database (`database/portfolio.db`) as the single source of truth; builds export it to JSON automatically, and pushing to `main` triggers GitHub Actions to build and deploy to GitHub Pages.
 
