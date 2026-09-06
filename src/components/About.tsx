@@ -87,7 +87,7 @@ export default function About() {
   return (
     <section id="about" ref={scope} className="relative scroll-mt-16 py-10 sm:py-24">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
-        <SectionHeading eyebrow={SECTIONS.find((s) => s.id === 'about')?.label ?? '关于我'} title="从数据工程到 AI 创作工具链" />
+        <SectionHeading eyebrow={SECTIONS.find((s) => s.id === 'about')?.label ?? '关于我'} title="从业务交付到 AI 应用落地" />
 
         <div className="mt-5 grid gap-5 sm:mt-12 lg:grid-cols-2">
           {/* 简介卡：学历锚点 + 阶段化叙事（早期 / 近期 / 日常） */}
