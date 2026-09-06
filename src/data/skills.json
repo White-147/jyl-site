@@ -81,7 +81,8 @@
             "Zustand",
             "HTML",
             "CSS",
-            "Three.js"
+            "Three.js",
+            "企业后台"
           ]
         },
         {
@@ -96,7 +97,8 @@
             "JWT",
             "Thymeleaf",
             "C++",
-            "Maven"
+            "Maven",
+            "XML"
           ]
         },
         {
@@ -109,6 +111,7 @@
             "EF Core",
             "WebAPI",
             "WebService",
+            "Control API",
             "PHP"
           ]
         },
@@ -120,7 +123,9 @@
             "Python Sidecar",
             "Agent",
             "Skills",
-            "MCP"
+            "MCP",
+            "CoPaw / QwenPaw",
+            "Memory / 多 Agent"
           ]
         },
         {
@@ -135,7 +140,8 @@
             "PixVerse",
             "Provider 配置",
             "Ollama",
-            "模型发现与连接测试"
+            "模型发现与连接测试",
+            "DeepSeek API"
           ]
         },
         {
@@ -144,6 +150,7 @@
             "llama.cpp",
             "llama-server",
             "Ollama",
+            "LM Studio",
             "LLM Server（OpenAI 兼容 API）"
           ]
         },
@@ -165,7 +172,8 @@
             "Windows Worker / Service",
             "PowerShell",
             "嵌入式 Python",
-            "本地端口与进程管理"
+            "本地端口与进程管理",
+            "桌面诊断"
           ]
         },
         {
@@ -241,6 +249,8 @@
             "PostgreSQL",
             "SQLite",
             "SQL Server",
+            "存储过程",
+            "查询视图",
             "SQL",
             "索引与查询优化",
             "数据备份与恢复",
