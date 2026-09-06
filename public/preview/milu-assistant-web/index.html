@@ -3,36 +3,23 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="./logo.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png?v=1" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MiLu Console</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <!-- 字体样式表异步加载：不阻塞首屏渲染（首屏先用系统字体回退，加载完成后再应用），
-         避免境外网络下 fonts.googleapis.com 超时拖慢首屏 -->
-    <link
-      rel="preload"
-      as="style"
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Lato:wght@400;700&family=Newsreader:ital,wght@0,400;0,500;1,400&display=swap"
-      onload="this.onload=null;this.rel='stylesheet'"
-    />
-    <noscript>
-      <link
-        rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Lato:wght@400;700&family=Newsreader:ital,wght@0,400;0,500;1,400&display=swap"
-      />
-    </noscript>
-    <script type="module" crossorigin src="./assets/index-CNG-HoW2.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-1l_vhtcr.css">
+    <!-- 字体已完全本地化（@fontsource woff2，随构建打包），不再请求境外 fonts.googleapis.com -->
+    <script type="module" crossorigin src="./assets/index-CtpSWZP_.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-CrZoRIKX.css">
   <style id="demo-pollish">
 .demo-pollish-note{margin:12px 14px;padding:9px 14px;border:1px dashed rgba(147,51,234,.45);border-radius:10px;color:#9333ea;background:rgba(147,51,234,.07);font:500 13px/1.6 system-ui,-apple-system,sans-serif}
 html[data-theme="dark"] .demo-pollish-note,html.dark .demo-pollish-note,html.dark-mode .demo-pollish-note{border:1px dashed rgba(192,132,252,.4);border-radius:10px;color:#c084fc;background:rgba(192,132,252,.08);font:500 13px/1.6 system-ui,-apple-system,sans-serif}
 </style></head>
   <body>
-    <div id="root"></div>
+    <div id="root"></div>
   <script id="demo-pollish">
 (function () {
   var NOTE_HTML = '<div class="demo-pollish-note" style="align-self:flex-start;flex:0 0 auto">演示模式 · 后端未部署：此处界面为在线美化展示，完整功能见 GitHub 仓库</div>';
   var REPLACE_ONLY = false;
+  var CHAT_HEADER_OFFSET = true;
   var KEYWORDS = /未连接|未部署|未加载|加载.{0,15}失败|无法连接|请先启动后端|Control API|上下文加载失败|不能连接|连接失败|服务不可用|请求失败|There isn't a GitHub Pages|Site not found|404/i;
 
   function apply() {
@@ -72,6 +59,27 @@ html[data-theme="dark"] .demo-pollish-note,html.dark .demo-pollish-note,html.dar
   }
 
   // 顶部横条（独立 id）：容器出现前不插入；容器变化后自动归位（避免应用挂载时机的时序问题）
+  function positionNote(n, host) {
+    if (!n) return;
+    // 顶部横条统一改为「悬浮浮层」，不占用文档流：
+    // 工作台/聊天等固定视口布局中，占流式横条会把内容挤出可视区（如 chat 输入区下移被裁）
+    if (getComputedStyle(host).position === 'static') host.style.position = 'relative';
+    n.style.position = 'absolute';
+    // MiLuConsole：检测 chat 页 64px header（新建会话/模型选择），横条下移让位避免遮挡
+    var topOffset = 12;
+    if (CHAT_HEADER_OFFSET) {
+      var chatHeader = host.querySelector('[class*="chat-anywhere-header"],[class*="default-header"],[class*="page-header"]');
+      if (chatHeader) {
+        var hr = chatHeader.getBoundingClientRect();
+        if (hr.height > 0) topOffset = hr.height + 12;
+      }
+    }
+    n.style.top = topOffset + 'px';
+    n.style.left = '12px';
+    n.style.right = '12px';
+    n.style.zIndex = '30';
+  }
+
   function ensureTopNote() {
     if (!REPLACE_ONLY && document.querySelector('.demo-pollish-note')) return; // 已有错误替换横条，不再重复
     var existing = document.getElementById('demo-mode-note');
@@ -80,20 +88,14 @@ html[data-theme="dark"] .demo-pollish-note,html.dark .demo-pollish-note,html.dar
       existing.remove();
       existing = null;
     }
-    if (existing || !host) return;
+    if (!host) return;
+    if (existing) { positionNote(existing, host); return; }
     var n = document.createElement('div');
     n.id = 'demo-mode-note';
     n.innerHTML = NOTE_HTML;
     var first = host.firstElementChild;
     if (first) host.insertBefore(n, first); else host.appendChild(n);
-    // 顶部横条统一改为「悬浮浮层」，不占用文档流：
-    // 工作台/聊天等固定视口布局中，占流式横条会把内容挤出可视区（如 chat 输入区下移被裁）
-    if (getComputedStyle(host).position === 'static') host.style.position = 'relative';
-    n.style.position = 'absolute';
-    n.style.top = '12px';
-    n.style.left = '12px';
-    n.style.right = '12px';
-    n.style.zIndex = '30';
+    positionNote(n, host);
   }
 
   apply();

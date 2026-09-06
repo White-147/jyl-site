@@ -58,6 +58,8 @@ for (const name of Object.keys(THEMES)) {
   }
   const t = THEMES[name]
   const replaceOnly = name === 'xiao-lou-ai' ? 'true' : 'false' // XiaoLouAI：错误元素容器窄，仅隐藏、顶部统一全宽条
+  // MiLuConsole：Chat 页 header 高 64px（含新建会话/模型选择按钮），横条需下移让位，否则遮挡交互
+  const chatHeaderOffset = name === 'milu-assistant-web' ? 'true' : 'false'
   const noteCss = (c) =>
     `border:1px dashed ${c.border};border-radius:10px;color:${c.color};background:${c.bg};` +
     `font:500 13px/1.6 system-ui,-apple-system,sans-serif`
@@ -69,6 +71,7 @@ html[data-theme="dark"] .demo-pollish-note,html.dark .demo-pollish-note,html.dar
 (function () {
   var NOTE_HTML = '<div class="demo-pollish-note" style="align-self:flex-start;flex:0 0 auto">演示模式 · 后端未部署：此处界面为在线美化展示，完整功能见 GitHub 仓库</div>';
   var REPLACE_ONLY = ${replaceOnly};
+  var CHAT_HEADER_OFFSET = ${chatHeaderOffset};
   var KEYWORDS = /未连接|未部署|未加载|加载.{0,15}失败|无法连接|请先启动后端|Control API|上下文加载失败|不能连接|连接失败|服务不可用|请求失败|There isn't a GitHub Pages|Site not found|404/i;
 
   function apply() {
@@ -108,6 +111,27 @@ html[data-theme="dark"] .demo-pollish-note,html.dark .demo-pollish-note,html.dar
   }
 
   // 顶部横条（独立 id）：容器出现前不插入；容器变化后自动归位（避免应用挂载时机的时序问题）
+  function positionNote(n, host) {
+    if (!n) return;
+    // 顶部横条统一改为「悬浮浮层」，不占用文档流：
+    // 工作台/聊天等固定视口布局中，占流式横条会把内容挤出可视区（如 chat 输入区下移被裁）
+    if (getComputedStyle(host).position === 'static') host.style.position = 'relative';
+    n.style.position = 'absolute';
+    // MiLuConsole：检测 chat 页 64px header（新建会话/模型选择），横条下移让位避免遮挡
+    var topOffset = 12;
+    if (CHAT_HEADER_OFFSET) {
+      var chatHeader = host.querySelector('[class*="chat-anywhere-header"],[class*="default-header"],[class*="page-header"]');
+      if (chatHeader) {
+        var hr = chatHeader.getBoundingClientRect();
+        if (hr.height > 0) topOffset = hr.height + 12;
+      }
+    }
+    n.style.top = topOffset + 'px';
+    n.style.left = '12px';
+    n.style.right = '12px';
+    n.style.zIndex = '30';
+  }
+
   function ensureTopNote() {
     if (!REPLACE_ONLY && document.querySelector('.demo-pollish-note')) return; // 已有错误替换横条，不再重复
     var existing = document.getElementById('demo-mode-note');
@@ -116,20 +140,14 @@ html[data-theme="dark"] .demo-pollish-note,html.dark .demo-pollish-note,html.dar
       existing.remove();
       existing = null;
     }
-    if (existing || !host) return;
+    if (!host) return;
+    if (existing) { positionNote(existing, host); return; }
     var n = document.createElement('div');
     n.id = 'demo-mode-note';
     n.innerHTML = NOTE_HTML;
     var first = host.firstElementChild;
     if (first) host.insertBefore(n, first); else host.appendChild(n);
-    // 顶部横条统一改为「悬浮浮层」，不占用文档流：
-    // 工作台/聊天等固定视口布局中，占流式横条会把内容挤出可视区（如 chat 输入区下移被裁）
-    if (getComputedStyle(host).position === 'static') host.style.position = 'relative';
-    n.style.position = 'absolute';
-    n.style.top = '12px';
-    n.style.left = '12px';
-    n.style.right = '12px';
-    n.style.zIndex = '30';
+    positionNote(n, host);
   }
 
   apply();
