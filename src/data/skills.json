@@ -62,7 +62,7 @@
       "note": "",
       "groups": [
         {
-          "title": "后端与平台",
+          "title": "【开发交付】后端与平台",
           "items": [
             "Java",
             "Spring Boot",
@@ -83,7 +83,7 @@
           ]
         },
         {
-          "title": "前端",
+          "title": "【开发交付】前端",
           "items": [
             "TypeScript",
             "JavaScript",
@@ -103,7 +103,7 @@
           ]
         },
         {
-          "title": "模型与 API 接入",
+          "title": "【AI落地】模型与 API 接入",
           "items": [
             "OpenAI-compatible API",
             "External API Profile",
@@ -117,7 +117,7 @@
           ]
         },
         {
-          "title": "Python 与 AI 工程",
+          "title": "【开发交付】Python 与 AI 工程",
           "items": [
             "Python",
             "FastAPI",
@@ -129,7 +129,7 @@
           ]
         },
         {
-          "title": "本地大模型部署",
+          "title": "【AI落地】本地大模型部署",
           "items": [
             "llama.cpp",
             "llama-server",
@@ -143,7 +143,7 @@
           ]
         },
         {
-          "title": "桌面与本地化",
+          "title": "【开发交付】桌面与本地化",
           "items": [
             "Electron",
             "electron-builder",
@@ -157,7 +157,7 @@
           ]
         },
         {
-          "title": "媒体与多模态",
+          "title": "【AI落地】媒体与多模态",
           "items": [
             "FFmpeg",
             "OCR（Tesseract）",
@@ -170,7 +170,7 @@
           ]
         },
         {
-          "title": "工程化与测试",
+          "title": "【实施与协同】工程化与测试",
           "items": [
             "Git",
             "GitHub",
@@ -187,7 +187,7 @@
           ]
         },
         {
-          "title": "AI 编程协作",
+          "title": "【实施与协同】AI 编程协作",
           "items": [
             "Cursor Agent",
             "Cursor Composer",
