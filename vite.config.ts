@@ -7,12 +7,12 @@ import { join } from 'node:path'
 // 首屏字体（src/fonts，由 @font-face 引用）；构建后把这些字体的 <link rel="preload" as="font">
 // 注入 dist/index.html 的 <head>——HTML 解析时立即发起请求，早于 CSS/JS，消除字体滞后覆盖（FOUT）。
 // 字体文件名在构建后带 hash，故采用 closeBundle 后处理（读实际产物名），而非写死 URL。
+// 注意：Liu Jian Mao Cao（名字）与 Smiley Sans（得意黑）已 base64 内嵌进 index.html（font-face-inline，
+// 随 HTML 到达），此处仅预加载 Noto Sans SC 三个正文字重。
 const FONT_FILES = [
-  'liu-jian-mao-cao-regular.woff2', // Hero 名字（刘草手书）
-  'smiley-sans-oblique.woff2',       // 得意黑小标题
-  'noto-sans-sc-400.woff2',          // 正文 400
-  'noto-sans-sc-500.woff2',          // 正文 500
-  'noto-sans-sc-900.woff2',          // 正文 900（粗标题）
+  'noto-sans-sc-400.woff2', // 正文 400
+  'noto-sans-sc-500.woff2', // 正文 500
+  'noto-sans-sc-900.woff2', // 正文 900（粗标题）
 ]
 
 function injectFontPreload(): Plugin {

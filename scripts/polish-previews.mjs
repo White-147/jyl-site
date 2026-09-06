@@ -60,6 +60,9 @@ for (const name of Object.keys(THEMES)) {
   const replaceOnly = name === 'xiao-lou-ai' ? 'true' : 'false' // XiaoLouAI：错误元素容器窄，仅隐藏、顶部统一全宽条
   // MiLuConsole：Chat 页 header 高 64px（含新建会话/模型选择按钮），横条需下移让位，否则遮挡交互
   const chatHeaderOffset = name === 'milu-assistant-web' ? 'true' : 'false'
+  // 流式页面（普通文档流、可滚动）：横条改为占流插入（不浮层），内容自然下移不被遮挡。
+  // 绝对定位浮层只适合固定视口布局（chat/工作台），流式页会盖住内容（如 Book 首页系统公告卡）。
+  const flowMode = name === 'book-recommendation' ? 'true' : 'false'
   const noteCss = (c) =>
     `border:1px dashed ${c.border};border-radius:10px;color:${c.color};background:${c.bg};` +
     `font:500 13px/1.6 system-ui,-apple-system,sans-serif`
@@ -72,6 +75,7 @@ html[data-theme="dark"] .demo-pollish-note,html.dark .demo-pollish-note,html.dar
   var NOTE_HTML = '<div class="demo-pollish-note" style="align-self:flex-start;flex:0 0 auto">演示模式 · 后端未部署：此处界面为在线美化展示，完整功能见 GitHub 仓库</div>';
   var REPLACE_ONLY = ${replaceOnly};
   var CHAT_HEADER_OFFSET = ${chatHeaderOffset};
+  var FLOW_MODE = ${flowMode};
   var KEYWORDS = /未连接|未部署|未加载|加载.{0,15}失败|无法连接|请先启动后端|Control API|上下文加载失败|不能连接|连接失败|服务不可用|请求失败|There isn't a GitHub Pages|Site not found|404/i;
 
   function apply() {
@@ -113,7 +117,17 @@ html[data-theme="dark"] .demo-pollish-note,html.dark .demo-pollish-note,html.dar
   // 顶部横条（独立 id）：容器出现前不插入；容器变化后自动归位（避免应用挂载时机的时序问题）
   function positionNote(n, host) {
     if (!n) return;
-    // 顶部横条统一改为「悬浮浮层」，不占用文档流：
+    // 流式页面（普通文档流、可滚动）：横条占流插入，内容自然下移不被遮挡
+    if (FLOW_MODE) {
+      n.style.position = '';
+      n.style.top = '';
+      n.style.left = '';
+      n.style.right = '';
+      n.style.zIndex = '';
+      host.style.position = '';
+      return;
+    }
+    // 固定视口布局：顶部横条改为「悬浮浮层」，不占用文档流：
     // 工作台/聊天等固定视口布局中，占流式横条会把内容挤出可视区（如 chat 输入区下移被裁）
     if (getComputedStyle(host).position === 'static') host.style.position = 'relative';
     n.style.position = 'absolute';
