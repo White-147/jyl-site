@@ -62,7 +62,30 @@
       "note": "",
       "groups": [
         {
-          "title": "后端与平台",
+          "title": "前端框架",
+          "items": [
+            "React 19",
+            "Vue 2",
+            "TypeScript",
+            "JavaScript",
+            "Vite"
+          ]
+        },
+        {
+          "title": "前端工具与UI",
+          "items": [
+            "Ant Design",
+            "Element UI",
+            "Tailwind CSS",
+            "ECharts",
+            "Zustand",
+            "HTML",
+            "CSS",
+            "Three.js"
+          ]
+        },
+        {
+          "title": "Java 后端",
           "items": [
             "Java",
             "Spring Boot",
@@ -71,35 +94,33 @@
             "MyBatis-Plus",
             "RESTful API",
             "JWT",
+            "Thymeleaf",
             "C++",
+            "Maven"
+          ]
+        },
+        {
+          "title": ".NET 平台",
+          "items": [
             "C#",
             ".NET 8",
             ".NET 10",
             "ASP.NET Core",
             "EF Core",
-            "Swagger",
-            "Knife4j",
-            "Maven"
+            "WebAPI",
+            "WebService",
+            "PHP"
           ]
         },
         {
-          "title": "前端",
+          "title": "Python 与 AI 工程",
           "items": [
-            "TypeScript",
-            "JavaScript",
-            "React 19",
-            "Vue 2",
-            "Vite",
-            "Tailwind CSS",
-            "Ant Design",
-            "Element UI",
-            "ECharts",
-            "Axios",
-            "Thymeleaf",
-            "HTML",
-            "CSS",
-            "Three.js",
-            "Zustand"
+            "Python",
+            "FastAPI",
+            "Python Sidecar",
+            "Agent",
+            "Skills",
+            "MCP"
           ]
         },
         {
@@ -118,44 +139,32 @@
           ]
         },
         {
-          "title": "Python 与 AI 工程",
-          "items": [
-            "Python",
-            "FastAPI",
-            "Python Sidecar",
-            "Agent",
-            "Skills",
-            "agentscope",
-            "MCP"
-          ]
-        },
-        {
-          "title": "本地大模型部署",
+          "title": "模型部署工具",
           "items": [
             "llama.cpp",
             "llama-server",
             "Ollama",
+            "LLM Server（OpenAI 兼容 API）"
+          ]
+        },
+        {
+          "title": "本地模型与推理",
+          "items": [
             "Qwen3.8",
             "Qwen3.6",
             "GGUF 量化（Q4_K_M / IQ2_M）",
             "CUDA 混合推理",
-            "FlashAttention / 长上下文",
-            "LLM Server（OpenAI 兼容 API）",
-            "本地模型下载与启动",
-            "推理性能实测"
+            "FlashAttention / 长上下文"
           ]
         },
         {
           "title": "桌面与本地化",
           "items": [
             "Electron",
-            "electron-builder",
-            "NSIS",
             "Inno Setup",
             "Windows Worker / Service",
             "PowerShell",
             "嵌入式 Python",
-            "C# 启动器",
             "本地端口与进程管理"
           ]
         },
@@ -173,20 +182,30 @@
           ]
         },
         {
-          "title": "工程化与测试",
+          "title": "工程化与构建",
           "items": [
             "Git",
             "GitHub",
             "GitHub Actions",
+            "Vite 构建",
+            "Linux"
+          ]
+        },
+        {
+          "title": "测试",
+          "items": [
             "Vitest",
             "xUnit",
             "Playwright",
-            "Synthetic E2E",
-            "Selenium",
-            "Vite 构建",
-            "Linux",
-            "Ubuntu",
-            "Docker 基础"
+            "Selenium"
+          ]
+        },
+        {
+          "title": "Docker 与容器",
+          "items": [
+            "Docker 基础",
+            "Docker Compose",
+            "Ubuntu"
           ]
         },
         {
