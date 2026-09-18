@@ -40,7 +40,7 @@ function ProofCard({
         />
         <span className="flex flex-wrap items-center gap-x-1.5 text-xs text-slate-400 dark:text-slate-500">
           {type && (
-            <span className={type === '证书' ? 'font-medium text-brand-600 dark:text-cyan-400' : 'font-medium text-amber-600 dark:text-amber-400'}>
+            <span className={type === '证书' ? 'font-medium text-brand-700 dark:text-brand-200' : 'font-medium text-amber-700 dark:text-amber-400'}>
               {type}
             </span>
           )}
@@ -54,7 +54,7 @@ function ProofCard({
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className="ml-auto h-5 w-5 shrink-0 text-slate-400 transition-colors group-hover:text-brand-600 dark:text-slate-500 dark:group-hover:text-cyan-400"
+          className="ml-auto h-5 w-5 shrink-0 text-slate-400 transition-colors group-hover:text-brand-600 dark:text-slate-500 dark:group-hover:text-brand-200"
           aria-hidden="true"
         >
           <circle cx="11" cy="11" r="7" />
@@ -69,7 +69,7 @@ export default function Education() {
   const [viewing, setViewing] = useState<CertItem | null>(null)
 
   return (
-    <section id="education" className="relative scroll-mt-16 py-10 sm:py-24">
+    <section id="education" className="relative anchor-offset section-tight">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <SectionHeading eyebrow={SECTIONS.find((s) => s.id === 'education')?.label ?? '教育背景'} title="教育经历 · 证书与奖项" />
 
@@ -78,7 +78,7 @@ export default function Education() {
           {/* 学校竖卡 */}
           <Reveal className="lg:col-span-1">
             <div className="glass-card-strong flex h-full flex-col justify-center gap-5 rounded-2xl p-6 sm:p-8">
-              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-700 dark:bg-brand-500/10 dark:text-cyan-400">
+              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-700 dark:bg-brand-500/10 dark:text-brand-200">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6" aria-hidden="true">
                   <path d="M22 10 12 5 2 10l10 5 10-5z" />
                   <path d="M6 12v5c0 1.66 2.69 3 6 3s6-1.34 6-3v-5" />
@@ -86,7 +86,7 @@ export default function Education() {
               </span>
               <div>
                 <h3 className="text-lg font-bold text-ink dark:text-ink-light">{education.school}</h3>
-                <p className="text-sm font-medium text-brand-700 dark:text-cyan-400">{education.degree}</p>
+                <p className="text-sm font-medium text-brand-700 dark:text-brand-200">{education.degree}</p>
                 <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
                   {education.period} · {education.location}
                 </p>

@@ -10,7 +10,7 @@ export default function Contact() {
   const backup = useCopyFeedback(contact.email, toast.show)
 
   return (
-    <section id="contact" className="relative scroll-mt-20 section-loose">
+    <section id="contact" className="relative anchor-offset section-loose">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <SectionHeading
           eyebrow={SECTIONS.find((s) => s.id === 'contact')?.label ?? '联系方式'}
@@ -39,6 +39,7 @@ export default function Contact() {
                   type="button"
                   onClick={primary.copy}
                   aria-label={`复制邮箱 ${contact.emailQq}`}
+                  data-copyable
                   className="group inline-flex items-center gap-2 rounded-lg bg-brand-700 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-800 dark:bg-brand-700 dark:hover:bg-brand-600"
                 >
                   {primary.copied ? (
@@ -51,8 +52,9 @@ export default function Contact() {
                       <path d="M5 15V5a2 2 0 0 1 2-2h10" />
                     </svg>
                   )}
-                  {/* 邮箱文本保留在 DOM 中（可选中、读屏可读），只是不再触发 mailto */}
-                  <span lang="en">{contact.emailQq}</span>
+                  {/* 邮箱文本保留在 DOM 中（可选中、读屏可读），只是不再触发 mailto。
+                      data-copyable = 只读保护白名单，见 useReadOnlyGuard.ts */}
+                  <span lang="en" data-copyable>{contact.emailQq}</span>
                 </button>
                 <a
                   href={contact.github}
@@ -78,7 +80,8 @@ export default function Contact() {
                   下载简历
                 </a>
               </div>
-              {/* 联系方式：手动三行，三端排版一致；文本可选可复制 */}
+              {/* 联系方式：手动三行，三端排版一致。
+                  两个邮箱标注 data-copyable（只读白名单，可选中可复制）；GitHub 链接不标注。 */}
               <p className="mx-auto mt-8 max-w-md space-y-1.5 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
                 <span className="block">
                   QQ 邮箱：
@@ -88,7 +91,7 @@ export default function Contact() {
                     title="点击复制"
                     className="underline decoration-slate-300 underline-offset-2 transition-colors hover:text-brand-700 dark:decoration-slate-600 dark:hover:text-brand-200"
                   >
-                    <span lang="en">{contact.emailQq}</span>
+                    <span lang="en" data-copyable>{contact.emailQq}</span>
                   </button>
                 </span>
                 <span className="block">
@@ -99,7 +102,7 @@ export default function Contact() {
                     title="点击复制"
                     className="underline decoration-slate-300 underline-offset-2 transition-colors hover:text-brand-700 dark:decoration-slate-600 dark:hover:text-brand-200"
                   >
-                    <span lang="en">{contact.email}</span>
+                    <span lang="en" data-copyable>{contact.email}</span>
                   </button>
                 </span>
                 <span className="block">
@@ -121,6 +124,19 @@ export default function Contact() {
           </div>
         </Reveal>
       </div>
+
+      {/* 收尾呼吸区（scrim）。
+          为什么需要它：`#contact` 是最后一段，下面只有页脚。实测桌面端页面的最大滚动量
+          比"让它停在锚点停靠位"所需的量少 45px、平板端少 258px，
+          于是它**滚不到停靠位**（标题停在 133px 而不是 88px）。
+          这不是锚点偏移算错，而是页面根本滚不了那么远。
+          补一段不承载内容的呼吸区，让最后一段也能停在正确位置、并被导轨正确高亮。
+          高度让 vh 参与：矮屏少留、高屏多留，避免手机上出现大片空白。
+          它只是一块背景，与全站背景层连续，不会被读成"空白区块"。 */}
+      <div
+        aria-hidden="true"
+        className="h-[clamp(6rem,22vh,16rem)] sm:h-[clamp(8rem,30vh,20rem)]"
+      />
       <Toast message={toast.message} />
     </section>
   )

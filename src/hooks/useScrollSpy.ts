@@ -1,27 +1,52 @@
 import { useEffect, useState } from 'react'
+import {
+  SCROLL_MARGIN_DESKTOP_PX,
+  SCROLL_MARGIN_MOBILE_PX,
+  SCROLL_TRIGGER_EPSILON_PX,
+} from '../data/scrollTargets'
 
-/** 滚动侦测：返回当前正在阅读的区块 id（用于导航高亮）。
- *  触发规则：板块顶部越过视口顶部 128px 触发线，且选择「最靠下」的板块
- *  （即刚越过触发线的那个 = 当前在读；与板块 scroll-mt-16 锚点停靠位兼容）。
- *  用 scroll 监听 + rAF 节流（IntersectionObserver threshold:0 只在进出视口时回调，
- *  无法表达「板块顶部越过触发线」这一连续条件）。 */
+/**
+ * 滚动侦测：返回当前正在阅读的区块 id（用于导航高亮）。
+ *
+ * 判定规则：取「顶部已经越过触发线、且最靠下」的那个板块 = 当前在读。
+ * 这与「点锚点跳转后落点恰好等于停靠位」是同一个坐标系：
+ * 段落停靠在 X 处 → 它的 top = X ≤ 判定线 → 它成为最靠下的通过者 → 高亮它。
+ *
+ * ⚠️ 联动维护点（详见 docs/联动维护点.md 第 6 条）
+ * 判定线必须等于各 section 的锚点停靠位（`ANCHOR_OFFSET_CLASS`，见 scrollTargets.ts）。
+ * 三处成对：scrollTargets.ts 的值 → index.css 的 @utility → 这里读的值。
+ *
+ * 历史问题（两轮）：
+ *   1. 停靠位 64px 而判定线 128px → 点击导航跳转后高亮停在上一段，要再滚一下才切。
+ *   2. 两者统一 80px，但手机端吸顶导航正好占 0..80px → 标题紧贴浮层下沿、零间隙。
+ * 现在：停靠位与判定线同源（手机 104 / 桌面 88），容差 2px 只用于吸收子像素误差。
+ *
+ * 首屏（#top）也参与侦测：它排在 SECTIONS 第一位，页面滚到顶时它成为当前项，
+ * 所以点「返回顶部」后首屏节点会亮起，而不是停留在「关于我」。
+ */
 export function useScrollSpy(ids: string[]) {
   const [active, setActive] = useState('')
 
   useEffect(() => {
-    const TRIGGER_LINE = 128
     let raf = 0
 
     const update = () => {
       cancelAnimationFrame(raf)
       raf = requestAnimationFrame(() => {
+        // 判定线 = 当前视口宽度下的停靠位 + 容差
+        const margin =
+          window.matchMedia('(min-width: 640px)').matches
+            ? SCROLL_MARGIN_DESKTOP_PX
+            : SCROLL_MARGIN_MOBILE_PX
+        const triggerLine = margin + SCROLL_TRIGGER_EPSILON_PX
+
         let bestId = ''
         let bestTop = -Infinity
         for (const id of ids) {
           const el = document.getElementById(id)
           if (!el) continue
           const top = el.getBoundingClientRect().top
-          if (top <= TRIGGER_LINE && top > bestTop) {
+          if (top <= triggerLine && top > bestTop) {
             bestTop = top
             bestId = id
           }

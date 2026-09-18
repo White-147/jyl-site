@@ -1,12 +1,15 @@
 import { useScrollSpy } from '../hooks/useScrollSpy'
-import { SECTIONS, SECTION_IDS } from '../data/navigation'
+import { useAnchorScroll } from '../hooks/useAnchorScroll'
+import { CHAPTERS, SECTION_IDS } from '../data/navigation'
 
-// 移动端空间有限：教育并入「经历」区块，Tab Bar 保持 5 个主 tab
-const tabs = SECTIONS.filter((s) => s.id !== 'education')
+// 移动端空间有限：教育并入「经历」区块，Tab Bar 保持 5 个主 tab；
+// 首屏（isChapter: false）不进 Tab Bar，它只参与滚动侦测与右侧导轨
+const tabs = CHAPTERS.filter((s) => s.id !== 'education')
 
 /** 移动端底部常驻 Tab Bar（2026 主流：可见性 + 拇指区，替代汉堡菜单） */
 export default function MobileTabBar() {
   const active = useScrollSpy(SECTION_IDS)
+  const { onAnchorClick } = useAnchorScroll()
 
   return (
     <nav
@@ -20,10 +23,11 @@ export default function MobileTabBar() {
             <a
               key={tab.id}
               href={`#${tab.id}`}
+              onClick={(e) => onAnchorClick(e, tab.id)}
               aria-current={isActive ? 'page' : undefined}
               className={`flex min-h-14 flex-1 flex-col items-center justify-center gap-0.5 text-[11px] font-medium transition-colors ${
                 isActive
-                  ? 'text-brand-700 dark:text-cyan-400'
+                  ? 'text-brand-700 dark:text-brand-200'
                   : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
               }`}
             >
