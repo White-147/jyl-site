@@ -7,7 +7,8 @@
     <link rel="icon" href="favicon.ico">
     <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png?v=1">
     <title>book_recommendation</title>
-  <script defer src="js/chunk-vendors.js"></script><script defer src="js/app.js"></script><style id="demo-pollish">
+  <script defer src="js/chunk-vendors.js"></script><script defer src="js/app.js"></script><meta id="frame-guard-csp" http-equiv="Content-Security-Policy" content="frame-ancestors 'self'">
+<style id="demo-pollish">
 .demo-pollish-note{margin:12px 14px;padding:9px 14px;border:1px dashed rgba(64,158,255,.5);border-radius:10px;color:#409eff;background:rgba(64,158,255,.08);font:500 13px/1.6 system-ui,-apple-system,sans-serif}
 html[data-theme="dark"] .demo-pollish-note,html.dark .demo-pollish-note,html.dark-mode .demo-pollish-note{border:1px dashed rgba(96,165,250,.5);border-radius:10px;color:#60a5fa;background:rgba(96,165,250,.08);font:500 13px/1.6 system-ui,-apple-system,sans-serif}
 </style></head>
@@ -115,6 +116,26 @@ html[data-theme="dark"] .demo-pollish-note,html.dark .demo-pollish-note,html.dar
   setTimeout(ensureTopNote, 1200);
   setInterval(function () { apply(); ensureTopNote(); }, 1200);
   new MutationObserver(apply).observe(document.documentElement, { childList: true, subtree: true });
+})();
+</script>
+<script id="frame-guard">
+(function () {
+  try {
+    if (window.self === window.top) return;
+    var top;
+    try { top = window.top.location.href } catch (e) { top = null }
+    // 同源嵌入（本站自己的页面）放行
+    if (top && top.indexOf(window.location.origin) === 0) return;
+    try { window.top.location.replace(window.self.location.href) } catch (e) {}
+    document.documentElement.innerHTML =
+      '<body style="margin:0;display:flex;align-items:center;justify-content:center;min-height:100vh;' +
+      'font:500 15px/1.8 system-ui,-apple-system,PingFang SC,Microsoft YaHei,sans-serif;color:#536c70;' +
+      'background:#f6faf9;text-align:center;padding:2rem">' +
+      '<div><strong style="display:block;font-size:17px;color:#0f2e36;margin-bottom:.5rem">' +
+      '此页面不允许被嵌入</strong>' +
+      '请访问原始地址：<a href="' + window.location.href + '" style="color:#0f574f">' +
+      window.location.href + '</a></div></body>';
+  } catch (e) {}
 })();
 </script></body>
 </html>

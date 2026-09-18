@@ -49,6 +49,37 @@ const HOST_CANDIDATES = [
   'section',
 ]
 
+// iframe 防护（反爬 L4）：预览页与主站同源，默认允许被任意站点 <frame>/<iframe> 嵌套，
+// 等于把自己的静态资源变成别人的免费门面。这里做客户端纵深防御：
+//   1) frame-ancestors CSP（对现代浏览器生效；GitHub Pages 无法下发 HTTP 头，只能靠 meta）
+//   2) frame-busting 脚本兜底（老浏览器 / CSP 被忽略时）
+// 主站本体的 5 个预览页相互之间不使用 iframe（均为直达链接），所以不会误伤。
+//
+// 注意：本块包含**两个**元素，所以清理时 meta 与 script 要分别擦除。
+// 只擦 script 会导致重复运行时 meta 不断累积（实测跑到第 2 轮就出现两份 CSP）。
+const FRAME_GUARD_META =
+  `<meta id="frame-guard-csp" http-equiv="Content-Security-Policy" content="frame-ancestors 'self'">`
+const FRAME_GUARD = `<script id="frame-guard">
+(function () {
+  try {
+    if (window.self === window.top) return;
+    var top;
+    try { top = window.top.location.href } catch (e) { top = null }
+    // 同源嵌入（本站自己的页面）放行
+    if (top && top.indexOf(window.location.origin) === 0) return;
+    try { window.top.location.replace(window.self.location.href) } catch (e) {}
+    document.documentElement.innerHTML =
+      '<body style="margin:0;display:flex;align-items:center;justify-content:center;min-height:100vh;' +
+      'font:500 15px/1.8 system-ui,-apple-system,PingFang SC,Microsoft YaHei,sans-serif;color:#536c70;' +
+      'background:#f6faf9;text-align:center;padding:2rem">' +
+      '<div><strong style="display:block;font-size:17px;color:#0f2e36;margin-bottom:.5rem">' +
+      '此页面不允许被嵌入</strong>' +
+      '请访问原始地址：<a href="' + window.location.href + '" style="color:#0f574f">' +
+      window.location.href + '</a></div></body>';
+  } catch (e) {}
+})();
+</script>`
+
 let done = 0
 for (const name of Object.keys(THEMES)) {
   const file = join(previewDir, name, 'index.html')
@@ -174,9 +205,14 @@ html[data-theme="dark"] .demo-pollish-note,html.dark .demo-pollish-note,html.dar
   let html = readFileSync(file, 'utf8')
   html = html.replace(/<style id="demo-pollish">[\s\S]*?<\/style>[\s]*/g, '')
   html = html.replace(/<script id="demo-pollish">[\s\S]*?<\/script>[\s]*/g, '')
-  html = html.replace('</head>', STYLE + '</head>').replace('</body>', SCRIPT + '</body>')
+  html = html.replace(/<script id="frame-guard">[\s\S]*?<\/script>[\s]*/g, '')
+  // CSP meta 单独擦除：它是独立元素，且要兼容早期没有 id 的注入版本
+  html = html.replace(/<meta[^>]*http-equiv="Content-Security-Policy"[^>]*>\s*/g, '')
+  html = html
+    .replace('</head>', FRAME_GUARD_META + '\n' + STYLE + '</head>')
+    .replace('</body>', SCRIPT + '\n' + FRAME_GUARD + '</body>')
   writeFileSync(file, html)
   done++
-  console.log(`injected: ${name} (${t.color})`)
+  console.log(`injected: ${name}（浅色 ${t.light.color} / 深色 ${t.dark.color}）`)
 }
-console.log(`完成：${done} 个预览页已注入/更新演示美化`)
+console.log(`完成：${done} 个预览页已注入/更新演示美化与 iframe 防护`)
