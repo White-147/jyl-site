@@ -1,11 +1,12 @@
 // 字体子集化管线：从站点源码提取用到的全部字符
 //  1. Noto Sans SC（正文，4 字重）→ 站点专用 woff2
 //  2a. Smiley Sans 得意黑（区块标题展示字母）→ 站点字符集子集 woff2（源 5.7MB）
-//  2b. Long Cang 龙藏手书（名字单独展示）→ 名字专用字符集子集 woff2（源 5MB）
+//  2b. Liu Jian Mao Cao 柳建毛草（Hero 名字 + 站点图标字形）→ 名字专用字符集子集 woff2（源 5MB）
 //  3. Fraunces（数字显示衬线）→ 复制 latin 子集
 //  4. Victor Mono（等宽点缀：代码彩蛋 / 行号，含 italic 变体）→ 复制 latin 子集
 // 用法：node scripts/subset-fonts.mjs
-// 内容更新（新增文字）后重新运行本脚本即可。
+// 内容更新（新增文字）后重新运行本脚本即可；随后由 inline-firstscreen-fonts.mjs 内联首屏字体
+// （npm run fonts:subset 会把这两步串起来执行）。
 import { readFileSync, writeFileSync, mkdirSync, readdirSync, statSync, copyFileSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'

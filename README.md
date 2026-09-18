@@ -29,8 +29,9 @@
 - 单页滚动式布局，浅色 / 深色模式切换（跟随系统或手动，状态栏配色同步）
 - 项目按岗位方向筛选：AI 应用 / 企业系统 / 大数据
 - 项目索引列表：行号 + 缩略图 + 技术栈展开/收起 + 要点折叠 + 灯箱放大
-- 技能分组展示：12 个工程领域分组、模糊搜索（大小写/符号/空格归一）、高频快捷标签
+- 技能画像分组展示：8 个岗位方向画像、模糊搜索（大小写/符号/空格归一）、高频快捷标签
 - About 阶段化叙事：早期 / 近期 / 日常 + 三条能力链路数字卡片
+- **区块导航双形态**：桌面端右侧贯穿式玻璃管（节点按各段滚动进度分布、液柱表示阅读进度），移动端底部 Tab Bar + 置顶胶囊导航
 - **项目在线预览**：各项目的静态前端嵌入本站（`public/preview/`），卡片「在线体验」直达；无后端项目显示适配各项目风格的演示提示条（深浅色双态）
 - **演示模式**：BookRecommendation / MiLuStudio 采用构建开关（`VUE_APP_EMBEDDED_DEMO` / `VITE_EMBEDDED_DEMO`）内置示例数据，无后端也能直入登录后首页
 - **SPA fallback**：`404.html` 将深链刷新（BrowserRouter 子路由 / 遗留畸形 URL）兜底回所属应用入口
@@ -38,8 +39,9 @@
 - 移动端适配：底部 Tab Bar、安全区、置顶胶囊导航、单列布局
 - 内容驱动：SQLite 数据库 → 构建时导出 JSON → 打包部署
 - **反爬与内容保护**：邮箱混淆渲染 + 诱饵地址、预览页 iframe 防护、`robots.txt` 拒 AI 语料采集、简历 PDF 全页对角水印（保留文本层，ATS 友好）
-- **可访问性达标**：全站对比度满足 WCAG 2.2 AA（浅深两套均实测通过）、灯箱焦点陷阱与焦点归还、允许文本选中复制、打印拦截并引导至 PDF 简历
-- **性能预算**：`backdrop-filter` 收敛到 4 处固定元素、常驻动画离屏暂停、粒子数随视口收敛、背景层由 4 层合为 3 层
+- **内容只读**：默认禁止选中/复制，仅联系区邮箱标记 `data-copyable` 放行（配合「点击复制」按钮）
+- **可访问性达标**：全站对比度满足 WCAG 2.2 AA（浅深两套均实测通过）、灯箱焦点陷阱与焦点归还、打印拦截并引导至 PDF 简历
+- **性能预算**：`backdrop-filter` 收敛到 4 处固定元素、常驻动画离屏暂停、粒子数随视口收敛、背景层由 4 层合为 3 层；首屏无内容跳动（CLS 桌面 0）
 
 ## 技术栈
 
@@ -47,9 +49,10 @@
 | --- | --- |
 | 前端 | React 19、TypeScript、Vite、Tailwind CSS 4 |
 | 动效 | GSAP（ScrollTrigger）+ IntersectionObserver，全站尊重 `prefers-reduced-motion` |
-| 字体 | 五层字体体系：正文 Noto Sans SC、展示层得意黑（Smiley Sans）、名字柳建毛草、数字 Fraunces、等宽 Victor Mono（`scripts/subset-fonts.mjs` 子集化，均自托管） |
+| 字体 | 五层字体体系：正文 Noto Sans SC、展示层得意黑（Smiley Sans）、名字柳建毛草、数字 Fraunces、等宽 Victor Mono（`scripts/subset-fonts.mjs` 子集化 + `inline-firstscreen-fonts.mjs` 内联首屏，均自托管） |
+| 图标 | 由柳建毛草字体现场渲染「蒋」字标（`scripts/gen_icons.py`），石墨底 + 琥珀字，输出 favicon 全尺寸 + maskable + 导航图标 |
 | 数据 | SQLite（`database/portfolio.db`，内容源） |
-| 脚本 | Node.js（seed / export / subset-fonts 数据与字体管线；polish-previews 预览页演示注入；start-all 面试演示一键启动） |
+| 脚本 | Node.js（seed / export / 字体与图标管线 / 联系方式编码 / 预览注入）+ Python（简历水印、图标生成） |
 | 部署 | GitHub Pages + GitHub Actions（`deploy.yml`） |
 
 ## 系统架构
@@ -73,29 +76,40 @@ jyl-site/
 ├── database/
 │   └── portfolio.db          # ★ SQLite 内容库（内容源）
 ├── docs/
-│   ├── assets/screenshots/   # 项目截图
-│   └── design/               # 设计过程文件（色板预览等）
+│   ├── 联动维护点.md          # ★ 「同一事实写在两处」的联动点清单（改动前必读）
+│   └── assets/screenshots/   # README 展示用站点截图
 ├── public/
 │   ├── resume.pdf            # 站点简历（最新版覆盖即可）
 │   ├── 404.html              # SPA fallback：深链刷新兜底回应用入口
+│   ├── robots.txt            # 抓取策略（放行搜索引擎、拒绝 AI 语料采集）
+│   ├── sitemap.xml           # 站点结构
+│   ├── manifest.webmanifest  # 站点图标清单（含 Android maskable）
 │   ├── preview/              # ★ 内嵌项目预览（各项目前端静态产物 + 演示注入）
+│   ├── favicons/             # 站点图标（由 scripts/gen_icons.py 生成）
 │   ├── projects/*.webp       # 项目截图（构建资源）
-│   └── images/ certificates/ # 头像、证书缩略图
+│   └── images/ certificates/ # 头像、导航图标、证书缩略图
 ├── scripts/
 │   ├── seed-db.mjs           #   JSON → 数据库（npm run db:seed）
 │   ├── export-db.mjs         #   数据库 → JSON（npm run db:export）
 │   ├── subset-fonts.mjs      #   站点五层字体子集化（新增文案后重新运行）
 │   ├── inline-firstscreen-fonts.mjs  # 首屏字体 base64 内联进 index.html（随上一步自动运行）
+│   ├── gen_icons.py          #   站点图标：从柳建毛草渲染「蒋」字标（npm run icons:gen）
 │   ├── encode-contact.mjs    #   联系方式混淆表生成（改邮箱/GitHub 后运行）
 │   ├── watermark_resume.py   #   简历 PDF 全页对角水印（保留文本层）
 │   ├── polish-previews.mjs   #   预览页演示提示 + iframe 防护注入（重跑即覆盖更新）
 │   └── start-all.ps1 / .bat  #   面试演示：一键启动本站各项目（本地运行）
 ├── src/
 │   ├── data/*.json           # 构建数据（由数据库导出生成，勿手改）
+│   ├── data/navigation.ts    # 区块注册表（导航 / 滚动侦测 / 导轨共用单一数据源）
+│   ├── data/scrollTargets.ts # 锚点偏移单一来源（滚动侦测线同源）
+│   ├── data/contact.ts       # 联系方式混淆层
 │   ├── data/types.ts         # 数据类型定义
 │   ├── fonts/                # 站点专用字体子集（subset-fonts.mjs 生成）
+│   ├── hooks/                # useTheme / useScrollSpy / useAnchorScroll / useInViewPause 等
 │   └── components/           # 页面组件
 ├── .github/workflows/deploy.yml
+├── DESIGN.md                 # 设计系统（颜色 / 字体 / 层级 / 组件 / 禁忌）
+├── PRODUCT.md                # 产品与策略口径（用户 / 反参考 / 设计原则）
 ├── LICENSE
 └── README.md
 ```
@@ -114,7 +128,7 @@ jyl-site/
 配套机制：
 
 - **演示提示条**：`scripts/polish-previews.mjs` 向每个预览页注入「演示模式 · 后端未部署」提示（**按项目品牌配色、深浅色双态**），并将缺后端报错优雅替换；幂等，重跑即更新
-- **预览图标**：每个预览页与 `404.html` 均声明 favicon + 180×180 apple-touch-icon（移动端历史页大图标），图标由 `scripts/gen-preview-icons.ps1` 从各项目 logo 生成（SyLabAI 使用韶远/Accela 徽标截取）
+- **预览图标**：每个预览页与 `404.html` 均声明 favicon + 180×180 apple-touch-icon（移动端历史页大图标），图标由 `scripts/gen-preview-icons.ps1` 从各项目 logo 生成（SyLabAI 使用韶远/Accela 徽标截取）。**注意**：主站自身的 favicon 由 `scripts/gen_icons.py` 单独生成，两者不是同一套
 - **深链刷新兜底**：`public/404.html` 识别预览路径并跳回应用入口（BrowserRouter 应用刷新不再 404）
 - **演示模式开关**：各项目以构建时环境变量启用（不污染正常开发），如 `npx vite build --mode embedded` / `npm run build -- --mode embedded`
 - **iframe 防护**：`polish-previews.mjs` 同时向每个预览页注入 `frame-ancestors 'self'` CSP 与 frame-busting 脚本，阻止预览页被外部站点嵌套抓取
@@ -130,12 +144,16 @@ jyl-site/
 | L3 | 简历 PDF 全页对角平铺水印，**不破坏文本层**（ATS 仍可解析）；原件保留在 `_archive/resumes/` | `scripts/watermark_resume.py` |
 | L4 | 预览页 iframe 防护（CSP + frame-busting 兜底） | `scripts/polish-previews.mjs` |
 
+内容只读（前端层）：全站默认禁止选中/复制（`useReadOnlyGuard` + `body { user-select: none }`），
+仅联系区两个邮箱标注 `data-copyable` 放行，并配套「点击复制」按钮与成功提示。
+
 维护动作：
 
 ```bash
 npm run contact:encode     # 改过 profile.json 的邮箱 / GitHub 后运行
 npm run resume:watermark   # 换简历后：先把新版放进 _archive/resumes/，再运行
 npm run previews:polish    # 预览页重新构建复制进 public/preview/ 后运行
+npm run icons:gen          # 换图标字或配色后重新生成 favicon 全尺寸
 ```
 
 > 打印一律拦截：站点不提供打印版式（固定网格、玻璃层、导航栏打印出来是半成品），
@@ -165,7 +183,7 @@ npm run build      # = db:export + 类型检查 + 构建
 1. **改 JSON → 入库**：编辑 `src/data/*.json`，执行 `npm run db:seed` 同步到库；
 2. **改数据库 → 出 JSON**：直接用 SQLite 工具改 `database/portfolio.db`，执行 `npm run db:export` 重新生成 JSON。
 
-换简历：覆盖 `public/resume.pdf`（原件归档在 `_archive/resumes/`）。
+换简历：把新版放进 `_archive/resumes/`，再跑 `npm run resume:watermark` 生成带水印的 `public/resume.pdf`（脚本会自检文本层与页数）。
 新增证书/头像：压缩后的 WebP 放 `public/` 对应目录，原图放入 `_archive/` 对应目录，再改 `education.json` 或相关数据。
 
 > 新增或修改站点文案后，请重新运行 `npm run fonts:subset` 生成最新字体子集（新用字不在子集内会回退到系统字体）。
@@ -173,9 +191,10 @@ npm run build      # = db:export + 类型检查 + 构建
 
 ## 图片与命名规范
 
-- 站点图片统一放 `public/` 下，按类型分目录：`projects/`、`certificates/`、`images/`（头像）
+- 站点图片统一放 `public/` 下，按类型分目录：`projects/`、`certificates/`、`images/`（头像与导航图标）、`favicons/`（站点图标）
 - **命名规则**：小写 kebab-case（连字符分隔）；产品名保持紧凑（`milustudio`、`xiaolouai`），通用词用连字符（`milu-assistant-web`、`book-recommendation`、`cet-4`、`sanchuang-medal`）
 - `_archive/` 归档文件与 `public/` 站点文件一一对应、命名一致（简历 PDF 除外，保留原名便于识别）
+- 站点图标不入 `_archive/`：它是**生成物**，源是 `scripts/gen_icons.py` + 柳建毛草字体，改配色或换字只需重跑 `npm run icons:gen`
 - 数据源为 SQLite（`database/portfolio.db`），其中存储的图片路径与 `public/` 实际文件名严格一致；新增/改名图片后执行 `npm run db:seed` 同步
 
 ## 部署到 GitHub Pages
@@ -209,9 +228,11 @@ npm run build      # = db:export + 类型检查 + 构建
 
 - 内容驱动架构：SQLite 单一内容源，JSON 由构建导出，改数据不碰代码。
 - 与简历同口径：站点简历下载与投递版保持同步更新，公司名、项目名、时间线一致。
-- 数据流脚本化：`db:seed` / `db:export` 双向同步，内容维护成本低。
-- 字体子集化管线：五层字体按站点用字打包为单个 woff2（得意黑 113KB / 柳建毛草 10KB / Fraunces 18KB / Victor Mono 16+21KB），首屏字体开销可控。
+- **能脚本化的都脚本化了**：内容 `db:seed` / `db:export`、字体 `fonts:subset`、图标 `icons:gen`、联系方式 `contact:encode`、简历水印 `resume:watermark`、预览注入 `previews:polish`。
+- 字体子集化管线：五层字体按站点用字打包为单个 woff2（得意黑约 131KB / 柳建毛草 10KB / Fraunces 18KB / Victor Mono 16+21KB），首屏两个展示字体 base64 内联进 HTML，消除回退字体跳变。
+- 图标与字体同源：favicon 的「蒋」字由柳建毛草现场渲染（`scripts/gen_icons.py`），与首屏名字同一套字形；全尺寸 favicon 合计约 62KB（原方案单张 512 就 118KB）。
 - 项目在线预览：`public/preview/` 内嵌 5 个项目前端 + 演示模式开关，作品集内即可直达"登录后首页"。
 - SPA 刷新兜底：`404.html` 单文件解决 BrowserRouter 深链刷新 404。
-- 全站可访问性：键盘焦点可见、ARIA 标注、`prefers-reduced-motion` 降级、安全区适配。
+- 全站可访问性：键盘焦点可见、ARIA 标注、`prefers-reduced-motion` 降级、安全区适配、WCAG 2.2 AA 对比度实测通过。
 - 自动化部署：推送即构建发布（GitHub Actions + GitHub Pages），无需手动操作。
+- 可维护性：设计系统与联动维护点成文（`DESIGN.md` / `PRODUCT.md` / `docs/联动维护点.md`），跨文件耦合都有注释指向文档。

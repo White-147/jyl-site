@@ -5,14 +5,15 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "db:seed": "node scripts/seed-db.mjs",
-    "db:export": "node scripts/export-db.mjs",
     "build": "npm run db:export && tsc --noEmit && vite build",
     "preview": "vite preview",
+    "db:seed": "node scripts/seed-db.mjs",
+    "db:export": "node scripts/export-db.mjs",
     "fonts:subset": "node scripts/subset-fonts.mjs && node scripts/inline-firstscreen-fonts.mjs",
-    "previews:polish": "node scripts/polish-previews.mjs",
+    "icons:gen": "python scripts/gen_icons.py",
     "contact:encode": "node scripts/encode-contact.mjs --write",
-    "resume:watermark": "python scripts/watermark_resume.py"
+    "resume:watermark": "python scripts/watermark_resume.py",
+    "previews:polish": "node scripts/polish-previews.mjs"
   },
   "dependencies": {
     "@fontsource/jetbrains-mono": "^5.3.0",

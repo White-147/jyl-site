@@ -1,0 +1,31 @@
+{
+  "name": "蒋宇龙 · 信息技术综合岗位",
+  "short_name": "蒋宇龙",
+  "description": "个人求职作品集：数据工程、业务系统交付与 Windows 原生桌面端工程化。",
+  "lang": "zh-CN",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#fafbfb",
+  "theme_color": "#fafbfb",
+  "icons": [
+    {
+      "src": "favicons/favicon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "favicons/favicon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "favicons/maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
