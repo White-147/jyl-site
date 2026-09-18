@@ -12,6 +12,10 @@
 <style id="demo-pollish">
 .demo-pollish-note{margin:12px 14px;padding:9px 14px;border:1px dashed rgba(59,130,246,.5);border-radius:10px;color:#3b82f6;background:rgba(59,130,246,.07);font:500 13px/1.6 system-ui,-apple-system,sans-serif}
 html[data-theme="dark"] .demo-pollish-note,html.dark .demo-pollish-note,html.dark-mode .demo-pollish-note{border:1px dashed rgba(96,165,250,.5);border-radius:10px;color:#60a5fa;background:rgba(96,165,250,.08);font:500 13px/1.6 system-ui,-apple-system,sans-serif}
+/* 预留空间模式：宿主容器按 CSS 变量让出横条高度，其「参与文档流」的子元素自然下移。
+   只影响流式子元素的起始位置，绝对定位的分栏/输入区不受影响；box-sizing 一并锁定，
+   避免 content-box 宿主因 padding 而增高被裁切。 */
+.demo-note-reserved{box-sizing:border-box!important;padding-top:var(--demo-note-space,0px)!important}
 </style></head>
   <body>
     <div id="root"></div>
@@ -21,6 +25,7 @@ html[data-theme="dark"] .demo-pollish-note,html.dark .demo-pollish-note,html.dar
   var REPLACE_ONLY = false;
   var CHAT_HEADER_OFFSET = false;
   var FLOW_MODE = false;
+  var RESERVE_MODE = true;
   var KEYWORDS = /未连接|未部署|未加载|加载.{0,15}失败|无法连接|请先启动后端|Control API|上下文加载失败|不能连接|连接失败|服务不可用|请求失败|There isn't a GitHub Pages|Site not found|404/i;
 
   function apply() {
@@ -64,6 +69,8 @@ html[data-theme="dark"] .demo-pollish-note,html.dark .demo-pollish-note,html.dar
     if (!n) return;
     // 流式页面（普通文档流、可滚动）：横条占流插入，内容自然下移不被遮挡
     if (FLOW_MODE) {
+      host.classList.remove('demo-note-reserved');
+      host.style.removeProperty('--demo-note-space');
       n.style.position = '';
       n.style.top = '';
       n.style.left = '';
@@ -72,13 +79,13 @@ html[data-theme="dark"] .demo-pollish-note,html.dark .demo-pollish-note,html.dar
       host.style.position = '';
       return;
     }
-    // 固定视口布局：顶部横条改为「悬浮浮层」，不占用文档流：
-    // 工作台/聊天等固定视口布局中，占流式横条会把内容挤出可视区（如 chat 输入区下移被裁）
+    // 固定视口布局：横条仍然浮层（不把内容挤出可视区），但**为它预留出空间**，
+    // 避免盖住应用自己的工具栏/内容区。预留量 = 横条高度 + 上下留白。
     if (getComputedStyle(host).position === 'static') host.style.position = 'relative';
     n.style.position = 'absolute';
-    // MiLuConsole：检测 chat 页 64px header（新建会话/模型选择），横条下移让位避免遮挡
     var topOffset = 12;
     if (CHAT_HEADER_OFFSET) {
+      // MiLuConsole：chat 页 header 高 64px（新建会话/模型选择），横条下移让位避免遮挡交互
       var chatHeader = host.querySelector('[class*="chat-anywhere-header"],[class*="default-header"],[class*="page-header"]');
       if (chatHeader) {
         var hr = chatHeader.getBoundingClientRect();
@@ -89,6 +96,15 @@ html[data-theme="dark"] .demo-pollish-note,html.dark .demo-pollish-note,html.dar
     n.style.left = '12px';
     n.style.right = '12px';
     n.style.zIndex = '30';
+
+    if (RESERVE_MODE) {
+      // 横条高度随文案与视口变化（实测 65px @1440、86px @390），所以先移除预留量再量净高度，
+      // 否则会把上一次的 padding 算进去，逐次累加。
+      host.style.setProperty('--demo-note-space', '0px');
+      var hr2 = n.getBoundingClientRect().height;
+      host.style.setProperty('--demo-note-space', Math.ceil(hr2 + topOffset) + 'px');
+      host.classList.add('demo-note-reserved');
+    }
   }
 
   function ensureTopNote() {

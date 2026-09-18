@@ -48,7 +48,9 @@ function StatValue({ stat }: { stat: Stat }) {
   }, [stat.value])
 
   return (
-    <div ref={ref} className="font-numeric text-3xl font-medium tracking-tight text-brand-700 sm:text-4xl dark:text-brand-200">
+    // whitespace-nowrap：数字与后缀是一个整体（「500」+「条/日」），窄卡里不能被拆成上下两行。
+    // 实测 810px 视口下不加会分成两行，数字块高从 40px 变 38px 且视觉断裂。
+    <div ref={ref} className="font-numeric whitespace-nowrap text-3xl font-medium tracking-tight text-brand-700 sm:text-4xl dark:text-brand-200">
       {display}
       {stat.suffix && (
         <span className="ml-0.5 text-xs font-semibold text-slate-500 sm:text-sm dark:text-slate-400">{stat.suffix}</span>
@@ -86,7 +88,7 @@ export default function About() {
 
   return (
     <section id="about" ref={scope} className="relative anchor-offset section-tight">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6">
+      <div className="rail-gutter mx-auto max-w-6xl px-4 sm:px-6">
         <SectionHeading eyebrow={SECTIONS.find((s) => s.id === 'about')?.label ?? '关于我'} title="从业务交付到 AI 应用落地" />
 
         <div className="mt-5 grid gap-5 sm:mt-12 lg:grid-cols-2">
@@ -155,22 +157,30 @@ export default function About() {
           </Reveal>
         </div>
 
-        {/* 三段链路：数字有叙事上下文，替代孤立的统计块 */}
+        {/* 三段链路：数字有叙事上下文，替代孤立的统计块。
+
+            列数按「卡片实际可读宽度」而不是「看起来够不够」来定：
+            每张卡内部有两组「数字 + 后缀」，低于约 300px 时数字与后缀会被挤成上下两行、
+            正文每行掉到 10–16 个汉字。实测（改前）：
+               640px 起就切 3 列 → 810px 视口每张仅 241px、每行 11 字
+               1024px 视口 271px、1280px 也才 305px
+            所以改成：<640 单列 → ≥640 两列 → ≥1188 三列（1188 是按实测定的自定义断点，见 index.css 的 xl3）。
+            810px 下每张 323px、正文每行 25 字，数字与后缀同行。 */}
         <div className="mt-5 sm:mt-6">
           <div className="relative mb-6 hidden sm:block" aria-hidden="true">
             <div className="h-px w-full origin-left bg-gradient-to-r from-brand-200 via-brand-400 to-brand-500/60 dark:from-brand-300/20 dark:via-brand-300/50 dark:to-brand-400/50" data-about="pipe" />
           </div>
-          <div className="grid gap-4 sm:grid-cols-3 sm:gap-5">
+          <div className="grid gap-4 sm:grid-cols-2 sm:gap-5 xl3:grid-cols-3">
             {links.map((link, i) => (
               <Reveal key={link.title} delay={i * 110}>
-                <div className="group glass-card h-full rounded-2xl p-5 transition-all hover:-translate-y-0.5 hover:border-brand-300 hover:shadow-md sm:p-6 dark:hover:border-brand-500/50">
+                <div className="group glass-card h-full rounded-2xl p-4 transition-all hover:-translate-y-0.5 hover:border-brand-300 hover:shadow-md sm:p-5 xl3:p-6 dark:hover:border-brand-500/50">
                   <div className="flex items-baseline justify-between gap-3">
                     <h3 className="text-lg font-bold text-ink dark:text-ink-light">{link.title}</h3>
                     <span className="shrink-0 rounded-full bg-brand-50 px-2 py-0.5 text-[11px] font-semibold text-brand-700 dark:bg-brand-500/10 dark:text-brand-200">
                       {link.tag}
                     </span>
                   </div>
-                  <div className="mt-4 flex gap-8">
+                  <div className="mt-4 flex gap-6 lg:gap-8">
                     {link.statIdx.map((idx) => {
                       const stat = stats[idx]
                       return (
