@@ -9,9 +9,32 @@ export interface SectionDef {
   shortLabel: string
   /** 图标 path（底部 Tab Bar 用） */
   icon: string
+  /**
+   * 特殊角色标记。
+   * `hero` = 首屏：它排在第一位、参与滚动侦测与右侧导轨节点、会被高亮，
+   *   但**不是正文章节** —— 不计入 `01/06` 编号、不进移动端底部 Tab Bar。
+   *   同时它是页面的顶端锚点，导航到它等同于"回到顶部"。
+   * 普通章节不带此字段。
+   */
+  role?: 'hero'
+  /** 是否是一个「有正文的章节」。`false` 用于首屏这类只有背景没有正文的条目。 */
+  isChapter?: boolean
 }
 
+/** 首屏的角色标记与 id，供各组件引用，避免各处硬编码字符串 */
+export const HERO_ROLE = 'hero' as const
+export const HERO_ID = 'top'
+
 export const SECTIONS: SectionDef[] = [
+  {
+    // id 必须与 Hero.tsx 的 <section id="top"> 一致
+    id: HERO_ID,
+    role: HERO_ROLE,
+    label: '首屏',
+    shortLabel: '首屏',
+    isChapter: false,
+    icon: 'M12 3 2 12h4v9h12v-9h4L12 3z',
+  },
   {
     id: 'about',
     label: '关于我',
@@ -50,5 +73,11 @@ export const SECTIONS: SectionDef[] = [
   },
 ]
 
-/** 区块 id 列表（滚动侦测共用） */
+/** 区块 id 列表（滚动侦测共用）。**包含首屏**，因为首屏也要在导轨上高亮。 */
 export const SECTION_IDS = SECTIONS.map((s) => s.id)
+
+/** 有正文的正文章节（不计首屏）。用于编号、底部 Tab Bar 等「按章节」的场景。 */
+export const CHAPTERS = SECTIONS.filter((s) => s.isChapter !== false)
+
+/** 正文章节 id 列表 */
+export const CHAPTER_IDS = CHAPTERS.map((s) => s.id)

@@ -51,7 +51,7 @@ export default function Skills() {
   const showQuickTags = QUICK_TAG_PROFILE_IDS.has(active?.id ?? '')
 
   return (
-    <section id="skills" className="relative scroll-mt-16 py-10 sm:py-24">
+    <section id="skills" className="relative anchor-offset section-base">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <SectionHeading
           eyebrow={SECTIONS.find((s) => s.id === 'skills')?.label ?? '专业技能'}
@@ -118,8 +118,8 @@ export default function Skills() {
                   onClick={() => setActiveId(p.id)}
                   className={`shrink-0 rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
                     isActive
-                      ? 'bg-brand-700 text-white shadow-sm dark:bg-brand-600'
-                      : 'border border-slate-300 bg-white text-slate-600 hover:border-brand-400 hover:text-brand-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-brand-500 dark:hover:text-cyan-400'
+                      ? 'bg-brand-700 text-white shadow-sm dark:bg-brand-700'
+                      : 'border border-slate-300 bg-white text-slate-600 hover:border-brand-400 hover:text-brand-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-brand-500 dark:hover:text-brand-200'
                   }`}
                 >
                   {p.label}
@@ -146,8 +146,8 @@ export default function Skills() {
                     aria-pressed={tagActive}
                     className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors ${
                       tagActive
-                        ? 'bg-brand-700 text-white shadow-sm dark:bg-brand-600'
-                        : 'border border-slate-300 bg-white text-slate-600 hover:border-brand-400 hover:text-brand-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-brand-500 dark:hover:text-cyan-400'
+                        ? 'bg-brand-700 text-white shadow-sm dark:bg-brand-700'
+                        : 'border border-slate-300 bg-white text-slate-600 hover:border-brand-400 hover:text-brand-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-brand-500 dark:hover:text-brand-200'
                     }`}
                   >
                     {tag}
@@ -165,39 +165,48 @@ export default function Skills() {
           </p>
         </Reveal>
 
-        {/* 分组卡片：桌面双列 grid（01|02 同行，Z 序阅读；同行等高对齐），移动端单列 */}
+        {/* 分组卡片：桌面双列 grid（01|02 同行，Z 序阅读；同行等高对齐），移动端单列。
+            奇数张时最后一张横跨两列（方案甲）：保住网格秩序感与行序，
+            同时消除末行右半边的空洞，且不拉高任何卡片。 */}
         {filtered.length > 0 ? (
           <div
             key={active?.id ?? 'empty'}
             className="mt-8 space-y-5 sm:mt-10 lg:grid lg:grid-cols-2 lg:items-stretch lg:gap-5 lg:space-y-0"
           >
-            {filtered.map((group, i) => (
-              <Reveal key={group.title} delay={(i % 2) * 80} className="reveal-group lg:h-full">
-                <div className="h-full rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-colors hover:border-brand-300 sm:p-7 dark:border-slate-800 dark:bg-slate-800 dark:hover:border-brand-500/60">
-                  <div className="flex items-center gap-3">
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-sm font-bold text-brand-700 dark:bg-brand-500/10 dark:text-cyan-400">
-                      {String(group.origIndex + 1).padStart(2, '0')}
-                    </span>
-                    <h3 className="text-lg font-bold text-ink dark:text-ink-light">{group.title}</h3>
-                    <span className="ml-auto shrink-0 text-xs text-slate-400 dark:text-slate-500">
-                      {group.items.length} 项
-                    </span>
-                  </div>
-                  {/* chips 逐个交错浮现（见 index.css .reveal-group .chip） */}
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {group.items.map((item, j) => (
-                      <span
-                        key={item}
-                        style={{ transitionDelay: `${j * 30}ms` }}
-                        className="chip rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm text-slate-600 dark:border-slate-700 dark:bg-gradient-to-b dark:from-slate-900 dark:via-slate-900 dark:via-70% dark:to-slate-950/70 dark:text-slate-300"
-                      >
-                        {item}
+            {filtered.map((group, i) => {
+              const isLastOdd = i === filtered.length - 1 && filtered.length % 2 === 1
+              return (
+                <Reveal
+                  key={group.title}
+                  delay={(i % 2) * 80}
+                  className={`reveal-group lg:h-full ${isLastOdd ? 'lg:col-span-2' : ''}`}
+                >
+                  <div className="h-full rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-colors hover:border-brand-300 sm:p-7 dark:border-slate-800 dark:bg-slate-800 dark:hover:border-brand-500/60">
+                    <div className="flex items-center gap-3">
+                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-sm font-bold text-brand-700 dark:bg-brand-500/10 dark:text-brand-200">
+                        {String(group.origIndex + 1).padStart(2, '0')}
                       </span>
-                    ))}
+                      <h3 className="text-lg font-bold text-ink dark:text-ink-light">{group.title}</h3>
+                      <span className="ml-auto shrink-0 text-xs text-slate-400 dark:text-slate-500">
+                        {group.items.length} 项
+                      </span>
+                    </div>
+                    {/* chips 逐个交错浮现（见 index.css .reveal-group .chip） */}
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      {group.items.map((item, j) => (
+                        <span
+                          key={item}
+                          style={{ transitionDelay: `${j * 30}ms` }}
+                          className="chip rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
+                        >
+                          {item}
+                        </span>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              </Reveal>
-            ))}
+                </Reveal>
+              )
+            })}
           </div>
         ) : (
           <div className="mt-10 rounded-2xl border border-dashed border-slate-300 bg-white/60 p-10 text-center dark:border-slate-700 dark:bg-slate-900/60">
@@ -205,7 +214,7 @@ export default function Skills() {
             <button
               type="button"
               onClick={() => setQuery('')}
-              className="mt-3 text-sm font-semibold text-brand-700 transition-colors hover:text-brand-800 dark:text-cyan-400 dark:hover:text-cyan-300"
+              className="mt-3 text-sm font-semibold text-brand-700 transition-colors hover:text-brand-800 dark:text-brand-200 dark:hover:text-brand-100"
             >
               清空搜索
             </button>

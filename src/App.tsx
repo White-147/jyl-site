@@ -1,5 +1,6 @@
-import { useEffect } from 'react'
 import { ThemeProvider } from './hooks/useTheme'
+import useReadOnlyGuard from './hooks/useReadOnlyGuard'
+import { useDeepLinkCorrection } from './hooks/useAnchorScroll'
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
 import About from './components/About'
@@ -14,23 +15,11 @@ import MobileTabBar from './components/MobileTabBar'
 import SideDotsNav from './components/SideDotsNav'
 
 export default function App() {
-  // 只读保护（收窄版）：仅拦截图片相关的右键菜单与拖拽，防止原图被右键另存/拖走。
-  // 文本选择与复制**不再拦截**——招聘方需要复制邮箱、摘录项目描述，
-  // 全站锁死会直接阻断核心任务。图片在 CSS 层另有 -webkit-touch-callout 拦截移动端长按保存菜单。
-  useEffect(() => {
-    const onContextMenu = (e: MouseEvent) => {
-      if ((e.target as Element | null)?.closest('img')) e.preventDefault()
-    }
-    const onDragStart = (e: DragEvent) => {
-      if ((e.target as Element | null)?.closest('img')) e.preventDefault()
-    }
-    document.addEventListener('contextmenu', onContextMenu)
-    document.addEventListener('dragstart', onDragStart)
-    return () => {
-      document.removeEventListener('contextmenu', onContextMenu)
-      document.removeEventListener('dragstart', onDragStart)
-    }
-  }, [])
+  // 内容只读保护：默认拒绝选中/复制，只有标注 data-copyable 的元素放行。
+  // 具体口径与原因见 src/hooks/useReadOnlyGuard.ts 的注释。
+  useReadOnlyGuard()
+  // 深链兜底：带 #id 直接打开时，浏览器可能少滚一段，静默纠正一次
+  useDeepLinkCorrection()
 
   return (
     <ThemeProvider>

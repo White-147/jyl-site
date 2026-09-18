@@ -1,7 +1,7 @@
 import { useMemo, useState, type ReactNode } from 'react'
 import { SECTIONS } from '../data/navigation'
 import projectsData from '../data/projects.json'
-import profile from '../data/profile.json'
+import { contact } from '../data/contact'
 import type { Project, ProjectTag } from '../data/types'
 import Lightbox from './Lightbox'
 import Reveal from './Reveal'
@@ -27,7 +27,7 @@ interface ProjectAction {
 }
 
 const actionLinkClass =
-  'inline-flex items-center gap-1 whitespace-nowrap text-sm font-medium text-brand-700 transition-colors hover:text-brand-900 hover:underline underline-offset-4 decoration-brand-300 dark:text-cyan-400 dark:hover:text-cyan-300 dark:decoration-brand-500/50'
+  'inline-flex items-center gap-1 whitespace-nowrap text-sm font-medium text-brand-700 transition-colors hover:text-brand-900 hover:underline underline-offset-4 decoration-brand-300 dark:text-brand-200 dark:hover:text-brand-100 dark:decoration-brand-500/50'
 
 function buildProjectActions(project: Project): ProjectAction[] {
   const actions: ProjectAction[] = []
@@ -88,7 +88,7 @@ function ProjectRow({ project, index }: { project: Project; index: number }) {
         <div className="grid gap-4 sm:grid-cols-[3.5rem_minmax(0,1fr)] sm:gap-5">
           {/* 行号（编辑索引感） */}
           <span
-            className="hidden pt-1 font-mono text-sm font-semibold text-brand-600 sm:block dark:text-cyan-400"
+            className="hidden pt-1 font-mono text-sm font-semibold text-brand-700 sm:block dark:text-brand-200"
             aria-hidden="true"
           >
             {String(index + 1).padStart(2, '0')}
@@ -141,10 +141,10 @@ function ProjectRow({ project, index }: { project: Project; index: number }) {
                 <a
                   href={project.link}
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer nofollow"
                   aria-label={`${project.name} GitHub 仓库`}
                   title="GitHub 仓库"
-                  className="flex h-6 w-6 items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-brand-50 hover:text-brand-700 dark:hover:bg-brand-500/10 dark:hover:text-cyan-400"
+                  className="flex h-6 w-6 items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-brand-50 hover:text-brand-700 dark:hover:bg-brand-500/10 dark:hover:text-brand-200"
                 >
                   <svg viewBox="0 0 16 16" fill="currentColor" className="h-4 w-4" aria-hidden="true">
                     <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z" />
@@ -167,7 +167,7 @@ function ProjectRow({ project, index }: { project: Project; index: number }) {
                 <div className="mt-2.5 flex flex-wrap items-center gap-x-5 gap-y-1.5">
                   {project.details.length > 0 && (
                     <details className="group">
-                      <summary className="inline-flex cursor-pointer items-center gap-1 py-1 text-sm font-semibold text-brand-700 transition-colors hover:text-brand-800 dark:text-cyan-400 dark:hover:text-cyan-300">
+                      <summary className="inline-flex cursor-pointer items-center gap-1 py-1 text-sm font-semibold text-brand-700 transition-colors hover:text-brand-800 dark:text-brand-200 dark:hover:text-brand-100">
                         查看要点（{project.details.length} 条）
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="chevron-up-down h-3.5 w-3.5 transition-transform" aria-hidden="true">
                           <path d="m6 9 6 6 6-6" />
@@ -176,7 +176,7 @@ function ProjectRow({ project, index }: { project: Project; index: number }) {
                       <ul className="mt-2 space-y-1.5">
                         {project.details.map((detail) => (
                           <li key={detail.slice(0, 16)} className="flex gap-2 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
-                            <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-brand-500 dark:bg-cyan-400" aria-hidden="true" />
+                            <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-brand-400 dark:bg-brand-300" aria-hidden="true" />
                             {detail}
                           </li>
                         ))}
@@ -190,7 +190,7 @@ function ProjectRow({ project, index }: { project: Project; index: number }) {
                           <a
                             href={action.href}
                             target="_blank"
-                            rel="noreferrer"
+                            rel="noopener noreferrer nofollow"
                             title={action.title}
                             className={actionLinkClass}
                           >
@@ -224,7 +224,7 @@ function ProjectRow({ project, index }: { project: Project; index: number }) {
                     type="button"
                     onClick={() => setStackOpen((o) => !o)}
                     aria-expanded={stackOpen}
-                    className="inline-flex items-center gap-1 rounded-full border border-dashed border-slate-300 px-2.5 py-1 text-[11px] font-semibold text-brand-700 transition-colors hover:border-brand-400 hover:bg-brand-50 dark:border-slate-600 dark:text-cyan-400 dark:hover:border-brand-500 dark:hover:bg-brand-500/10"
+                    className="inline-flex items-center gap-1 rounded-full border border-dashed border-slate-300 px-2.5 py-1 text-[11px] font-semibold text-brand-700 transition-colors hover:border-brand-400 hover:bg-brand-50 dark:border-slate-600 dark:text-brand-200 dark:hover:border-brand-500 dark:hover:bg-brand-500/10"
                   >
                     {stackOpen ? '收起' : `展开全部（${project.stack.length - 5} 项）`}
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`h-3 w-3 transition-transform ${stackOpen ? 'rotate-180' : ''}`} aria-hidden="true">
@@ -250,7 +250,7 @@ export default function Projects() {
   )
 
   return (
-    <section id="projects" className="relative scroll-mt-16 py-10 sm:py-24">
+    <section id="projects" className="relative anchor-offset section-base">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <SectionHeading
           eyebrow={SECTIONS.find((s) => s.id === 'projects')?.label ?? '项目作品'}
@@ -261,12 +261,12 @@ export default function Projects() {
               <span className="block">
                 更多项目见{' '}
                 <a
-                  href={profile.github}
+                  href={contact.github}
                   target="_blank"
-                  rel="noreferrer"
-                  className="font-medium text-brand-700 underline decoration-brand-300 underline-offset-4 hover:text-brand-800 dark:text-cyan-400 dark:decoration-brand-500/50 dark:hover:text-cyan-300"
+                  rel="noopener noreferrer nofollow"
+                  className="font-medium text-brand-700 underline decoration-brand-300 underline-offset-4 hover:text-brand-800 dark:text-brand-200 dark:decoration-brand-500/50 dark:hover:text-brand-100"
                 >
-                  {profile.githubLabel}
+                  <span lang="en">{contact.githubLabel}</span>
                 </a>
               </span>
               <span className="mt-1 block text-xs text-slate-400 dark:text-slate-500">
@@ -286,8 +286,8 @@ export default function Projects() {
               aria-pressed={active === tag}
               className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
                 active === tag
-                  ? 'bg-brand-700 text-white shadow-sm dark:bg-brand-600'
-                  : 'border border-slate-300 bg-white text-slate-600 hover:border-brand-400 hover:text-brand-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-brand-500 dark:hover:text-cyan-400'
+                  ? 'bg-brand-700 text-white shadow-sm dark:bg-brand-700'
+                  : 'border border-slate-300 bg-white text-slate-600 hover:border-brand-400 hover:text-brand-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-brand-500 dark:hover:text-brand-200'
               }`}
             >
               {tag}
