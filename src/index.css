@@ -75,6 +75,15 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
+  /* 断点补充：About 的三张「能力链路卡」每张内部有两组「数字 + 后缀」，
+     低于约 320px 的可读宽度时数字与后缀会被挤成两行、正文每行掉到 16 字以内。
+     实测（含 md 起的右侧导轨留白 120px、容器左右 padding 各 24px）：
+       1024 视口 → 容器 912px，三列每张仅 280px（正文 230px）
+       1188 视口 → 容器 1044px，三列每张 323px（正文 273px）← 刚好够
+     所以三列不用 Tailwind 默认的 lg(1024)，改用这个按实测定的 1188。
+     Tailwind 的断点即 --breakpoint-* 主题变量，声明后自动生成 xl3: 前缀。 */
+  --breakpoint-xl3: 74.25rem;
+
   /* 字体层：正文 Noto Sans SC（自托管子集）→ 展示层得意黑（区块大标题/品牌）
      → 签名层柳建毛草（Hero 名字专属）→ 数字层 Fraunces → 等宽点缀 Victor Mono，拉丁回退 Inter */
   --font-sans: "Noto Sans SC", "Inter", "PingFang SC", "Hiragino Sans GB",
@@ -469,13 +478,33 @@ details[open] .chevron-up-down {
 }
 
 /* 锚点停靠偏移（单一来源，见 src/data/scrollTargets.ts 与 docs/联动维护点.md 第 6 条）。
-   用 @utility 生成 Tailwind 工具类，保证「值」与「类名」不会各改一半。
-   原为各组件写死的 scroll-mt-16 / scroll-mt-20，三端不区分，手机端标题会紧贴吸顶导航。 */
-@utility anchor-offset {
+   ⚠️ 不能用 `@utility` + 嵌套 `@media` 实现：实测 Tailwind v4 的 @utility 会把嵌套的
+   @media 丢掉，只生成基础声明（.anchor-offset{scroll-margin-top:104px}），
+   结果是所有断点都取同一个值 —— 手机端的 104px 会一直被用到桌面端。
+   所以这里用普通类 + 显式 @media，写在 `@import "tailwindcss"` 之后，
+   与工具类同层级且顺序在后，优先级足够。 */
+.anchor-offset {
   scroll-margin-top: 104px;
-
-  @media (width >= 40rem) {
+}
+@media (min-width: 640px) {
+  .anchor-offset {
     scroll-margin-top: 88px;
+  }
+}
+
+/* 右侧导轨的横向留白。
+   md（768px）起右侧玻璃管导航出现，它是 `position: fixed`，**不占布局空间**；
+   而内容容器的 `max-w-6xl`（1152px）在小于 1152 + 两侧留白的视口里根本撑不满，
+   于是导轨直接压在容器上。实测（加留白前）：
+     834px  → 容器右缘 834，导轨文字最左 732（压进容器 78px）
+     1024px → 压进 62px
+     1280px → 仍压进 38px
+   长行文字会落进这块区域被导轨的标签盖住（iPad 竖屏截图可见「培训与项」「工具链」被压）。
+   这里为容器留出右侧沟槽。数值 7rem 覆盖导轨文字宽（56px）+ 间距 + 安全余量。
+   注意：1280 以下都会生效，1280 以上 `max-w-6xl` 的自动外边距已经足够，留白自动失效。 */
+@media (min-width: 768px) {
+  .rail-gutter {
+    padding-right: 7.5rem;
   }
 }
 

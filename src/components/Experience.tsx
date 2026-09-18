@@ -80,7 +80,7 @@ function ExperienceItem({ exp, index }: { exp: Experience; index: number }) {
 export default function Experience() {
   return (
     <section id="experience" className="relative anchor-offset section-base">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6">
+      <div className="rail-gutter mx-auto max-w-6xl px-4 sm:px-6">
         <SectionHeading
           eyebrow={SECTIONS.find((s) => s.id === 'experience')?.label ?? '工作经历'}
           title="从业务交付到 AI 工具链"

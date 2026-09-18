@@ -70,7 +70,7 @@ export default function Education() {
 
   return (
     <section id="education" className="relative anchor-offset section-tight">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6">
+      <div className="rail-gutter mx-auto max-w-6xl px-4 sm:px-6">
         <SectionHeading eyebrow={SECTIONS.find((s) => s.id === 'education')?.label ?? '教育背景'} title="教育经历 · 证书与奖项" />
 
         {/* 教育背景 + 证书/奖项（bento：学校竖卡 + 证明 2x2） */}

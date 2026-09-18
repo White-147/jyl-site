@@ -11,7 +11,7 @@ export default function Contact() {
 
   return (
     <section id="contact" className="relative anchor-offset section-loose">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6">
+      <div className="rail-gutter mx-auto max-w-6xl px-4 sm:px-6">
         <SectionHeading
           eyebrow={SECTIONS.find((s) => s.id === 'contact')?.label ?? '联系方式'}
           title="期待与您交流"

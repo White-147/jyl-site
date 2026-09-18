@@ -160,7 +160,10 @@ function ProjectRow({ project, index }: { project: Project; index: number }) {
                 </div>
               </div>
 
-              <p className="mt-2.5 text-sm leading-relaxed text-slate-600 dark:text-slate-300">{project.summary}</p>
+              {/* 概要宽度约束：中文正文的舒适行长为 30–45 字，而文本列在宽屏可达 784px
+                  （约 50+ 字/行，长行容易读串）。max-w-[46rem] 把行宽收到约 44 字，
+                  同时不影响窄屏（窄屏本来就短于这个上限）。 */}
+              <p className="mt-2.5 max-w-[46rem] text-sm leading-relaxed text-slate-600 dark:text-slate-300">{project.summary}</p>
 
               {/* meta 行：查看要点（可折叠）与项目动作链接同层排列，动作不再独占一行 */}
               {(project.details.length > 0 || projectActions.length > 0) && (
@@ -251,7 +254,7 @@ export default function Projects() {
 
   return (
     <section id="projects" className="relative anchor-offset section-base">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6">
+      <div className="rail-gutter mx-auto max-w-6xl px-4 sm:px-6">
         <SectionHeading
           eyebrow={SECTIONS.find((s) => s.id === 'projects')?.label ?? '项目作品'}
           title="可验证的项目"

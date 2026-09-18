@@ -52,7 +52,7 @@ export default function Skills() {
 
   return (
     <section id="skills" className="relative anchor-offset section-base">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6">
+      <div className="rail-gutter mx-auto max-w-6xl px-4 sm:px-6">
         <SectionHeading
           eyebrow={SECTIONS.find((s) => s.id === 'skills')?.label ?? '专业技能'}
           title="岗位技能画像"
