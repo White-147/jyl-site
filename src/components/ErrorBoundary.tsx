@@ -26,11 +26,10 @@ export default class ErrorBoundary extends Component<Props, State> {
       return (
         <div className="flex min-h-screen flex-col items-center justify-center gap-4 p-6 text-center">
           <p className="text-2xl font-semibold text-ink dark:text-slate-100">页面出了点问题</p>
-          <p className="text-sm text-slate-500 dark:text-slate-400">刷新一下就能恢复</p>
-          <button
+          <p className="text-sm text-slate-500 dark:text-slate-400">刷新一下就能恢复</p>          <button
             type="button"
             onClick={() => window.location.reload()}
-            className="rounded-lg bg-brand-600 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-700"
+            className="rounded-lg bg-brand-700 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-800"
           >
             刷新页面
           </button>

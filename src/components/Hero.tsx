@@ -1,11 +1,14 @@
 import { useLayoutEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 import profile from '../data/profile.json'
+import { useInViewPause } from '../hooks/useInViewPause'
 import Lightbox from './Lightbox'
 
 export default function Hero() {
   const [showAvatar, setShowAvatar] = useState(false)
   const scope = useRef<HTMLElement>(null)
+  // 光斑是无限循环动画：离开首屏后暂停，避免后台逐帧提交合成
+  const { ref: decorRef, inView } = useInViewPause<HTMLDivElement>('200px')
 
   // 首屏入场序列：内容立即可见（首屏由 index.html 静态骨架兜底），仅保留轻微上移入场；
   // 不透明度不做动画，避免与骨架切换时出现"消失再出现"（reduced-motion 时跳过）
@@ -15,11 +18,11 @@ export default function Hero() {
     const ctx = gsap.context(() => {
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
       gsap.from('[data-hero="fade"]', {
-        y: 18,
-        duration: 0.45,
-        ease: 'power2.out',
-        stagger: 0.06,
-        delay: 0.05,
+        y: 16,
+        duration: 0.36,
+        ease: 'power3.out',
+        stagger: 0.045,
+        delay: 0.04,
       })
     }, el)
     return () => ctx.revert()
@@ -29,11 +32,14 @@ export default function Hero() {
     <section id="top" ref={scope} className="relative overflow-hidden">
       {/* 背景装饰：柔和光斑（微浮动）+ 网格（底部渐隐，与全站 body 背景无缝交接） */}
       <div
-        className="pointer-events-none absolute inset-0"
+        ref={decorRef}
+        className={`pointer-events-none absolute inset-0 ${inView ? '' : 'anim-paused'}`}
         aria-hidden="true"
         style={{
-          maskImage: 'linear-gradient(to bottom, black 72%, transparent 100%)',
-          WebkitMaskImage: 'linear-gradient(to bottom, black 72%, transparent 100%)',
+          // 缩短淡化区（55%→86%）：与全站 body 网格在视口底部平滑交接。
+          // 原为 72%→100%，两层网格各自在 mask 边缘收尾，会在首屏下沿留下一条可见的分界线。
+          maskImage: 'linear-gradient(to bottom, black 55%, transparent 86%)',
+          WebkitMaskImage: 'linear-gradient(to bottom, black 55%, transparent 86%)',
         }}
       >
         <div className="absolute -top-24 left-1/2 -translate-x-1/2">
@@ -41,7 +47,7 @@ export default function Hero() {
         </div>
         <div className="absolute right-0 top-1/3">
           <div
-            className="h-72 w-72 rounded-full bg-cyan-400/10 blur-3xl animate-hero-float dark:bg-cyan-400/10"
+            className="h-72 w-72 rounded-full bg-brand-300/10 blur-3xl animate-hero-float dark:bg-brand-400/10"
             style={{ animationDelay: '-5.5s' }}
           />
         </div>
@@ -49,8 +55,8 @@ export default function Hero() {
           className="absolute inset-0 opacity-[0.35] dark:opacity-20"
           style={{
             backgroundImage:
-              'linear-gradient(to right, rgb(148 168 166 / 0.12) 1px, transparent 1px), linear-gradient(to bottom, rgb(148 168 166 / 0.12) 1px, transparent 1px)',
-            backgroundSize: '48px 48px',
+              'linear-gradient(to right, var(--grid-line) 1px, transparent 1px), linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px)',
+            backgroundSize: 'var(--grid-size) var(--grid-size)',
             maskImage: 'radial-gradient(ellipse 70% 60% at 50% 40%, black, transparent)',
             WebkitMaskImage: 'radial-gradient(ellipse 70% 60% at 50% 40%, black, transparent)',
           }}
@@ -64,14 +70,17 @@ export default function Hero() {
 
       <div className="hero-viewport relative mx-auto flex max-w-6xl flex-col justify-start px-4 pb-12 pt-10 sm:justify-center sm:px-6 sm:pb-24 sm:pt-14">
         <div className="max-w-4xl">
-          {/* 求职状态徽标 */}
+          {/* 求职状态徽标。
+              配色：石墨为底 + 琥珀只落在状态圆点上（见 DESIGN.md 的 One Meaning Rule）。
+              原为 emerald 绿色徽标，在首屏过于抢眼，与石墨 + 琥珀体系也不同源。
+              「可联系」这一状态由圆点的脉动动画承担，不需要再靠一块高饱和底色。 */}
           <span
             data-hero="fade"
-            className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-400"
+            className="inline-flex items-center gap-2 rounded-full border border-brand-100 bg-brand-50/70 px-3 py-1 text-xs font-medium text-brand-900 dark:border-brand-300/25 dark:bg-brand-300/10 dark:text-brand-100"
           >
             <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-60" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-400 opacity-60" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-brand-700 dark:bg-brand-300" />
             </span>
             求职中 · 到岗时间可沟通
           </span>
@@ -100,7 +109,7 @@ export default function Hero() {
 
           <p
             data-hero="fade"
-            className="font-display mt-3 text-2xl font-normal leading-[1.12] tracking-tight text-brand-700 text-balance sm:mt-4 sm:text-4xl dark:text-cyan-400"
+            className="font-display mt-3 text-2xl font-normal leading-[1.12] tracking-tight text-brand-700 text-balance sm:mt-4 sm:text-4xl dark:text-brand-200"
           >
             {profile.title}
           </p>
@@ -153,7 +162,7 @@ export default function Hero() {
             <a
               href={profile.resumeUrl}
               download
-              className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-brand-700 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-800 sm:w-auto dark:bg-brand-600 dark:hover:bg-brand-500"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-brand-700 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-800 sm:w-auto dark:bg-brand-700 dark:hover:bg-brand-600"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden="true">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />
