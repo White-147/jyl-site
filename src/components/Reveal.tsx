@@ -24,7 +24,9 @@ export default function Reveal({ children, delay = 0, className = '' }: RevealPr
           setVisible(entry.isIntersecting)
         })
       },
-      { threshold: 0.08, rootMargin: '0px 0px -32px 0px' },
+      // 提前 64px 触发：让入场在元素进入视口时**已经**开始，
+      // 而不是等它到位后才起步（原 -32px 会让整站读起来比实际慢）
+      { threshold: 0.06, rootMargin: '0px 0px 64px 0px' },
     )
     io.observe(el)
     return () => io.disconnect()

@@ -48,7 +48,7 @@ function StatValue({ stat }: { stat: Stat }) {
   }, [stat.value])
 
   return (
-    <div ref={ref} className="font-numeric text-3xl font-medium tracking-tight text-brand-700 sm:text-4xl dark:text-cyan-400">
+    <div ref={ref} className="font-numeric text-3xl font-medium tracking-tight text-brand-700 sm:text-4xl dark:text-brand-200">
       {display}
       {stat.suffix && (
         <span className="ml-0.5 text-xs font-semibold text-slate-500 sm:text-sm dark:text-slate-400">{stat.suffix}</span>
@@ -85,7 +85,7 @@ export default function About() {
   }, [])
 
   return (
-    <section id="about" ref={scope} className="relative scroll-mt-16 py-10 sm:py-24">
+    <section id="about" ref={scope} className="relative anchor-offset section-tight">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <SectionHeading eyebrow={SECTIONS.find((s) => s.id === 'about')?.label ?? '关于我'} title="从业务交付到 AI 应用落地" />
 
@@ -93,7 +93,7 @@ export default function About() {
           {/* 简介卡：学历锚点 + 阶段化叙事（早期 / 近期 / 日常） */}
           <Reveal>
             <div className="glass-card-strong h-full rounded-2xl p-6 sm:p-7">
-              <p className="font-display text-lg font-normal tracking-tight text-brand-700 dark:text-cyan-400">{anchor}</p>
+              <p className="font-display text-lg font-normal tracking-tight text-brand-700 dark:text-brand-200">{anchor}</p>
               <div className="mt-4 space-y-4">
                 {about.map((para) => (
                   <div key={para.phase}>
@@ -105,7 +105,7 @@ export default function About() {
                         }`}
                       >
                         {i === 0 && (
-                          <span className="font-semibold text-brand-600 dark:text-brand-300">{para.phase} </span>
+                          <span className="font-semibold text-brand-700 dark:text-brand-200">{para.phase} </span>
                         )}
                         {text}
                       </p>
@@ -123,25 +123,26 @@ export default function About() {
                 className="pointer-events-none absolute inset-0 opacity-[0.3] dark:opacity-15"
                 aria-hidden="true"
                 style={{
+                  // 与 body 光斑同源（brand-500 / brand-400），保证装饰层与全站同色
                   backgroundImage:
-                    'radial-gradient(60% 60% at 85% 15%, rgb(20 184 166 / 0.18), transparent 70%), radial-gradient(50% 50% at 10% 90%, rgb(8 145 178 / 0.14), transparent 70%)',
+                    'radial-gradient(60% 60% at 85% 15%, rgb(217 122 6 / 0.14), transparent 70%), radial-gradient(50% 50% at 10% 90%, rgb(247 189 110 / 0.16), transparent 70%)',
                 }}
               />
-              <p className="font-display text-lg font-normal tracking-tight text-brand-700 dark:text-cyan-400">
+              <p className="font-display text-lg font-normal tracking-tight text-brand-700 dark:text-brand-200">
                 多岗位定位 · 各方向均可验证
               </p>
               <ul className="relative mt-5 space-y-5">
                 {positions.map((item) => (
                   <li key={item.title}>
                     <div className="text-base leading-snug text-slate-600 sm:leading-relaxed dark:text-slate-300">
-                      <strong className="font-semibold text-brand-600 dark:text-brand-300">{item.title}</strong>
+                      <strong className="font-semibold text-brand-700 dark:text-brand-200">{item.title}</strong>
                       <span className="text-slate-600 dark:text-slate-300">：{item.desc}</span>
                     </div>
                     <div className="mt-2 flex flex-wrap gap-1.5">
                       {item.keywords.map((tag) => (
                         <span
                           key={tag}
-                          className="rounded-full border border-brand-200 bg-brand-50 px-2 py-0.5 text-[11px] font-medium text-brand-700 dark:border-brand-500/25 dark:bg-brand-500/10 dark:text-brand-300"
+                          className="rounded-full border border-brand-200 bg-brand-50 px-2 py-0.5 text-[11px] font-medium text-brand-700 dark:border-brand-500/25 dark:bg-brand-500/10 dark:text-brand-200"
                         >
                           {tag}
                         </span>
@@ -157,7 +158,7 @@ export default function About() {
         {/* 三段链路：数字有叙事上下文，替代孤立的统计块 */}
         <div className="mt-5 sm:mt-6">
           <div className="relative mb-6 hidden sm:block" aria-hidden="true">
-            <div className="h-px w-full origin-left bg-gradient-to-r from-brand-200 via-brand-400 to-cyan-400/60 dark:from-brand-500/20 dark:via-brand-500/50 dark:to-cyan-400/50" data-about="pipe" />
+            <div className="h-px w-full origin-left bg-gradient-to-r from-brand-200 via-brand-400 to-brand-500/60 dark:from-brand-300/20 dark:via-brand-300/50 dark:to-brand-400/50" data-about="pipe" />
           </div>
           <div className="grid gap-4 sm:grid-cols-3 sm:gap-5">
             {links.map((link, i) => (
@@ -165,7 +166,7 @@ export default function About() {
                 <div className="group glass-card h-full rounded-2xl p-5 transition-all hover:-translate-y-0.5 hover:border-brand-300 hover:shadow-md sm:p-6 dark:hover:border-brand-500/50">
                   <div className="flex items-baseline justify-between gap-3">
                     <h3 className="text-lg font-bold text-ink dark:text-ink-light">{link.title}</h3>
-                    <span className="shrink-0 rounded-full bg-brand-50 px-2 py-0.5 text-[11px] font-semibold text-brand-700 dark:bg-brand-500/10 dark:text-brand-300">
+                    <span className="shrink-0 rounded-full bg-brand-50 px-2 py-0.5 text-[11px] font-semibold text-brand-700 dark:bg-brand-500/10 dark:text-brand-200">
                       {link.tag}
                     </span>
                   </div>

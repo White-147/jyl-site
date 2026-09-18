@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /* 站点专用字体子集（node scripts/subset-fonts.mjs 生成，仅含站点用字）
-   Noto Sans SC（正文）可变字重分别子集；Smiley Sans 得意黑（标题展示）为站点字符集裁剪；
+   Noto Sans SC（正文）按字重分别子集为 4 个静态档；Smiley Sans 得意黑（标题展示）为站点字符集裁剪；
    Fraunces / Victor Mono 取 latin 子集 */
 @font-face {
   font-family: "Noto Sans SC";
@@ -76,7 +76,7 @@
 
 @theme {
   /* 字体层：正文 Noto Sans SC（自托管子集）→ 展示层得意黑（区块大标题/品牌）
-     → 名字层龙藏手书（Hero 名字专属）→ 数字层 Fraunces → 等宽点缀 Victor Mono，拉丁回退 Inter */
+     → 签名层柳建毛草（Hero 名字专属）→ 数字层 Fraunces → 等宽点缀 Victor Mono，拉丁回退 Inter */
   --font-sans: "Noto Sans SC", "Inter", "PingFang SC", "Hiragino Sans GB",
     "Microsoft YaHei", system-ui, -apple-system, sans-serif;
   --font-display: "Smiley Sans", "Noto Sans SC", "PingFang SC", "Microsoft YaHei",
@@ -87,20 +87,61 @@
   --font-mono: "Victor Mono", "SFMono-Regular", Consolas, "Liberation Mono",
     monospace;
 
-  /* 青玉色板（2026-08 改版）：主色青玉 teal，高亮碧青 cyan，
-     深色模式与粒子液柱同族，深浅两套语言统一 */
-  --color-ink: #0f2e36; /* 浅色标题：深青墨 */
-  --color-ink-light: #e9f6f4; /* 深色标题：微青海白 */
-  --color-brand-50: #f0fdfa;
-  --color-brand-100: #ccfbf1;
-  --color-brand-200: #99f6e4;
-  --color-brand-300: #5eead4;
-  --color-brand-400: #2dd4bf;
-  --color-brand-500: #14b8a6;
-  --color-brand-600: #0d9488;
-  --color-brand-700: #0f766e;
-  --color-brand-800: #115e59;
-  --color-brand-900: #134e4a;
+  /* 标题色（语义独立于色板：改主色时这两档通常保持不变） */
+  --color-ink: #1a1c1e; /* 浅色标题：石墨黑（画布 16.49:1） */
+  --color-ink-light: #e6e8e9; /* 深色正文/标题：深底 15.03:1 */
+  --color-ink-strong: #f5f6f6; /* 深色高强调（仅大面积白字场景） */
+
+  /* 主色板「琥珀」。底座是纯中性石墨（见下方「中性色（石墨）」一段），
+     琥珀是唯一强调色，只用于「可交互 / 当前 / 关键数字」。
+     每一档都标注了实际用途与实测对比度，改值时按标注重新验算。
+     换算基准：画布 #fafbfb、白 #ffffff、深色画布 #121415、深色卡片 #23282b。 */
+  --color-brand-50: #fdf8ef;
+  --color-brand-100: #fbecd3;
+  --color-brand-200: #f3d9ac; /* 深色模式强调文字：深底 13.49:1 */
+  --color-brand-300: #f2a93b; /* 深色模式光晕/强调：深底 9.25:1。浅色模式仅用于图形（底上 1.98:1） */
+  --color-brand-400: #f7bd6e; /* 深色模式提亮：深底 10.96:1 */
+  --color-brand-500: #d97a06; /* 图形、进度条、光斑。**禁止承载文字**（底上 3.03:1） */
+  --color-brand-600: #b96200; /* 仅图形与图标描边。**禁止承载 <24px 文字**（底上 4.27:1） */
+  --color-brand-700: #9d5300; /* 承载正文级文字与实底按钮：白字 5.72:1、画布 5.52:1 */
+  --color-brand-800: #804400; /* hover 加深：画布 7.38:1 */
+  --color-brand-900: #5e3200;
+  --color-brand-950: #3d2100;
+
+  /* 深色模式层级：用背景色阶表达浮起，不用阴影（DESIGN.md 的 Tonal-First Rule）。
+     全部为纯中性石墨，与浅色模式同一族。 */
+  --color-canvas-dark: #121415;
+  --color-surface-dark-raised: #1b1e20;
+  --color-surface-dark-card: #23282b;
+  --color-line-dark: #2c3234;
+  --color-footer-dark: #0d0f10; /* 比画布再深一档，作为收尾而非用纯黑砸下去 */
+
+  /* 中性色（石墨）：浅色模式 50→700 逐步变深，深色模式 50→700 反向逐步变浅。
+     两个方向的单调性保证组件里的 text-slate-* / border-slate-* 在深浅两套主题下
+     都能拿到可读的颜色，不需要逐个加 dark: 变体。每档标注实测对比度。 */
+  /* —— 浅色模式基调 —— */
+  --color-slate-50: #f4f5f5;
+  --color-slate-100: #e8eaeb;
+  --color-slate-200: #dfe2e3; /* 卡边/分隔线 */
+  --color-slate-300: #c6ccce; /* 控件描边（图形级，≥3:1） */
+  --color-slate-400: #52767a; /* 承载日期/单位等小字：画布 5.60:1 */
+  --color-slate-500: #4a6165; /* 次级正文：画布 6.38:1 */
+  --color-slate-600: #333a3d; /* 正文：画布 11.17:1 */
+  --color-slate-700: #2f3a3d;
+  --color-slate-800: #23282b; /* 浅色模式下的深色块 */
+  --color-slate-900: #1b1e20;
+  --color-slate-950: #121415;
+
+  /* 动效 token：指数缓出族，无回弹（原 cubic-bezier(0.34,1.56,0.64,1) 已全部替换） */
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-out-sharp: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-micro: 150ms;
+  --duration-reveal: 320ms;
+  --duration-panel: 240ms;
+
+  /* 网格底纹：全站统一一处定义（原 body/Hero/联系区三处各自硬编码，色值与间距不一致） */
+  --grid-line: rgb(120 140 143 / 0.13);
+  --grid-size: 48px;
 
   /* 流体字号：min/max 用 rem（尊重浏览器缩放与用户字体设置），中间 rem+vw 渐变，
      320px→1440px 平滑缩放，无断点跳跃；PC/平板/手机三端文本自适应 */
@@ -119,19 +160,49 @@
 
 html {
   scroll-behavior: smooth;
+  /* 禁止浏览器伪造字重：Noto Sans SC 子集已含 400/500/700/900 真实字重，
+     缺字回退到系统字体时宁可显示真实字重，也不接受合成加粗（DESIGN.md 的 No-Synthesis Rule） */
+  font-synthesis: none;
+  /* 深色画布在橡皮筋滚动时露出的底色 */
+  background-color: #fafbfb;
+}
+.dark html,
+html.dark {
+  background-color: #121415;
+
+  /* 深色模式的中性色阶：与浅色模式**反向**。
+     深色底上文字越大越浅才是对的层级，而 Tailwind 的 slate 档位是为浅底设计的，
+     直接用会让深色模式的次级文字（slate-400/500）掉到 3.0-3.4:1。
+     这里把 50→700 整体倒序重新定值，组件里的 text-slate-400 / text-slate-500
+     无需逐个加 dark: 变体，自动在两套主题下都拿到可读的颜色。
+
+     注意：这只是「值」的反转，不改变任何组件的用法语义。
+     审计方法：随手取一个 slate-N 文本，浅底与深底都应 ≥ 4.5:1。 */
+  --color-slate-50: #f5f6f6;
+  --color-slate-100: #dde0e2; /* 深底 13.93:1 */
+  --color-slate-200: #c6ccce; /* 深底 11.38:1 ｜ 卡片底 9.17:1 */
+  --color-slate-300: #a9b2b5; /* 深底 8.55:1 ｜ 卡片底 6.90:1 */
+  --color-slate-400: #95a0a3; /* 深底 6.89:1 ｜ 卡片底 5.56:1 */
+  --color-slate-500: #9ea9ac; /* 深底 7.68:1 ｜ 卡片底 6.19:1 */
+  --color-slate-600: #a9b2b5;
+  --color-slate-700: #2c3234;
+  --color-slate-800: #23282b; /* 深色模式卡片面 */
+  --color-slate-900: #1b1e20; /* 深色模式抬升面 */
+  --color-slate-950: #121415; /* 深色画布 */
 }
 
 body {
   @apply antialiased;
 }
 
-/* 滚动渐显动画（Reveal 组件） */
+/* 滚动渐显动画（Reveal 组件）：320ms 指数缓出，提前触发。
+   原为 600ms + 默认 ease（慢起慢收），比用户滚动节奏慢，会让整站显慢。 */
 .reveal {
   opacity: 0;
-  transform: translateY(24px);
+  transform: translateY(14px);
   transition:
-    opacity 0.6s ease,
-    transform 0.6s ease;
+    opacity var(--duration-reveal) var(--ease-out-soft),
+    transform var(--duration-reveal) var(--ease-out-soft);
 }
 
 .reveal.visible {
@@ -155,8 +226,8 @@ body {
   opacity: 0;
   transform: translateY(6px);
   transition:
-    opacity 0.4s ease,
-    transform 0.4s ease;
+    opacity 240ms var(--ease-out-soft),
+    transform 240ms var(--ease-out-soft);
 }
 
 .reveal-group.visible .chip {
@@ -172,7 +243,8 @@ body {
   }
 }
 
-/* Hero 背景光斑微浮动（克制式装饰动效） */
+/* Hero 背景光斑微浮动（克制式装饰动效）：周期放缓到 16s，
+   并在离屏时由 IntersectionObserver 暂停（见 useInViewPause） */
 @keyframes hero-float {
   0%,
   100% {
@@ -184,7 +256,7 @@ body {
 }
 
 .animate-hero-float {
-  animation: hero-float 11s ease-in-out infinite;
+  animation: hero-float 16s ease-in-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -193,41 +265,89 @@ body {
   }
 }
 
+/* 吐司入场（Toast.tsx）：240ms 指数缓出，只动 opacity + transform */
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.animate-toast-in {
+  animation: toast-in var(--duration-panel) var(--ease-out-soft) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-toast-in {
+    animation: none;
+  }
+}
+
 /* 图片防下载（移动端）：禁止 iOS / 微信 WKWebView 长按图片弹出「存储图像」菜单，
-   Android 长按保存走 contextmenu 事件，已由 App.tsx 全局拦截 */
+   Android 长按保存走 contextmenu 事件，已由 useReadOnlyGuard 拦截。 */
 img {
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   user-select: none;
 }
 
-/* 全站只读：禁止文本选择与复制（配合 App.tsx 的 contextmenu/dragstart/copy 拦截，
-   图片右键、拖拽、移动端长按保存/复制均不可用；mailto/下载链接不受影响） */
+/* 内容只读保护：全站默认不可选中，只有标注 data-copyable 的元素（当前仅联系区邮箱）放行。
+   配合 src/hooks/useReadOnlyGuard.ts 的事件拦截形成双层；
+   JS 未执行时纯 CSS 仍然生效。白名单口径与原因见该文件注释。 */
 body {
   -webkit-user-select: none;
   user-select: none;
 }
+[data-copyable],
+[data-copyable] * {
+  -webkit-user-select: text;
+  user-select: text;
+  cursor: text;
+}
 
-/* 全站连续背景：青玉基调 + 多层柔光光斑（teal/cyan）+ 颗粒纹理
-   （光效全页一致，板块内容以卡片浮起；深色为深青黑，与粒子液柱同族） */
+/* 全站连续背景：石墨基调 + 琥珀光斑 + 颗粒纹理，压成单个复合层。
+   原为 3 个 radial-gradient + 1 张 feTurbulence SVG，逐帧多重栅格化；
+   现合并为 2 个椭圆光斑 + 颗粒，滚动时重绘成本明显下降。
+   光斑色 = brand-500 (#d97a06) 与 brand-400 (#f7bd6e)，低透明度以保证正文对比度不被稀释。 */
 body {
-  background-color: #f6faf9;
+  background-color: #fafbfb;
   background-image:
-    radial-gradient(55% 45% at 75% 5%, rgb(20 184 166 / 0.14), transparent 70%),
-    radial-gradient(45% 40% at 12% 45%, rgb(8 145 178 / 0.12), transparent 70%),
-    radial-gradient(40% 35% at 82% 92%, rgb(13 148 136 / 0.10), transparent 70%),
+    radial-gradient(
+      68% 52% at 76% 6%,
+      rgb(217 122 6 / 0.09),
+      transparent 72%
+    ),
+    radial-gradient(
+      58% 48% at 8% 78%,
+      rgb(247 189 110 / 0.11),
+      transparent 72%
+    ),
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
+  background-repeat: no-repeat, no-repeat, repeat;
+  background-attachment: fixed, fixed, fixed;
 }
 .dark body {
-  background-color: #04121a;
+  background-color: #121415;
   background-image:
-    radial-gradient(55% 45% at 75% 5%, rgb(20 184 166 / 0.16), transparent 70%),
-    radial-gradient(45% 40% at 12% 45%, rgb(8 145 178 / 0.14), transparent 70%),
-    radial-gradient(40% 35% at 82% 92%, rgb(34 211 238 / 0.10), transparent 70%),
+    radial-gradient(
+      68% 52% at 76% 6%,
+      rgb(217 122 6 / 0.13),
+      transparent 72%
+    ),
+    radial-gradient(
+      58% 48% at 8% 78%,
+      rgb(247 189 110 / 0.07),
+      transparent 72%
+    ),
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.065'/%3E%3C/svg%3E");
 }
 
-/* 全页淡网格：与首屏同款 48px 网格，从顶部中心向四周淡出（整页铺满感） */
+/* 全页淡网格：与首屏同款 48px 网格，从顶部中心向四周淡出（整页铺满感）。
+   单一来源 token --grid-line / --grid-size，Hero 与联系区统一引用，不再各自硬编码。 */
 body::before {
   content: "";
   position: fixed;
@@ -235,48 +355,68 @@ body::before {
   pointer-events: none;
   z-index: 0;
   background-image:
-    linear-gradient(to right, rgb(148 168 166 / 0.10) 1px, transparent 1px),
-    linear-gradient(to bottom, rgb(148 168 166 / 0.10) 1px, transparent 1px);
-  background-size: 48px 48px;
+    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+  background-size: var(--grid-size) var(--grid-size);
   mask-image: radial-gradient(ellipse 90% 70% at 50% 15%, black, transparent 75%);
   -webkit-mask-image: radial-gradient(ellipse 90% 70% at 50% 15%, black, transparent 75%);
 }
 .dark body::before {
-  background-image:
-    linear-gradient(to right, rgb(148 168 166 / 0.07) 1px, transparent 1px),
-    linear-gradient(to bottom, rgb(148 168 166 / 0.07) 1px, transparent 1px);
+  /* 深色下网格压暗：直接降不透明度，避免再写一份色值 */
+  opacity: 0.62;
 }
 
-/* 玻璃拟态卡片（2026 Glassmorphism：tint + blur + 细亮边，配合全页光斑背景使用） */
+/* 卡片三档（DESIGN.md 的 Blur-Budget Rule）：按「是否需要透视」划分。
+   实心面板见各组件的 bg-white + border；以下两档为半透明层。
+   原 glass-card / glass-card-strong 带 backdrop-filter，但静态卡片坐在固定背景层上，
+   模糊的视觉收益接近零、合成开销真实存在，故移除模糊、保留 tint 与细亮边。
+   阴影色由琥珀派生（rgb(157 83 0) = brand-700），保持与主色同族。 */
 .glass-card {
   background: rgb(255 255 255 / 0.55);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgb(255 255 255 / 0.65);
-  box-shadow: 0 1px 2px rgb(15 118 110 / 0.06);
+  box-shadow: 0 1px 2px rgb(157 83 0 / 0.06);
 }
 .dark .glass-card {
-  background: rgb(8 30 42 / 0.55);
-  border-color: rgb(103 232 249 / 0.14);
+  background: rgb(27 30 32 / 0.55);
+  border-color: rgb(44 50 52 / 0.9);
 }
 /* 强玻璃：用于含正文的区域，tint 更高保证可读性 */
 .glass-card-strong {
   background: rgb(255 255 255 / 0.74);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
   border: 1px solid rgb(255 255 255 / 0.7);
-  box-shadow: 0 1px 2px rgb(15 118 110 / 0.06);
+  box-shadow: 0 1px 2px rgb(157 83 0 / 0.06);
 }
 .dark .glass-card-strong {
-  background: rgb(8 30 42 / 0.72);
-  border-color: rgb(103 232 249 / 0.14);
+  background: rgb(27 30 32 / 0.72);
+  border-color: rgb(44 50 52 / 0.9);
 }
 
-/* 玻璃管阅读液柱（深色模式）：粒子缓慢上浮 + 呼吸闪烁（液体微粒感） */
+/* 玻璃管阅读液柱：粒子缓慢上浮 + 呼吸闪烁（液体微粒感）。
+   数量由 SideDotsNav 按视口高度取 min()，深色 24 个 / 浅色 14 个（原深色 72 个）。
+   离屏时由 IntersectionObserver 暂停 animation-play-state，避免后台白跑动画。 */
 @keyframes particle-drift {
   0% { transform: translateY(0); opacity: 0.15; }
   30% { opacity: 0.7; }
   100% { transform: translateY(-26px); opacity: 0.1; }
+}
+
+.rail-particle {
+  animation-name: particle-drift;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+/* 离屏暂停：整个导航不在视口内时停掉所有粒子与光斑动画 */
+.anim-paused,
+.anim-paused * {
+  animation-play-state: paused !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rail-particle,
+  .animate-hero-float {
+    animation: none;
+  }
 }
 
 /* Hero 首屏高度：优先 small viewport（移动端地址栏收起后高度准确），
@@ -289,4 +429,84 @@ body::before {
 /* 项目列表「查看要点」折叠箭头：展开后旋转（details[open] 原生状态） */
 details[open] .chevron-up-down {
   transform: rotate(180deg);
+}
+
+/* 区块垂直节奏（DESIGN.md：留白用来划断，不用来表演）。
+   原为每段固定 py-10 / sm:py-24，相邻两段相加会产生约 288px 的等宽真空带，
+   且长度单调。改为三档不等距：紧接首屏的段紧、主体段中、收尾段松，
+   让空白读起来是「段距」而不是「没做完」。 */
+.section-tight {
+  padding-top: 2.5rem;
+  padding-bottom: 2.5rem;
+}
+.section-base {
+  padding-top: 3.5rem;
+  padding-bottom: 3.5rem;
+}
+.section-loose {
+  padding-top: 3.5rem;
+  padding-bottom: 4.5rem;
+}
+@media (min-width: 640px) {
+  .section-tight {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+  }
+  .section-base {
+    padding-top: 5rem;
+    padding-bottom: 5rem;
+  }
+  .section-loose {
+    padding-top: 5.5rem;
+    padding-bottom: 7rem;
+  }
+}
+
+/* 打印拦截提示：屏幕下一直隐藏，只在 @media print 下显示。
+   注意不要用 HTML 的 `hidden` 属性——它会写成 display:none !important，打印时覆盖不掉。 */
+.print-blocked {
+  display: none;
+}
+
+/* 锚点停靠偏移（单一来源，见 src/data/scrollTargets.ts 与 docs/联动维护点.md 第 6 条）。
+   用 @utility 生成 Tailwind 工具类，保证「值」与「类名」不会各改一半。
+   原为各组件写死的 scroll-mt-16 / scroll-mt-20，三端不区分，手机端标题会紧贴吸顶导航。 */
+@utility anchor-offset {
+  scroll-margin-top: 104px;
+
+  @media (width >= 40rem) {
+    scroll-margin-top: 88px;
+  }
+}
+
+/* 打印一律拦截：站点不提供打印版式（固定网格、玻璃层、导航栏打印出来是半成品），
+   改为显示 index.html 里那段静态提示，引导到带水印的 PDF 简历。
+
+   关键：提示必须写在 index.html 的 <body> 下、而不是 React 应用内部。
+   应用整体被 display:none 之后，其子孙节点无论怎么设都不会渲染。 */
+@media print {
+  .app-root {
+    display: none !important;
+  }
+  .print-blocked {
+    display: block !important;
+    margin: 0;
+    padding: 4rem 2rem;
+    font-family: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+    font-size: 14pt;
+    line-height: 1.8;
+    color: #1a1c1e;
+    text-align: center;
+  }
+  .print-blocked strong {
+    display: block;
+    margin-bottom: 0.75rem;
+    font-size: 17pt;
+  }
+  .print-blocked a {
+    color: #9d5300;
+  }
+  @page {
+    margin: 12mm;
+  }
 }
