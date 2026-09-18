@@ -37,6 +37,9 @@
 - 简历 PDF 一键下载（`public/resume.pdf`，随投递版本更新）
 - 移动端适配：底部 Tab Bar、安全区、置顶胶囊导航、单列布局
 - 内容驱动：SQLite 数据库 → 构建时导出 JSON → 打包部署
+- **反爬与内容保护**：邮箱混淆渲染 + 诱饵地址、预览页 iframe 防护、`robots.txt` 拒 AI 语料采集、简历 PDF 全页对角水印（保留文本层，ATS 友好）
+- **可访问性达标**：全站对比度满足 WCAG 2.2 AA（浅深两套均实测通过）、灯箱焦点陷阱与焦点归还、允许文本选中复制、打印拦截并引导至 PDF 简历
+- **性能预算**：`backdrop-filter` 收敛到 4 处固定元素、常驻动画离屏暂停、粒子数随视口收敛、背景层由 4 层合为 3 层
 
 ## 技术栈
 
@@ -82,7 +85,10 @@ jyl-site/
 │   ├── seed-db.mjs           #   JSON → 数据库（npm run db:seed）
 │   ├── export-db.mjs         #   数据库 → JSON（npm run db:export）
 │   ├── subset-fonts.mjs      #   站点五层字体子集化（新增文案后重新运行）
-│   ├── polish-previews.mjs   #   预览页演示提示注入（重跑即覆盖更新）
+│   ├── inline-firstscreen-fonts.mjs  # 首屏字体 base64 内联进 index.html（随上一步自动运行）
+│   ├── encode-contact.mjs    #   联系方式混淆表生成（改邮箱/GitHub 后运行）
+│   ├── watermark_resume.py   #   简历 PDF 全页对角水印（保留文本层）
+│   ├── polish-previews.mjs   #   预览页演示提示 + iframe 防护注入（重跑即覆盖更新）
 │   └── start-all.ps1 / .bat  #   面试演示：一键启动本站各项目（本地运行）
 ├── src/
 │   ├── data/*.json           # 构建数据（由数据库导出生成，勿手改）
@@ -111,6 +117,29 @@ jyl-site/
 - **预览图标**：每个预览页与 `404.html` 均声明 favicon + 180×180 apple-touch-icon（移动端历史页大图标），图标由 `scripts/gen-preview-icons.ps1` 从各项目 logo 生成（SyLabAI 使用韶远/Accela 徽标截取）
 - **深链刷新兜底**：`public/404.html` 识别预览路径并跳回应用入口（BrowserRouter 应用刷新不再 404）
 - **演示模式开关**：各项目以构建时环境变量启用（不污染正常开发），如 `npx vite build --mode embedded` / `npm run build -- --mode embedded`
+- **iframe 防护**：`polish-previews.mjs` 同时向每个预览页注入 `frame-ancestors 'self'` CSP 与 frame-busting 脚本，阻止预览页被外部站点嵌套抓取
+
+## 反爬与内容保护
+
+客户端方案无法真正阻止抓取，这里的目标是**提高无差别采集的成本**，同时不牺牲招聘方的正常使用：
+
+| 层 | 手段 | 位置 |
+| --- | --- | --- |
+| L1 | `robots.txt` 放行搜索引擎、拒绝 AI 语料采集与批量抓取 UA；`sitemap.xml` 提供结构；外链统一 `rel="noopener noreferrer nofollow"` | `public/robots.txt`、`public/sitemap.xml` |
+| L2 | 邮箱与 GitHub 地址以字符码表存储、渲染时才解码；页面内埋入读屏与视觉均不可见的诱饵邮箱 | `src/data/contact.ts`、`scripts/encode-contact.mjs` |
+| L3 | 简历 PDF 全页对角平铺水印，**不破坏文本层**（ATS 仍可解析）；原件保留在 `_archive/resumes/` | `scripts/watermark_resume.py` |
+| L4 | 预览页 iframe 防护（CSP + frame-busting 兜底） | `scripts/polish-previews.mjs` |
+
+维护动作：
+
+```bash
+npm run contact:encode     # 改过 profile.json 的邮箱 / GitHub 后运行
+npm run resume:watermark   # 换简历后：先把新版放进 _archive/resumes/，再运行
+npm run previews:polish    # 预览页重新构建复制进 public/preview/ 后运行
+```
+
+> 打印一律拦截：站点不提供打印版式（固定网格、玻璃层、导航栏打印出来是半成品），
+> 打印时会显示一段提示引导到 PDF 简历。
 
 ## 本地运行
 
@@ -139,7 +168,8 @@ npm run build      # = db:export + 类型检查 + 构建
 换简历：覆盖 `public/resume.pdf`（原件归档在 `_archive/resumes/`）。
 新增证书/头像：压缩后的 WebP 放 `public/` 对应目录，原图放入 `_archive/` 对应目录，再改 `education.json` 或相关数据。
 
-> 新增或修改站点文案后，请重新运行 `node scripts/subset-fonts.mjs` 生成最新字体子集（新用字不在子集内会回退到系统字体）。
+> 新增或修改站点文案后，请重新运行 `npm run fonts:subset` 生成最新字体子集（新用字不在子集内会回退到系统字体）。
+> 该命令会先子集化 `src/fonts/*.woff2`，再把首屏两个展示字体重新 base64 内联进 `index.html`，两步必须成对执行。
 
 ## 图片与命名规范
 
@@ -160,10 +190,20 @@ npm run build      # = db:export + 类型检查 + 构建
 
 ## 设计系统
 
-- **视觉基调「青玉 · 深空青」**：主色青玉（teal `#0f766e`）+ 高亮碧青（cyan），浅色冷白微青底、深色深青黑底；深浅两套色彩同族，深色粒子液柱与浅色主色统一。
-- **字体五层体系**：正文 Noto Sans SC（自托管子集 4 字重）、展示层**得意黑**（区块标题/品牌）、名字**柳建毛草**（Hero 专属，草书）、数字 **Fraunces**（统计/强调数字）、等宽 **Victor Mono**（代码彩蛋/行号，含斜体变体）；`scripts/subset-fonts.mjs` 按站点用字子集化，新增文案后需重新运行。
-- **动效**：GSAP（Hero 入场序列 + About 链路连接线 scrub），全站尊重 `prefers-reduced-motion`；其余滚动渐显由 IntersectionObserver 驱动。
-- **版式特色**：Hero 编辑式排版（名字超大两行 + 头像签名章 + 等宽代码彩蛋）；项目区「编辑索引行」差异化；技能区模糊搜索 + 桌面双列均衡；About 阶段化叙事 + 能力链路数字卡。
+设计口径已固化为两份文件，后续任何改动都以此为准：
+
+- **`PRODUCT.md`**：register（brand）、目标用户、反参考、五条设计原则、可访问性要求
+- **`DESIGN.md`**：完整 token（颜色 / 字体 / 圆角 / 间距 / 组件）+ 六节规范（Overview / Colors / Typography / Elevation / Components / Do's and Don'ts）
+- **`.impeccable/design.json`**：token 的机读侧车（色阶、阴影、动效时长、组件片段）
+
+- **视觉基调「石墨 · 琥珀」**：底色为纯中性石墨（黑 / 白 / 灰三档色阶），唯一强调色是暖琥珀。深浅两套同族，只有明度方向相反（浅色 50→700 逐步变深，深色反向）。中性色不使用带色相的灰。
+- **颜色策略**：琥珀是唯一强调色，只出现在「可交互 / 当前 / 关键数字」三处，一屏覆盖不超过 10%。
+- **对比度**：正文色与背景组合 ≥ 4.5:1，装饰性图形边界 ≥ 3:1。`brand-500` / `brand-600` 只用于非文字元素，承载小字一律用 `brand-700`。深浅两套均以无头浏览器实测复核。
+- **字体五层体系**：正文 Noto Sans SC（自托管子集 4 字重）、展示层**得意黑**（区块标题/品牌）、名字**柳建毛草**（Hero 专属，草书）、数字 **Fraunces**（统计/强调数字）、等宽 **Victor Mono**（代码彩蛋/行号，含斜体变体）；`npm run fonts:subset` 按站点用字子集化并重新内联首屏字体。
+- **卡片三档**：实心面板（项目行/技能卡/经历卡，不透明 + 发丝边）｜ 轻色板（关于我/教育卡，半透明 + 发丝边，**不加模糊**）｜ 毛玻璃（仅吸顶导航、底部 Tab、右侧玻璃管、灯箱等固定浮层）。划分依据是「是否需要透视」，不是重要性。
+- **深色层级**：用背景色阶表达浮起（`#121415` → `#1b1e20` → `#23282b`），不依赖阴影。
+- **动效**：GSAP（Hero 入场序列 + About 链路连接线 scrub）+ IntersectionObserver 滚动渐显；时长 150–320ms、指数缓出、无回弹；无限循环动画（粒子、光斑）在元素离屏时自动暂停；全站尊重 `prefers-reduced-motion`。
+- **版式特色**：Hero 编辑式排版（名字超大 + 头像签名章 + 等宽代码彩蛋）；区块标题编辑式非对称（左标题 + 右编号 `01 / 06` + 延伸发丝线）；项目区「编辑索引行」差异化（行号 + 左右交错 + 发丝分隔，不用盒子）；技能区模糊搜索 + 双列网格（奇数张时末卡横跨两列）；About 阶段化叙事 + 能力链路数字卡。
 
 ## 项目亮点
 
