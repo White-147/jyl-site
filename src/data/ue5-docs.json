@@ -1,0 +1,113 @@
+{
+  "_note": "由 scripts/import-ue-docs.mjs 生成，请勿手改。原文在 docs/ue5/source/*.md（从本地笔记同步），图片产物在 public/docs/ue5/images/。",
+  "docsRoot": "docs/ue5",
+  "docs": [
+    {
+      "id": "unreal5-notes",
+      "title": "虚幻引擎总览",
+      "subtitle": "下载安装、项目模板、界面与快捷键、学习路线",
+      "status": "ready",
+      "toc": [
+        {
+          "id": "虚幻5引擎学习笔记",
+          "label": "虚幻5引擎学习笔记",
+          "level": 1
+        },
+        {
+          "id": "一概况说明",
+          "label": "一、概况说明",
+          "level": 2
+        },
+        {
+          "id": "1-版本说明",
+          "label": "1. 版本说明",
+          "level": 3
+        },
+        {
+          "id": "2-自助答疑方法",
+          "label": "2. 自助答疑方法",
+          "level": 3
+        },
+        {
+          "id": "3虚幻引擎58运行配置",
+          "label": "3.虚幻引擎5.8运行配置",
+          "level": 3
+        },
+        {
+          "id": "二学习记录",
+          "label": "二、学习记录",
+          "level": 2
+        },
+        {
+          "id": "1虚幻引擎和fab",
+          "label": "1.虚幻引擎和Fab",
+          "level": 3
+        },
+        {
+          "id": "2新建项目和项目模板",
+          "label": "2.新建项目和项目模板",
+          "level": 3
+        },
+        {
+          "id": "3-编辑模式下的视角移动方式",
+          "label": "3. 编辑模式下的视角移动方式",
+          "level": 3
+        },
+        {
+          "id": "4-变换工具快捷键",
+          "label": "4. 变换工具快捷键",
+          "level": 3
+        },
+        {
+          "id": "5-项目启动快捷键",
+          "label": "5. 项目启动快捷键",
+          "level": 3
+        },
+        {
+          "id": "6-界面基础操作",
+          "label": "6. 界面基础操作",
+          "level": 3
+        },
+        {
+          "id": "7界面进阶操作",
+          "label": "7.界面进阶操作",
+          "level": 3
+        },
+        {
+          "id": "8蓝图",
+          "label": "8.蓝图",
+          "level": 3
+        }
+      ],
+      "html": "unreal5-notes.html"
+    },
+    {
+      "id": "ue5-window-base",
+      "title": "界面基础操作",
+      "subtitle": "编辑器界面与面板",
+      "toc": [],
+      "status": "pending"
+    },
+    {
+      "id": "ue5-window-advanced",
+      "title": "界面进阶操作",
+      "subtitle": "视口工具栏、大纲与细节",
+      "toc": [],
+      "status": "pending"
+    },
+    {
+      "id": "blueprint-base",
+      "title": "蓝图基础",
+      "subtitle": "蓝图类、父类体系与对象模型",
+      "toc": [],
+      "status": "pending"
+    },
+    {
+      "id": "blueprint-program-base",
+      "title": "蓝图编程基础",
+      "subtitle": "增强输入、角色移动与自动门实战",
+      "toc": [],
+      "status": "pending"
+    }
+  ]
+}

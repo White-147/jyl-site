@@ -213,6 +213,29 @@ npm run build      # = db:export + 类型检查 + 构建
 > 需要注意静态托管都必须能直接跑这份 `dist/`（`base: './'`，相对路径，无平台特有配置）。
 
 
+## UE5 学习笔记文档区
+
+站内文档区位于 `#/docs/ue5`（hash 路由，不需要服务端重写），把桌面上的 UE 学习笔记
+（Typora 维护的 markdown）转成可读的文档站：左侧文档树 + 本篇大纲、标题锚点跳转、
+配图点击放大（复用站点灯箱）、**整块正文放开复制**（`data-copyable` 白名单）。
+
+- 入口：项目区末尾的「UE5 学习笔记」卡片、页脚、桌面端右侧导轨
+- 当前已导入 1 篇（`unreal5-notes`），其余 4 篇在侧栏以「待导入」占位，避免死链
+- 图片：193 张原始截图（124MB）压缩为 WebP 后约 13MB；`public/docs/ue5/images/` 只放 WebP，
+  原始 PNG 归档在 `_archive/ue5-notes/images/`
+
+内容流水线与维护步骤见 [`docs/联动维护点.md`](docs/联动维护点.md) 第 13 条：
+
+```bash
+python scripts/optimize_images.py _archive/ue5-notes/images public/docs/ue5/images --only-from-md docs/ue5/source/<name>.md
+node scripts/import-ue-docs.mjs     # 生成 public/docs/ue5/*.html + src/data/ue5-docs.json
+npm run fonts:subset                # 新汉字要进字体子集
+npm run build
+```
+
+> `scripts/import-ue-docs.mjs` 自带自检：引用了但未转换的图片会直接报错退出，不会静默出裂图。
+
+
 ## 设计系统
 
 设计口径已固化为两份文件，后续任何改动都以此为准：
