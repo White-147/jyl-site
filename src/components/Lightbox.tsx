@@ -6,6 +6,12 @@ interface LightboxProps {
   onClose: () => void
   /** 底部操作区（如名称、跳转按钮、关闭按钮） */
   children?: ReactNode
+  /**
+   * 面板最大宽度类名。默认 `max-w-4xl`（项目截图够用）。
+   * ⚠️ 必须写成**完整类名字面量**（如 `max-w-6xl`）——Tailwind 是扫描源码生成 CSS，
+   * 拼出来的类名不会被生成（docs 区的 UE 截图是编辑器全屏截图，需要更宽的灯箱）。
+   */
+  maxWidthClass?: string
 }
 
 const FOCUSABLE =
@@ -16,7 +22,7 @@ const FOCUSABLE =
  *  焦点管理（WCAG 2.2）：打开时记住触发元素并把焦点移入对话框，
  *  打开期间 Tab 在对话框内循环（不穿透到遮罩后的页面），
  *  关闭后把焦点归还给触发元素。 */
-export default function Lightbox({ src, alt, onClose, children }: LightboxProps) {
+export default function Lightbox({ src, alt, onClose, children, maxWidthClass = 'max-w-4xl' }: LightboxProps) {
   const overlayRef = useRef<HTMLDivElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
   const previousFocus = useRef<HTMLElement | null>(null)
@@ -87,7 +93,7 @@ export default function Lightbox({ src, alt, onClose, children }: LightboxProps)
       <div
         ref={panelRef}
         tabIndex={-1}
-        className="relative max-h-full max-w-4xl outline-none"
+        className={`relative max-h-full ${maxWidthClass} outline-none`}
         onClick={(e) => e.stopPropagation()}
       >
         <img src={src} alt={alt} className="max-h-[78vh] w-auto rounded-lg shadow-2xl" />

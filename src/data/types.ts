@@ -99,3 +99,31 @@ export interface EducationData {
   certs: CertItem[]
   awards: AwardItem[]
 }
+
+/* ---------- UE5 学习笔记文档区（src/data/ue5-docs.json，由 scripts/import-ue-docs.mjs 生成） ---------- */
+
+export interface DocHeading {
+  /** 标题锚点 id（由转换器按标题文本生成，稳定且可分享） */
+  id: string
+  label: string
+  /** 标题层级：1 篇名 / 2 大节 / 3 小节（4 级不进大纲） */
+  level: number
+}
+
+export interface DocEntry {
+  id: string
+  title: string
+  subtitle?: string
+  /** ready = 已导入并生成 HTML；pending = 只占位显示（笔记尚未导入本站） */
+  status: 'ready' | 'pending'
+  toc: DocHeading[]
+  /** ready 时的 HTML 文件名（位于 public/docs/ue5/ 下） */
+  html?: string
+}
+
+export interface Ue5DocsManifest {
+  /** 生成说明（该文件为产物，勿手改） */
+  _note: string
+  docsRoot: string
+  docs: DocEntry[]
+}

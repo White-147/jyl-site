@@ -3,8 +3,9 @@ import { useAnchorScroll } from '../hooks/useAnchorScroll'
 import { CHAPTERS, SECTION_IDS } from '../data/navigation'
 
 // 移动端空间有限：教育并入「经历」区块，Tab Bar 保持 5 个主 tab；
-// 首屏（isChapter: false）不进 Tab Bar，它只参与滚动侦测与右侧导轨
-const tabs = CHAPTERS.filter((s) => s.id !== 'education')
+// 首屏（isChapter: false）不进 Tab Bar，它只参与滚动侦测与右侧导轨；
+// 带 href 的条目是跨视图跳转（UE 文档区），也不进 Tab Bar（底部只放"滚到某一段"）。
+const tabs = CHAPTERS.filter((s) => s.id !== 'education' && !s.href)
 
 /** 移动端底部常驻 Tab Bar（2026 主流：可见性 + 拇指区，替代汉堡菜单） */
 export default function MobileTabBar() {

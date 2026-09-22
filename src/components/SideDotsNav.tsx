@@ -120,7 +120,8 @@ function Rail() {
       setPositions(
         SECTIONS.map((sec) => {
           const el = document.getElementById(sec.id)
-          if (!el) return 0
+          // 跨视图条目（UE 文档区，主页面里没有对应 section）不参与比例计算，压到管底
+          if (!el) return 100
           // 首屏（#top）在文档顶端，滚到它时 scrollY = 0
           if (sec.role === HERO_ROLE) return 0
           const sectionTop = el.getBoundingClientRect().top + window.scrollY
@@ -285,9 +286,10 @@ function Rail() {
             const isActive = active === sec.id
             return (
               <div key={sec.id} className="absolute right-0" style={{ top: `${positions[i]}%` }}>
+                {/* 带 href 的条目（UE 文档区）是跨视图跳转，不走 useAnchorScroll 的平滑滚动 */}
                 <a
-                  href={`#${sec.id}`}
-                  onClick={(e) => onAnchorClick(e, sec.id)}
+                  href={sec.href ?? `#${sec.id}`}
+                  onClick={sec.href ? undefined : (e) => onAnchorClick(e, sec.id)}
                   aria-current={isActive ? 'true' : undefined}
                   aria-label={sec.label}
                   title={sec.label}

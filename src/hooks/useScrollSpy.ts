@@ -41,6 +41,10 @@ export function useScrollSpy(ids: string[]) {
     const update = () => {
       cancelAnimationFrame(raf)
       raf = requestAnimationFrame(() => {
+        // ⚠️ `#docs` 是**跨视图**入口（hash 路由 `#/docs/ue5`），主页面里没有这个 section。
+        // 这里提前退出并保持上一次的高亮，否则滚到底部时它会把高亮抢走。
+        if (!els.some((el) => el !== null)) return
+
         // 判定线 = 当前视口宽度下的停靠位 + 容差
         const margin =
           window.matchMedia('(min-width: 640px)').matches

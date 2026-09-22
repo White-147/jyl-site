@@ -1,5 +1,12 @@
 @import "tailwindcss";
 
+/* 注意：文档区（Docs.tsx）用到两个带方括号的任意值类 —— `max-w-[88rem]` 与
+   `lg:grid-cols-[15rem_minmax(0,1fr)]` / `xl:grid-cols-[15rem_minmax(0,1fr)_13rem]`。
+   它们能被正常扫描生成（2026-09 构建产物已逐条核对）。
+   之所以记在这里：这类「静默不生成」的失败不会报错，只会让版式悄悄塌掉
+   （同类事故见 docs/联动维护点.md 第 6 条的 @utility 丢嵌套 @media）。
+   **新增带方括号的任意值类后，请在 dist/assets/*.css 里 grep 一次确认它真的生成了。** */
+
 /* 站点专用字体子集（node scripts/subset-fonts.mjs 生成，仅含站点用字）
    Noto Sans SC（正文）按字重分别子集为 4 个静态档；Smiley Sans 得意黑（标题展示）为站点字符集裁剪；
    Fraunces / Victor Mono 取 latin 子集 */
@@ -589,6 +596,202 @@ details[open] .chevron-up-down {
 .cv-section {
   content-visibility: auto;
   contain-intrinsic-size: auto 2200px;
+}
+
+/* ===== UE 文档区正文排版（.doc-content，见 src/components/Docs.tsx） =====
+   内容来自 scripts/import-ue-docs.mjs 转换出的静态 HTML，样式全部落在这里，
+   组件那边只负责容器与交互（灯箱、锚点）。
+   两条硬约束：
+     1) **图片要比正文宽**：UE 编辑器截图信息密度高，正文列（46rem 左近）根本看不清。
+        这里把 figure 允许到容器满宽（容器本身最大 88rem），并在灯箱里给 max-w-6xl。
+     2) **UE 截图是深色底**：浅色模式下直接贴在白卡上会显得割裂，所以给图片自身一块
+        中性深色底 + 细边，深色模式下则用比卡片更深一档的底色托住，避免"黑图糊进深色画布"。 */
+.doc-content {
+  color: var(--color-slate-600);
+  font-size: var(--text-base);
+  line-height: 1.85;
+  /* 笔记里大量出现整条 URL 的裸文本（如 unrealengine 论坛的深层链接），
+     它们没有任何可断点，在 390px 手机上会把正文撑出容器（实测 410px > 358px）。
+     `anywhere` 比 `break-word` 更彻底：它允许在任意字符间断开，且会参与 min-content 计算。 */
+  overflow-wrap: anywhere;
+}
+.dark .doc-content {
+  color: var(--color-slate-300);
+}
+
+/* 标题层级与间距：h2 上留白更足（大节之间要能一眼断开），h3/h4 递进收紧 */
+.doc-content .doc-h1,
+.doc-content .doc-h2,
+.doc-content .doc-h3,
+.doc-content .doc-h4 {
+  position: relative;
+  scroll-margin-top: 96px; /* 与 Docs.tsx 的 HEADER_OFFSET 对齐：锚点跳转不被吸顶导航压住 */
+  color: var(--color-ink);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.dark .doc-content .doc-h1,
+.dark .doc-content .doc-h2,
+.dark .doc-content .doc-h3,
+.dark .doc-content .doc-h4 {
+  color: var(--color-ink-light);
+}
+.doc-content .doc-h1 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--text-3xl);
+  margin: 0 0 1.25rem;
+}
+.doc-content .doc-h2 {
+  font-size: var(--text-2xl);
+  margin: 2.75rem 0 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--color-slate-200);
+}
+.dark .doc-content .doc-h2 {
+  border-top-color: var(--color-slate-700);
+}
+.doc-content .doc-h3 {
+  font-size: var(--text-xl);
+  margin: 2rem 0 0.75rem;
+}
+.doc-content .doc-h4 {
+  font-size: var(--text-lg);
+  margin: 1.5rem 0 0.5rem;
+}
+
+/* 标题左侧的 # 锚点：常驻但很淡，hover 时才亮（与 MD 文档阅读器的惯例一致） */
+.doc-content .doc-anchor {
+  position: absolute;
+  left: -1.15em;
+  color: var(--color-slate-300);
+  text-decoration: none;
+  font-weight: 400;
+  opacity: 0;
+  transition: opacity var(--duration-micro) var(--ease-out-soft);
+}
+.dark .doc-content .doc-anchor {
+  color: var(--color-slate-600);
+}
+.doc-content .doc-h1:hover .doc-anchor,
+.doc-content .doc-h2:hover .doc-anchor,
+.doc-content .doc-h3:hover .doc-anchor,
+.doc-content .doc-h4:hover .doc-anchor,
+.doc-content .doc-anchor:focus-visible {
+  opacity: 1;
+}
+/* 窄屏没有左侧留白放 #，直接不显示（锚点仍可通过大纲跳转） */
+@media (max-width: 1023px) {
+  .doc-content .doc-anchor {
+    display: none;
+  }
+}
+
+.doc-content p {
+  margin: 0.85rem 0;
+}
+.doc-content strong {
+  font-weight: 700;
+  color: var(--color-ink);
+}
+.dark .doc-content strong {
+  color: var(--color-ink-light);
+}
+.doc-content .doc-link {
+  color: var(--color-brand-700);
+  text-decoration: underline;
+  text-decoration-color: var(--color-brand-300);
+  text-underline-offset: 3px;
+}
+.doc-content .doc-link:hover {
+  color: var(--color-brand-800);
+}
+.dark .doc-content .doc-link {
+  color: var(--color-brand-200);
+  text-decoration-color: rgb(242 169 59 / 0.5);
+}
+.doc-content code {
+  padding: 0.1em 0.35em;
+  border-radius: 0.35rem;
+  background: var(--color-slate-100);
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+}
+.dark .doc-content code {
+  background: var(--color-slate-900);
+}
+/* 尚未导入本站的文档互链：保持原文位置但明确不可点，避免死链 */
+.doc-content .doc-link-pending {
+  color: var(--color-slate-400);
+  border-bottom: 1px dashed var(--color-slate-300);
+}
+.dark .doc-content .doc-link-pending {
+  border-bottom-color: var(--color-slate-600);
+}
+.doc-content .doc-pending-badge {
+  margin-left: 0.35em;
+  padding: 0.05em 0.4em;
+  border: 1px dashed var(--color-slate-300);
+  border-radius: 9999px;
+  font-size: 0.7em;
+  vertical-align: 0.1em;
+}
+.dark .doc-content .doc-pending-badge {
+  border-color: var(--color-slate-600);
+}
+.doc-content .doc-hr {
+  margin: 2.25rem 0;
+  border: 0;
+  border-top: 1px solid var(--color-slate-200);
+}
+.dark .doc-content .doc-hr {
+  border-top-color: var(--color-slate-700);
+}
+
+/* 列表：一级用圆点，嵌套缩进并换更浅的标记 */
+.doc-content .doc-ul {
+  margin: 0.6rem 0;
+  padding-left: 1.35rem;
+  list-style: disc;
+}
+.doc-content .doc-ul > li {
+  margin: 0.4rem 0;
+  padding-left: 0.15rem;
+}
+.doc-content .doc-ul > li::marker {
+  color: var(--color-brand-500);
+}
+.doc-content .doc-ul-sub {
+  margin: 0.35rem 0 0.35rem;
+  list-style: circle;
+}
+.doc-content .doc-ul-sub > li::marker {
+  color: var(--color-slate-400);
+}
+
+/* 图片：可点击放大（灯箱在 React 侧用事件委托接管），宽度放到容器满宽 */
+.doc-content .doc-figure {
+  margin: 1.25rem 0;
+}
+.doc-content .doc-figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+  cursor: zoom-in;
+  border-radius: 0.75rem;
+  border: 1px solid rgb(0 0 0 / 0.35);
+  /* UE 编辑器截图是深色底：给它一块中性深底，浅色模式下不会"白底贴深图"显得割裂 */
+  background: #1b1e20;
+  transition: border-color var(--duration-micro) var(--ease-out-soft);
+}
+.doc-content .doc-figure img:hover {
+  border-color: var(--color-brand-500);
+}
+.doc-content .doc-figure figcaption {
+  margin-top: 0.5rem;
+  text-align: center;
+  font-size: var(--text-xs);
+  color: var(--color-slate-400);
 }
 
 /* 打印一律拦截：站点不提供打印版式（固定网格、玻璃层、导航栏打印出来是半成品），

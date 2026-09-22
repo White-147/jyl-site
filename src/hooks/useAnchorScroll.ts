@@ -114,6 +114,9 @@ export function useDeepLinkCorrection() {
   useEffect(() => {
     const id = location.hash.replace(/^#/, '')
     if (!id || id === HERO_ID) return
+    // 路由型 hash（`#/docs/ue5/...`）不是页内锚点：既没有对应元素，也不该被"纠正"。
+    // 文档区自己处理 `?s=<heading id>` 的定位（见 Docs.tsx）。
+    if (id.startsWith('/')) return
     const el = document.getElementById(id)
     if (!el) return
     const expected = expectedOffset()

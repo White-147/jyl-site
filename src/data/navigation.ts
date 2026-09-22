@@ -19,6 +19,12 @@ export interface SectionDef {
   role?: 'hero'
   /** 是否是一个「有正文的章节」。`false` 用于首屏这类只有背景没有正文的条目。 */
   isChapter?: boolean
+  /**
+   * 非页内锚点的自定义地址（目前只有 UE 文档区用：`#/docs/ue5`）。
+   * 带 href 的条目仍然注册在案（右侧导轨会显示、也能被高亮），
+   * 但点击时走**整页跳转**而不是 `useAnchorScroll` 的平滑滚动 —— 见 SideDotsNav 的判断。
+   */
+  href?: string
 }
 
 /** 首屏的角色标记与 id，供各组件引用，避免各处硬编码字符串 */
@@ -70,6 +76,16 @@ export const SECTIONS: SectionDef[] = [
     label: '联系我',
     shortLabel: '联系',
     icon: 'M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z',
+  },
+  {
+    // 独立文档区（不是主页面上的可滚动区块）：href 走 hash 路由 `#/docs/ue5`，
+    // 由 App.tsx 切换视图。**排最后**且在移动端 Tab Bar 里被过滤掉
+    // （见 MobileTabBar 的 tabs 过滤），因为它是跨页跳转而不是"滚到某一段"。
+    id: 'docs',
+    label: 'UE5 学习笔记',
+    shortLabel: '笔记',
+    icon: 'M4 4h10a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3V4zm3 3h6M7 11h6M7 15h4',
+    href: '#/docs/ue5',
   },
 ]
 
