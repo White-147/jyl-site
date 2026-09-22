@@ -197,36 +197,20 @@ npm run build      # = db:export + 类型检查 + 构建
 - 站点图标不入 `_archive/`：它是**生成物**，源是 `scripts/gen_icons.py` + 柳建毛草字体，改配色或换字只需重跑 `npm run icons:gen`
 - 数据源为 SQLite（`database/portfolio.db`），其中存储的图片路径与 `public/` 实际文件名严格一致；新增/改名图片后执行 `npm run db:seed` 同步
 
-## 部署到 GitHub Pages + Cloudflare Pages
+## 部署到 GitHub Pages
 
-仓库已配置 GitHub Actions（`.github/workflows/deploy.yml`），推送到 `main` 分支即自动构建并**同时发布到两端**：
+仓库已配置 GitHub Actions（`.github/workflows/deploy.yml`），推送到 `main` 分支即自动构建并部署：
 
-1. 构建流程：`npm ci` → `npm run build`（自动执行 `db:export` 从数据库导出 JSON，再做类型检查与打包），只构建一次；
-2. **GitHub Pages**：`upload-pages-artifact` 上传 `dist/`，`deploy-pages` 发布 → https://white-147.github.io/jyl-site/
-3. **Cloudflare Pages**：`wrangler pages deploy` 发布同一份产物 → `https://<项目名>.pages.dev`
+1. 构建流程：`npm ci` → `npm run build`（自动执行 `db:export` 从数据库导出 JSON，再做类型检查与打包）
+2. 部署流程：`upload-pages-artifact` 上传 `dist/`，`deploy-pages` 发布到 GitHub Pages
+3. 访问地址：https://white-147.github.io/jyl-site/
 
-> **为什么要两端**：站点资源全部同源，而 `github.io` 在大陆无代理时首屏 > 5s（挂代理很快、直连很慢、走缓存后正常）。
-> 代码侧首屏体积已从约 1MB 压到约 440KB，剩下的瓶颈是线路本身。Cloudflare 的港/新/日节点比 GitHub Pages 稳定得多，
-> GitHub Pages 则保留给海外访问与搜索引擎收录。
-
-启用 Cloudflare 一路需要在仓库 **Settings → Secrets and variables → Actions** 添加两个 secret：
-
-| Secret | 说明 |
-| --- | --- |
-| `CLOUDFLARE_API_TOKEN` | 建议只勾选 **Cloudflare Pages: Edit** 权限，不要用全局 API Key |
-| `CLOUDFLARE_ACCOUNT_ID` | 控制台右侧栏的 Account ID |
-
-未配置时该 job 的 gate 步骤会打印「跳过」并正常结束，**不会让 CI 变红**，GitHub Pages 照常发布。
-若在 Cloudflare 控制台已建好项目，把 workflow 里 `--project-name=jyl-site` 改成项目名即可。
-
-`public/_headers` 只在 Cloudflare 生效（GitHub Pages 不支持自定义响应头），用于下发：
-
-- 真正的 HTTP 级 `Content-Security-Policy` / `X-Frame-Options` / `X-Content-Type-Options`
-  （预览页的 meta CSP 与 frame-busting 仍保留，用于 GitHub Pages 与本地预览）；
-- 分级缓存：`/assets/*` 永久（文件名带内容指纹）、HTML 不缓存（改了刷新就能看到）、PDF 短缓存。
-
-> 如需自定义域名：Cloudflare Pages 的 Projects → Custom domains 加一条 CNAME 即可，**不需要 ICP 备案**
-> （备案只在选用「中国大陆加速」时才是硬要求）。GitHub Pages 侧若要绑域名，在仓库 Settings → Pages 配置。
+> 如需自定义域名：在仓库 Settings → Pages 中绑定域名。
+>
+> **关于访问速度**：站点资源全部同源托管，`github.io` 在大陆无代理时会明显偏慢（实测首屏 > 5s，
+> 走缓存后正常）。代码侧的体积优化已经做完（首屏约 1MB → 约 440KB，详见下方性能预算），
+> 剩下的瓶颈是线路本身，**当前决定不做镜像/代理部署**。若将来要换线路，
+> 需要注意静态托管都必须能直接跑这份 `dist/`（`base: './'`，相对路径，无平台特有配置）。
 
 
 ## 设计系统
