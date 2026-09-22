@@ -30,7 +30,7 @@
 - 项目按岗位方向筛选：AI 应用 / 企业系统 / 大数据
 - 项目索引列表：行号 + 缩略图 + 技术栈展开/收起 + 要点折叠 + 灯箱放大
 - 技能画像分组展示：8 个岗位方向画像、模糊搜索（大小写/符号/空格归一）、高频快捷标签
-- About 阶段化叙事：早期 / 近期 / 日常 + 三条能力链路数字卡片
+- About 阶段化叙事：早期 / 近期 / 日常 + 四条能力链路数字卡片（数据工程 / 业务交付 / AI 工具链 / UE 游戏开发，2×2 双列网格）
 - **区块导航双形态**：桌面端右侧贯穿式玻璃管（节点按各段滚动进度分布、液柱表示阅读进度），移动端底部 Tab Bar + 置顶胶囊导航
 - **项目在线预览**：各项目的静态前端嵌入本站（`public/preview/`），卡片「在线体验」直达；无后端项目显示适配各项目风格的演示提示条（深浅色双态）
 - **演示模式**：BookRecommendation / MiLuStudio 采用构建开关（`VUE_APP_EMBEDDED_DEMO` / `VITE_EMBEDDED_DEMO`）内置示例数据，无后端也能直入登录后首页
@@ -41,7 +41,7 @@
 - **反爬与内容保护**：邮箱混淆渲染 + 诱饵地址、预览页 iframe 防护、`robots.txt` 拒 AI 语料采集、简历 PDF 全页对角水印（保留文本层，ATS 友好）
 - **内容只读**：默认禁止选中/复制，仅联系区邮箱标记 `data-copyable` 放行（配合「点击复制」按钮）
 - **可访问性达标**：全站对比度满足 WCAG 2.2 AA（浅深两套均实测通过）、灯箱焦点陷阱与焦点归还、打印拦截并引导至 PDF 简历
-- **性能预算**：`backdrop-filter` 收敛到 4 处固定元素、常驻动画离屏暂停、粒子数随视口收敛、背景层由 4 层合为 3 层；首屏无内容跳动（CLS 桌面 0）
+- **性能预算**：首屏 HTML 只内联 10KB 的名字字体（得意黑 138KB 改按需外链，不再计入每次 HTML 请求）；中文字体只保留 **400/500/700** 三档（900 档无人引用、已删，省 146KB），且只 preload 首屏真正会画的 400/500；`background-attachment: fixed` 已取消（改独立 fixed 合成层）、移动端去掉常驻 `backdrop-filter`、`<768px` 不挂载右侧导轨（连带其滚动监听与观察器）、滚动侦测的元素引用做缓存、常驻动画离屏暂停、**ScrollTrigger 已从产物移除**（About 连接线改 IntersectionObserver + CSS 过渡）、首屏以下区块 `content-visibility: auto`、CLS 桌面 0
 
 ## 技术栈
 
@@ -197,15 +197,37 @@ npm run build      # = db:export + 类型检查 + 构建
 - 站点图标不入 `_archive/`：它是**生成物**，源是 `scripts/gen_icons.py` + 柳建毛草字体，改配色或换字只需重跑 `npm run icons:gen`
 - 数据源为 SQLite（`database/portfolio.db`），其中存储的图片路径与 `public/` 实际文件名严格一致；新增/改名图片后执行 `npm run db:seed` 同步
 
-## 部署到 GitHub Pages
+## 部署到 GitHub Pages + Cloudflare Pages
 
-仓库已配置 GitHub Actions（`.github/workflows/deploy.yml`），推送到 `main` 分支即自动构建并部署：
+仓库已配置 GitHub Actions（`.github/workflows/deploy.yml`），推送到 `main` 分支即自动构建并**同时发布到两端**：
 
-1. 构建流程：`npm ci` → `npm run build`（自动执行 `db:export` 从数据库导出 JSON，再做类型检查与打包）
-2. 部署流程：`upload-pages-artifact` 上传 `dist/`，`deploy-pages` 发布到 GitHub Pages
-3. 访问地址：https://white-147.github.io/jyl-site/
+1. 构建流程：`npm ci` → `npm run build`（自动执行 `db:export` 从数据库导出 JSON，再做类型检查与打包），只构建一次；
+2. **GitHub Pages**：`upload-pages-artifact` 上传 `dist/`，`deploy-pages` 发布 → https://white-147.github.io/jyl-site/
+3. **Cloudflare Pages**：`wrangler pages deploy` 发布同一份产物 → `https://<项目名>.pages.dev`
 
-> 如需自定义域名：在仓库 Settings → Pages 中绑定已备案域名；如切换 Vercel/Netlify 部署，将根目录 `_redirects`/配置文件与 Actions 工作流一并调整即可。
+> **为什么要两端**：站点资源全部同源，而 `github.io` 在大陆无代理时首屏 > 5s（挂代理很快、直连很慢、走缓存后正常）。
+> 代码侧首屏体积已从约 1MB 压到约 440KB，剩下的瓶颈是线路本身。Cloudflare 的港/新/日节点比 GitHub Pages 稳定得多，
+> GitHub Pages 则保留给海外访问与搜索引擎收录。
+
+启用 Cloudflare 一路需要在仓库 **Settings → Secrets and variables → Actions** 添加两个 secret：
+
+| Secret | 说明 |
+| --- | --- |
+| `CLOUDFLARE_API_TOKEN` | 建议只勾选 **Cloudflare Pages: Edit** 权限，不要用全局 API Key |
+| `CLOUDFLARE_ACCOUNT_ID` | 控制台右侧栏的 Account ID |
+
+未配置时该 job 的 gate 步骤会打印「跳过」并正常结束，**不会让 CI 变红**，GitHub Pages 照常发布。
+若在 Cloudflare 控制台已建好项目，把 workflow 里 `--project-name=jyl-site` 改成项目名即可。
+
+`public/_headers` 只在 Cloudflare 生效（GitHub Pages 不支持自定义响应头），用于下发：
+
+- 真正的 HTTP 级 `Content-Security-Policy` / `X-Frame-Options` / `X-Content-Type-Options`
+  （预览页的 meta CSP 与 frame-busting 仍保留，用于 GitHub Pages 与本地预览）；
+- 分级缓存：`/assets/*` 永久（文件名带内容指纹）、HTML 不缓存（改了刷新就能看到）、PDF 短缓存。
+
+> 如需自定义域名：Cloudflare Pages 的 Projects → Custom domains 加一条 CNAME 即可，**不需要 ICP 备案**
+> （备案只在选用「中国大陆加速」时才是硬要求）。GitHub Pages 侧若要绑域名，在仓库 Settings → Pages 配置。
+
 
 ## 设计系统
 
@@ -229,7 +251,7 @@ npm run build      # = db:export + 类型检查 + 构建
 - 内容驱动架构：SQLite 单一内容源，JSON 由构建导出，改数据不碰代码。
 - 与简历同口径：站点简历下载与投递版保持同步更新，公司名、项目名、时间线一致。
 - **能脚本化的都脚本化了**：内容 `db:seed` / `db:export`、字体 `fonts:subset`、图标 `icons:gen`、联系方式 `contact:encode`、简历水印 `resume:watermark`、预览注入 `previews:polish`。
-- 字体子集化管线：五层字体按站点用字打包为单个 woff2（得意黑约 131KB / 柳建毛草 10KB / Fraunces 18KB / Victor Mono 16+21KB），首屏两个展示字体 base64 内联进 HTML，消除回退字体跳变。
+- 字体子集化管线：按站点用字打包为单个 woff2（正文 Noto Sans SC 400/500/700 各约 145KB / 得意黑 138KB / 柳建毛草 10KB / Fraunces 18KB / Victor Mono 16+21KB）；**只内联首屏真正需要的 10KB 名字字体**，得意黑与其余字重走外部文件按需/分级 preload，既消除回退字体跳变又不拖慢首屏。
 - 图标与字体同源：favicon 的「蒋」字由柳建毛草现场渲染（`scripts/gen_icons.py`），与首屏名字同一套字形；全尺寸 favicon 合计约 62KB（原方案单张 512 就 118KB）。
 - 项目在线预览：`public/preview/` 内嵌 5 个项目前端 + 演示模式开关，作品集内即可直达"登录后首页"。
 - SPA 刷新兜底：`404.html` 单文件解决 BrowserRouter 深链刷新 404。

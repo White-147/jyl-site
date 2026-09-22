@@ -12,8 +12,10 @@ export default function MobileTabBar() {
   const { onAnchorClick } = useAnchorScroll()
 
   return (
+    // `mobile-flat-bar`：<768px 关掉 backdrop-blur（见 index.css 该类的注释）。
+    // 本栏常驻屏幕底部，模糊是持续的逐帧开销；靠提高底色不透明度维持可读性。
     <nav
-      className="fixed inset-x-0 bottom-0 z-50 border-t border-slate-200/70 bg-white/85 pb-[env(safe-area-inset-bottom)] backdrop-blur-sm md:hidden dark:border-slate-800/70 dark:bg-slate-950/85"
+      className="mobile-flat-bar fixed inset-x-0 bottom-0 z-50 border-t border-slate-200/70 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-sm md:hidden dark:border-slate-800/70 dark:bg-slate-950/95"
       aria-label="移动端导航"
     >
       <div className="mx-auto flex max-w-md items-stretch justify-around">

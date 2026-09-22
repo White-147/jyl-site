@@ -1,0 +1,35 @@
+# Cloudflare Pages 响应头（GitHub Pages 不支持自定义响应头，这份只对 CF 生效）
+#
+# 为什么需要它：主站的所有「反爬 / iframe 防护」现在都是**客户端兜底**——
+#   scripts/polish-previews.mjs 只能往预览页塞 <meta http-equiv="Content-Security-Policy">，
+#   因为 GitHub Pages 无法下发响应头。Cloudflare Pages 支持 _headers 文件，
+#   于是可以把它升级成真正的 HTTP 头（meta 那份继续保留，用于 GitHub Pages 与本地预览）。
+#
+# 语法：每段一条规则，第一行是 URL 模式，后续是 `Name: value`。
+# 修改后重新构建部署即生效，不需要在控制台做任何配置。
+
+/*
+  # 不要在未被 iframe 嵌入时留下可探测的指纹，同时禁掉 MIME 嗅探
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  # 本站没有任何页面需要被外部嵌入；预览页另有自己的 frame-ancestors 'self' 与 frame-busting
+  X-Frame-Options: SAMEORIGIN
+  # 只用到自身资源 + 内联样式/脚本（首屏骨架与主题初始化都是内联的，所以不能省 unsafe-inline）
+  Content-Security-Policy: default-src 'self'; img-src 'self' data:; font-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; frame-ancestors 'self'; base-uri 'self'; form-action 'self'
+
+# 带内容指纹的构建产物：文件名里的 hash 变了内容才会变，可以永久缓存
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# 站点图标与二维码类固定名资源：一周即可（换图标时用的是 ?v=4 这类查询串，会自然失效）
+/favicons/*
+  Cache-Control: public, max-age=604800
+
+# HTML 不缓存：这是「改了内容刷新就能看到」的保证。
+# ⚠️ 不要给 HTML 加长缓存 —— 文件名没有指纹，一旦缓存住用户就看不到更新。
+/*.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+# 简历 PDF 用文件名区分版本（resume.pdf 覆盖式更新），给短缓存避免下到旧版
+/resume.pdf
+  Cache-Control: public, max-age=300

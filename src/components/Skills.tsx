@@ -52,7 +52,9 @@ export default function Skills() {
 
   return (
     <section id="skills" className="relative anchor-offset section-base">
-      <div className="rail-gutter mx-auto max-w-6xl px-4 sm:px-6">
+      {/* cv-section：首屏以下的区块跳过初始布局/绘制，见 index.css 该类的注释。
+          只包内容容器、不包 <section>（锚点停靠与滚动侦测都依赖 section 的正常布局）。 */}
+      <div className="cv-section rail-gutter mx-auto max-w-6xl px-4 sm:px-6">
         <SectionHeading
           eyebrow={SECTIONS.find((s) => s.id === 'skills')?.label ?? '专业技能'}
           title="岗位技能画像"

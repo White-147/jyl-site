@@ -160,7 +160,7 @@ components:
 ## 3. Typography
 
 **Display Font:** Smiley Sans 得意黑（自托管子集，OFL）；回退 Noto Sans SC
-**Body Font:** Noto Sans SC（自托管子集，400/500/700/900）；回退 Inter、PingFang SC、Microsoft YaHei
+**Body Font:** Noto Sans SC（自托管子集，**400/500/700 三档**；900 档已删除 —— 全站无引用，一个中文字重子集约 146KB）；回退 Inter、PingFang SC、Microsoft YaHei
 **Signature Font:** Liu Jian Mao Cao 柳建毛草（OFL，仅 Hero 名字）
 **Numeric Font:** Fraunces（latin 子集，统计数字）
 **Label/Mono Font:** Victor Mono（latin + italic，行号、代码彩蛋、键名）
@@ -177,7 +177,7 @@ components:
 - **Mono** (400, `clamp(0.6875rem, …, 0.75rem)`): 项目行号、代码彩蛋、技术键名。
 
 ### Named Rules
-**The Three-Weight Rule.** 正文字族只用 400 / 500 / 700 三个字重；900 仅用于 Hero 级的巨型数字。禁止使用字重 100–300（中文子集不含该档，会回退并触发合成加粗）。
+**The Three-Weight Rule.** 正文字族**只用** 400 / 500 / 700 三个字重，`@font-face` 也只声明这三档（900 档已于 2026-09 删除：全站无引用，一个中文字重子集约 146KB，没有理由让每个访客下载）。禁止使用字重 100–300 或 900（中文子集不含该档，会回退到系统字体并触发合成加粗）。
 
 **The No-Synthesis Rule.** 全站 `font-synthesis: none`。宁可回退到系统字体的真实字重，也不接受浏览器伪造的粗体。
 

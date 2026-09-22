@@ -41,13 +41,14 @@ export interface AboutPara {
   texts: string[]
 }
 
-/** About 能力链路卡：数字引用 stats 数组下标（statIdx 与 stats 一一对应） */
+/** About 能力链路卡：数字**内联在卡内**，不再引用全局 stats 下标
+ *  （下标式引用是漂移源：改 stats 顺序会静默串卡，见 docs/联动维护点.md 的约定）。 */
 export interface AboutLink {
   title: string
   tag: string
   desc: string
-  /** [第 1 个数字, 第 2 个数字] 在 stats 中的下标 */
-  statIdx: [number, number]
+  /** 卡片展示的两个数字（顺序即展示顺序） */
+  stats: Stat[]
 }
 
 /** About 右侧多定位卡：一个岗位方向一条定位（结构与技能画像对齐） */

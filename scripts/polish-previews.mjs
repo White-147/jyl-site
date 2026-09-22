@@ -81,6 +81,40 @@ const FRAME_GUARD = `<script id="frame-guard">
 </script>`
 
 let done = 0
+
+/** 预览页入口预热（2026-09 新增）：把入口 chunk 与样式表提前到 HTML 解析阶段请求。
+ *
+ *  为什么需要：预览页是各项目**自己的**构建产物（Vite/Rspack），主站这边唯一能改的就是这个注入脚本。
+ *  这些产物里运行时懒加载的 chunk 有几十个（如 xiao-lou-ai 约 65 个），而预览页又和主站同源，
+ *  全部走 GitHub Pages。跨境/弱网下每个请求都要多付一次往返，入口 chunk 迟到 = 白屏时间被拉长。
+ *  给入口加 `rel="modulepreload"` / `rel="preload" as="style"` 能把这两次请求挪到解析 HTML 时发起，
+ *  不改动产物本身、不改行为，失败也没有副作用（浏览器只是忽略掉未使用的预载）。
+ *
+ *  ⚠️ 幂等：注入前先擦掉上一轮插入的预热标签（带 data-preload-injected 标记），
+ *     否则重跑一次就多一组，而本文件是「重跑即覆盖」的设计。
+ *  ⚠️ 只预热**入口 chunk 与样式**：不要顺手把懒加载的业务 chunk 也塞进来，
+ *     那会把「按需」变成「首屏全下载」，反而更慢。 */
+function previewPreloadLinks(html) {
+  const links = []
+  // 样式：Vite 产出 <link rel="stylesheet" href="...">（file:// 与 http 都可能）
+  const cssFiles = [...html.matchAll(/<link[^>]+rel=["']stylesheet["'][^>]*>/g)]
+    .map((m) => (m[0].match(/href=["']([^"']+)["']/) || [])[1])
+    .filter(Boolean)
+  for (const href of cssFiles.slice(0, 2)) {
+    links.push(`<link rel="preload" as="style" href="${href}" data-preload-injected>`)
+  }
+  // 入口脚本：老版 Vite 用 modulepreload 已经声明过，跳过；否则取第一个 type="module" 的 src
+  const hasModulePreload = /<link[^>]+rel=["']modulepreload["']/.test(html)
+  if (!hasModulePreload) {
+    const moduleScript = [...html.matchAll(/<script[^>]*>/g)]
+      .map((m) => m[0])
+      .find((tag) => /type=["']module["']/.test(tag))
+    const entry = moduleScript && (moduleScript.match(/src=["']([^"']+)["']/) || [])[1]
+    if (entry) links.push(`<link rel="modulepreload" href="${entry}" data-preload-injected>`)
+  }
+  return links
+}
+
 for (const name of Object.keys(THEMES)) {
   const file = join(previewDir, name, 'index.html')
   if (!existsSync(file)) {
@@ -230,11 +264,14 @@ html[data-theme="dark"] .demo-pollish-note,html.dark .demo-pollish-note,html.dar
   html = html.replace(/<script id="frame-guard">[\s\S]*?<\/script>[\s]*/g, '')
   // CSP meta 单独擦除：它是独立元素，且要兼容早期没有 id 的注入版本
   html = html.replace(/<meta[^>]*http-equiv="Content-Security-Policy"[^>]*>\s*/g, '')
+  // 入口预热也要先擦后插（同名幂等，见 previewPreloadLinks 的注释）
+  html = html.replace(/<link[^>]*data-preload-injected[^>]*>\s*/g, '')
+  const preloadLinks = previewPreloadLinks(html)
   html = html
-    .replace('</head>', FRAME_GUARD_META + '\n' + STYLE + '</head>')
+    .replace('</head>', preloadLinks.join('\n') + (preloadLinks.length ? '\n' : '') + FRAME_GUARD_META + '\n' + STYLE + '</head>')
     .replace('</body>', SCRIPT + '\n' + FRAME_GUARD + '</body>')
   writeFileSync(file, html)
   done++
-  console.log(`injected: ${name}（浅色 ${t.light.color} / 深色 ${t.dark.color}）`)
+  console.log(`injected: ${name}（浅色 ${t.light.color} / 深色 ${t.dark.color}｜预热 ${preloadLinks.length} 项）`)
 }
 console.log(`完成：${done} 个预览页已注入/更新演示美化与 iframe 防护`)

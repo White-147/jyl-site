@@ -24,13 +24,9 @@
   font-display: swap;
   src: url("./fonts/noto-sans-sc-700.woff2") format("woff2");
 }
-@font-face {
-  font-family: "Noto Sans SC";
-  font-style: normal;
-  font-weight: 900;
-  font-display: swap;
-  src: url("./fonts/noto-sans-sc-900.woff2") format("woff2");
-}
+/* 没有 900 档：全站没有任何元素用到 900，DESIGN.md 的 Three-Weight Rule 同样只允许 400/500/700。
+   一个中文字重子集约 146KB，删掉即省一份下载（见 scripts/subset-fonts.mjs 的说明）。
+   注意：容器里可能残留历史的 noto-sans-sc-900.woff2，那只是垃圾文件，不声明就永远不会被请求。 */
 /* 展示字体：得意黑（Smiley Sans，OFL 开源，斜切墨体）——区块大标题/品牌/定位短语 */
 @font-face {
   font-family: "Smiley Sans";
@@ -169,7 +165,7 @@
 
 html {
   scroll-behavior: smooth;
-  /* 禁止浏览器伪造字重：Noto Sans SC 子集已含 400/500/700/900 真实字重，
+  /* 禁止浏览器伪造字重：Noto Sans SC 子集已含 400/500/700 真实字重，
      缺字回退到系统字体时宁可显示真实字重，也不接受合成加粗（DESIGN.md 的 No-Synthesis Rule） */
   font-synthesis: none;
   /* 深色画布在橡皮筋滚动时露出的底色 */
@@ -318,12 +314,31 @@ body {
   cursor: text;
 }
 
-/* 全站连续背景：石墨基调 + 琥珀光斑 + 颗粒纹理，压成单个复合层。
+/* 全站连续背景：石墨基调 + 琥珀光斑 + 颗粒纹理。
    原为 3 个 radial-gradient + 1 张 feTurbulence SVG，逐帧多重栅格化；
-   现合并为 2 个椭圆光斑 + 颗粒，滚动时重绘成本明显下降。
-   光斑色 = brand-500 (#d97a06) 与 brand-400 (#f7bd6e)，低透明度以保证正文对比度不被稀释。 */
+   后合并为 2 个椭圆光斑 + 颗粒。
+   光斑色 = brand-500 (#d97a06) 与 brand-400 (#f7bd6e)，低透明度以保证正文对比度不被稀释。
+
+   ⚠️ 2026-09 移动端性能修复：**不再使用 `background-attachment: fixed`**。
+   它在移动端被各浏览器实现为「每次滚动重绘整屏背景」，是公认的卡顿源。现在拆成两层：
+     · 光斑（需要固定视口、不随内容滚动）→ body::after，独立 `position: fixed` 元素，
+       由合成器承担，滚动时不触发重绘；
+     · 颗粒（本身是无缝小纹理，随内容滚动在视觉上无差别）→ 留在 body 上正常滚动。
+   改这里时不要图省事把 fixed 写回 background-attachment。 */
 body {
   background-color: #fafbfb;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+}
+
+/* 固定光斑层：`position: fixed` + 负 z-index 落在 body 背景之上、内容之下。
+   pointer-events: none 保证它不吃点击；它没有 mask，纯 2 个径向渐变，绘制成本极低。 */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
   background-image:
     radial-gradient(
       68% 52% at 76% 6%,
@@ -334,13 +349,13 @@ body {
       58% 48% at 8% 78%,
       rgb(247 189 110 / 0.11),
       transparent 72%
-    ),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
-  background-repeat: no-repeat, no-repeat, repeat;
-  background-attachment: fixed, fixed, fixed;
+    );
 }
+
 .dark body {
   background-color: #121415;
+}
+.dark body::after {
   background-image:
     radial-gradient(
       68% 52% at 76% 6%,
@@ -351,8 +366,7 @@ body {
       58% 48% at 8% 78%,
       rgb(247 189 110 / 0.07),
       transparent 72%
-    ),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.065'/%3E%3C/svg%3E");
+    );
 }
 
 /* 全页淡网格：与首屏同款 48px 网格，从顶部中心向四周淡出（整页铺满感）。
@@ -506,6 +520,75 @@ details[open] .chevron-up-down {
   .rail-gutter {
     padding-right: 7.5rem;
   }
+}
+
+/* 移动端去掉常驻毛玻璃（2026-09 性能修复）。
+   `backdrop-filter` 在移动端每帧都要重新采样背景，是滚动掉帧的常见来源；
+   这里的两处（吸顶胶囊导航、底部 Tab Bar）**一直贴在屏幕上**，代价是持续的。
+   两者都是「半透明白 + 细边」的观感，靠提高不透明度即可维持，不需要真模糊。
+   只作用于 <768px：≥768px 没有底部 Tab Bar、胶囊导航也已隐藏，模糊本来就不参与合成。 */
+@media (max-width: 767px) {
+  .mobile-flat-bar {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+/* 链路连接线（About 四张链路卡上方那条细线）+ 它的「画一次」过渡。
+   为什么不用 GSAP ScrollTrigger：全站只有这一条线需要它，却要把整个插件打进首屏包。
+   现在由 IntersectionObserver 加一个类名触发，视觉上是同样的「从左至右画出来」，
+   区别只是不再随滚动回退（滚动 scrub 的收益在这个尺寸下几乎看不出来）。
+   ⚠️ 触发点与原 ScrollTrigger 的 start: 'top 78%' 对齐，见 About.tsx 的 rootMargin: -22%。
+   ⚠️ 尺寸/渐变/深浅色**全部写在这里**，JSX 上不再挂 Tailwind 的 h-px/w-full/origin-left：
+      类与工具类的 transform 会打架（谁赢取决于产物里的先后顺序，属于不可控的隐式行为）。 */
+.about-pipe {
+  height: 1px;
+  width: 100%;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 900ms var(--ease-out-soft);
+  background-image: linear-gradient(
+    to right,
+    var(--color-brand-200),
+    var(--color-brand-400),
+    rgb(217 122 6 / 0.6)
+  );
+}
+.dark .about-pipe {
+  background-image: linear-gradient(
+    to right,
+    rgb(242 169 59 / 0.2),
+    rgb(242 169 59 / 0.5),
+    rgb(247 189 110 / 0.5)
+  );
+}
+.about-pipe.is-drawn {
+  transform: scaleX(1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .about-pipe {
+    transform: none;
+    transition: none;
+  }
+}
+
+/* 首屏以下的区块跳过「初始渲染」（content-visibility: auto）。
+   浏览器会跳过这些子树的布局与绘制，直到它们接近视口，滚动时也会自动回收已离屏的部分。
+   这是本页最"长"的一类优化：整页有 7 个区块、几十张卡片，首屏只需要 Hero。
+
+   ⚠️ 只加在**区块内容容器**上，不加在 <section> 上：
+     · 锚点停靠（scroll-margin-top）与「#contact 收尾呼吸区」都挂在 section 上，必须保持正常布局；
+     · 首屏 Hero 与紧随其后的 About **不加**（About 内部有 IntersectionObserver 与链路卡测量）。
+   ⚠️ contain-intrinsic-size 是必需的：没有它，未渲染子树的自然尺寸按 0 计，
+     滚动条会随滚动不断"长出来"。这里 `auto 2200px` 取的是**移动端**（单列、最长的技能区）
+     的近似高度，宁可高估也不要低估：高估只是让滚动条一开始偏长、随后缩回；
+     低估则会让滚动条一路变长（观感更差）。
+     `auto` 关键字很关键：某个区块渲染过一次后，浏览器会记住它的真实尺寸并复用它，
+     所以第二个来回（以及之后所有访问）不再有偏差。
+   改区块数量或大幅改版式后，这个估计值可以重新用 DevTools 量一次（不是硬约束）。 */
+.cv-section {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 2200px;
 }
 
 /* 打印一律拦截：站点不提供打印版式（固定网格、玻璃层、导航栏打印出来是半成品），
