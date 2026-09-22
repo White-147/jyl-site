@@ -1,1 +1,0 @@
-{"rules":[],"comment":"Deprecated placeholder. Cloudflare Pages only parses the extensionless `_headers` file; this JSON was an abandoned experiment. It contains no rules and is harmless, but please delete it if you touch this directory — the real configuration lives in `public/_headers`."}
