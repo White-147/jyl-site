@@ -1,13 +1,9 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import gsap from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { useEffect, useRef, useState } from 'react'
 import { SECTIONS } from '../data/navigation'
 import profile from '../data/profile.json'
 import type { AboutLink, AboutPara, AboutPosition, Stat } from '../data/types'
 import Reveal from './Reveal'
 import SectionHeading from './SectionHeading'
-
-gsap.registerPlugin(ScrollTrigger)
 
 /** 关键数字：进入视口时从 0 滚动计数到目标值（纯数字部分） */
 function StatValue({ stat }: { stat: Stat }) {
@@ -60,30 +56,41 @@ function StatValue({ stat }: { stat: Stat }) {
 }
 
 export default function About() {
-  const stats = profile.stats as Stat[]
   const about = profile.about as AboutPara[]
   const links = profile.aboutLinks as AboutLink[]
   const positions = (profile.positions ?? []) as AboutPosition[]
   const anchor = profile.anchor ?? '数据科学与大数据技术本科'
   const scope = useRef<HTMLElement>(null)
 
-  // 链路连接线：桌面端随滚动从左至右绘制（scrub，克制）
-  useLayoutEffect(() => {
+  // 链路连接线：进入视口时从左至右画一次。
+  //
+  // ⚠️ 2026-09：原来用 GSAP ScrollTrigger 做**滚动 scrub**（随滚动进度反向可回退）。
+  // 为了这一条线，整个 ScrollTrigger 插件（约 40KB 原始 / gzip 后更少但仍在主包里）被拉进首屏包，
+  // 而它是全站唯一的使用点。现在改为 IntersectionObserver 触发一次 CSS 过渡：
+  //   · 观感差异：线不再随滚动回退，只在进入视口时画一次（触发点与原 start: 'top 78%' 对齐）
+  //   · 收益：ScrollTrigger 从产物中彻底消失
+  // 判定与回退都在 CSS 里（.about-pipe / .about-pipe.is-drawn），reduced-motion 下直接是终态。
+  useEffect(() => {
     const el = scope.current
     if (!el) return
-    const ctx = gsap.context(() => {
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
-      gsap.fromTo(
-        '[data-about="pipe"]',
-        { scaleX: 0 },
-        {
-          scaleX: 1,
-          ease: 'none',
-          scrollTrigger: { trigger: el, start: 'top 78%', end: 'bottom 55%', scrub: 0.6 },
-        },
-      )
-    }, el)
-    return () => ctx.revert()
+    const pipe = el.querySelector('[data-about="pipe"]')
+    if (!pipe) return
+    if (!('IntersectionObserver' in window)) {
+      pipe.classList.add('is-drawn')
+      return
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return
+          pipe.classList.add('is-drawn')
+          io.disconnect()
+        })
+      },
+      { rootMargin: '0px 0px -22% 0px' },
+    )
+    io.observe(pipe)
+    return () => io.disconnect()
   }, [])
 
   return (
@@ -157,20 +164,25 @@ export default function About() {
           </Reveal>
         </div>
 
-        {/* 三段链路：数字有叙事上下文，替代孤立的统计块。
+        {/* 四条链路：数字有叙事上下文，替代孤立的统计块。
 
             列数按「卡片实际可读宽度」而不是「看起来够不够」来定：
             每张卡内部有两组「数字 + 后缀」，低于约 300px 时数字与后缀会被挤成上下两行、
-            正文每行掉到 10–16 个汉字。实测（改前）：
-               640px 起就切 3 列 → 810px 视口每张仅 241px、每行 11 字
-               1024px 视口 271px、1280px 也才 305px
-            所以改成：<640 单列 → ≥640 两列 → ≥1188 三列（1188 是按实测定的自定义断点，见 index.css 的 xl3）。
-            810px 下每张 323px、正文每行 25 字，数字与后缀同行。 */}
+            正文每行掉到 10–16 个汉字。
+            四张卡定稿（联动 docs/联动维护点.md 第 5 条）：
+                &lt;640 单列 → ≥640 恒定两列（2×2）→ 三列方案已废弃
+            废弃三列的原因：四张卡在 3 列网格里会排成 3+1，第四张独自占一整行，
+            平板与 1024–1188px 视口尤其难看（原三卡时代的 2+1 是同一个病）。
+            改为恒定两列 + 容器上限 1024px：每行恰好两张、两行收尾，
+            每张约 480px（桌面）→ 数字与后缀同行、正文每行 30 字以上，
+            同时与项目区 / 技能区既有的双列网格语言一致。
+            ⚠️ 容器上限取 1024px 而不是 max-w-6xl：后者在 >1188px 时每张会被拉到 520px+，
+               卡片被摊薄。改卡片内边距或 rail-gutter 后需重新验算这个上限。 */}
         <div className="mt-5 sm:mt-6">
           <div className="relative mb-6 hidden sm:block" aria-hidden="true">
-            <div className="h-px w-full origin-left bg-gradient-to-r from-brand-200 via-brand-400 to-brand-500/60 dark:from-brand-300/20 dark:via-brand-300/50 dark:to-brand-400/50" data-about="pipe" />
+            <div className="about-pipe" data-about="pipe" />
           </div>
-          <div className="grid gap-4 sm:grid-cols-2 sm:gap-5 xl3:grid-cols-3">
+          <div className="grid gap-4 sm:mx-auto sm:max-w-5xl sm:grid-cols-2 sm:gap-5">
             {links.map((link, i) => (
               <Reveal key={link.title} delay={i * 110}>
                 <div className="group glass-card h-full rounded-2xl p-4 transition-all hover:-translate-y-0.5 hover:border-brand-300 hover:shadow-md sm:p-5 xl3:p-6 dark:hover:border-brand-500/50">
@@ -181,17 +193,14 @@ export default function About() {
                     </span>
                   </div>
                   <div className="mt-4 flex gap-6 lg:gap-8">
-                    {link.statIdx.map((idx) => {
-                      const stat = stats[idx]
-                      return (
-                        <div key={stat.label}>
-                          <StatValue stat={stat} />
-                          <div className="mt-1 text-[11px] leading-snug break-words text-slate-500 sm:text-xs dark:text-slate-400">
-                            {stat.label}
-                          </div>
+                    {link.stats.map((stat) => (
+                      <div key={stat.label}>
+                        <StatValue stat={stat} />
+                        <div className="mt-1 text-[11px] leading-snug break-words text-slate-500 sm:text-xs dark:text-slate-400">
+                          {stat.label}
                         </div>
-                      )
-                    })}
+                      </div>
+                    ))}
                   </div>
                   <p className="mt-4 text-sm leading-relaxed text-slate-500 dark:text-slate-400">{link.desc}</p>
                 </div>

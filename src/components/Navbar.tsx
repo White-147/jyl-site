@@ -9,7 +9,9 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 pt-[env(safe-area-inset-top)] md:hidden">
-      <nav className="mx-auto mt-3 flex h-14 max-w-3xl items-center justify-between rounded-2xl border border-slate-200/70 bg-white/85 px-4 shadow-sm backdrop-blur-sm dark:border-slate-800/70 dark:bg-slate-950/85 sm:px-5">
+      {/* `mobile-flat-bar`：<768px 关掉 backdrop-blur（见 index.css 该类的注释）。
+          本导航是 `md:hidden`，所以模糊在它身上从来没有可见收益，只有合成开销。 */}
+      <nav className="mobile-flat-bar mx-auto mt-3 flex h-14 max-w-3xl items-center justify-between rounded-2xl border border-slate-200/70 bg-white/90 px-4 shadow-sm backdrop-blur-sm dark:border-slate-800/70 dark:bg-slate-950/90 sm:px-5">
         {/* 品牌：站点图标 + 名字。
             图标是石墨圆角块 + 琥珀「蒋」字，与浏览器标签页同一个标记；
             名字用展示字体，跟随主题色，因此不需要为深浅两套各出一张图。

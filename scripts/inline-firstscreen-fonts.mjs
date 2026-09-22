@@ -1,10 +1,17 @@
-// 首屏字体内联：把 src/fonts 里已子集化的两个展示字体以 base64 内联进 index.html。
+// 首屏字体内联：把 src/fonts 里已子集化的字体以 base64 内联进 index.html。
 //
 // 为什么需要这个脚本：
-//   柳建毛草（Hero 名字）与得意黑（区块标题）在首屏关键路径上，
-//   若走外部字体文件会出现「先回退字体、后覆盖」的跳变。内联后随 HTML 一起到达。
-//   代价是 index.html 变大（两个字体约 137KB → base64 约 180KB），
-//   但 HTML 会走 gzip/brotli，实际传输增量远小于此。
+//   柳建毛草（Hero 名字）在首屏关键路径上，若走外部字体文件会出现「先回退字体、后覆盖」的跳变。
+//   内联后随 HTML 一起到达。代价是 index.html 变大（10KB → base64 约 13KB），
+//   毛草只有 10KB，这个代价值得。
+//
+// ⚠️ 为什么**只内联柳建毛草**，得意黑改走外部文件（2026-09 移动端性能修复）
+//   得意黑子集 131KB → base64 约 175KB。原注释假设「HTML 会走 gzip/brotli，实际传输增量远小于此」，
+//   但**该假设不成立**：base64 里裹的是已经压缩过的 woff2，gzip 压不动，增量几乎全额落到
+//   每一次 HTML 请求上（含移动端）。而得意黑的真实用途是**区块标题**（「可验证的项目」「岗位技能画像」…），
+//   它们全部在首屏以下；首屏唯一的展示层文字是 Hero 定位短语（`font-display`），
+//   它有 Noto Sans SC 兜底、`swap` 下只会无跳动地替换字形。
+//   因此把 175KB 从关键路径移到「区块标题渲染时按需拉取」是净收益。
 //
 // 为什么之前是个隐患：
 //   这段 base64 原先由人工粘贴写入 index.html，**没有任何生成器**，
@@ -22,10 +29,11 @@ import { fileURLToPath } from 'node:url'
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const htmlPath = join(root, 'index.html')
 
-/** 内联哪两个字体、用哪个 family 名（必须与 src/index.css 的 @font-face 完全一致） */
+/** 内联哪些字体、用哪个 family 名（必须与 src/index.css 的 @font-face 完全一致）。
+ *  ⚠️ 只放**首屏真正用到且体积小**的字体。往里加字体前先算一遍 base64 增量（×1.34），
+ *  它会计入每一次 HTML 请求，且在 gzip 下压不动（woff2 已是压缩格式）——详见文件头注释。 */
 const FONTS = [
   { family: 'Liu Jian Mao Cao', file: 'liu-jian-mao-cao-regular.woff2' },
-  { family: 'Smiley Sans', file: 'smiley-sans-oblique.woff2' },
 ]
 
 const START = '<!-- firstscreen-fonts-inline:start -->'

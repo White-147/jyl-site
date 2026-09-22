@@ -29,6 +29,14 @@ export function useScrollSpy(ids: string[]) {
 
   useEffect(() => {
     let raf = 0
+    // 元素引用缓存（2026-09 移动端性能修复）：
+    // 原来每帧对每个 id 调一次 document.getElementById —— 那是会触发样式/布局失效查询的 DOM 操作，
+    // 滚动时约 60 次/秒 × 7 个 id。这些节点在整页生命周期内不会换，挂载时解析一次即可，
+    // 只有 resize 才需要重解析（视口断点可能改变被测量的内容）。
+    let els: (HTMLElement | null)[] = []
+    const resolve = () => {
+      els = ids.map((id) => document.getElementById(id))
+    }
 
     const update = () => {
       cancelAnimationFrame(raf)
@@ -42,26 +50,32 @@ export function useScrollSpy(ids: string[]) {
 
         let bestId = ''
         let bestTop = -Infinity
-        for (const id of ids) {
-          const el = document.getElementById(id)
+        for (let i = 0; i < els.length; i++) {
+          const el = els[i]
           if (!el) continue
           const top = el.getBoundingClientRect().top
           if (top <= triggerLine && top > bestTop) {
             bestTop = top
-            bestId = id
+            bestId = ids[i]
           }
         }
         if (bestId) setActive(bestId)
       })
     }
 
+    const onResize = () => {
+      resolve()
+      update()
+    }
+
+    resolve()
     update()
     window.addEventListener('scroll', update, { passive: true })
-    window.addEventListener('resize', update)
+    window.addEventListener('resize', onResize)
     return () => {
       cancelAnimationFrame(raf)
       window.removeEventListener('scroll', update)
-      window.removeEventListener('resize', update)
+      window.removeEventListener('resize', onResize)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ids.join(',')])

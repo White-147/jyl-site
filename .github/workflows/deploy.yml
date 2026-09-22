@@ -1,4 +1,19 @@
-name: Deploy to GitHub Pages
+name: Deploy to GitHub Pages + Cloudflare Pages
+
+# 一次构建、双端发布（2026-09 新增 Cloudflare 一路）。
+#
+# 为什么要双端：站点内容全部同源托管，而 `white-147.github.io` 在大陆无代理时首屏 > 5s
+# （实测：挂代理冷开很快、直连 >5s、刷新走缓存后正常）。代码侧的首屏体积已从约 1MB 压到约 440KB，
+# 剩下的瓶颈是线路本身，Cloudflare 的港/新/日节点比 GitHub Pages 稳定得多。
+# GitHub Pages 保留：现有链接不断，海外访问与搜索引擎收录不受影响。
+#
+# ⚠️ 需要在仓库 Settings → Secrets and variables → Actions 里添加两个 secret：
+#      CLOUDFLARE_API_TOKEN  —— 建议只勾选 "Cloudflare Pages: Edit" 权限（不要用全局 API Key）
+#      CLOUDFLARE_ACCOUNT_ID
+#    没配置时 Cloudflare 那一路会自动跳过（见下面的 gate 步骤），只发 GitHub Pages，CI 不会红。
+#
+# ⚠️ GitHub Actions 不允许在 step 的 if 里直接读 secrets（会报 Unrecognized named-value），
+#    所以这里先把 secret 映射成 job 级 env，再用 gate 步骤输出布尔量给后续步骤判断。
 
 on:
   push:
@@ -26,11 +41,12 @@ jobs:
       - run: npm ci
       # 构建会自动执行 db:export（数据库 → JSON）后再打包
       - run: npm run build
+      # 只构建一次：两个部署目标都用这一份产物，保证两端线上完全一致
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
 
-  deploy:
+  deploy-github-pages:
     needs: build
     runs-on: ubuntu-latest
     environment:
@@ -39,3 +55,46 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  deploy-cloudflare-pages:
+    needs: build
+    runs-on: ubuntu-latest
+    env:
+      CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CF_ACCOUNT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - name: 检查 Cloudflare 凭据是否已配置
+        id: gate
+        run: |
+          if [ -n "$CF_TOKEN" ] && [ -n "$CF_ACCOUNT" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+            echo "✔ Cloudflare 凭据已配置，继续部署"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "⏭ 跳过 Cloudflare 部署：缺少 CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID"
+          fi
+
+      - uses: actions/download-artifact@v4
+        if: steps.gate.outputs.ready == 'true'
+        with:
+          name: github-pages
+          path: artifact
+
+      # upload-pages-artifact 产出的是 tar.gz，解包后才是站点根目录
+      - name: 解包 Pages artifact
+        if: steps.gate.outputs.ready == 'true'
+        run: |
+          mkdir -p dist
+          tar --gunzip --extract --file=artifact/artifact.tar --directory=dist
+          ls dist | head -20
+
+      # ⚠️ 项目名：若你在 Cloudflare 控制台已经建好项目，把它改成那个名字；
+      #    没建过的话 wrangler 会自动创建（首次部署即成功）。
+      - name: Deploy to Cloudflare Pages
+        if: steps.gate.outputs.ready == 'true'
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy dist --project-name=jyl-site
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}

@@ -50,12 +50,15 @@ const text = [...set].sort().join('')
 console.log(`✔ 字符集：${text.length} 个字符`)
 
 // 2. 子集化 Noto Sans SC（源：fontsource 简体中文全量 woff2）
+// ⚠️ 只出 **400 / 500 / 700** 三档：全站没有任何元素用到 900（`font-black` / `font-weight:900`
+//    在 src 下均无引用，DESIGN.md 的「Three-Weight Rule」也只允许 400/500/700）。
+//    一个中文字重子集约 146KB，删掉 900 直接省一份下载。若将来真要 900 大字，
+//    把这一行加回来、并同步 index.css 的 @font-face 与 vite.config.ts 的 FONT_FILES。
 mkdirSync(join(root, 'src', 'fonts'), { recursive: true })
 const NOTO = [
   [400, 'noto-sans-sc-chinese-simplified-400-normal.woff2'],
   [500, 'noto-sans-sc-chinese-simplified-500-normal.woff2'],
   [700, 'noto-sans-sc-chinese-simplified-700-normal.woff2'],
-  [900, 'noto-sans-sc-chinese-simplified-900-normal.woff2'],
 ]
 for (const [weight, file] of NOTO) {
   const src = join(root, 'node_modules', '@fontsource', 'noto-sans-sc', 'files', file)

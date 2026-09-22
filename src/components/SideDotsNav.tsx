@@ -1,10 +1,31 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, useSyncExternalStore } from 'react'
 import { useScrollSpy } from '../hooks/useScrollSpy'
 import { useAnchorScroll } from '../hooks/useAnchorScroll'
 import { useInViewPause } from '../hooks/useInViewPause'
 import { SECTIONS, SECTION_IDS, HERO_ID, HERO_ROLE } from '../data/navigation'
 import { SCROLL_MARGIN_DESKTOP_PX, SCROLL_MARGIN_MOBILE_PX } from '../data/scrollTargets'
 import ThemeToggle from './ThemeToggle'
+
+/** 导轨只在 md（768px）起可见（与 className 的 `hidden md:flex` 同源）。
+ *  ⚠️ 这是**联动点**：改这里必须同步改下面的 className，反之亦然。 */
+const RAIL_QUERY = '(min-width: 768px)'
+
+const subscribeRail = (cb: () => void) => {
+  const mq = window.matchMedia(RAIL_QUERY)
+  mq.addEventListener('change', cb)
+  return () => mq.removeEventListener('change', cb)
+}
+
+/** 只负责「当下是否显示导轨」。用 useSyncExternalStore 而不是 useEffect+useState，
+ *  是为了避免首帧按「手机」渲染、effect 里再切成「桌面」造成的一次无谓布局位移：
+ *  它会在**同一次渲染前**比对快照并强制重渲染（React 提供的正是这个用途）。 */
+function useRailVisible() {
+  return useSyncExternalStore(
+    subscribeRail,
+    () => window.matchMedia(RAIL_QUERY).matches,
+    () => false,
+  )
+}
 
 /** 右侧玻璃管进度导航（内容篇幅分布版）：
  *  管在顶部图标与底部主题之间贯穿（top-14/bottom-14，图标在管外）；
@@ -14,7 +35,30 @@ import ThemeToggle from './ThemeToggle'
  *  液柱粒子：数量随视口高度取 min（深色 24 / 浅色 14，原深色固定 72 个）。
  *  浅色模式为克制版复刻——更低不透明度、更小尺寸，只当隐约的流动感，
  *  让浅深两套保持同一形态语言；深色仍为较亮的赛博微粒。 */
+/** 对外组件：`<768px` 时直接不挂载导轨，连带它的滚动监听 / 观察器 / 测量逻辑一起省掉。
+ *
+ *  ⚠️ 2026-09 移动端性能修复的**结构性**做法
+ *  原实现只在 className 上写 `hidden md:flex`，元素虽然不显示，但组件照样挂载并运行：
+ *  一个 scroll 监听（每帧读 scrollHeight 强制布局）、两个 ResizeObserver、
+ *  一个 MutationObserver、一个 rAF 双帧重测，以及 useScrollSpy 的常驻侦测。
+ *  手机上这些测量结果没有任何人看得见，却要和真正的滚动竞争主线程 —— 这是本次修复里
+ *  对「手机 + 平板竖屏」最直接的一项。
+ *  这里用条件挂载替代 CSS 隐藏：`<768px` 时整棵子树与全部 effect 都不存在。
+ *  外层 nav 是稳定骨架（承载 `hidden md:flex` 的显示开关与定位），Rail 内部再用
+ *  `display: contents` 展开，视觉与拆分前完全一致。 */
 export default function SideDotsNav() {
+  const railVisible = useRailVisible()
+  return (
+    <nav
+      aria-label="页面章节导航"
+      className="fixed bottom-0 right-4 top-0 z-40 hidden md:flex"
+    >
+      {railVisible && <Rail />}
+    </nav>
+  )
+}
+
+function Rail() {
   const active = useScrollSpy(SECTION_IDS)
   const { onAnchorClick } = useAnchorScroll()
   const { ref: railRef, inView } = useInViewPause<HTMLElement>()
@@ -100,31 +144,61 @@ export default function SideDotsNav() {
   }, [])
 
   // 阅读进度：液柱高度 = 已读百分比（rAF 节流，滚动/窗口变化时更新）
+  //
+  // ⚠️ 2026-09 移动端/平板性能修复：**不要每帧读 scrollHeight**。
+  // `documentElement.scrollHeight` 是一次强制布局查询（读它会 flush 待处理的样式与布局），
+  // 而本组件从 md（768px，平板）起就存在，等于平板每次滚动都在 rAF 里强制同步重排。
+  // 页面高度只在「图片解码完成 / 字体替换 / 内容增删 / 视口变化」时才会变，
+  // 所以这里缓存 max，并只在这些时机刷新：
+  //   · window resize（含移动端地址栏收起的视口高度变化）
+  //   · 下面的 ResizeObserver 观察 body（内容高度变化时触发，已带 rAF 合并）
+  // 历史口径不变：液柱 = scrollY / (docH − viewportH)，节点位置用同一分母（见下方 measure）。
   useEffect(() => {
     let raf = 0
-    const update = () => {
+    let maxScroll = 0
+
+    const refreshMax = () => {
+      const doc = document.documentElement
+      maxScroll = doc.scrollHeight - doc.clientHeight
+    }
+
+    const paint = () => {
       cancelAnimationFrame(raf)
       raf = requestAnimationFrame(() => {
-        const doc = document.documentElement
-        const max = doc.scrollHeight - doc.clientHeight
-        setProgress(max > 0 ? (window.scrollY / max) * 100 : 0)
+        setProgress(maxScroll > 0 ? (window.scrollY / maxScroll) * 100 : 0)
       })
     }
-    update()
-    window.addEventListener('scroll', update, { passive: true })
-    window.addEventListener('resize', update)
+
+    const onResize = () => {
+      refreshMax()
+      paint()
+    }
+
+    refreshMax()
+    paint()
+    window.addEventListener('scroll', paint, { passive: true })
+    window.addEventListener('resize', onResize)
+    // ResizeObserver 的首次回调会在观察开始时同步触发一次，正好负责「挂载后内容仍在长高」的补正；
+    // 它只更新缓存的 max，不直接 setState，避免在观察回调里读到布局中途的值。
+    const ro = new ResizeObserver(() => {
+      refreshMax()
+      paint()
+    })
+    ro.observe(document.body)
     return () => {
       cancelAnimationFrame(raf)
-      window.removeEventListener('scroll', update)
-      window.removeEventListener('resize', update)
+      window.removeEventListener('scroll', paint)
+      window.removeEventListener('resize', onResize)
+      ro.disconnect()
     }
   }, [])
 
   return (
+    // `contents`：内层不再生成盒子，管体/节点/主题按钮仍是外层 nav 的子节点，
+    // 定位与层级与拆分前逐像素一致（唯一变化是把 ref 从最外层挪到了这一层）。
     <nav
       ref={railRef}
-      aria-label="页面章节导航"
-      className={`fixed bottom-0 right-4 top-0 z-40 hidden md:flex ${inView ? '' : 'anim-paused'}`}
+      className={`contents ${inView ? '' : 'anim-paused'}`}
     >
       {/* 玻璃管：顶部图标与底部主题之间贯穿（光纤质感） */}
       <div
