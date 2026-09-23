@@ -28,19 +28,65 @@ const argVal = (name, fallback) => {
 const SOURCE_DIR = join(root, argVal('--source', join('docs', 'ue5', 'source')))
 const IMAGE_DIR = join(root, argVal('--images', join('public', 'docs', 'ue5', 'images')))
 
-/** 文档清单：顺序即侧栏顺序。status=ready 才会生成页面；pending 的只显示标题并禁用跳转。 */
+/** 文档清单：顺序即侧栏顺序，也**就是建议阅读顺序**（依赖关系是实测出来的，别随手调）。
+ *
+ *  依赖图（来自文档内的互链与内容依赖）：
+ *    unreal5-notes 是总入口，指向另外 4 篇；ue5-window-base 与 blueprint-program-base 会回引它；
+ *    ue5-window-advanced 的前置是 ue5-window-base；
+ *    blueprint-program-base 开头明确建立在「蓝图基础」之上（"由于蓝图基础中的第一人称关卡模板…"）。
+ *  所以 order：01 总览 → 02 界面基础 → 03 界面进阶 → 04 蓝图基础 → 05 蓝图编程。
+ *
+ *  group 只用于侧栏分组留白（界面族 3 篇 / 蓝图族 2 篇）；prereq 显示在正文头部。 */
 const DOCS = [
   {
     id: 'unreal5-notes',
     file: 'unreal5-notes.md',
     title: '虚幻引擎总览',
-    subtitle: '下载安装、项目模板、界面与快捷键、学习路线',
+    subtitle: '环境准备、Fab、项目模板、界面与快捷键',
+    order: 1,
+    group: '界面',
     status: 'ready',
   },
-  { id: 'ue5-window-base', file: 'ue5-window-base.md', title: '界面基础操作', subtitle: '编辑器界面与面板', status: 'pending' },
-  { id: 'ue5-window-advanced', file: 'ue5-window-advanced.md', title: '界面进阶操作', subtitle: '视口工具栏、大纲与细节', status: 'pending' },
-  { id: 'blueprint-base', file: 'blueprint-base.md', title: '蓝图基础', subtitle: '蓝图类、父类体系与对象模型', status: 'pending' },
-  { id: 'blueprint-program-base', file: 'blueprint-program-base.md', title: '蓝图编程基础', subtitle: '增强输入、角色移动与自动门实战', status: 'pending' },
+  {
+    id: 'ue5-window-base',
+    file: 'ue5-window-base.md',
+    title: '界面基础操作',
+    subtitle: '菜单栏、标签页、主工具栏、视口工具栏',
+    order: 2,
+    group: '界面',
+    prereq: 'unreal5-notes',
+    status: 'ready',
+  },
+  {
+    id: 'ue5-window-advanced',
+    file: 'ue5-window-advanced.md',
+    title: '界面进阶操作',
+    subtitle: '视口工具栏、大纲视图、细节面板',
+    order: 3,
+    group: '界面',
+    prereq: 'ue5-window-base',
+    status: 'ready',
+  },
+  {
+    id: 'blueprint-base',
+    file: 'blueprint-base.md',
+    title: '蓝图基础',
+    subtitle: '蓝图类、父类体系与 UE 对象模型',
+    order: 4,
+    group: '蓝图',
+    prereq: 'unreal5-notes',
+    status: 'ready',
+  },
+  {
+    id: 'blueprint-program-base',
+    file: 'blueprint-program-base.md',
+    title: '蓝图编程基础',
+    subtitle: '增强输入、角色与视角移动、自动门实战',
+    order: 5,
+    group: '蓝图',
+    prereq: 'blueprint-base',
+    status: 'ready',
+  },
 ]
 
 /* ---------- 工具 ---------- */
@@ -278,7 +324,15 @@ const missing = []
 
 for (const doc of DOCS) {
   if (doc.status !== 'ready') {
-    manifestDocs.push({ id: doc.id, title: doc.title, subtitle: doc.subtitle, toc: [], status: 'pending' })
+    manifestDocs.push({
+      id: doc.id,
+      title: doc.title,
+      subtitle: doc.subtitle,
+      order: doc.order,
+      group: doc.group,
+      toc: [],
+      status: 'pending',
+    })
     continue
   }
   const src = join(SOURCE_DIR, doc.file)
@@ -299,11 +353,26 @@ for (const doc of DOCS) {
     id: doc.id,
     title: doc.title,
     subtitle: doc.subtitle,
+    order: doc.order,
+    group: doc.group,
+    // prereq / next 都存**文档对象**（id + 标题），前端不必再查一次表
+    prereq: doc.prereq ? { id: doc.prereq, title: docById.get(doc.prereq)?.title ?? doc.prereq } : null,
+    next: doc.nextId ? { id: doc.nextId, title: docById.get(doc.nextId)?.title ?? doc.nextId } : null,
     status: 'ready',
     toc: tocForNav,
     html: `${doc.id}.html`,
   })
   console.log(`[ok] ${doc.id}: ${html.length} 字节 HTML，大纲 ${tocForNav.length} 项，图片 ${ctx.images.size} 张`)
+}
+
+// 「下一篇」按 order 推导（不手写，避免加减文档时漏改）：只在同 group 内串，
+// 这样界面族读完不会直接跳进蓝图族 —— 跨组的那一步交给侧栏（用户可能有别的读法）。
+for (let i = 0; i < manifestDocs.length; i++) {
+  const cur = manifestDocs[i]
+  const next = manifestDocs
+    .slice(i + 1)
+    .find((d) => d.group === cur.group && d.status === 'ready')
+  if (next) cur.next = { id: next.id, title: next.title }
 }
 
 if (missing.length) {

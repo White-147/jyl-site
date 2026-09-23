@@ -164,7 +164,7 @@ export default function Docs({ docId, anchor }: { docId?: string; anchor?: strin
           目录
         </button>
         <span className="text-sm text-slate-400 dark:text-slate-500">
-          {ready.length} 篇已导入 · 共 {DOCS.length} 篇
+          {ready.length} 篇 · 按顺序阅读
         </span>
       </div>
 
@@ -175,37 +175,54 @@ export default function Docs({ docId, anchor }: { docId?: string; anchor?: strin
             <p className="text-xs font-semibold uppercase tracking-widest text-brand-700 dark:text-brand-200">
               UE5 学习笔记
             </p>
-            <ul className="mt-3 space-y-1">
-              {DOCS.map((doc) =>
-                doc.status === 'ready' ? (
-                  <li key={doc.id}>
-                    <a
-                      href={docsHref(doc.id)}
-                      aria-current={doc.id === current.id ? 'page' : undefined}
-                      className={`block rounded-lg px-3 py-2 text-sm transition-colors ${
-                        doc.id === current.id
-                          ? 'bg-brand-700 font-semibold text-white'
-                          : 'text-slate-600 hover:bg-slate-100 hover:text-brand-700 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-brand-200'
-                      }`}
-                    >
-                      {doc.title}
-                    </a>
-                  </li>
-                ) : (
-                  <li key={doc.id}>
-                    <span
-                      title="该篇尚未导入本站"
-                      className="flex items-center justify-between gap-2 rounded-lg px-3 py-2 text-sm text-slate-400 dark:text-slate-500"
-                    >
-                      {doc.title}
-                      <span className="rounded border border-dashed border-slate-300 px-1.5 py-0.5 text-[10px] dark:border-slate-600">
-                        待导入
+            <ul className="mt-3">
+              {DOCS.map((doc, i) => {
+                const prevGroup = i > 0 ? DOCS[i - 1].group : doc.group
+                // group 变化处加一段留白：界面族（01–03）与蓝图族（04–05）分开，
+                // 让"这两族有先后"这件事在侧栏里就看得见，而不是靠用户自己猜。
+                const groupGap = i > 0 && doc.group !== prevGroup
+                const num = String(doc.order ?? i + 1).padStart(2, '0')
+                return (
+                  <li key={doc.id} className={groupGap ? 'mt-4 border-t border-slate-200 pt-4 dark:border-slate-700' : 'mt-1'}>
+                    {doc.status === 'ready' ? (
+                      <a
+                        href={docsHref(doc.id)}
+                        aria-current={doc.id === current.id ? 'page' : undefined}
+                        className={`flex items-baseline gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors ${
+                          doc.id === current.id
+                            ? 'bg-brand-700 font-semibold text-white'
+                            : 'text-slate-600 hover:bg-slate-100 hover:text-brand-700 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-brand-200'
+                        }`}
+                      >
+                        <span
+                          className={`font-mono text-[11px] tabular-nums ${
+                            doc.id === current.id ? 'text-white/75' : 'text-slate-400 dark:text-slate-500'
+                          }`}
+                        >
+                          {num}
+                        </span>
+                        <span className="min-w-0">{doc.title}</span>
+                      </a>
+                    ) : (
+                      <span
+                        title="该篇尚未导入本站"
+                        className="flex items-baseline gap-2.5 rounded-lg px-3 py-2 text-sm text-slate-400 dark:text-slate-500"
+                      >
+                        <span className="font-mono text-[11px] tabular-nums">{num}</span>
+                        <span className="min-w-0 flex-1">{doc.title}</span>
+                        <span className="rounded border border-dashed border-slate-300 px-1.5 py-0.5 text-[10px] dark:border-slate-600">
+                          待导入
+                        </span>
                       </span>
-                    </span>
+                    )}
                   </li>
-                ),
-              )}
+                )
+              })}
             </ul>
+
+            <p className="mt-4 px-3 text-[11px] leading-relaxed text-slate-400 dark:text-slate-500">
+              按 01 → 05 顺序阅读；每篇头部标注前置、尾部给出下一篇。
+            </p>
 
             {/* 当前篇大纲：移动端与桌面端共用（桌面端就在左栏下方） */}
             {current.toc.length > 0 && (
@@ -244,7 +261,24 @@ export default function Docs({ docId, anchor }: { docId?: string; anchor?: strin
         {/* 中：正文。data-copyable = 只读保护白名单，放开这一整块的选择与复制 */}
         <main className="min-w-0">
           <header className="mb-6 border-b border-slate-200 pb-5 dark:border-slate-700">
-            <h1 className="font-display text-3xl font-normal tracking-tight text-ink dark:text-ink-light">
+            <div className="flex flex-wrap items-center gap-2.5">
+              <span className="font-mono text-xs tabular-nums text-slate-400 dark:text-slate-500">
+                {String(current.order ?? 1).padStart(2, '0')} / {String(DOCS.length).padStart(2, '0')}
+              </span>
+              <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+                {current.group}
+              </span>
+              {/* 前置：告诉读者"这一篇不是入口"，避免从中间开始读而卡住 */}
+              {current.prereq && (
+                <span className="text-xs text-slate-400 dark:text-slate-500">
+                  前置：
+                  <a href={docsHref(current.prereq.id)} className="text-brand-700 underline decoration-brand-300 underline-offset-2 hover:text-brand-800 dark:text-brand-200 dark:decoration-brand-500/50">
+                    {current.prereq.title}
+                  </a>
+                </span>
+              )}
+            </div>
+            <h1 className="font-display mt-2.5 text-3xl font-normal tracking-tight text-ink dark:text-ink-light">
               {current.title}
             </h1>
             {current.subtitle && (
@@ -270,6 +304,27 @@ export default function Docs({ docId, anchor }: { docId?: string; anchor?: strin
           <p className="mt-4 text-xs leading-relaxed text-slate-400 dark:text-slate-500">
             本区内容为个人学习笔记，原文由 Typora 维护；点击任意配图可放大查看。
           </p>
+
+          {/* 篇尾导航：读完一篇给"下一篇"（只在同 group 内串，跨组那一步留给侧栏） */}
+          <nav aria-label="文档导航" className="mt-6 flex flex-wrap items-center gap-3">
+            <a
+              href={docsHref('unreal5-notes')}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-sm font-medium text-slate-700 transition-colors hover:border-brand-400 hover:text-brand-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-brand-500 dark:hover:text-brand-200"
+            >
+              文档总览
+            </a>
+            {current.next && (
+              <a
+                href={docsHref(current.next.id)}
+                className="group inline-flex items-center gap-2 rounded-lg bg-brand-700 px-3.5 py-2 text-sm font-semibold text-white transition-colors hover:bg-brand-800"
+              >
+                下一篇：{current.next.title}
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true">
+                  <path d="M5 12h14M13 5l7 7-7 7" />
+                </svg>
+              </a>
+            )}
+          </nav>
         </main>
 
         {/* 右：本篇大纲（宽屏常驻） */}

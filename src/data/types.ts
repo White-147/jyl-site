@@ -114,6 +114,14 @@ export interface DocEntry {
   id: string
   title: string
   subtitle?: string
+  /** 阅读顺序（01–05）。侧栏与正文头部都显示，依赖关系靠它表达 */
+  order?: number
+  /** 主题分组（界面 / 蓝图…）。侧栏在组间加留白，正文头部显示为徽标 */
+  group?: string
+  /** 前置文档（正文头部显示「前置：xxx」），无前置为 null */
+  prereq?: { id: string; title: string } | null
+  /** 下一篇（同组内按 order 推导；篇尾 CTA 用），本组最后一篇为 null */
+  next?: { id: string; title: string } | null
   /** ready = 已导入并生成 HTML；pending = 只占位显示（笔记尚未导入本站） */
   status: 'ready' | 'pending'
   toc: DocHeading[]

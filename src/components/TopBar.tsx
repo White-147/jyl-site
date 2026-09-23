@@ -97,9 +97,11 @@ export default function TopBar() {
           </span>
         </a>
 
-        {/* 右侧控件组：笔记 / 返回顶部 / 主题 / 简历。
-            空间账（390px 手机）：品牌 ≈204 + 笔记 36 + 返回顶部 36 + 主题 36 + 简历 36 + padding 32 = 380，
-            刚好卡进 390 —— 所以 <640px 时"笔记/简历"的文字收起（只留图标，由 title 与 aria-label 提供提示），
+        {/* 右侧控件组：笔记 · 主题 · 简历 · 顶部。
+            ⚠️ 顺序是定稿（2026-09 用户确认）：「返回顶部」放**最右** ——
+               它原本夹在中间、且贴顶时完全不可见，导致控件带中间出现两个看不出用途的空洞。
+            空间账（390px 手机）：品牌 ≈204 + 笔记 36 + 主题 36 + 简历 36 + 顶部 36 + padding 32 = 380，
+            刚好卡进 390 —— 所以 <640px 时三个带文字的控件只留图标（由 title 与 aria-label 提供提示），
             ≥640px 再显示文字。若将来品牌名变长或要加第五个控件，必须重新算这笔账。 */}
         <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
           <a
@@ -114,22 +116,8 @@ export default function TopBar() {
             <span className="hidden sm:inline">笔记</span>
           </a>
 
-          {/* 返回顶部：贴顶时隐藏但保留占位（避免右侧按钮组左右跳动） */}
-          <button
-            type="button"
-            onClick={goTop}
-            aria-label="返回顶部"
-            title="返回顶部"
-            tabIndex={showTop ? 0 : -1}
-            aria-hidden={!showTop}
-            className={`bar-control ${showTop ? '' : 'pointer-events-none opacity-0'}`}
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="h-4.5 w-4.5" aria-hidden="true">
-              <path d="M12 19V5M5 12l7-7 7 7" />
-            </svg>
-          </button>
-
-          <ThemeToggle />
+          {/* 主题：按钮上直接显示**当前模式名**（自动 / 浅色 / 深色），不必点开菜单才知道 */}
+          <ThemeToggle label="主题" />
 
           <a
             href={contact.resumeUrl}
@@ -143,6 +131,23 @@ export default function TopBar() {
             </svg>
             <span className="hidden sm:inline">简历</span>
           </a>
+
+          {/* 返回顶部（最右）：**始终可见**，贴顶时降为禁用态 ——
+              之前是「贴顶时 opacity:0 但保留占位」，那会在控件带里留一个空洞。
+              用 disabled + 降不透明度表达，不移出布局、整条带宽度不变。 */}
+          <button
+            type="button"
+            onClick={goTop}
+            disabled={!showTop}
+            aria-label="返回顶部"
+            title="返回顶部"
+            className={`bar-control ${showTop ? '' : 'cursor-default opacity-40'}`}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="h-4.5 w-4.5" aria-hidden="true">
+              <path d="M12 19V5M5 12l7-7 7 7" />
+            </svg>
+            <span className="hidden sm:inline">顶部</span>
+          </button>
         </div>
       </div>
     </header>
