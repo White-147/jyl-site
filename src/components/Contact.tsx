@@ -1,4 +1,3 @@
-import { SECTIONS } from '../data/navigation'
 import { HONEYPOTS, contact } from '../data/contact'
 import { Toast, useCopyFeedback, useToast } from './Toast'
 import Reveal from './Reveal'
@@ -13,7 +12,7 @@ export default function Contact() {
     <section id="contact" className="relative anchor-offset section-loose">
       <div className="rail-gutter mx-auto max-w-6xl px-4 sm:px-6">
         <SectionHeading
-          eyebrow={SECTIONS.find((s) => s.id === 'contact')?.label ?? '联系方式'}
+          sectionId="contact"
           title="期待与您交流"
           description="点击邮箱即可复制，或直接下载简历。"
         />

@@ -1,7 +1,7 @@
 /** 全站区块注册表：导航、滚动侦测、移动端 Tab Bar、右侧导航共用同一数据源。
  *  新增/调整区块只需修改此处。 */
 
-export interface SectionDef {
+interface SectionDef {
   id: string
   /** 完整描述（右侧玻璃管导航用，无歧义） */
   label: string
@@ -97,6 +97,3 @@ export const SECTION_IDS = SECTIONS.map((s) => s.id)
 
 /** 有正文的正文章节（不计首屏）。用于编号、底部 Tab Bar 等「按章节」的场景。 */
 export const CHAPTERS = SECTIONS.filter((s) => s.isChapter !== false)
-
-/** 正文章节 id 列表 */
-export const CHAPTER_IDS = CHAPTERS.map((s) => s.id)

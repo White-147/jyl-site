@@ -34,32 +34,51 @@ export default function TopBar() {
   const [showTop, setShowTop] = useState(false)
   const [scrolled, setScrolled] = useState(false)
 
+  // 文档区在桌面端换了滚动容器（`.docs-shell` + `#docs-scroll`，见 Docs.tsx）：
+  // 页面本身不滚，所以「返回顶部」的可用状态与顶栏换档都要读**容器**的滚动量。
+  // ⚠️ 这里刻意用 `getElementById` 而不是 context：两者分属不同组件子树，
+  //    传 context 会把顶栏与文档区耦合起来，而它们本来只需要共享一个 DOM 契约。
+  const scroller = () => document.getElementById('docs-scroll')
+
   // 两个滚动状态：
   //   showTop  —— 「返回顶部」滚过一屏才出现（贴顶时它没有意义）
   //   scrolled —— 顶栏材质换档（贴顶时更透，滚动后加深以保住文字对比度）
   // 合并到同一个 rAF 里，避免两次布局读取（与站内其它滚动侦听同一原则）。
+  // 两个滚动源都听：主站与手机端是 window，文档区桌面端是容器。
   useEffect(() => {
     let raf = 0
     const update = () => {
       cancelAnimationFrame(raf)
       raf = requestAnimationFrame(() => {
-        const y = window.scrollY
+        const y = Math.max(window.scrollY, scroller()?.scrollTop ?? 0)
         setShowTop(y > 400)
         setScrolled(y > 8)
       })
     }
     update()
+    const el = scroller()
     window.addEventListener('scroll', update, { passive: true })
+    el?.addEventListener('scroll', update, { passive: true })
     return () => {
       cancelAnimationFrame(raf)
       window.removeEventListener('scroll', update)
+      el?.removeEventListener('scroll', update)
     }
-  }, [])
+    // 依赖 isDocs：文档区挂载后 #docs-scroll 才存在，切换视图时要重新绑定
+  }, [isDocs])
 
-  const goTop = () => window.scrollTo({ top: 0, behavior: 'smooth' })
+  /** 回顶：文档区桌面端要滚容器，其余情况滚页面 */
+  const goTop = () => {
+    const el = scroller()
+    if (el && el.scrollHeight > el.clientHeight + 1) {
+      el.scrollTo({ top: 0, behavior: 'smooth' })
+      return
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 
   return (
-    <header className={`site-bar sticky top-0 z-50 ${scrolled ? 'is-scrolled' : ''}`}>
+    <header className={`site-bar sticky top-0 z-50 ${scrolled ? 'is-scrolled' : ''} ${isDocs ? 'is-fixed' : ''}`}>
       {/* ⚠️ 整宽而不是 max-w-6xl：1200px 级容器在 1440 视口上会留下两侧各 137px 空白，
           参考站（韶远 / 米游社 / 因缘精灵）的内容都是撑满 + 固定左右留白。
           上限取 112rem（1792px）是为了超宽屏不把品牌与控件甩到两端。 */}
@@ -98,27 +117,11 @@ export default function TopBar() {
             </span>
           </a>
 
-          {/* 文档区专属：显式的「返回作品集」。
-              ⚠️ 为什么必须有（用户反馈，已实测确认）：
-                原来唯一的返回入口是文档区**页内顶部**那个按钮，实测滚到 2000px 后它的
-                `top = -1896`（完全离开视口），于是"往下读之后就回不去了"。
-                品牌虽然也链回主站，但它读作"网站标题"而不是"返回"，不能当唯一出口。
-              放在品牌右侧（而不是右侧控件组里）：它描述的是"当前不在主站"这个状态，
-              与品牌同属"我在哪"的信息，放在一起才读得通；也让右侧那组保持
-              「笔记 · 主题 · 简历 · 顶部」四个固定控件不被挤乱。 */}
-          {isDocs && (
-            <a
-              href="#/"
-              title="返回作品集"
-              className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-slate-300/80 bg-white/60 px-2.5 text-sm font-medium text-slate-700 transition-colors hover:border-brand-400 hover:text-brand-700 sm:px-3 dark:border-slate-600/80 dark:bg-slate-800/60 dark:text-slate-200 dark:hover:border-brand-500 dark:hover:text-brand-200"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden="true">
-                <path d="M19 12H5M12 19l-7-7 7-7" />
-              </svg>
-              {/* 手机上只留箭头（品牌名要保完整，空间账见右侧控件组注释） */}
-              <span className="hidden sm:inline">返回作品集</span>
-            </a>
-          )}
+          {/* ⚠️ 这里**不再**放「返回作品集」（2026-09 移除）：
+              我上一轮在品牌右侧加过一个，但用户要的是「把左侧那一栏整体固定住」，
+              而文档区左栏顶部本来就有这个入口。同一个目标两处入口 = 重复，
+              所以现在文档区的返回入口只有一处：左栏顶部（桌面端钉在视口里、手机端在文档流顶部）。
+              品牌本身也链回主站，作为兜底。 */}
         </div>
 
         {/* 右侧控件组：笔记 · 主题 · 简历 · 顶部。

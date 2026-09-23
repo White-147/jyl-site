@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react'
-import { SECTIONS } from '../data/navigation'
 import profile from '../data/profile.json'
 import type { AboutLink, AboutPara, AboutPosition, Stat } from '../data/types'
 import Reveal from './Reveal'
@@ -96,7 +95,7 @@ export default function About() {
   return (
     <section id="about" ref={scope} className="relative anchor-offset section-tight">
       <div className="rail-gutter mx-auto max-w-6xl px-4 sm:px-6">
-        <SectionHeading eyebrow={SECTIONS.find((s) => s.id === 'about')?.label ?? '关于我'} title="从数据到 AI，再到游戏开发" />
+        <SectionHeading sectionId="about" title="从数据到 AI，再到游戏开发" />
 
         <div className="mt-5 grid gap-5 sm:mt-12 lg:grid-cols-2">
           {/* 简介卡：学历锚点 + 阶段化叙事（早期 / 近期 / 日常） */}

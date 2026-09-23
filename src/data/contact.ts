@@ -15,9 +15,6 @@ import profile from './profile.json'
  */
 
 /** "abc@x.com" -> charCode 数组 */
-export function encode(value: string): number[] {
-  return Array.from(value, (ch) => ch.charCodeAt(0))
-}
 
 /** charCode 数组 -> 原字符串 */
 export function decode(codes: number[]): string {

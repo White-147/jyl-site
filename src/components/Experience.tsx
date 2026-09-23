@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { SECTIONS } from '../data/navigation'
 import experienceData from '../data/experience.json'
 import type { Experience } from '../data/types'
 import { useIsMobile } from '../hooks/useIsMobile'
@@ -83,7 +82,7 @@ export default function Experience() {
       {/* cv-section：首屏以下的区块跳过初始布局/绘制，见 index.css 该类的注释。 */}
       <div className="cv-section rail-gutter mx-auto max-w-6xl px-4 sm:px-6">
         <SectionHeading
-          eyebrow={SECTIONS.find((s) => s.id === 'experience')?.label ?? '工作经历'}
+          sectionId="experience"
           title="从业务交付到 AI 工具链"
           description="把规则和需求，转成可执行、可交付的工程结果。"
         />

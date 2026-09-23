@@ -64,7 +64,7 @@ export interface AboutPosition {
   keywords: string[]
 }
 
-export interface SkillGroup {
+interface SkillGroup {
   title: string
   items: string[]
 }
@@ -92,7 +92,7 @@ export interface CertItem {
   date?: string
 }
 
-export interface AwardItem {
+interface AwardItem {
   name: string
   image: string
 }
@@ -108,7 +108,7 @@ export interface EducationData {
 
 /* ---------- UE5 学习笔记文档区（src/data/ue5-docs.json，由 scripts/import-ue-docs.mjs 生成） ---------- */
 
-export interface DocHeading {
+interface DocHeading {
   /** 标题锚点 id（由转换器按标题文本生成，稳定且可分享） */
   id: string
   label: string
@@ -116,7 +116,7 @@ export interface DocHeading {
   level: number
 }
 
-export interface DocEntry {
+interface DocEntry {
   id: string
   title: string
   subtitle?: string
