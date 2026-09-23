@@ -152,6 +152,7 @@ export default function Hero() {
   api: ['Java', '.NET', 'Python'],
   fe: ['React', 'TypeScript'],
   native: ['Electron', 'Win32'],
+  game: 'Unreal 5 · Blueprint',
   aim: 'AI toolchain',
 }`}
             </code>

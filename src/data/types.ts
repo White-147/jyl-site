@@ -35,10 +35,16 @@ export interface Project {
 }
 
 export interface AboutPara {
-  /** 阶段标签（早期 / 近期 / 日常） */
+  /** 阶段分组名（早期 / 近期 / 日常）。**不直接上屏**，只用于把段落分组与做 key */
   phase: string
-  /** 该阶段下的自然段（段首由 phase 彩色强调） */
-  texts: string[]
+  /**
+   * 该阶段下的自然段。两种写法：
+   *  - `string`：普通段落，不带标签；
+   *  - `{ label, text }`：带行内彩色标签的段落（如「日常」「目前」）。
+   * 标签样式与阶段名一致（brand 色 + 半粗），四个标签竖排下来是齐的。
+   * 见 About.tsx 的渲染分支 —— 改这里要同时改那边。
+   */
+  texts: (string | { label: string; text: string })[]
 }
 
 /** About 能力链路卡：数字**内联在卡内**，不再引用全局 stats 下标

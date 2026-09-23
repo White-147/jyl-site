@@ -583,7 +583,9 @@ details[open] .chevron-up-down {
    踩过的坑（2026-09）：两者都写时，构建用的 lightningcss 会把它们当成同一条属性做合并，
    结果是只留下一份 —— 实测产物里只剩下 `-webkit-backdrop-filter`，
    而 Chrome 不认这个前缀，于是玻璃在 Chrome/Firefox 里**完全不生效**（只有 Safari 有），
-   `getComputedStyle(el).backdropFilter` 还返回 `none`，排查时极易误判成"选择器写错了"。 */
+   `getComputedStyle(el).backdropFilter` 还返回 `none`，排查时极易误判成"选择器写错了"。
+   （lightningcss 本来就会按 targets 自动补 `-webkit-`：实测产物里标准属性与带前缀属性
+     各出现 15 次，所以源码侧完全不需要手写。） */
 .site-bar {
   background-image: linear-gradient(
     to bottom,
@@ -591,7 +593,23 @@ details[open] .chevron-up-down {
     rgb(255 255 255 / 0.26)
   );
   backdrop-filter: blur(20px) saturate(1.8) brightness(1.06);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.55);
+  /* 「镜面高光 + 侧缘亮线 + 离地阴影」三层（2026-09 第二轮升级）：
+     拆开 Liquid Glass 的 CSS 配方后，观感差距就落在这三行上 ——
+       · 顶部高光是**唯一**决定"读作玻璃还是读作一层色膜"的东西：
+         配方原话是"设成 85% 白就读作被照亮的倒角；降到 30% 面板立刻变平"。
+         我们原来只有 1px / 55%，正好卡在"平"的那一侧，所以就"还是毛玻璃"。
+       · 底缘回弹光是玻璃下沿把地面反光带回来的一点亮度，缺了它面板像贴在屏上。
+       · 侧缘（左右各 1px）是用户明确要的"更接近 Material"那一档：
+         真实玻璃不只顶部受光，两侧边缘也会有连续的亮线。
+       · 外侧阴影给"离地感"：贴顶时很轻，滚动后加重（见 .is-scrolled）。
+     折射（feDisplacementMap）刻意不做：它要求把背景复制进面板里对齐，
+     只对固定背景成立；顶栏是常驻在**滚动内容**之上的，会立即错位且每帧多一次全表面栅格化。 */
+  box-shadow:
+    inset 0 1.5px 0 rgb(255 255 255 / 0.85),
+    inset 0 -1px 0 rgb(255 255 255 / 0.14),
+    inset 1px 0 0 rgb(255 255 255 / 0.12),
+    inset -1px 0 0 rgb(255 255 255 / 0.12),
+    0 2px 10px rgb(0 0 0 / 0.04);
   transition:
     background-image var(--duration-reveal) var(--ease-out-soft),
     box-shadow var(--duration-reveal) var(--ease-out-soft);
@@ -602,9 +620,13 @@ details[open] .chevron-up-down {
     rgb(255 255 255 / 0.68),
     rgb(255 255 255 / 0.5)
   );
+  /* 滚动后：高光略收（底色变厚了，再叠满高光会发白），外侧阴影加重给出"浮起" */
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.6),
-    0 1px 12px rgb(157 83 0 / 0.06);
+    inset 0 1.5px 0 rgb(255 255 255 / 0.9),
+    inset 0 -1px 0 rgb(255 255 255 / 0.18),
+    inset 1px 0 0 rgb(255 255 255 / 0.14),
+    inset -1px 0 0 rgb(255 255 255 / 0.14),
+    0 6px 22px rgb(157 83 0 / 0.1);
 }
 .dark .site-bar {
   background-image: linear-gradient(
@@ -613,7 +635,14 @@ details[open] .chevron-up-down {
     rgb(18 20 21 / 0.34)
   );
   backdrop-filter: blur(20px) saturate(1.8) brightness(0.95);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.07);
+  /* 深色模式的高光是"内暗边 + 顶部微亮"：与 DESIGN.md 的 Tonal-First Rule 一致 —— 
+     深色不用亮边模拟浮起，所以这里刻意比浅色档弱一档（.07 而不是 .85） */
+  box-shadow:
+    inset 0 1.5px 0 rgb(255 255 255 / 0.07),
+    inset 0 -1px 0 rgb(255 255 255 / 0.04),
+    inset 1px 0 0 rgb(255 255 255 / 0.05),
+    inset -1px 0 0 rgb(255 255 255 / 0.05),
+    0 2px 10px rgb(0 0 0 / 0.2);
 }
 .dark .site-bar.is-scrolled {
   background-image: linear-gradient(
@@ -622,8 +651,11 @@ details[open] .chevron-up-down {
     rgb(18 20 21 / 0.6)
   );
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.08),
-    0 1px 12px rgb(0 0 0 / 0.18);
+    inset 0 1.5px 0 rgb(255 255 255 / 0.1),
+    inset 0 -1px 0 rgb(255 255 255 / 0.05),
+    inset 1px 0 0 rgb(255 255 255 / 0.06),
+    inset -1px 0 0 rgb(255 255 255 / 0.06),
+    0 6px 22px rgb(0 0 0 / 0.34);
 }
 /* 不支持 backdrop-filter 时退回不透明度更高的底，避免"半透明却看不清字" */
 @supports not (backdrop-filter: blur(1px)) {
@@ -984,19 +1016,6 @@ details[open] .chevron-up-down {
   text-align: center;
   font-size: var(--text-xs);
   color: var(--color-slate-400);
-}
-
-/* 文档大纲的「目录树」：用一条竖线把二、三级挂到文档名之下。
-   为什么需要它：原实现只用缩进区分层级（level 2 是 `pl-3`、level 3 是 `pl-5`，差 4px），
-   视觉上几乎没有层级感，读者看到的是"一长串没头没尾的条目"。
-   ⚠️ 只作用于大纲列表（`.rail-tree`），不要扩散到正文。 */
-.rail-tree > ul {
-  margin-left: 3px;
-  padding-left: 8px;
-  border-left: 1px solid var(--color-slate-200);
-}
-.dark .rail-tree > ul {
-  border-left-color: var(--color-slate-700);
 }
 
 /* 打印一律拦截：站点不提供打印版式（固定网格、玻璃层、导航栏打印出来是半成品），

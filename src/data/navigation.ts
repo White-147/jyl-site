@@ -84,6 +84,9 @@ export const SECTIONS: SectionDef[] = [
     id: 'docs',
     label: 'UE5 学习笔记',
     shortLabel: '笔记',
+    // ⚠️ 必需：SectionHeading 的编号总数取 CHAPTERS.length，
+    //    漏掉这个标记，文档区会被算作第 7 个章节 → 全站编号变成 0x / 07（实测踩过）。
+    isChapter: false,
     icon: 'M4 4h10a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3V4zm3 3h6M7 11h6M7 15h4',
     href: '#/docs/ue5',
   },

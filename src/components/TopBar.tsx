@@ -68,34 +68,58 @@ export default function TopBar() {
             文档区里点它回主站，主站里点它回顶部。
             ⚠️ 品牌名在手机端**保留完整**（用户明确要求），因此右侧控件的文字在 <640px 收起，
                只留图标 —— 空间账见下面 controls 的注释。 */}
-        <a
-          href={isDocs ? '#/docs' : '#top'}
-          onClick={
-            isDocs
-              ? undefined
-              : (e) => {
-                  // 主站内：走平滑回顶（原生锚点在布局收敛期会少滚一段，见 useAnchorScroll 的说明）
-                  if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return
-                  e.preventDefault()
-                  history.replaceState(null, '', location.pathname + location.search)
-                  goTop()
-                }
-          }
-          className="flex min-w-0 items-center gap-2"
-        >
-          <img
-            src="images/icon-jiang-192.png"
-            alt=""
-            width={192}
-            height={192}
-            className="h-7 w-7 shrink-0 rounded-md object-contain"
-          />
-          <span className="font-display truncate text-sm font-normal tracking-tight text-ink sm:text-lg dark:text-ink-light">
-            {profile.name}
-            <span className="mx-0.5 text-slate-400 dark:text-slate-500">·</span>
-            个人作品集网站
-          </span>
-        </a>
+        <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+          <a
+            href={isDocs ? '#/docs' : '#top'}
+            onClick={
+              isDocs
+                ? undefined
+                : (e) => {
+                    // 主站内：走平滑回顶（原生锚点在布局收敛期会少滚一段，见 useAnchorScroll 的说明）
+                    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return
+                    e.preventDefault()
+                    history.replaceState(null, '', location.pathname + location.search)
+                    goTop()
+                  }
+            }
+            className="flex min-w-0 items-center gap-2"
+          >
+            <img
+              src="images/icon-jiang-192.png"
+              alt=""
+              width={192}
+              height={192}
+              className="h-7 w-7 shrink-0 rounded-md object-contain"
+            />
+            <span className="font-display truncate text-sm font-normal tracking-tight text-ink sm:text-lg dark:text-ink-light">
+              {profile.name}
+              <span className="mx-0.5 text-slate-400 dark:text-slate-500">·</span>
+              个人作品集网站
+            </span>
+          </a>
+
+          {/* 文档区专属：显式的「返回作品集」。
+              ⚠️ 为什么必须有（用户反馈，已实测确认）：
+                原来唯一的返回入口是文档区**页内顶部**那个按钮，实测滚到 2000px 后它的
+                `top = -1896`（完全离开视口），于是"往下读之后就回不去了"。
+                品牌虽然也链回主站，但它读作"网站标题"而不是"返回"，不能当唯一出口。
+              放在品牌右侧（而不是右侧控件组里）：它描述的是"当前不在主站"这个状态，
+              与品牌同属"我在哪"的信息，放在一起才读得通；也让右侧那组保持
+              「笔记 · 主题 · 简历 · 顶部」四个固定控件不被挤乱。 */}
+          {isDocs && (
+            <a
+              href="#/"
+              title="返回作品集"
+              className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-slate-300/80 bg-white/60 px-2.5 text-sm font-medium text-slate-700 transition-colors hover:border-brand-400 hover:text-brand-700 sm:px-3 dark:border-slate-600/80 dark:bg-slate-800/60 dark:text-slate-200 dark:hover:border-brand-500 dark:hover:text-brand-200"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden="true">
+                <path d="M19 12H5M12 19l-7-7 7-7" />
+              </svg>
+              {/* 手机上只留箭头（品牌名要保完整，空间账见右侧控件组注释） */}
+              <span className="hidden sm:inline">返回作品集</span>
+            </a>
+          )}
+        </div>
 
         {/* 右侧控件组：笔记 · 主题 · 简历 · 顶部。
             ⚠️ 顺序是定稿（2026-09 用户确认）：「返回顶部」放**最右** ——

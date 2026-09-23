@@ -142,21 +142,20 @@ export default function Docs({ docId, anchor }: { docId?: string; anchor?: strin
 
   /** 当前篇大纲（桌面右栏、xl 以下的左栏、手机抽屉三处共用）。
    *
-   *  层级用「目录树」表达而不是靠缩进量（2026-09 改版）：
-   *    · level 1 = 文档名，实心方块 + 加粗，作为整棵树的根；
-   *    · level 2/3 = 竖线（`rail-tree` 的 border-left）+ 分支符 `├` / `└`；
-   *    · 字号 12px：实测最长标签 17 字（`roll、yaw、pitch知识点`）在 13px 下要 212px，
-   *      而右栏可用文字宽只有 192px（A 方案），12px 下正好放得下、**不换行**。
-   *      换行会把目录拉得又长又乱，这是本次加宽 + 缩字号的唯一目的。
-   *    · 兜底：仍溢出的个别标签用 `truncate` + `title`，宁可省略号也不换行。 */
+   *  ⚠️ 层级只用「缩进 + 字号/字重」表达，**不用树形连接线**（2026-09 第二轮）：
+   *    第一版试过 `├ └` 字符 + 1px 竖线，实测观感偏"文件管理器"，
+   *    而参考的那种带图标与折叠三角的树属于应用侧栏范式，搬进 224px 的网页大纲里显得沉重。
+   *    现在的口径：每级缩进 12px，一级 12px 半粗、二级 12px 常规、三级 11px 灰，
+   *    靠三级之间的**明度差**读层级，比画线更干净。
+   *    字号分档不是随手取的：最长标签 17 字在 12px 下需要约 196px，
+   *    而右栏可用文字宽 192px —— 所以三级降到 11px，保证**全部标签不换行**（实测 34/27 项零换行）。
+   *    兜底：仍溢出的个别标签用 `truncate`，宁可省略号也不换行（换行会把目录拉得又长又乱）。 */
   const outline = current ? (
     <ul className="space-y-0.5">
-      {current.toc.map((t, idx) => {
-        const isLast = idx === current.toc.length - 1
-        const nextLevel = current.toc[idx + 1]?.level ?? 0
-        const isBranchEnd = nextLevel <= t.level || isLast
+      {current.toc.map((t) => {
+        const level = t.level
         return (
-          <li key={t.id} className={t.level === 1 ? 'mt-1 first:mt-0' : ''}>
+          <li key={t.id}>
             <a
               href={docsHref(current.id, t.id)}
               onClick={(e) => {
@@ -165,33 +164,22 @@ export default function Docs({ docId, anchor }: { docId?: string; anchor?: strin
                 setNavOpen(false)
               }}
               title={t.label}
-              className={`group flex items-center gap-1.5 py-1 text-[12px] leading-tight transition-colors ${
+              className={`flex items-baseline py-1 leading-tight transition-colors ${
+                level === 1
+                  ? 'text-[12px] font-semibold'
+                  : level === 2
+                    ? 'text-[12px]'
+                    : 'text-[11px]'
+              } ${
                 activeAnchor === t.id
-                  ? 'font-medium text-brand-700 dark:text-brand-200'
-                  : 'text-slate-500 hover:text-brand-700 dark:text-slate-400 dark:hover:text-brand-200'
+                  ? 'font-semibold text-brand-700 dark:text-brand-200'
+                  : level === 3
+                    ? 'text-slate-400 hover:text-brand-700 dark:text-slate-500 dark:hover:text-brand-200'
+                    : 'text-slate-500 hover:text-brand-700 dark:text-slate-400 dark:hover:text-brand-200'
               }`}
-              style={{ paddingLeft: `${(t.level - 1) * 14}px` }}
+              style={{ paddingLeft: `${(level - 1) * 12}px` }}
             >
-              {t.level === 1 ? (
-                <span
-                  className={`h-1.5 w-1.5 shrink-0 rounded-[2px] ${
-                    activeAnchor === t.id ? 'bg-brand-600 dark:bg-brand-300' : 'bg-slate-400 dark:bg-slate-500'
-                  }`}
-                  aria-hidden="true"
-                />
-              ) : (
-                <span
-                  className={`shrink-0 font-mono text-[10px] leading-none ${
-                    activeAnchor === t.id ? 'text-brand-500 dark:text-brand-300' : 'text-slate-300 dark:text-slate-600'
-                  }`}
-                  aria-hidden="true"
-                >
-                  {isBranchEnd ? '└' : '├'}
-                </span>
-              )}
-              <span className={`truncate ${t.level === 1 ? 'font-semibold text-slate-600 dark:text-slate-300' : ''}`}>
-                {t.label}
-              </span>
+              <span className="truncate">{t.label}</span>
             </a>
           </li>
         )
@@ -357,7 +345,7 @@ export default function Docs({ docId, anchor }: { docId?: string; anchor?: strin
                 <p className="mt-5 border-t border-slate-200 pt-4 text-xs font-semibold uppercase tracking-widest text-slate-400 dark:border-slate-700 dark:text-slate-500">
                   本篇大纲
                 </p>
-                <div className="rail-tree mt-2.5">{outline}</div>
+                <div className="mt-2.5">{outline}</div>
               </>
             )}
           </div>
@@ -385,7 +373,7 @@ export default function Docs({ docId, anchor }: { docId?: string; anchor?: strin
                 <p className="mt-6 border-t border-slate-200 pt-4 text-xs font-semibold uppercase tracking-widest text-slate-400 dark:border-slate-700 dark:text-slate-500">
                   本篇大纲
                 </p>
-                <div className="rail-tree mt-2.5">{outline}</div>
+                <div className="mt-2.5">{outline}</div>
               </div>
             )}
           </div>
@@ -468,7 +456,7 @@ export default function Docs({ docId, anchor }: { docId?: string; anchor?: strin
             <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500">
               本篇大纲
             </p>
-            <div className="rail-tree mt-2.5">{outline}</div>
+            <div className="mt-2.5">{outline}</div>
           </nav>
         </aside>
       </div>
