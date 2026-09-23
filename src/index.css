@@ -307,9 +307,16 @@ img {
   user-select: none;
 }
 
-/* 内容只读保护：全站默认不可选中，只有标注 data-copyable 的元素（当前仅联系区邮箱）放行。
+/* 内容只读保护：全站默认不可选中，只有标注 data-copyable 的元素（联系区邮箱 + UE 文档区正文）放行。
    配合 src/hooks/useReadOnlyGuard.ts 的事件拦截形成双层；
-   JS 未执行时纯 CSS 仍然生效。白名单口径与原因见该文件注释。 */
+   JS 未执行时纯 CSS 仍然生效。白名单口径与原因见该文件注释。
+
+   ⚠️ 光标必须与"可选中"分开处理（2026-09 修复）：
+   `cursor: text` 原写在 `[data-copyable] *` 上，意思只是"这一块可以选中"，
+   但它是**继承式**地压过了链接/按钮自己的光标 —— 实测 UE 文档区里所有文档内链接
+   的光标都是 `text` 而不是 `pointer`，读者根本看不出哪里能点。
+   （图片因为自带 `cursor-zoom-in` 且选择器优先级更高而侥幸正常。）
+   现在：容器与普通文本给 `text`，**可交互元素与图片各自恢复**该有的光标。 */
 body {
   -webkit-user-select: none;
   user-select: none;
@@ -318,7 +325,23 @@ body {
 [data-copyable] * {
   -webkit-user-select: text;
   user-select: text;
+}
+/* ⚠️ `:where()` 不能省：`:not()` 链会把选择器权重抬到 (0,2,0)，压过下面
+   `[data-copyable] img` 的 (0,1,1)，图片的 `cursor: zoom-in` 会失效。
+   包一层 `:where()` 把 `:not()` 链的权重清零，整体回到 (0,1,0)，
+   与下面的规则同级、由**源码顺序**决定 —— 所以这三条的顺序不能调。 */
+[data-copyable],
+[data-copyable] :where(:not(a):not(button):not([role='button']):not(summary):not(img)) {
   cursor: text;
+}
+[data-copyable] a,
+[data-copyable] button,
+[data-copyable] [role='button'],
+[data-copyable] summary {
+  cursor: pointer;
+}
+[data-copyable] img {
+  cursor: zoom-in;
 }
 
 /* 全站连续背景：石墨基调 + 琥珀光斑 + 颗粒纹理。
@@ -854,6 +877,10 @@ details[open] .chevron-up-down {
 
 .doc-content p {
   margin: 0.85rem 0;
+  /* ⚠️ 行宽上限：文档区在 1920 屏上内容列可达 1180px，中文一行会到 50+ 字，
+     读起来容易串行（DESIGN.md 要求 65–75ch）。这里只约束**纯段落**，
+     图片与列表不受影响（列表项短、图片本来就要宽）。52rem ≈ 44 个汉字。 */
+  max-width: 52rem;
 }
 .doc-content strong {
   font-weight: 700;

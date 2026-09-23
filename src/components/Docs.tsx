@@ -34,8 +34,12 @@ export default function Docs({ docId, anchor }: { docId?: string; anchor?: strin
   const [failed, setFailed] = useState(false)
   const [lightbox, setLightbox] = useState<{ src: string; alt: string } | null>(null)
   const [activeAnchor, setActiveAnchor] = useState('')
+  // 手机端的目录抽屉。它必须**吸顶**：之前那个「目录」按钮放在文档区顶部，
+  // 实测滚到 1200px 后按钮 top = -1112（完全出视口），展开的目录块又是 overflow: visible，
+  // 于是下滑之后再也没有任何跳转手段。现在入口吸顶在顶栏下方、抽屉自带滚动。
   const [navOpen, setNavOpen] = useState(false)
   const contentRef = useRef<HTMLDivElement>(null)
+  const drawerRef = useRef<HTMLDivElement>(null)
 
   // 拉取文档 HTML（构建产物，静态资源；失败时给出明确回退而不是空白页）
   useEffect(() => {
@@ -67,6 +71,101 @@ export default function Docs({ docId, anchor }: { docId?: string; anchor?: strin
     window.scrollTo({ top: 0, behavior: 'auto' })
     setNavOpen(false)
   }, [current?.id])
+
+  // 手机端抽屉：锁背景滚动 + ESC 关闭 + 打开时焦点移入（与 Lightbox 同一套无障碍口径）
+  useEffect(() => {
+    if (!navOpen) return
+    const prevOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        setNavOpen(false)
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    drawerRef.current?.focus()
+    return () => {
+      document.body.style.overflow = prevOverflow
+      window.removeEventListener('keydown', onKey)
+    }
+  }, [navOpen])
+
+  /** 文档树（侧栏与手机抽屉共用同一段 JSX —— 两处各写一份必然会漂移） */
+  const docTree = (
+    <ul>
+      {DOCS.map((doc, i) => {
+        const prevGroup = i > 0 ? DOCS[i - 1].group : doc.group
+        // group 变化处加一段留白：界面族（01–03）与蓝图族（04–05）分开，
+        // 让"这两族有先后"这件事在目录里就看得见，而不是靠用户自己猜。
+        const groupGap = i > 0 && doc.group !== prevGroup
+        const num = String(doc.order ?? i + 1).padStart(2, '0')
+        return (
+          <li key={doc.id} className={groupGap ? 'mt-3 border-t border-slate-200 pt-3 dark:border-slate-700' : 'mt-0.5'}>
+            {doc.status === 'ready' ? (
+              <a
+                href={docsHref(doc.id)}
+                aria-current={doc.id === current?.id ? 'page' : undefined}
+                onClick={() => setNavOpen(false)}
+                className={`flex items-baseline gap-2 rounded-lg px-2.5 py-1.5 text-sm transition-colors ${
+                  doc.id === current?.id
+                    ? 'bg-brand-700 font-semibold text-white'
+                    : 'text-slate-600 hover:bg-slate-100 hover:text-brand-700 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-brand-200'
+                }`}
+              >
+                <span
+                  className={`font-mono text-[11px] tabular-nums ${
+                    doc.id === current?.id ? 'text-white/75' : 'text-slate-400 dark:text-slate-500'
+                  }`}
+                >
+                  {num}
+                </span>
+                <span className="min-w-0">{doc.title}</span>
+              </a>
+            ) : (
+              <span
+                title="该篇尚未导入本站"
+                className="flex items-baseline gap-2 rounded-lg px-2.5 py-1.5 text-sm text-slate-400 dark:text-slate-500"
+              >
+                <span className="font-mono text-[11px] tabular-nums">{num}</span>
+                <span className="min-w-0 flex-1">{doc.title}</span>
+                <span className="rounded border border-dashed border-slate-300 px-1.5 py-0.5 text-[10px] dark:border-slate-600">
+                  待导入
+                </span>
+              </span>
+            )}
+          </li>
+        )
+      })}
+    </ul>
+  )
+
+  /** 当前篇大纲（桌面右栏、xl 以下的左栏、手机抽屉三处共用） */
+  const outline = current ? (
+    <ul className="space-y-0.5">
+      {current.toc.map((t) => (
+        <li key={t.id}>
+          <a
+            href={docsHref(current.id, t.id)}
+            onClick={(e) => {
+              e.preventDefault()
+              goToAnchor(t.id)
+              setNavOpen(false)
+            }}
+            className={`block border-l-2 py-1 text-[13px] leading-snug transition-colors ${
+              t.level >= 3 ? 'pl-5' : 'pl-3'
+            } ${
+              activeAnchor === t.id
+                ? 'border-brand-500 font-medium text-brand-700 dark:text-brand-200'
+                : 'border-slate-200 text-slate-500 hover:border-brand-300 hover:text-brand-700 dark:border-slate-700 dark:text-slate-400 dark:hover:text-brand-200'
+            }`}
+          >
+            {t.label}
+          </a>
+        </li>
+      ))}
+    </ul>
+  ) : null
 
   // 深链：`?s=<heading id>` → 滚到该标题
   useEffect(() => {
@@ -143,8 +242,13 @@ export default function Docs({ docId, anchor }: { docId?: string; anchor?: strin
   }
 
   return (
-    <div className="mx-auto max-w-[88rem] px-4 pb-24 pt-6 sm:px-6 lg:pt-10">
-      {/* 顶部：返回主站 + 移动端目录开关 */}
+    // ⚠️ 宽度口径（2026-09 放大）：外层 100rem（1600px），左右栏收窄到 192 / 176，间距 24。
+    //    改动前是 88rem + 240 / 208 + gap 32 —— 实测 1440 下内容列只有 848px、1920 下被 88rem 封顶
+    //    在 848px 不动（左右各空 256px），所以"内容区小 + 没占满"是同一个原因。
+    //    改后内容列：1440 → 948，1920 → 1180。
+    <div className="mx-auto max-w-[100rem] px-4 pb-24 pt-6 sm:px-6 lg:pt-10">
+      {/* 顶部：返回主站 + 阅读顺序说明。
+          ⚠️ 手机端的「目录」入口**不在这里** —— 它必须吸顶才可用（见下方 md:hidden 的吸顶条）。 */}
       <div className="mb-5 flex flex-wrap items-center gap-3">
         <a
           href="#top"
@@ -155,105 +259,96 @@ export default function Docs({ docId, anchor }: { docId?: string; anchor?: strin
           </svg>
           返回作品集
         </a>
-        <button
-          type="button"
-          onClick={() => setNavOpen((v) => !v)}
-          aria-expanded={navOpen}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:border-brand-400 hover:text-brand-700 lg:hidden dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200"
-        >
-          目录
-        </button>
         <span className="text-sm text-slate-400 dark:text-slate-500">
           {ready.length} 篇 · 按顺序阅读
         </span>
       </div>
 
-      <div className="lg:grid lg:grid-cols-[15rem_minmax(0,1fr)] lg:gap-8 xl:grid-cols-[15rem_minmax(0,1fr)_13rem]">
-        {/* 左：文档树 + 当前篇大纲 */}
-        <aside className={`${navOpen ? 'block' : 'hidden'} lg:block`}>
-          <div className="lg:sticky lg:top-24 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto lg:pr-1">
+      {/* 手机端吸顶条：目录入口。`sticky top-16` = 正好贴在常驻顶栏下沿，
+          无论滚到文档哪一段都能点到（这是修复"下滑后失去跳转能力"的关键）。 */}
+      <div className="sticky top-16 z-30 -mx-4 mb-4 border-b border-slate-200/70 bg-[rgb(250_251_251/0.92)] px-4 py-2 backdrop-blur-sm sm:-mx-6 sm:px-6 md:hidden dark:border-slate-700/70 dark:bg-[rgb(18_20_21/0.9)]">
+        <button
+          type="button"
+          onClick={() => setNavOpen((v) => !v)}
+          aria-expanded={navOpen}
+          aria-controls="docs-drawer"
+          className="inline-flex h-9 w-full items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white text-sm font-medium text-slate-700 transition-colors hover:border-brand-400 hover:text-brand-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="h-4 w-4" aria-hidden="true">
+            <path d="M4 6h16M4 12h16M4 18h10" />
+          </svg>
+          目录与大纲
+          <span className="font-mono text-[11px] tabular-nums text-slate-400 dark:text-slate-500">
+            {String(current.order ?? 1).padStart(2, '0')}/{String(DOCS.length).padStart(2, '0')}
+          </span>
+        </button>
+      </div>
+
+      {/* 手机端抽屉：独占一层浮层，自带滚动，分「切换文档」与「本篇大纲」两块 */}
+      {navOpen && (
+        <>
+          <div
+            className="fixed inset-0 z-40 bg-slate-950/35 md:hidden"
+            aria-hidden="true"
+            onClick={() => setNavOpen(false)}
+          />
+          <div
+            id="docs-drawer"
+            ref={drawerRef}
+            tabIndex={-1}
+            role="dialog"
+            aria-modal="true"
+            aria-label="文档目录与大纲"
+            className="fixed inset-x-0 bottom-0 top-16 z-40 overflow-y-auto overscroll-contain rounded-t-2xl border-t border-slate-200 bg-[#fafbfb] px-4 pb-8 pt-4 shadow-[0_-8px_30px_rgba(0,0,0,0.18)] outline-none md:hidden dark:border-slate-700 dark:bg-[#121415]"
+          >
+            <div className="mb-3 flex items-center justify-between">
+              <p className="text-xs font-semibold uppercase tracking-widest text-brand-700 dark:text-brand-200">
+                UE5 学习笔记
+              </p>
+              <button
+                type="button"
+                onClick={() => setNavOpen(false)}
+                aria-label="关闭目录"
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="h-4 w-4" aria-hidden="true">
+                  <path d="M18 6 6 18M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            {docTree}
+            {current.toc.length > 0 && (
+              <>
+                <p className="mt-5 border-t border-slate-200 pt-4 text-xs font-semibold uppercase tracking-widest text-slate-400 dark:border-slate-700 dark:text-slate-500">
+                  本篇大纲
+                </p>
+                <div className="mt-3">{outline}</div>
+              </>
+            )}
+          </div>
+        </>
+      )}
+
+      <div className="md:grid md:grid-cols-[12rem_minmax(0,1fr)] md:gap-6 xl:grid-cols-[12rem_minmax(0,1fr)_11rem]">
+        {/* 左：文档树（+ xl 以下顺带放本篇大纲 —— 右侧栏在 xl 以下不显示，没有它会没大纲可看） */}
+        <aside className="hidden md:block">
+          <div className="md:sticky md:top-24 md:max-h-[calc(100vh-8rem)] md:overflow-y-auto md:pr-1">
             <p className="text-xs font-semibold uppercase tracking-widest text-brand-700 dark:text-brand-200">
               UE5 学习笔记
             </p>
-            <ul className="mt-3">
-              {DOCS.map((doc, i) => {
-                const prevGroup = i > 0 ? DOCS[i - 1].group : doc.group
-                // group 变化处加一段留白：界面族（01–03）与蓝图族（04–05）分开，
-                // 让"这两族有先后"这件事在侧栏里就看得见，而不是靠用户自己猜。
-                const groupGap = i > 0 && doc.group !== prevGroup
-                const num = String(doc.order ?? i + 1).padStart(2, '0')
-                return (
-                  <li key={doc.id} className={groupGap ? 'mt-4 border-t border-slate-200 pt-4 dark:border-slate-700' : 'mt-1'}>
-                    {doc.status === 'ready' ? (
-                      <a
-                        href={docsHref(doc.id)}
-                        aria-current={doc.id === current.id ? 'page' : undefined}
-                        className={`flex items-baseline gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors ${
-                          doc.id === current.id
-                            ? 'bg-brand-700 font-semibold text-white'
-                            : 'text-slate-600 hover:bg-slate-100 hover:text-brand-700 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-brand-200'
-                        }`}
-                      >
-                        <span
-                          className={`font-mono text-[11px] tabular-nums ${
-                            doc.id === current.id ? 'text-white/75' : 'text-slate-400 dark:text-slate-500'
-                          }`}
-                        >
-                          {num}
-                        </span>
-                        <span className="min-w-0">{doc.title}</span>
-                      </a>
-                    ) : (
-                      <span
-                        title="该篇尚未导入本站"
-                        className="flex items-baseline gap-2.5 rounded-lg px-3 py-2 text-sm text-slate-400 dark:text-slate-500"
-                      >
-                        <span className="font-mono text-[11px] tabular-nums">{num}</span>
-                        <span className="min-w-0 flex-1">{doc.title}</span>
-                        <span className="rounded border border-dashed border-slate-300 px-1.5 py-0.5 text-[10px] dark:border-slate-600">
-                          待导入
-                        </span>
-                      </span>
-                    )}
-                  </li>
-                )
-              })}
-            </ul>
+            <div className="mt-3">{docTree}</div>
 
-            <p className="mt-4 px-3 text-[11px] leading-relaxed text-slate-400 dark:text-slate-500">
+            <p className="mt-4 px-2.5 text-[11px] leading-relaxed text-slate-400 dark:text-slate-500">
               按 01 → 05 顺序阅读；每篇头部标注前置、尾部给出下一篇。
             </p>
 
-            {/* 当前篇大纲：移动端与桌面端共用（桌面端就在左栏下方） */}
             {current.toc.length > 0 && (
-              <>
+              <div className="xl:hidden">
                 <p className="mt-6 border-t border-slate-200 pt-4 text-xs font-semibold uppercase tracking-widest text-slate-400 dark:border-slate-700 dark:text-slate-500">
                   本篇大纲
                 </p>
-                <ul className="mt-3 space-y-0.5 xl:hidden">
-                  {current.toc.map((t) => (
-                    <li key={t.id}>
-                      <a
-                        href={docsHref(current.id, t.id)}
-                        onClick={(e) => {
-                          e.preventDefault()
-                          goToAnchor(t.id)
-                          setNavOpen(false)
-                        }}
-                        className={`block border-l-2 py-1 text-[13px] transition-colors ${
-                          t.level >= 3 ? 'pl-6' : 'pl-3'
-                        } ${
-                          activeAnchor === t.id
-                            ? 'border-brand-500 font-medium text-brand-700 dark:text-brand-200'
-                            : 'border-slate-200 text-slate-500 hover:border-brand-300 hover:text-brand-700 dark:border-slate-700 dark:text-slate-400 dark:hover:text-brand-200'
-                        }`}
-                      >
-                        {t.label}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </>
+                <div className="mt-3">{outline}</div>
+              </div>
             )}
           </div>
         </aside>
@@ -327,34 +422,13 @@ export default function Docs({ docId, anchor }: { docId?: string; anchor?: strin
           </nav>
         </main>
 
-        {/* 右：本篇大纲（宽屏常驻） */}
+        {/* 右：本篇大纲（宽屏常驻；xl 以下由左栏与手机抽屉承担，三处共用同一个 `outline`） */}
         <aside className="hidden xl:block">
           <nav aria-label="本篇大纲" className="sticky top-24 max-h-[calc(100vh-8rem)] overflow-y-auto">
             <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500">
               本篇大纲
             </p>
-            <ul className="mt-3 space-y-0.5">
-              {current.toc.map((t) => (
-                <li key={t.id}>
-                  <a
-                    href={docsHref(current.id, t.id)}
-                    onClick={(e) => {
-                      e.preventDefault()
-                      goToAnchor(t.id)
-                    }}
-                    className={`block border-l-2 py-1 text-[13px] leading-snug transition-colors ${
-                      t.level >= 3 ? 'pl-5' : 'pl-3'
-                    } ${
-                      activeAnchor === t.id
-                        ? 'border-brand-500 font-medium text-brand-700 dark:text-brand-200'
-                        : 'border-slate-200 text-slate-500 hover:border-brand-300 hover:text-brand-700 dark:border-slate-700 dark:text-slate-400 dark:hover:text-brand-200'
-                    }`}
-                  >
-                    {t.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
+            <div className="mt-3">{outline}</div>
           </nav>
         </aside>
       </div>
