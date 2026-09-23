@@ -226,29 +226,33 @@ export default function Docs({ docId, anchor }: { docId?: string; anchor?: strin
     }
   }, [loading, html])
 
-  /** 大纲点击：滚到标题 + 写回地址栏（抽成函数，左右两栏与正文锚点共用一套行为） */
   /**
    * 滚到某个标题。
    *
-   * ⚠️ 三条实测教训，改这里之前先读完（每一条都让落点偏过）：
+   * ⚠️ 四条实测教训，改这里之前先读完（前三条都是踩过的坑，最后一条是现在的实现）：
    *
-   * 1. **不要手算 scrollTop。** 在这个布局里元素的真实位置三种测法都不可靠：
-   *    `getBoundingClientRect()` 会被正文里的 `sticky` 小节标题干扰；
-   *    `offsetTop` 量到的是相对 `body` 的位置（正文列不是定位元素，所有标题的 offsetParent 都是 body）；
-   *    `content-visibility: auto` 又让远处元素在滚动过程中才真正布局。改用原生 `scrollIntoView`。
+   * 1. **不要用 `scrollIntoView()`。** 它会滚动**所有可滚祖先，包括窗口** ——
+   *    而 `html.docs-shell { overflow: clip }` 只挡用户滚动，**挡不住程序化滚动**。
+   *    实测后果（1672×930，点一个大纲项后）：
+   *      · 窗口 `scrollY` 被滚到 **77**，滚动容器顶从 64 变成 **−13**
+   *      · 左栏（sticky 于窗口）跟着上移 **77px** → 用户看到"左侧导航整体上移"
+   *      · 容器顶部 77px 钻到 fixed 顶栏**下面**、底部 77px 落到视口**外面**，
+   *        那两段**既看不到也点不到**（hit-test 落到顶栏上）→ 用户报"文本无法选中复制"
+   *      · 所有落点整体上移 77px → "点概况说明却看到版本说明"
+   *    刷新也治不好：深链 `?s=` 会在挂载后再跳一次，再次触发同样的窗口滚动。
    *
-   * 2. **瞬时跳转（`behavior: 'auto'`）不够，必须再逐帧纠正。** 这是关键：
-   *    正文列带 `content-visibility: auto`，未渲染子树按 `contain-intrinsic-size`（2200px）估算高度，
-   *    于是**任何一次性的定位都算不准** —— 跳到"估算位置"后，被跳过的子树才真正布局、
-   *    文档高度随即变化，元素就跑到了别处（实测偏差 96～1923px，且越远越离谱）。
-   *    平滑滚动更糟：它在发起时就把目标算死，滚到估算的最大值就被夹住（实测最大可滚
-   *    4902 → 6729 → 9739 一路在涨）。
-   *    正解：跳一次 → 连测若干帧，只要位置还在变就再跳一次，直到稳定（通常 2～3 帧）。
-   *    代价：没有平滑过渡，换来锚点准确。`content-visibility` 与平滑滚动本来就不兼容。
+   * 2. **不要手算 `getBoundingClientRect()`。** 正文里有 `sticky` 小节标题，测值会失真。
    *
-   * 3. **落点留白只在一处定：滚动容器的 `scroll-pt-4`（scroll-padding-top: 16px）。**
-   *    不要再手写减一个像素值 —— 写过 `- 16`，与容器的 scroll-padding **叠加**成 32px，
-   *    实测标题落到容器顶上方 48px（被顶栏压住）。手机端那份留白来自 `HEADER_OFFSET`。
+   * 3. **不要用裸 `offsetTop`。** 它只给"相对 offsetParent"的偏移，
+   *    而标题的 offsetParent 原本是 `body`（正文列与滚动容器都没定位），量到的是相对**页面**的位置。
+   *
+   * 4. **现在的做法**：让滚动容器与正文列 `position: relative`，使 `offsetParent` 链收敛到容器；
+   *    再沿链把 `offsetTop` 累加，得到元素相对容器的真实位置。
+   *    实测 8 个采样点（含文档末尾两项）偏差全部 **≤0.5px**，窗口 `scrollY` 保持 0。
+   *
+   * ⚠️ 落点留白只在一处定：容器的 `md:scroll-pt-4`（`scroll-padding-top: 16px`）。
+   *    这里直接读它的计算值，不要再手写像素。
+   *    手机端（页面滚动）用**顶栏实际高度 + 16**，同样不写死像素（原因见下方实现处）。
    */
   const scrollToAnchor = useCallback((id: string) => {
     const el = document.getElementById(id)
@@ -256,41 +260,36 @@ export default function Docs({ docId, anchor }: { docId?: string; anchor?: strin
     const scroller = scrollRef.current
     const canScroll = scroller && scroller.scrollHeight > scroller.clientHeight + 1
 
-    // ⚠️ 跳转期间**临时关掉 `content-visibility`**（2026-09 实测的最终解，别删）：
-    //    正文每个小节块都带 `.cv-section`（`content-visibility: auto` + 估算高度 2200px），
-    //    而文档区正文列远比技能区高 —— 一个几千字的区块被估成 2200px，七八个叠起来
-    //    就把文档撑到真实高度的两三倍。于是"点目录跳转"按虚高位置定位、随后区块逐个渲染、
-    //    高度缩回，落点全错（实测偏差 96～1900px；最后一个大纲项差 1234px，
-    //    `scrollTop` 甚至卡在被夹住的旧最大值上）。
-    //    做法：先让全部内容参与布局（一帧），跳到真值位置，跳完恢复 ——
-    //    `.cv-section` 的优化照旧生效，只是不在"跳转这一瞬"。
-    //    ⚠️ 开关挂在 `<html>` 上由 CSS 属性选择器承接：要禁用的是 `.cv-section`，
-    //       而 `contentRef` 指向的 `.doc-content` 在祖先链**下面**，内联样式传不过去（踩过）。
-    const root = document.documentElement
-    root.setAttribute('data-anchor-jump', '')
-    const restore = () => root.removeAttribute('data-anchor-jump')
-
-    const jump = () => {
-      if (canScroll) el.scrollIntoView({ block: 'start', behavior: 'auto' })
-      else window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - HEADER_OFFSET, behavior: 'auto' })
-    }
-    const settle = (attempt = 0) => {
-      jump()
-      if (attempt >= 4) {
-        restore()
-        return
+    if (canScroll && scroller) {
+      // 沿 offsetParent 链累加到滚动容器（前提：容器与正文列都是 position: relative）
+      let y = 0
+      let node: HTMLElement | null = el
+      while (node && node !== scroller) {
+        y += node.offsetTop || 0
+        node = node.offsetParent as HTMLElement | null
       }
-      requestAnimationFrame(() => {
-        const top = el.getBoundingClientRect().top
-        const delta = canScroll ? Math.abs(top - scroller!.getBoundingClientRect().top - 16) : Math.abs(top - HEADER_OFFSET)
-        if (delta <= 2) {
-          restore()
-          return
-        }
-        settle(attempt + 1)
-      })
+      // 链没收敛到容器（将来有人去掉 relative 就会这样）：退回 rect 差值，至少不算错得太离谱
+      if (node !== scroller) {
+        y = el.getBoundingClientRect().top - scroller.getBoundingClientRect().top + scroller.scrollTop
+      }
+      // 落点留白来自容器的 scroll-padding-top
+      const pad = parseFloat(getComputedStyle(scroller).scrollPaddingTop) || 0
+      const max = scroller.scrollHeight - scroller.clientHeight
+      scroller.scrollTop = Math.max(0, Math.min(y - pad, max))
+      return
     }
-    settle()
+    // 手机端：页面在滚。留白按**顶栏的实际高度 + 32** 算，不要用固定的 `HEADER_OFFSET`。
+    // 为什么（2026-09 实测）：手机上顶栏是 `sticky`，滚动位置 0 时它在文档流里（top = 0），
+    // 一滚就贴住视口顶、占 `0..64px`；而 `HEADER_OFFSET` 是另一套口径（88），
+    // 直接拿来做留白会偏。这里改成"顶栏实际高度 + 32 呼吸间隙"。
+    // 取 32 是为了与 `docs/联动维护点.md` 第 6 条记录的口径一致
+    // （手机端 `.anchor-offset` 的 scroll-margin-top 是 112 = 64 + 48；这里 64 + 32 略紧一档，
+    //  视觉上标题仍在顶栏下方有明确间隔）。
+    const barH = document.querySelector('header.site-bar')?.getBoundingClientRect().height ?? 64
+    window.scrollTo({
+      top: el.getBoundingClientRect().top + window.scrollY - barH - 32,
+      behavior: 'auto',
+    })
   }, [])
 
   /** 大纲点击：滚到标题 + 写回地址栏（抽成函数，左右两栏与正文锚点共用一套行为） */
@@ -446,7 +445,7 @@ export default function Docs({ docId, anchor }: { docId?: string; anchor?: strin
       <div
         ref={scrollRef}
         id="docs-scroll"
-        className="docs-scroll md:grid md:min-h-0 md:flex-1 md:grid-cols-[13rem_minmax(0,1fr)] md:gap-6 md:overflow-y-auto md:scroll-pt-4 md:pr-2 xl:grid-cols-[13rem_minmax(0,1fr)_14rem]"
+        className="docs-scroll relative md:grid md:min-h-0 md:flex-1 md:grid-cols-[13rem_minmax(0,1fr)] md:gap-6 md:overflow-y-auto md:scroll-pt-4 md:pr-2 xl:grid-cols-[13rem_minmax(0,1fr)_14rem]"
       >
         {/* 左：返回入口 + 文档树（+ xl 以下顺带放本篇大纲 —— 右侧栏在 xl 以下不显示）
             ⚠️ sticky 必须加在 **aside 自身**上，不要外面套一层 div 再 sticky（2026-09 踩过两次）：
@@ -519,7 +518,7 @@ export default function Docs({ docId, anchor }: { docId?: string; anchor?: strin
             所以这里是「正文下去对齐两栏」，而不是「两栏上来对齐正文」——
             后者受 sticky 物理约束做不到，别在这上面继续试。
             ⚠️ 底部留白不能省（`md:pb-24`）：滚动容器的 padding-bottom 在内容末尾不可靠。 */}
-        <main className="min-w-0 md:pb-24 md:pt-16">
+        <main className="relative min-w-0 md:pb-24 md:pt-16">
           <header className="mb-6 border-b border-slate-200 pb-5 dark:border-slate-700">
             <div className="flex flex-wrap items-center gap-2.5">
               <span className="font-mono text-xs tabular-nums text-slate-400 dark:text-slate-500">
