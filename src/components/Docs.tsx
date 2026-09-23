@@ -463,17 +463,28 @@ export default function Docs({ docId, anchor }: { docId?: string; anchor?: strin
               必须让**它自己**能滚，否则底部内容永远看不到。
               `docs-scroll` 类把滚动条收细、轨道透明（见 index.css）—— 内容通常装得下，
               整条原生滚动条（带浅色轨道）会像一条白带子斜在那里，很扎眼。 */}
-        <aside className="docs-scroll hidden md:sticky md:top-16 md:block md:max-h-[calc(100dvh-4rem)] md:overflow-y-auto md:pb-4 md:pr-1 md:pt-4">
+        <aside className="docs-scroll hidden md:sticky md:top-16 md:block md:max-h-[calc(100dvh-4rem)] md:overflow-y-auto md:pb-4 md:pr-1 md:pt-0">
+          {/* ⚠️ 「返回作品集」的字号/字重/列顶留白都不要动小（2026-09 用户三次反馈"偏低"）：
+              它是左栏第一行，要与正文首行**读起来齐平**。实测（1672×930）：
+                · 正文 h1「虚幻引擎总览」中文字形上沿 = 98.5px
+                · 右栏「本篇大纲」= 131px；本链接现在是 128px（`md:pt-0`）
+              **128px 是左栏首行的物理下限**：滚动容器顶 64 + sticky 的 `top-16` 64 = 128，
+              再往上会被 sticky 约束挡住（实测 pt-0 与 pt-1 在滚动后都停在 128）。
+              也就是说左栏首行永远无法与 30px 的 h1 齐平，只能贴到它的中段 ——
+              这与参考站一致（那边左栏是文档列表，本来就没有"返回"这一行）。
+              三处配合把它顶到下限：字号 15px、字重 semibold、`md:pt-0`。
+              ⚠️ 右栏保持 `xl:pt-1`：它的大纲标题与左栏基本齐平（131 vs 128），
+                 两边都归零会让大纲贴住顶栏。 */}
           <a
             href="#top"
-            className="mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 transition-colors hover:text-brand-700 dark:text-slate-400 dark:hover:text-brand-200"
+            className="mb-4 inline-flex items-center gap-1.5 pl-1.5 text-[15px] font-semibold text-slate-500 transition-colors hover:text-brand-700 dark:text-slate-400 dark:hover:text-brand-200"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden="true">
               <path d="M19 12H5M12 19l-7-7 7-7" />
             </svg>
             返回作品集
           </a>
-          <p className="flex items-baseline justify-between gap-2 text-xs font-semibold uppercase tracking-widest text-brand-700 dark:text-brand-200">
+          <p className="flex items-baseline justify-between gap-2 pl-1.5 text-xs font-semibold uppercase tracking-widest text-brand-700 dark:text-brand-200">
             UE5 学习笔记
             <span className="font-mono text-[10px] font-normal tabular-nums tracking-normal text-slate-400 dark:text-slate-500">
               {ready.length} 篇
@@ -499,11 +510,16 @@ export default function Docs({ docId, anchor }: { docId?: string; anchor?: strin
         </aside>
 
         {/* 中：正文。data-copyable = 只读保护白名单，放开这一整块的选择与复制。
-            ⚠️ `md:pt-0` 是刻意的：正文列一旦有 padding-top，它就会把首行推到顶栏下方
-            40px 处，而两栏（sticky）也只好跟着让位 —— 顶栏底下就出现一条空白带
-            （用户反馈"上面一大块空在那"）。现在首行直接贴顶栏下沿。
-            底部留白不能省（`md:pb-6`）：滚动容器的 padding-bottom 在内容末尾不可靠。 */}
-        <main className="min-w-0 md:pb-24 md:pt-4">
+            ⚠️ `md:pt-16` 让正文首行与左右两栏**首行齐平**（2026-09 用户明确要求
+            「最好是左右栏和正文首行上方一样」）。数值不是拍的，是算出来的：
+              · 两栏是 sticky，滚动容器顶 64 + `top-16`（= 64）= **首行下限 128px**；
+                它们**不可能再往上** —— sticky 元素不能超出容器顶，实测 pt-0 与 pt-1 滚动后都停在 128。
+              · 正文原本 `pt-4`（16px），h1 字形上沿落在 98.5px，比两栏高 30px。
+              · 补到 `pt-16`（64px）后 h1 落在 128 附近，三栏首行同线。
+            所以这里是「正文下去对齐两栏」，而不是「两栏上来对齐正文」——
+            后者受 sticky 物理约束做不到，别在这上面继续试。
+            ⚠️ 底部留白不能省（`md:pb-24`）：滚动容器的 padding-bottom 在内容末尾不可靠。 */}
+        <main className="min-w-0 md:pb-24 md:pt-16">
           <header className="mb-6 border-b border-slate-200 pb-5 dark:border-slate-700">
             <div className="flex flex-wrap items-center gap-2.5">
               <span className="font-mono text-xs tabular-nums text-slate-400 dark:text-slate-500">
@@ -576,8 +592,8 @@ export default function Docs({ docId, anchor }: { docId?: string; anchor?: strin
             加宽的代价是内容列从 1184 → 1144（仍远大于加宽前的 961）。
             ⚠️ 与左栏同一口径：sticky 加在 aside 自身、**只留底部 padding**（2026-09 修正；
               原来这里是 `py-6`，实测首行落在 192px，比正文标题的 159px 低 33px）。 */}
-        <aside className="docs-scroll hidden xl:sticky xl:top-16 xl:block xl:max-h-[calc(100dvh-4rem)] xl:overflow-y-auto xl:pb-4 xl:pt-4">
-          <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500">
+        <aside className="docs-scroll hidden xl:sticky xl:top-16 xl:block xl:max-h-[calc(100dvh-4rem)] xl:overflow-y-auto xl:pb-4 xl:pt-1">
+          <p className="pl-1.5 text-xs font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500">
             本篇大纲
           </p>
           <div className="mt-2.5">{outline}</div>
