@@ -166,7 +166,10 @@ export function ThemeToggle({
         }
       >
         <ModeIcon mode={mode} className={variant === 'dot' ? 'h-4 w-4' : 'h-4.5 w-4.5'} />
-        {variant !== 'dot' && label && <span>{MODE_META[mode].label}</span>}
+        {/* ⚠️ 文字必须包在 `hidden sm:inline` 里：手机上四个控件要同一形态（纯图标 34px），
+            否则主题钮因为显示「自动/浅色/深色」而比别人宽一倍（实测 66px vs 34px）。
+            这是它与其他三个控件唯一需要特别处理的地方。 */}
+        {variant !== 'dot' && label && <span className="hidden sm:inline">{MODE_META[mode].label}</span>}
       </button>
       {open && menu}
     </div>
