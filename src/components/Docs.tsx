@@ -22,7 +22,7 @@ export function parseDocsHash(hash: string): { docId?: string; anchor?: string }
   return { docId: segs[1], anchor }
 }
 
-export const docsHref = (docId: string, anchor?: string) =>
+const docsHref = (docId: string, anchor?: string) =>
   `#/docs/ue5/${docId}${anchor ? `?s=${encodeURIComponent(anchor)}` : ''}`
 
 export default function Docs({ docId, anchor }: { docId?: string; anchor?: string }) {
@@ -40,6 +40,10 @@ export default function Docs({ docId, anchor }: { docId?: string; anchor?: strin
   const [navOpen, setNavOpen] = useState(false)
   const contentRef = useRef<HTMLDivElement>(null)
   const drawerRef = useRef<HTMLDivElement>(null)
+  // ⚠️ 文档区的滚动容器（md 及以上）。**不是 window** ——
+  // 布局是「固定外壳 + 内部滚动」：左栏与右栏钉在视口里不动，只有中间正文列滚动。
+  // 所以锚点跳转、大纲高亮、切文档重置这三处读写的都是这个元素，不是页面。
+  const scrollRef = useRef<HTMLDivElement>(null)
 
   // 拉取文档 HTML（构建产物，静态资源；失败时给出明确回退而不是空白页）
   useEffect(() => {
@@ -66,9 +70,13 @@ export default function Docs({ docId, anchor }: { docId?: string; anchor?: strin
     }
   }, [current?.id])
 
-  // 切文档：回到顶部（否则会把上一篇的滚动位置带过来）
+  // 切文档：回到顶部（否则会把上一篇的滚动位置带过来）。
+  // ⚠️ 桌面端要滚的是**正文列容器**（scrollRef），手机端才是页面 —— 两处都归零最省心。
+  //    另外桌面端页面本身不滚动（由 index.css 的 `.docs-shell` 关掉），
+  //    所以进文档区时也要把窗口位置归零，否则会停在进入前的偏移上。
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'auto' })
+    if (scrollRef.current) scrollRef.current.scrollTop = 0
     setNavOpen(false)
   }, [current?.id])
 
@@ -187,17 +195,6 @@ export default function Docs({ docId, anchor }: { docId?: string; anchor?: strin
     </ul>
   ) : null
 
-  // 深链：`?s=<heading id>` → 滚到该标题
-  useEffect(() => {
-    if (!anchor || loading || !html) return
-    const t = window.setTimeout(() => {
-      const el = document.getElementById(anchor)
-      if (!el) return
-      window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - HEADER_OFFSET, behavior: 'auto' })
-    }, 60)
-    return () => window.clearTimeout(t)
-  }, [anchor, loading, html])
-
   // 侧栏/目录当前的标题高亮（rAF 节流，读的是 h2/h3 的视口位置）
   useEffect(() => {
     if (loading || !html) return
@@ -217,24 +214,61 @@ export default function Docs({ docId, anchor }: { docId?: string; anchor?: strin
       })
     }
     update()
+    // 两个滚动源都要听：桌面端是正文列容器（scrollRef），手机端是页面（window）。
+    // 用 passive 监听，不干扰滚动性能。
+    const scroller = scrollRef.current
+    scroller?.addEventListener('scroll', update, { passive: true })
     window.addEventListener('scroll', update, { passive: true })
     return () => {
       cancelAnimationFrame(raf)
+      scroller?.removeEventListener('scroll', update)
       window.removeEventListener('scroll', update)
     }
   }, [loading, html])
 
   /** 大纲点击：滚到标题 + 写回地址栏（抽成函数，左右两栏与正文锚点共用一套行为） */
+  /**
+   * 滚到某个标题。
+   *
+   * ⚠️ 必须按滚动容器分流（2026-09 改成「固定外壳 + 内部滚动」布局后新增）：
+   *   · 桌面端（md 及以上）页面本身不滚，正文列容器在滚 → 改容器的 scrollTop；
+   *   · 手机端没有侧栏，仍是页面滚动 → 走 window.scrollTo。
+   * 判据用「容器是否真的有可滚高度」而不是断点，这样两种布局共用一条代码路径，
+   * 也不会因为将来改断点而静默失效。
+   *
+   * `HEADER_OFFSET` 只对手机端（页面滚动）有意义：桌面端正文列的第一个标题本来就
+   * 紧贴列顶，不需要再减顶栏高度。
+   */
+  const scrollToAnchor = useCallback((id: string) => {
+    const el = document.getElementById(id)
+    if (!el) return
+    const scroller = scrollRef.current
+    const canScroll = scroller && scroller.scrollHeight > scroller.clientHeight + 1
+    if (canScroll) {
+      scroller.scrollTo({ top: scroller.scrollTop + el.getBoundingClientRect().top - 16, behavior: 'smooth' })
+    } else {
+      window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - HEADER_OFFSET, behavior: 'smooth' })
+    }
+  }, [])
+
+  /** 大纲点击：滚到标题 + 写回地址栏（抽成函数，左右两栏与正文锚点共用一套行为） */
   const goToAnchor = useCallback(
     (id: string) => {
-      const el = document.getElementById(id)
-      if (!el) return
-      window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - HEADER_OFFSET, behavior: 'smooth' })
+      scrollToAnchor(id)
       setActiveAnchor(id)
       history.replaceState(null, '', docsHref(current?.id ?? '', id))
     },
-    [current?.id],
+    [current?.id, scrollToAnchor],
   )
+
+  // 深链：`?s=<heading id>` → 滚到该标题。
+  // ⚠️ 放在 scrollToAnchor 定义**之后**：它依赖那个 useCallback，
+  //    提到前面会触发 TS2448（块级变量在声明前使用）。
+  useEffect(() => {
+    if (!anchor || loading || !html) return
+    const t = window.setTimeout(() => scrollToAnchor(anchor), 60)
+    return () => window.clearTimeout(t)
+  }, [anchor, loading, html, scrollToAnchor])
 
   /** 内容区点击委托：图片开灯箱、页内锚点走平滑滚动 + 写回 hash（可分享、可后退） */
   const onContentClick = useCallback(
@@ -268,10 +302,20 @@ export default function Docs({ docId, anchor }: { docId?: string; anchor?: strin
     //            右栏可用文字宽必须 ≥192px 才能不换行；内容列 1184 → 1144（@1600 容器）。
     //    注意两个值分别在 `md:grid-cols` 与 `xl:grid-cols` 里，改一处要连另一处一起看。
     //    改后内容列：1440 → 948，1920 → 1180。
-    <div className="mx-auto max-w-[100rem] px-4 pb-24 pt-6 sm:px-6 lg:pt-10">
-      {/* 顶部：返回主站 + 阅读顺序说明。
-          ⚠️ 手机端的「目录」入口**不在这里** —— 它必须吸顶才可用（见下方 md:hidden 的吸顶条）。 */}
-      <div className="mb-5 flex flex-wrap items-center gap-3">
+    // ⚠️ `md:h-[calc(100dvh-var(--site-bar-h))]` 不能省：外层容器带 `h-auto`，
+    //    而**显式的 height 会压过 `flex-1` 的 flex-basis**（flex 只在主轴分配剩余空间，
+    //    不覆盖 height 属性）。只写 `flex-1` 时 grid 会撑到内容高度（实测 20481px），
+    //    内部滚动根本不触发、页面又因为 `.docs-shell` 不能滚 —— 整个文档区就滚不动了。
+    <div className="mx-auto flex max-w-[100rem] flex-col px-4 pb-24 pt-6 sm:px-6 lg:pt-10 md:h-[calc(100dvh-var(--site-bar-h))] md:pb-0 md:pt-0">
+      {/* 桌面端把页面滚动换成「内部滚动」，顶栏改为 fixed（见 TopBar）；
+          这条占位把 fixed 顶栏让出的 64px 补回来 —— 高度必须与 `--site-bar-h` 一致。 */}
+      <div aria-hidden="true" className="hidden h-16 shrink-0 md:block" />
+
+      {/* 顶部：手机端的返回入口 + 篇数。
+          ⚠️ 桌面端这里**不再放假链接**（2026-09）：「返回作品集」已经挪进左栏顶部，
+          与「5 篇笔记」一起钉在视口里；手机端没有左栏，所以这两样仍留在文档流顶部。
+          一处入口、两种布局，不再在顶栏重复第三个。 */}
+      <div className="mb-5 flex flex-wrap items-center gap-3 md:hidden">
         <a
           href="#top"
           className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:border-brand-400 hover:text-brand-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-brand-500 dark:hover:text-brand-200"
@@ -352,35 +396,60 @@ export default function Docs({ docId, anchor }: { docId?: string; anchor?: strin
         </>
       )}
 
-      <div className="md:grid md:grid-cols-[13rem_minmax(0,1fr)] md:gap-6 xl:grid-cols-[13rem_minmax(0,1fr)_14rem]">
-        {/* 左：文档树（+ xl 以下顺带放本篇大纲 —— 右侧栏在 xl 以下不显示，没有它会没大纲可看） */}
-        <aside className="hidden md:block">
-          <div className="md:sticky md:top-24 md:max-h-[calc(100vh-8rem)] md:overflow-y-auto md:pr-1">
-            <p className="text-xs font-semibold uppercase tracking-widest text-brand-700 dark:text-brand-200">
-              UE5 学习笔记
-            </p>
-            <div className="mt-3">{docTree}</div>
+      <div
+        ref={scrollRef}
+        id="docs-scroll"
+        className="md:grid md:min-h-0 md:grid-cols-[13rem_minmax(0,1fr)] md:gap-6 md:overflow-y-auto md:pr-2 xl:grid-cols-[13rem_minmax(0,1fr)_14rem]"
+      >
+        {/* 左：返回入口 + 文档树（+ xl 以下顺带放本篇大纲 —— 右侧栏在 xl 以下不显示）
+            ⚠️ sticky 必须加在 **aside 自身**上，不要外面套一层 div 再 sticky（2026-09 踩过两次）：
+              · 若给 grid item 加 `align-self: start`，它的高度会缩到内容高度（实测 374px），
+                里面那个 sticky 元素的"容器"就只有 374px —— 没有可粘的行程，直接跟着滚走；
+              · 不加 `align-self: start` 时 grid item 被拉伸到整行高（15800px），
+                但那是 **aside 的盒子**，套在里面的 div 依然粘不住（sticky 认的是父级内容盒）。
+              所以：让 aside 保持默认 stretch、自身 `position: sticky`，
+              它的容器就是整行高的 grid area，粘住行程足够。
+            ⚠️ `top-16` 是顶栏高度；`md:py-6` 给内容上下留白（sticky 元素有 padding 不影响粘性）。
+            ⚠️ `max-h-[calc(100dvh-6rem)]` + `overflow-y-auto`：窄于 xl 时这一栏还要放大纲，
+              内容会超过视口，必须让**它自己**能滚，否则底部内容永远看不到。 */}
+        <aside className="hidden md:sticky md:top-16 md:block md:max-h-[calc(100dvh-6rem)] md:overflow-y-auto md:py-6 md:pr-1">
+          <a
+            href="#top"
+            className="mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 transition-colors hover:text-brand-700 dark:text-slate-400 dark:hover:text-brand-200"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden="true">
+              <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+            返回作品集
+          </a>
+          <p className="flex items-baseline justify-between gap-2 text-xs font-semibold uppercase tracking-widest text-brand-700 dark:text-brand-200">
+            UE5 学习笔记
+            <span className="font-mono text-[10px] font-normal tabular-nums tracking-normal text-slate-400 dark:text-slate-500">
+              {ready.length} 篇
+            </span>
+          </p>
+          <div className="mt-3">{docTree}</div>
 
-            {/* 「按顺序阅读」全站只在这里说一次（2026-09 精简）：
-                原来在页头计数、侧栏注释、目录末行、正文头部各说一遍，属于同一句话的四份拷贝。
-                序号 01–05 本身已经说明顺序，这里只补一句"为什么是这个顺序"。 */}
-            <p className="mt-4 px-2.5 text-[11px] leading-relaxed text-slate-400 dark:text-slate-500">
-              01–05 为建议阅读顺序（界面在前、蓝图在后）；每篇头部标注前置、尾部给出下一篇。
-            </p>
+          {/* 「按顺序阅读」全站只在这里说一次（2026-09 精简）：
+              原来在页头计数、侧栏注释、目录末行、正文头部各说一遍，属于同一句话的四份拷贝。
+              序号 01–05 本身已经说明顺序，这里只补一句"为什么是这个顺序"。 */}
+          <p className="mt-4 px-2.5 text-[11px] leading-relaxed text-slate-400 dark:text-slate-500">
+            01–05 为建议阅读顺序（界面在前、蓝图在后）；每篇头部标注前置、尾部给出下一篇。
+          </p>
 
-            {current.toc.length > 0 && (
-              <div className="xl:hidden">
-                <p className="mt-6 border-t border-slate-200 pt-4 text-xs font-semibold uppercase tracking-widest text-slate-400 dark:border-slate-700 dark:text-slate-500">
-                  本篇大纲
-                </p>
-                <div className="mt-2.5">{outline}</div>
-              </div>
-            )}
-          </div>
+          {current.toc.length > 0 && (
+            <div className="xl:hidden">
+              <p className="mt-6 border-t border-slate-200 pt-4 text-xs font-semibold uppercase tracking-widest text-slate-400 dark:border-slate-700 dark:text-slate-500">
+                本篇大纲
+              </p>
+              <div className="mt-2.5">{outline}</div>
+            </div>
+          )}
         </aside>
 
-        {/* 中：正文。data-copyable = 只读保护白名单，放开这一整块的选择与复制 */}
-        <main className="min-w-0">
+        {/* 中：正文。data-copyable = 只读保护白名单，放开这一整块的选择与复制。
+            `md:py-6` 是正文列自己的上下留白（外层在桌面端已去掉 padding）。 */}
+        <main className="min-w-0 md:py-6">
           <header className="mb-6 border-b border-slate-200 pb-5 dark:border-slate-700">
             <div className="flex flex-wrap items-center gap-2.5">
               <span className="font-mono text-xs tabular-nums text-slate-400 dark:text-slate-500">
@@ -450,14 +519,13 @@ export default function Docs({ docId, anchor }: { docId?: string; anchor?: strin
 
         {/* 右：本篇大纲（宽屏常驻；xl 以下由左栏与手机抽屉承担，三处共用同一个 `outline`）。
             宽度 14rem（224px）= A 方案：可用文字宽 192px，12px 字号下最长标签（17 字）刚好不换行。
-            加宽的代价是内容列从 1184 → 1144（仍远大于加宽前的 961）。 */}
-        <aside className="hidden xl:block">
-          <nav aria-label="本篇大纲" className="sticky top-24 max-h-[calc(100vh-8rem)] overflow-y-auto">
-            <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500">
-              本篇大纲
-            </p>
-            <div className="mt-2.5">{outline}</div>
-          </nav>
+            加宽的代价是内容列从 1184 → 1144（仍远大于加宽前的 961）。
+            ⚠️ 与左栏同一口径：sticky 加在 aside 自身，不要套内层 div（原因见左栏注释）。 */}
+        <aside className="hidden xl:sticky xl:top-16 xl:block xl:max-h-[calc(100dvh-6rem)] xl:overflow-y-auto xl:py-6">
+          <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500">
+            本篇大纲
+          </p>
+          <div className="mt-2.5">{outline}</div>
         </aside>
       </div>
 

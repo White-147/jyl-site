@@ -13,13 +13,15 @@ import {
  * 段落停靠在 X 处 → 它的 top = X ≤ 判定线 → 它成为最靠下的通过者 → 高亮它。
  *
  * ⚠️ 联动维护点（详见 docs/联动维护点.md 第 6 条）
- * 判定线必须等于各 section 的锚点停靠位（`ANCHOR_OFFSET_CLASS`，见 scrollTargets.ts）。
- * 三处成对：scrollTargets.ts 的值 → index.css 的 @utility → 这里读的值。
+ * 判定线必须等于各 section 的锚点停靠位（`.anchor-offset` 的 scroll-margin-top）。
+ * ⚠️ 这里读的是 `scrollTargets.ts` 的常量，而 CSS 侧那两个 scroll-margin-top 是**硬编码**的
+ *    —— 值本身仍是同源，但"改一处就够"的保证不存在。完整清单见 scrollTargets.ts 顶部注释。
  *
  * 历史问题（两轮）：
  *   1. 停靠位 64px 而判定线 128px → 点击导航跳转后高亮停在上一段，要再滚一下才切。
  *   2. 两者统一 80px，但手机端吸顶导航正好占 0..80px → 标题紧贴浮层下沿、零间隙。
- * 现在：停靠位与判定线同源（手机 104 / 桌面 88），容差 2px 只用于吸收子像素误差。
+ * 现在：停靠位与判定线同源（手机 112 / 桌面 104，见 scrollTargets.ts），
+ * 容差 2px 只用于吸收子像素误差。
  *
  * 首屏（#top）也参与侦测：它排在 SECTIONS 第一位，页面滚到顶时它成为当前项，
  * 所以点「返回顶部」后首屏节点会亮起，而不是停留在「关于我」。

@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { SECTIONS } from '../data/navigation'
 import educationData from '../data/education.json'
 import type { CertItem, EducationData } from '../data/types'
 import Lightbox from './Lightbox'
@@ -72,7 +71,7 @@ export default function Education() {
     <section id="education" className="relative anchor-offset section-tight">
       {/* cv-section：首屏以下的区块跳过初始布局/绘制，见 index.css 该类的注释。 */}
       <div className="cv-section rail-gutter mx-auto max-w-6xl px-4 sm:px-6">
-        <SectionHeading eyebrow={SECTIONS.find((s) => s.id === 'education')?.label ?? '教育背景'} title="教育经历 · 证书与奖项" />
+        <SectionHeading sectionId="education" title="教育经历 · 证书与奖项" />
 
         {/* 教育背景 + 证书/奖项（bento：学校竖卡 + 证明 2x2） */}
         <div className="mt-5 grid gap-5 sm:mt-12 lg:grid-cols-3">

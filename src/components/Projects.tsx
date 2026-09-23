@@ -1,5 +1,4 @@
 import { useMemo, useState, type ReactNode } from 'react'
-import { SECTIONS } from '../data/navigation'
 import projectsData from '../data/projects.json'
 import { contact } from '../data/contact'
 import type { Project, ProjectTag } from '../data/types'
@@ -256,7 +255,7 @@ export default function Projects() {
     <section id="projects" className="relative anchor-offset section-base">
       <div className="rail-gutter mx-auto max-w-6xl px-4 sm:px-6">
         <SectionHeading
-          eyebrow={SECTIONS.find((s) => s.id === 'projects')?.label ?? '项目作品'}
+          sectionId="projects"
           title="可验证的项目"
           description={
             <>

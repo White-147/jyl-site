@@ -102,7 +102,6 @@
   /* 标题色（语义独立于色板：改主色时这两档通常保持不变） */
   --color-ink: #1a1c1e; /* 浅色标题：石墨黑（画布 16.49:1） */
   --color-ink-light: #e6e8e9; /* 深色正文/标题：深底 15.03:1 */
-  --color-ink-strong: #f5f6f6; /* 深色高强调（仅大面积白字场景） */
 
   /* 主色板「琥珀」。底座是纯中性石墨（见下方「中性色（石墨）」一段），
      琥珀是唯一强调色，只用于「可交互 / 当前 / 关键数字」。
@@ -589,21 +588,27 @@ details[open] .chevron-up-down {
 .site-bar {
   background-image: linear-gradient(
     to bottom,
-    rgb(255 255 255 / 0.42),
-    rgb(255 255 255 / 0.26)
+    rgb(255 255 255 / 0.3),
+    rgb(255 255 255 / 0.16)
   );
-  backdrop-filter: blur(20px) saturate(1.8) brightness(1.06);
-  /* 「镜面高光 + 侧缘亮线 + 离地阴影」三层（2026-09 第二轮升级）：
+  backdrop-filter: blur(20px) saturate(1.5);
+  /* 「镜面高光 + 侧缘亮线 + 离地阴影」三层（2026-09 第三轮，用户确认"补齐 + 侧缘亮线"）：
      拆开 Liquid Glass 的 CSS 配方后，观感差距就落在这三行上 ——
        · 顶部高光是**唯一**决定"读作玻璃还是读作一层色膜"的东西：
          配方原话是"设成 85% 白就读作被照亮的倒角；降到 30% 面板立刻变平"。
-         我们原来只有 1px / 55%，正好卡在"平"的那一侧，所以就"还是毛玻璃"。
+         我们原来只有 1px / 55%，正好卡在"平"的那一侧，所以一直"还是毛玻璃"。
        · 底缘回弹光是玻璃下沿把地面反光带回来的一点亮度，缺了它面板像贴在屏上。
        · 侧缘（左右各 1px）是用户明确要的"更接近 Material"那一档：
          真实玻璃不只顶部受光，两侧边缘也会有连续的亮线。
        · 外侧阴影给"离地感"：贴顶时很轻，滚动后加重（见 .is-scrolled）。
-     折射（feDisplacementMap）刻意不做：它要求把背景复制进面板里对齐，
-     只对固定背景成立；顶栏是常驻在**滚动内容**之上的，会立即错位且每帧多一次全表面栅格化。 */
+     ⚠️ 白叠层从 42%/26% 降到 30%/16%，并**去掉 brightness(1.06)**、saturate 1.8 → 1.5：
+       实测原参数下浅色模式的顶栏采样到 `#ffffff` **纯白** —— brightness 与高饱和叠加后
+       把底色推到了上限，玻璃层内部已经没有明度差，于是读作"过于白、过于纯色"。
+     ⚠️ 折射（feDisplacementMap）实测**不可用**：本项目内做过两次独立验证，
+       第二次只用在 backdrop-filter 白名单内的原语（feGaussianBlur + feDisplacementMap），
+       三种变体（无滤镜 / 仅 blur / blur+位移）的截图**逐点像素完全相同** —— 位移没有渲染。
+       它需要把背景复制进面板里对齐，只对固定背景成立；顶栏常驻在滚动内容之上，前提不成立。
+       所以"更接近华为/iOS"的做法落在材质分层（见 .bar-control），不是折射。 */
   box-shadow:
     inset 0 1.5px 0 rgb(255 255 255 / 0.85),
     inset 0 -1px 0 rgb(255 255 255 / 0.14),
@@ -617,8 +622,8 @@ details[open] .chevron-up-down {
 .site-bar.is-scrolled {
   background-image: linear-gradient(
     to bottom,
-    rgb(255 255 255 / 0.68),
-    rgb(255 255 255 / 0.5)
+    rgb(255 255 255 / 0.62),
+    rgb(255 255 255 / 0.42)
   );
   /* 滚动后：高光略收（底色变厚了，再叠满高光会发白），外侧阴影加重给出"浮起" */
   box-shadow:
@@ -634,9 +639,11 @@ details[open] .chevron-up-down {
     rgb(18 20 21 / 0.5),
     rgb(18 20 21 / 0.34)
   );
-  backdrop-filter: blur(20px) saturate(1.8) brightness(0.95);
-  /* 深色模式的高光是"内暗边 + 顶部微亮"：与 DESIGN.md 的 Tonal-First Rule 一致 —— 
-     深色不用亮边模拟浮起，所以这里刻意比浅色档弱一档（.07 而不是 .85） */
+  backdrop-filter: blur(20px) saturate(1.5);
+  /* 深色模式的高光是"内暗边 + 顶部微亮"：与 DESIGN.md 的 Tonal-First Rule 一致 ——
+     深色不用亮边模拟浮起，所以这里刻意比浅色档弱一档（.07 而不是 .85）。
+     这里**保留** brightness(0.95)（浅色档已去掉）：深色下它压的是背景的灰雾，
+     而浅色下它会和 saturate 一起把底色推到纯白 —— 两档的取舍不同，不要一起改。 */
   box-shadow:
     inset 0 1.5px 0 rgb(255 255 255 / 0.07),
     inset 0 -1px 0 rgb(255 255 255 / 0.04),
@@ -692,7 +699,26 @@ details[open] .chevron-up-down {
      玻璃底的明度随滚动位置与下方内容变化，用固定值才能把对比度锁在 4.5:1 以上。
      浅色档 #333a3d（11.17:1），深色档 #dde0e2（13.93:1）。 */
   color: #333a3d;
-  background: transparent;
+  /* ===== 控件自身的玻璃层（2026-09 第三轮）=====
+     用户的原话是"按钮和华为/iOS 的效果没有**对齐**"—— 指的不是几何位置（实测四个控件
+     均 68px 宽、间距 4px、图标 18px、文字 28px、中心同一水平线，完全对齐），
+     而是**材质层级**：华为与 iOS 上按钮自己是**一块独立的玻璃件**，浮在顶栏那块玻璃之上；
+     我们原来静置是 `background: transparent`，整个顶栏只有一层材质，
+     所以读起来是"顶栏上一排文字"，而不是"玻璃按钮浮在玻璃上"。
+
+     ⚠️ 刻意**不做实时模糊**（用户确认）：那会让全站 backdrop-filter 元件从 6 个升到 10 个，
+        破掉自己定的 Blur-Budget，滚动帧率有风险。
+        只用「半透明填充 + 顶部内高光 + 极浅外阴影」把"一块浮起的玻璃"读出来 ——
+        观感上成立，且不消耗模糊预算。Apple 实际渲染里按钮也并非都在做实时模糊。
+
+     ⚠️ 对比度：填充是**半透明白**，底下仍是顶栏玻璃，明度变化很小；
+        文字色 #333a3d（11.17:1）在加入填充后只会更安全，不会跌破 4.5:1。
+        改填充透明度后请重测对比度（见 docs/联动维护点.md 第 3 条）。 */
+  background-color: rgb(255 255 255 / 0.5);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.9),
+    inset 0 -1px 0 rgb(255 255 255 / 0.25),
+    0 1px 2px rgb(15 23 42 / 0.06);
   transition:
     background-color var(--duration-micro) var(--ease-out-soft),
     color var(--duration-micro) var(--ease-out-soft),
@@ -706,25 +732,47 @@ details[open] .chevron-up-down {
 }
 .bar-control:hover {
   color: var(--color-brand-700);
-  background-color: rgb(255 255 255 / 0.32);
-  backdrop-filter: blur(14px) saturate(1.6);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.5);
+  background-color: rgb(255 255 255 / 0.72);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.95),
+    inset 0 -1px 0 rgb(255 255 255 / 0.3),
+    0 2px 6px rgb(15 23 42 / 0.1);
+}
+.bar-control:disabled {
+  /* 「返回顶部」贴顶时的禁用态：只降文字与图标的不透明度，**不动材质** ——
+     否则禁用时按钮会"瘪下去"，与旁边三个按钮不齐（实测 40% 不透明度来自组件类）。 */
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.5),
+    0 1px 2px rgb(15 23 42 / 0.03);
+  background-color: rgb(255 255 255 / 0.28);
 }
 .bar-control:focus-visible {
   outline: none;
   color: var(--color-brand-700);
-  background-color: rgb(255 255 255 / 0.36);
+  background-color: rgb(255 255 255 / 0.8);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.5),
+    inset 0 1px 0 rgb(255 255 255 / 0.95),
     0 0 0 2px rgb(242 169 59 / 0.6);
 }
 .dark .bar-control {
   color: #dde0e2;
+  /* 深色下按钮要比顶栏**更亮**才读作"浮起"（顶栏是 50%/34% 的深色叠层） */
+  background-color: rgb(255 255 255 / 0.07);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.12),
+    inset 0 -1px 0 rgb(0 0 0 / 0.2),
+    0 1px 2px rgb(0 0 0 / 0.3);
 }
 .dark .bar-control:hover {
   color: var(--color-brand-200);
-  background-color: rgb(255 255 255 / 0.09);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.1);
+  background-color: rgb(255 255 255 / 0.13);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.18),
+    0 2px 6px rgb(0 0 0 / 0.35);
+}
+.dark .bar-control:disabled {
+  background-color: rgb(255 255 255 / 0.04);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.07);
 }
 .dark .bar-control:focus-visible {
   background-color: rgb(255 255 255 / 0.11);
@@ -1016,6 +1064,31 @@ details[open] .chevron-up-down {
   text-align: center;
   font-size: var(--text-xs);
   color: var(--color-slate-400);
+}
+
+/* ===== 文档区的「固定外壳」（2026-09）=====
+   桌面端把页面滚动换成"内部滚动"：左栏（返回作品集 + 5 篇笔记 + 导航）与右栏大纲钉在视口里，
+   只有中间正文列在滚。用户明确要求"左侧那一栏连带着下面的导航一起固定住"。
+
+   ⚠️ 用 `overflow: clip` 而不是 `hidden`：`hidden` 会把根元素变成滚动容器，
+   根滚动位置会被保留并被"夹住"（切到文档区时可能停在中途）；`clip` 只是裁剪，
+   不建立滚动容器，`window.scrollY` 归零，顶栏的 `position: sticky` 语义也保持不变。
+
+   ⚠️ 只在 md 及以上生效：手机端没有侧栏，仍是普通页面滚动（配 Docs.tsx 里的吸顶目录抽屉）。
+   断点必须与 Docs.tsx 的 `md:` 前缀、TopBar 的 `md:fixed` 三处一致。 */
+@media (min-width: 768px) {
+  html.docs-shell,
+  html.docs-shell body {
+    overflow: clip;
+    /* 页面不滚了，避免为不存在的滚动条留位导致内容整体左移 */
+    scrollbar-gutter: auto;
+  }
+  /* 顶栏在文档区改为 fixed（页面不滚，sticky 无从粘起）；宽度由 TopBar 自己控制 */
+  .site-bar.is-fixed {
+    position: fixed;
+    inset-inline: 0;
+    top: 0;
+  }
 }
 
 /* 打印一律拦截：站点不提供打印版式（固定网格、玻璃层、导航栏打印出来是半成品），

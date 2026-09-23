@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react'
 import skillsData from '../data/skills.json'
-import { SECTIONS } from '../data/navigation'
 import type { SkillProfile } from '../data/types'
 import Reveal from './Reveal'
 import SectionHeading from './SectionHeading'
@@ -56,7 +55,7 @@ export default function Skills() {
           只包内容容器、不包 <section>（锚点停靠与滚动侦测都依赖 section 的正常布局）。 */}
       <div className="cv-section rail-gutter mx-auto max-w-6xl px-4 sm:px-6">
         <SectionHeading
-          eyebrow={SECTIONS.find((s) => s.id === 'skills')?.label ?? '专业技能'}
+          sectionId="skills"
           title="岗位技能画像"
           description="按岗位方向切换技能画像；输入关键词可快速筛选项目所需技能。"
         />

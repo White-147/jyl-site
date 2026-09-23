@@ -36,7 +36,7 @@ export function Toast({ message }: { message: string | null }) {
  * 优先 Clipboard API（需安全上下文：https / localhost）；
  * GitHub Pages 是 https，本地 http 预览会退化到 execCommand 兜底。
  */
-export async function copyText(text: string): Promise<boolean> {
+async function copyText(text: string): Promise<boolean> {
   try {
     if (navigator.clipboard && window.isSecureContext) {
       await navigator.clipboard.writeText(text)
