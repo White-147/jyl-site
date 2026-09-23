@@ -230,25 +230,67 @@ export default function Docs({ docId, anchor }: { docId?: string; anchor?: strin
   /**
    * 滚到某个标题。
    *
-   * ⚠️ 必须按滚动容器分流（2026-09 改成「固定外壳 + 内部滚动」布局后新增）：
-   *   · 桌面端（md 及以上）页面本身不滚，正文列容器在滚 → 改容器的 scrollTop；
-   *   · 手机端没有侧栏，仍是页面滚动 → 走 window.scrollTo。
-   * 判据用「容器是否真的有可滚高度」而不是断点，这样两种布局共用一条代码路径，
-   * 也不会因为将来改断点而静默失效。
+   * ⚠️ 三条实测教训，改这里之前先读完（每一条都让落点偏过）：
    *
-   * `HEADER_OFFSET` 只对手机端（页面滚动）有意义：桌面端正文列的第一个标题本来就
-   * 紧贴列顶，不需要再减顶栏高度。
+   * 1. **不要手算 scrollTop。** 在这个布局里元素的真实位置三种测法都不可靠：
+   *    `getBoundingClientRect()` 会被正文里的 `sticky` 小节标题干扰；
+   *    `offsetTop` 量到的是相对 `body` 的位置（正文列不是定位元素，所有标题的 offsetParent 都是 body）；
+   *    `content-visibility: auto` 又让远处元素在滚动过程中才真正布局。改用原生 `scrollIntoView`。
+   *
+   * 2. **瞬时跳转（`behavior: 'auto'`）不够，必须再逐帧纠正。** 这是关键：
+   *    正文列带 `content-visibility: auto`，未渲染子树按 `contain-intrinsic-size`（2200px）估算高度，
+   *    于是**任何一次性的定位都算不准** —— 跳到"估算位置"后，被跳过的子树才真正布局、
+   *    文档高度随即变化，元素就跑到了别处（实测偏差 96～1923px，且越远越离谱）。
+   *    平滑滚动更糟：它在发起时就把目标算死，滚到估算的最大值就被夹住（实测最大可滚
+   *    4902 → 6729 → 9739 一路在涨）。
+   *    正解：跳一次 → 连测若干帧，只要位置还在变就再跳一次，直到稳定（通常 2～3 帧）。
+   *    代价：没有平滑过渡，换来锚点准确。`content-visibility` 与平滑滚动本来就不兼容。
+   *
+   * 3. **落点留白只在一处定：滚动容器的 `scroll-pt-4`（scroll-padding-top: 16px）。**
+   *    不要再手写减一个像素值 —— 写过 `- 16`，与容器的 scroll-padding **叠加**成 32px，
+   *    实测标题落到容器顶上方 48px（被顶栏压住）。手机端那份留白来自 `HEADER_OFFSET`。
    */
   const scrollToAnchor = useCallback((id: string) => {
     const el = document.getElementById(id)
     if (!el) return
     const scroller = scrollRef.current
     const canScroll = scroller && scroller.scrollHeight > scroller.clientHeight + 1
-    if (canScroll) {
-      scroller.scrollTo({ top: scroller.scrollTop + el.getBoundingClientRect().top - 16, behavior: 'smooth' })
-    } else {
-      window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - HEADER_OFFSET, behavior: 'smooth' })
+
+    // ⚠️ 跳转期间**临时关掉 `content-visibility`**（2026-09 实测的最终解，别删）：
+    //    正文每个小节块都带 `.cv-section`（`content-visibility: auto` + 估算高度 2200px），
+    //    而文档区正文列远比技能区高 —— 一个几千字的区块被估成 2200px，七八个叠起来
+    //    就把文档撑到真实高度的两三倍。于是"点目录跳转"按虚高位置定位、随后区块逐个渲染、
+    //    高度缩回，落点全错（实测偏差 96～1900px；最后一个大纲项差 1234px，
+    //    `scrollTop` 甚至卡在被夹住的旧最大值上）。
+    //    做法：先让全部内容参与布局（一帧），跳到真值位置，跳完恢复 ——
+    //    `.cv-section` 的优化照旧生效，只是不在"跳转这一瞬"。
+    //    ⚠️ 开关挂在 `<html>` 上由 CSS 属性选择器承接：要禁用的是 `.cv-section`，
+    //       而 `contentRef` 指向的 `.doc-content` 在祖先链**下面**，内联样式传不过去（踩过）。
+    const root = document.documentElement
+    root.setAttribute('data-anchor-jump', '')
+    const restore = () => root.removeAttribute('data-anchor-jump')
+
+    const jump = () => {
+      if (canScroll) el.scrollIntoView({ block: 'start', behavior: 'auto' })
+      else window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - HEADER_OFFSET, behavior: 'auto' })
     }
+    const settle = (attempt = 0) => {
+      jump()
+      if (attempt >= 4) {
+        restore()
+        return
+      }
+      requestAnimationFrame(() => {
+        const top = el.getBoundingClientRect().top
+        const delta = canScroll ? Math.abs(top - scroller!.getBoundingClientRect().top - 16) : Math.abs(top - HEADER_OFFSET)
+        if (delta <= 2) {
+          restore()
+          return
+        }
+        settle(attempt + 1)
+      })
+    }
+    settle()
   }, [])
 
   /** 大纲点击：滚到标题 + 写回地址栏（抽成函数，左右两栏与正文锚点共用一套行为） */
@@ -302,11 +344,16 @@ export default function Docs({ docId, anchor }: { docId?: string; anchor?: strin
     //            右栏可用文字宽必须 ≥192px 才能不换行；内容列 1184 → 1144（@1600 容器）。
     //    注意两个值分别在 `md:grid-cols` 与 `xl:grid-cols` 里，改一处要连另一处一起看。
     //    改后内容列：1440 → 948，1920 → 1180。
-    // ⚠️ `md:h-[calc(100dvh-var(--site-bar-h))]` 不能省：外层容器带 `h-auto`，
-    //    而**显式的 height 会压过 `flex-1` 的 flex-basis**（flex 只在主轴分配剩余空间，
-    //    不覆盖 height 属性）。只写 `flex-1` 时 grid 会撑到内容高度（实测 20481px），
-    //    内部滚动根本不触发、页面又因为 `.docs-shell` 不能滚 —— 整个文档区就滚不动了。
-    <div className="mx-auto flex max-w-[100rem] flex-col px-4 pb-24 pt-6 sm:px-6 lg:pt-10 md:h-[calc(100dvh-var(--site-bar-h))] md:pb-0 md:pt-0">
+    // ⚠️ 高度口径（2026-09 第二次修正，这里踩过两次，别再改错）：
+    //    外框 = `md:h-dvh`（占满视口）→ 里面那条 `h-16` 占位条吃掉 fixed 顶栏的高度
+    //    → 剩下的空间由滚动容器的 `md:flex-1` 拿。
+    //    **绝对不要再写 `calc(100dvh - var(--site-bar-h))`**：占位条已经补过一次，
+    //    再减一次就是重复计算，整块内容会上移 64px、空白全落到最底部
+    //    （用户看到的就是"上方一大块空着"）。
+    //    另一头也要防：只给滚动容器写 `flex-1` 而不给外框定高，它会撑到内容高度
+    //    （实测 20481px），内部滚动不触发、页面又被 `.docs-shell` 关掉了滚动 —— 整个文档区滚不动。
+    //    两侧都定住（外框 h-dvh + 容器 flex-1）才成立。
+    <div className="mx-auto flex max-w-[100rem] flex-col px-4 pb-24 pt-6 sm:px-6 md:h-dvh md:pb-0 md:pt-0 lg:pt-0">
       {/* 桌面端把页面滚动换成「内部滚动」，顶栏改为 fixed（见 TopBar）；
           这条占位把 fixed 顶栏让出的 64px 补回来 —— 高度必须与 `--site-bar-h` 一致。 */}
       <div aria-hidden="true" className="hidden h-16 shrink-0 md:block" />
@@ -399,7 +446,7 @@ export default function Docs({ docId, anchor }: { docId?: string; anchor?: strin
       <div
         ref={scrollRef}
         id="docs-scroll"
-        className="md:grid md:min-h-0 md:grid-cols-[13rem_minmax(0,1fr)] md:gap-6 md:overflow-y-auto md:pr-2 xl:grid-cols-[13rem_minmax(0,1fr)_14rem]"
+        className="docs-scroll md:grid md:min-h-0 md:flex-1 md:grid-cols-[13rem_minmax(0,1fr)] md:gap-6 md:overflow-y-auto md:scroll-pt-4 md:pr-2 xl:grid-cols-[13rem_minmax(0,1fr)_14rem]"
       >
         {/* 左：返回入口 + 文档树（+ xl 以下顺带放本篇大纲 —— 右侧栏在 xl 以下不显示）
             ⚠️ sticky 必须加在 **aside 自身**上，不要外面套一层 div 再 sticky（2026-09 踩过两次）：
@@ -409,14 +456,14 @@ export default function Docs({ docId, anchor }: { docId?: string; anchor?: strin
                 但那是 **aside 的盒子**，套在里面的 div 依然粘不住（sticky 认的是父级内容盒）。
               所以：让 aside 保持默认 stretch、自身 `position: sticky`，
               它的容器就是整行高的 grid area，粘住行程足够。
-            ⚠️ `top-16` 是顶栏高度。
-            ⚠️ **垂直留白只放 bottom，不要用对称的 `py-6`**（2026-09 修正）：
-              sticky 元素自身的 padding 会把它往下推 —— 两栏原来是 `py-6`，实测侧栏首行文字
-              落在 193px 而正文标题在 159px，**侧栏比正文低 34px**（用户反馈"感觉像是在中间"）。
-              现在顶边贴齐（都在 104px 起），只在底部留 24px，长内容滚到底时不会顶在边缘上。
-            ⚠️ `max-h-[calc(100dvh-6rem)]` + `overflow-y-auto`：窄于 xl 时这一栏还要放大纲，
-              内容会超过视口，必须让**它自己**能滚，否则底部内容永远看不到。 */}
-        <aside className="hidden md:sticky md:top-16 md:block md:max-h-[calc(100dvh-6rem)] md:overflow-y-auto md:pb-6 md:pr-1">
+            ⚠️ 垂直留白只放 bottom（`pb-4`）：sticky 元素自身的 padding-top 会把它往下推，
+              等于在顶栏下面平白多一条空白带（用户反馈过两次"沉在中间 / 上面一大块空"）。
+              底部留白不能省：sticky 元素有 padding 不影响粘性，但内容贴着视口下沿会很难看。
+            ⚠️ `max-h` + `overflow-y-auto`：窄于 xl 时这一栏还要放大纲，内容可能超过视口，
+              必须让**它自己**能滚，否则底部内容永远看不到。
+              `docs-scroll` 类把滚动条收细、轨道透明（见 index.css）—— 内容通常装得下，
+              整条原生滚动条（带浅色轨道）会像一条白带子斜在那里，很扎眼。 */}
+        <aside className="docs-scroll hidden md:sticky md:top-16 md:block md:max-h-[calc(100dvh-4rem)] md:overflow-y-auto md:pb-4 md:pr-1 md:pt-4">
           <a
             href="#top"
             className="mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 transition-colors hover:text-brand-700 dark:text-slate-400 dark:hover:text-brand-200"
@@ -452,9 +499,11 @@ export default function Docs({ docId, anchor }: { docId?: string; anchor?: strin
         </aside>
 
         {/* 中：正文。data-copyable = 只读保护白名单，放开这一整块的选择与复制。
-            正文列自己留上下白（`md:py-6`）—— 滚动容器的 padding-bottom 在内容末尾不可靠，
-            所以上下留白都放在列自己身上，与左右两栏的 `pb-6` 口径一致。 */}
-        <main className="min-w-0 md:py-6">
+            ⚠️ `md:pt-0` 是刻意的：正文列一旦有 padding-top，它就会把首行推到顶栏下方
+            40px 处，而两栏（sticky）也只好跟着让位 —— 顶栏底下就出现一条空白带
+            （用户反馈"上面一大块空在那"）。现在首行直接贴顶栏下沿。
+            底部留白不能省（`md:pb-6`）：滚动容器的 padding-bottom 在内容末尾不可靠。 */}
+        <main className="min-w-0 md:pb-24 md:pt-4">
           <header className="mb-6 border-b border-slate-200 pb-5 dark:border-slate-700">
             <div className="flex flex-wrap items-center gap-2.5">
               <span className="font-mono text-xs tabular-nums text-slate-400 dark:text-slate-500">
@@ -525,8 +574,9 @@ export default function Docs({ docId, anchor }: { docId?: string; anchor?: strin
         {/* 右：本篇大纲（宽屏常驻；xl 以下由左栏与手机抽屉承担，三处共用同一个 `outline`）。
             宽度 14rem（224px）= A 方案：可用文字宽 192px，12px 字号下最长标签（17 字）刚好不换行。
             加宽的代价是内容列从 1184 → 1144（仍远大于加宽前的 961）。
-            ⚠️ 与左栏同一口径：sticky 加在 aside 自身，不要套内层 div（原因见左栏注释）。 */}
-        <aside className="hidden xl:sticky xl:top-16 xl:block xl:max-h-[calc(100dvh-6rem)] xl:overflow-y-auto xl:py-6">
+            ⚠️ 与左栏同一口径：sticky 加在 aside 自身、**只留底部 padding**（2026-09 修正；
+              原来这里是 `py-6`，实测首行落在 192px，比正文标题的 159px 低 33px）。 */}
+        <aside className="docs-scroll hidden xl:sticky xl:top-16 xl:block xl:max-h-[calc(100dvh-4rem)] xl:overflow-y-auto xl:pb-4 xl:pt-4">
           <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500">
             本篇大纲
           </p>

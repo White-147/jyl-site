@@ -866,6 +866,21 @@ details[open] .chevron-up-down {
   contain-intrinsic-size: auto 2200px;
 }
 
+/* ⚠️ 锚点跳转期间临时关掉上面的优化（2026-09 实测的必需配套）。
+   为什么：未渲染子树按 `contain-intrinsic-size`（2200px）参与布局，而**文档区正文列
+   远比技能区高** —— 一个几千字的区块被估成 2200px，七八个叠起来就把文档撑成真实高度的两三倍，
+   于是"点目录跳转"会按虚高的位置定位、随后区块逐个渲染、高度缩回，落点全错
+   （实测偏差 96～1900px，最后一个大纲项差 1234px；`scrollTop` 甚至卡在被夹住的旧最大值上）。
+   做法：跳转前先让全部内容参与布局（值一帧），跳到真值位置，跳完恢复 —— 优化照旧生效，
+   只是不在"跳转这一瞬"。见 Docs.tsx 的 scrollToAnchor。
+
+   用**属性选择器而不是直接写内联样式**：要禁用的是 `.cv-section`（正文的祖先链上），
+   而 `scrollRef` 指向的是外层滚动容器 —— 内联样式加在错的元素上不会生效（踩过）。
+   选择器带 `md:` 同一断点前提：手机端本来就是页面滚动，没有这个问题。 */
+html[data-anchor-jump] .cv-section {
+  content-visibility: visible;
+}
+
 /* ===== UE 文档区正文排版（.doc-content，见 src/components/Docs.tsx） =====
    内容来自 scripts/import-ue-docs.mjs 转换出的静态 HTML，样式全部落在这里，
    组件那边只负责容器与交互（灯箱、锚点）。
@@ -893,10 +908,27 @@ details[open] .chevron-up-down {
 .doc-content .doc-h3,
 .doc-content .doc-h4 {
   position: relative;
-  scroll-margin-top: 96px; /* 与 Docs.tsx 的 HEADER_OFFSET 对齐：锚点跳转不被吸顶导航压住 */
+  /* 96px = 顶栏 64 + 呼吸 32，给**手机端**用：那时是页面在滚，标题要避开常驻顶栏。
+     ⚠️ 桌面端（≥768px）必须清零：那里换成了"固定外壳 + 内部滚动"，
+        落点留白由滚动容器的 `scroll-padding-top`（`scroll-pt-4`，16px）负责，
+        而这个 96px 会**叠加**上去 —— 实测标题落在滚动容器顶下方 112px（96 + 16），
+        看着就是"点了目录没跳到标题上"。见下方 @media 块。 */
+  scroll-margin-top: 96px;
   color: var(--color-ink);
   font-weight: 700;
   letter-spacing: -0.01em;
+}
+
+/* ⚠️ 桌面端文档区（固定外壳 + 内部滚动）清零标题的 scroll-margin-top。
+   原因见上方注释：留白已由滚动容器的 `scroll-padding-top` 提供，这里再留一次就是双份。
+   断点必须与 `.docs-shell`（useDocsRoute 的 matchMedia 768）和 Docs.tsx 的 `md:` 一致。 */
+@media (min-width: 768px) {
+  html.docs-shell .doc-content .doc-h1,
+  html.docs-shell .doc-content .doc-h2,
+  html.docs-shell .doc-content .doc-h3,
+  html.docs-shell .doc-content .doc-h4 {
+    scroll-margin-top: 0;
+  }
 }
 .dark .doc-content .doc-h1,
 .dark .doc-content .doc-h2,
@@ -1089,6 +1121,39 @@ details[open] .chevron-up-down {
     inset-inline: 0;
     top: 0;
   }
+}
+
+/* ===== 文档区的细滚动条（.docs-scroll）=====
+   用在三处：正文滚动容器、左侧文档树、右侧大纲。
+   为什么需要：macOS/Windows 的原生滚动条带**浅色轨道**（深色模式下尤其刺眼），
+   而这两栏的内容通常装得下、根本不需要滚动 —— 于是轨道就成了一条斜在那里的白带子
+   （用户反馈"右侧进度栏看着不舒服"）。
+   这里把它收细、轨道设为透明、滑块半透明：需要滚时仍然看得见，不需要时几乎不可见。
+   ⚠️ 用标准属性 `scrollbar-width/color`（Firefox、Chrome 121+）+
+   `::-webkit-scrollbar`（更旧的 WebKit/Blink）两条腿，缺一条就会有浏览器露出原生样式。 */
+.docs-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(148 163 184 / 0.45) transparent;
+}
+.docs-scroll::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.docs-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.docs-scroll::-webkit-scrollbar-thumb {
+  background-color: rgb(148 163 184 / 0.4);
+  border-radius: 9999px;
+}
+.docs-scroll::-webkit-scrollbar-thumb:hover {
+  background-color: rgb(148 163 184 / 0.65);
+}
+.dark .docs-scroll {
+  scrollbar-color: rgb(100 116 139 / 0.5) transparent;
+}
+.dark .docs-scroll::-webkit-scrollbar-thumb {
+  background-color: rgb(100 116 139 / 0.5);
 }
 
 /* 打印一律拦截：站点不提供打印版式（固定网格、玻璃层、导航栏打印出来是半成品），

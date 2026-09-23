@@ -3,196 +3,196 @@
 <h3 id="新增游戏模板基础" class="doc-h3"><a class="doc-anchor" href="#新增游戏模板基础" aria-label="本节链接">#</a>新增游戏模板基础</h3>
 <p>由于蓝图基础中的第一人称关卡模板自带可移动人物等设置，为方便后续从零开始学习，新建关卡和角色</p>
 <p>在内容侧滑菜单中的Code目录下（蓝图基础中新增目录），右键新增蓝图类-游戏模式基础，命名为<strong>BP_GameMode</strong></p>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/新增​资产指定目录.webp" alt="新增​资产指定目录" loading="lazy" decoding="async" /><figcaption>新增​资产指定目录</figcaption></figure>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/新增蓝图类.webp" alt="新增蓝图类" loading="lazy" decoding="async" /><figcaption>新增蓝图类</figcaption></figure>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/新增游戏模式基础.webp" alt="新增游戏模式基础" loading="lazy" decoding="async" /><figcaption>新增游戏模式基础</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/新增​资产指定目录.webp" alt="新增​资产指定目录" width="1600" height="1000" loading="lazy" decoding="async" /><figcaption>新增​资产指定目录</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/新增蓝图类.webp" alt="新增蓝图类" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>新增蓝图类</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/新增游戏模式基础.webp" alt="新增游戏模式基础" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>新增游戏模式基础</figcaption></figure>
 <p>双击游戏模式基础，进入相应界面</p>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/双击进入游戏模式基础界面.webp" alt="双击进入游戏模式基础界面" loading="lazy" decoding="async" /><figcaption>双击进入游戏模式基础界面</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/双击进入游戏模式基础界面.webp" alt="双击进入游戏模式基础界面" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>双击进入游戏模式基础界面</figcaption></figure>
 <h3 id="新增角色" class="doc-h3"><a class="doc-anchor" href="#新增角色" aria-label="本节链接">#</a>新增角色</h3>
 <p>右键新增蓝图类-角色，创建用于编写的角色,命名为<strong>BP_Charater</strong></p>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/新增角色.webp" alt="新增角色" loading="lazy" decoding="async" /><figcaption>新增角色</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/新增角色.webp" alt="新增角色" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>新增角色</figcaption></figure>
 <ul class="doc-ul"><li>修改游戏模式基础的细节界面中默认Pawn类为新增的<strong>BP_Charater</strong></li><li><strong>注意</strong>：如果误点击了别处，可以左键单击组件界面的BP_GameMode唤出细节界面<ul class="doc-ul doc-ul-sub"><li>修改完默认Pawn配置后，记得点击编译和保存</li></ul></li></ul>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/游戏模式基础​细节界面.webp" alt="游戏模式基础​细节界面" loading="lazy" decoding="async" /><figcaption>游戏模式基础​细节界面</figcaption></figure>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/修改默认Pawn类.webp" alt="修改默认Pawn类" loading="lazy" decoding="async" /><figcaption>修改默认Pawn类</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/游戏模式基础​细节界面.webp" alt="游戏模式基础​细节界面" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>游戏模式基础​细节界面</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/修改默认Pawn类.webp" alt="修改默认Pawn类" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>修改默认Pawn类</figcaption></figure>
 <ul class="doc-ul"><li>返回之前所在的FirstPerson关卡中，将新增的游戏模式基础设置到关卡中</li><li>在世界场景设置中，将<strong>游戏模式重载</strong>设置为Node或者刚刚新增的<strong>BP_GameMode</strong><ul class="doc-ul doc-ul-sub"><li>注意，如果右侧默认没有世界场景设置，可以在<strong>窗口</strong>中点击添加</li></ul></li><li>在<strong>编辑-项目设置</strong>中的地图和模式，设置默认游戏模式为新增的<strong>BP_GameMode</strong></li></ul>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/世界场景设置​修改游戏模式重载.webp" alt="世界场景设置​修改游戏模式重载" loading="lazy" decoding="async" /><figcaption>世界场景设置​修改游戏模式重载</figcaption></figure>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/项目设置修改默认游戏模式.webp" alt="项目设置修改默认游戏模式" loading="lazy" decoding="async" /><figcaption>项目设置修改默认游戏模式</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/世界场景设置​修改游戏模式重载.webp" alt="世界场景设置​修改游戏模式重载" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>世界场景设置​修改游戏模式重载</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/项目设置修改默认游戏模式.webp" alt="项目设置修改默认游戏模式" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>项目设置修改默认游戏模式</figcaption></figure>
 <h2 id="2实现角色移动" class="doc-h2"><a class="doc-anchor" href="#2实现角色移动" aria-label="本节链接">#</a>2.实现角色移动</h2>
 <h3 id="新增映射上下文" class="doc-h3"><a class="doc-anchor" href="#新增映射上下文" aria-label="本节链接">#</a>新增映射上下文</h3>
 <p>由于轴映射和键盘映射的输入方式已经被弃用，因此采用增强输入的方式实现复杂的输入功能</p>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/角色移动/映射废弃警告.webp" alt="映射废弃警告" loading="lazy" decoding="async" /><figcaption>映射废弃警告</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/角色移动/映射废弃警告.webp" alt="映射废弃警告" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>映射废弃警告</figcaption></figure>
 <p>在内容侧滑菜单的Code目录下右键新增增强输入，为区分原有的移动输入命名，命名为<strong>IA_Move2</strong></p>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/角色移动/新增​增强输入.webp" alt="新增​增强输入" loading="lazy" decoding="async" /><figcaption>新增​增强输入</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/角色移动/新增​增强输入.webp" alt="新增​增强输入" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>新增​增强输入</figcaption></figure>
 <p><strong>双击IA_Move2</strong>进入细节界面，修改值类型为<strong>Axis2D</strong>，因为前后左右移动为二维向量操作，修改后点击保存或Ctrl S</p>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/角色移动/修改输入值类型.webp" alt="修改输入值类型" loading="lazy" decoding="async" /><figcaption>修改输入值类型</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/角色移动/修改输入值类型.webp" alt="修改输入值类型" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>修改输入值类型</figcaption></figure>
 <p>右键新增输入映射上下文，命名为<strong>IMC_Input</strong></p>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/角色移动/新增​输入映射上下文.webp" alt="新增​输入映射上下文" loading="lazy" decoding="async" /><figcaption>新增​输入映射上下文</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/角色移动/新增​输入映射上下文.webp" alt="新增​输入映射上下文" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>新增​输入映射上下文</figcaption></figure>
 <h3 id="设置映射上下文" class="doc-h3"><a class="doc-anchor" href="#设置映射上下文" aria-label="本节链接">#</a>设置映射上下文</h3>
 <p>双击IMC_Input进入细节界面，<strong>展开Default Key Mappings</strong>，在Mappings栏点击<strong>新增映射操作</strong>（+号）</p>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/角色移动/新增映射操作.webp" alt="新增映射操作" loading="lazy" decoding="async" /><figcaption>新增映射操作</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/角色移动/新增映射操作.webp" alt="新增映射操作" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>新增映射操作</figcaption></figure>
 <p><strong>展开Mappings栏</strong>，选择新增的<strong>IA_Move2</strong>输入</p>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/角色移动/设置​映射操作.webp" alt="设置​映射操作" loading="lazy" decoding="async" /><figcaption>设置​映射操作</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/角色移动/设置​映射操作.webp" alt="设置​映射操作" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>设置​映射操作</figcaption></figure>
 <p>因为要设置<strong>WASD</strong>进行移动，所以点击四次Mappings子栏中的<strong>将一个控制绑定到映射操作</strong>（+号）</p>
 <p>将设置好的<strong>子栏展开</strong>，在新增的四个映射栏中点击<strong>选择键值</strong>（键盘按钮），依次按键盘上的WASD，完成设置</p>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/角色移动/设置映射键值.webp" alt="设置映射键值" loading="lazy" decoding="async" /><figcaption>设置映射键值</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/角色移动/设置映射键值.webp" alt="设置映射键值" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>设置映射键值</figcaption></figure>
 <p>再次展开WASD键值栏，依据平面坐标系，当角色后退（向下移动）或者向左移动时，坐标所在位置为负数</p>
-<p><figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/角色移动/平面坐标系.webp" alt="" loading="lazy" decoding="async" /></figure></p>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/角色移动/添加元素.webp" alt="添加元素" loading="lazy" decoding="async" /><figcaption>添加元素</figcaption></figure>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/角色移动/设置反转输入.webp" alt="设置反转输入" loading="lazy" decoding="async" /><figcaption>设置反转输入</figcaption></figure>
+<p><figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/角色移动/平面坐标系.webp" alt="" width="287" height="255" fetchpriority="low" decoding="async" /></figure></p>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/角色移动/添加元素.webp" alt="添加元素" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>添加元素</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/角色移动/设置反转输入.webp" alt="设置反转输入" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>设置反转输入</figcaption></figure>
 <p>因为键盘映射操作<strong>默认为X轴</strong>，AD与WS移动不在一个轴，所以需要额外设置<strong>拌合输入轴值</strong>，将AD操作的默认轴改为Y轴</p>
 <p>同时因为A向左移动，也要设置S同样的否定元素，因此需要新增两个元素</p>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/角色移动/修改默认所在轴.webp" alt="修改默认所在轴" loading="lazy" decoding="async" /><figcaption>修改默认所在轴</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/角色移动/修改默认所在轴.webp" alt="修改默认所在轴" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>修改默认所在轴</figcaption></figure>
 <h3 id="激活映射上下文" class="doc-h3"><a class="doc-anchor" href="#激活映射上下文" aria-label="本节链接">#</a>激活映射上下文</h3>
 <p><strong>点击保存</strong>或Ctrl S，返回BP_Charater，进入<strong>事件图表</strong>界面，将设置好的增强输入激活</p>
 <p>在事件图表界面右键搜索输入get player controller，点击新增玩家控制器节点</p>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/角色移动/玩家控制器.webp" alt="玩家控制器" loading="lazy" decoding="async" /><figcaption>玩家控制器</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/角色移动/玩家控制器.webp" alt="玩家控制器" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>玩家控制器</figcaption></figure>
 <p>左键长按玩家控制器右侧蓝色引脚拉出，在搜索输入框输入<strong>enhanced</strong>，获取增强输入本地玩家子系统</p>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/角色移动/获取本地玩家增强输入子系统.webp" alt="获取本地玩家增强输入子系统" loading="lazy" decoding="async" /><figcaption>获取本地玩家增强输入子系统</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/角色移动/获取本地玩家增强输入子系统.webp" alt="获取本地玩家增强输入子系统" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>获取本地玩家增强输入子系统</figcaption></figure>
 <p>左键增强输入本地玩家子系统右侧蓝色引脚，在搜索输入框中输入<strong>add mapping context</strong>，获取映射上下文</p>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/角色移动/映射上下文.webp" alt="映射上下文" loading="lazy" decoding="async" /><figcaption>映射上下文</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/角色移动/映射上下文.webp" alt="映射上下文" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>映射上下文</figcaption></figure>
 <p>左键长按事件开始运行的左侧执行引脚，连接到映射上下文</p>
 <p>如果觉得界面拥挤，可以按del键或右键删除其他两个初始节点，目前用不到</p>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/角色移动/事件开始执行连接映射上下文.webp" alt="事件开始执行连接映射上下文" loading="lazy" decoding="async" /><figcaption>事件开始执行连接映射上下文</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/角色移动/事件开始执行连接映射上下文.webp" alt="事件开始执行连接映射上下文" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>事件开始执行连接映射上下文</figcaption></figure>
 <p>连接之后，在映射上下文节点中的<strong>选择资产</strong>中，选择已设置的<strong>IMC_Input</strong></p>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/角色移动/映射上下文选择资产.webp" alt="映射上下文选择资产" loading="lazy" decoding="async" /><figcaption>映射上下文选择资产</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/角色移动/映射上下文选择资产.webp" alt="映射上下文选择资产" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>映射上下文选择资产</figcaption></figure>
 <h3 id="编写角色移动" class="doc-h3"><a class="doc-anchor" href="#编写角色移动" aria-label="本节链接">#</a>编写角色移动</h3>
 <p>在事件图表界面右键，在搜索框中输入<strong>IA Move</strong>，选择强化操作事件中的<strong>IA Move2</strong></p>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/角色移动/蓝图新增角色移动节点.webp" alt="蓝图新增角色移动节点" loading="lazy" decoding="async" /><figcaption>蓝图新增角色移动节点</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/角色移动/蓝图新增角色移动节点.webp" alt="蓝图新增角色移动节点" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>蓝图新增角色移动节点</figcaption></figure>
 <p>在新增的节点中，点击<strong>展开</strong>，左键长按Action Value右侧引脚，搜索输入<strong>break</strong>，选择<strong>拆分向量2D</strong></p>
 <p>Action Value为向量2D结构，拆分向量2D可以将2D向量拆分为<strong>X和Y的两个浮点数</strong></p>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/角色移动/展开操作角色移动节点.webp" alt="展开操作角色移动节点" loading="lazy" decoding="async" /><figcaption>展开操作角色移动节点</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/角色移动/展开操作角色移动节点.webp" alt="展开操作角色移动节点" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>展开操作角色移动节点</figcaption></figure>
 <p>在事件图表界面右键，在搜索框中输入add movement input，点击添加</p>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/角色移动/新增移动输入.webp" alt="新增移动输入" loading="lazy" decoding="async" /><figcaption>新增移动输入</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/角色移动/新增移动输入.webp" alt="新增移动输入" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>新增移动输入</figcaption></figure>
 <p>IA Move节点中存在多个引脚，其中<strong>Triggerd引脚</strong>设置<strong>持续移动</strong>，因此需要将Triggerd引脚连接到新增的移动输入节点</p>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/角色移动/Trigger引脚连接移动输入.webp" alt="Trigger引脚连接移动输入" loading="lazy" decoding="async" /><figcaption>Trigger引脚连接移动输入</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/角色移动/Trigger引脚连接移动输入.webp" alt="Trigger引脚连接移动输入" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>Trigger引脚连接移动输入</figcaption></figure>
 <p>因为一般游戏中角色移动的方向取决于角色当前<strong>视角正前方的方向</strong>，因此还需要新增<strong>获取Actor向前向量</strong></p>
 <p>右键搜索输入get actor forward，选择后左键长按右侧黄色引脚，连接到移动输入的World Direction引脚处</p>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/角色移动/新增Actor向前向量.webp" alt="新增Actor向前向量" loading="lazy" decoding="async" /><figcaption>新增Actor向前向量</figcaption></figure>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/角色移动/向前向量​连接方向引脚.webp" alt="向前向量​连接方向引脚" loading="lazy" decoding="async" /><figcaption>向前向量​连接方向引脚</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/角色移动/新增Actor向前向量.webp" alt="新增Actor向前向量" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>新增Actor向前向量</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/角色移动/向前向量​连接方向引脚.webp" alt="向前向量​连接方向引脚" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>向前向量​连接方向引脚</figcaption></figure>
 <h3 id="实现角色移动" class="doc-h3"><a class="doc-anchor" href="#实现角色移动" aria-label="本节链接">#</a>实现角色移动</h3>
 <p>Scala Value数值为正时，角色朝对应方向移动，数值为负时，角色朝向反方向移动</p>
 <p>因此需要将<strong>拆分向量2D</strong>的X数值连接到<strong>Scala Value</strong>引脚处，此时WS的<strong>向前向后移动</strong>在<strong>完成编译</strong>之后即可生效</p>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/角色移动/拆分​向量2D​连接Scala Value.webp" alt="拆分​向量2D​连接Scala Value" loading="lazy" decoding="async" /><figcaption>拆分​向量2D​连接Scala Value</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/角色移动/拆分​向量2D​连接Scala Value.webp" alt="拆分​向量2D​连接Scala Value" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>拆分​向量2D​连接Scala Value</figcaption></figure>
 <p>在已有的add movement input节点的执行引脚处，长按左键新增新的add movement input</p>
 <p>因为需要实现的是左右移动，因此不能使用向前向量，右键搜索输入get actor right，新增获取向右向量</p>
 <p>将新增的<strong>获取向右向量</strong>节点和<strong>拆分向量2D</strong>的<strong>Y数值</strong>连接到新增的add movement input的World Direction和Scala Value引脚处，<strong>点击编译</strong>后即可实现角色的左右移动</p>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/角色移动/实现左右移动.webp" alt="实现左右移动" loading="lazy" decoding="async" /><figcaption>实现左右移动</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/角色移动/实现左右移动.webp" alt="实现左右移动" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>实现左右移动</figcaption></figure>
 <h2 id="3实现视角移动" class="doc-h2"><a class="doc-anchor" href="#3实现视角移动" aria-label="本节链接">#</a>3.实现视角移动</h2>
 <h3 id="新增增强输入" class="doc-h3"><a class="doc-anchor" href="#新增增强输入" aria-label="本节链接">#</a>新增增强输入</h3>
 <p>在内容侧滑菜单的code目录下，新增输入操作，命名为<strong>IA_Look2</strong></p>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/视角移动/新增输入操作.webp" alt="新增输入操作" loading="lazy" decoding="async" /><figcaption>新增输入操作</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/视角移动/新增输入操作.webp" alt="新增输入操作" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>新增输入操作</figcaption></figure>
 <p>双击IA_Look2，进入细节界面，因为视角的上下左右旋转也是二维操作，所以修改值类型为<strong>Axis2D</strong></p>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/视角移动/修改视角移动值类型.webp" alt="修改视角移动值类型" loading="lazy" decoding="async" /><figcaption>修改视角移动值类型</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/视角移动/修改视角移动值类型.webp" alt="修改视角移动值类型" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>修改视角移动值类型</figcaption></figure>
 <h3 id="设置增强输入" class="doc-h3"><a class="doc-anchor" href="#设置增强输入" aria-label="本节链接">#</a>设置增强输入</h3>
 <p>在映射上下文<strong>IMC_Input</strong>中添加操作映射，选择新增的IA_Look2</p>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/视角移动/映射上下文新增操作映射.webp" alt="映射上下文新增操作映射" loading="lazy" decoding="async" /><figcaption>映射上下文新增操作映射</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/视角移动/映射上下文新增操作映射.webp" alt="映射上下文新增操作映射" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>映射上下文新增操作映射</figcaption></figure>
 <p>展开选好的IA_Look2，设置映射键值为鼠标的XY 2D轴，完成设置</p>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/视角移动/视角移动添加鼠标映射.webp" alt="视角移动添加鼠标映射" loading="lazy" decoding="async" /><figcaption>视角移动添加鼠标映射</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/视角移动/视角移动添加鼠标映射.webp" alt="视角移动添加鼠标映射" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>视角移动添加鼠标映射</figcaption></figure>
 <p>返回BP_Charater，将设置好的IA_Look2节点添加到事件图表中</p>
 <p>右键搜索输入IA_Look2，选中强化操作事件中的IA_Look2</p>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/视角移动/事件图表中新增视角移动.webp" alt="事件图表中新增视角移动" loading="lazy" decoding="async" /><figcaption>事件图表中新增视角移动</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/视角移动/事件图表中新增视角移动.webp" alt="事件图表中新增视角移动" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>事件图表中新增视角移动</figcaption></figure>
 <h3 id="rollyawpitch知识点" class="doc-h3"><a class="doc-anchor" href="#rollyawpitch知识点" aria-label="本节链接">#</a>roll、yaw、pitch知识点</h3>
 <p>载体坐标系与载体坐标系的关系是三个Euler角:yaw，pitch，roll，反应了载体相对基准面的姿态：</p>
 <ul class="doc-ul"><li>pitch是围绕Y轴旋转，也叫做俯仰角（视角上下移动）。当X轴的正半轴位于过坐标原点的水平面之上(抬头)时，俯仰角为正，否则为负。</li><li>yaw是围绕Z轴旋转，也叫偏航角（视角左右移动）。即机头右偏航为正，反之为负。</li><li>roll是围绕X轴旋转，也叫翻滚角（视角旋转）。机体向右滚为正，反之为负。</li></ul>
 <h3 id="新增yawpitch" class="doc-h3"><a class="doc-anchor" href="#新增yawpitch" aria-label="本节链接">#</a>新增yaw、pitch</h3>
 <p>视角移动也属于持续操作，左键长按Triggerd的执行引脚，在搜索输入add yaw，选择<strong>添加控制器Yaw输入</strong></p>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/视角移动/添加yaw输入.webp" alt="添加yaw输入" loading="lazy" decoding="async" /><figcaption>添加yaw输入</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/视角移动/添加yaw输入.webp" alt="添加yaw输入" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>添加yaw输入</figcaption></figure>
 <p>右键搜索输入add pitch，选择<strong>添加控制器Pitch输入</strong></p>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/视角移动/添加pitch​输入.webp" alt="添加pitch​输入" loading="lazy" decoding="async" /><figcaption>添加pitch​输入</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/视角移动/添加pitch​输入.webp" alt="添加pitch​输入" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>添加pitch​输入</figcaption></figure>
 <p>左键长按IA_Look2节点的Action Value的引脚</p>
 <p><strong>快捷操作</strong>：将弹出的界面下滑到最底部，直接选择拆分向量2D，或直接右键Action Value文本，选择<strong>分割结构体引脚</strong>，Action Value会分裂成<strong>Action Value X和Action Value Y</strong></p>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/视角移动/快捷选择拆分向量2D​ 1.webp" alt="快捷选择拆分向量2D​ 1" loading="lazy" decoding="async" /><figcaption>快捷选择拆分向量2D​ 1</figcaption></figure>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/视角移动/快捷选择拆分向量2D 2​.webp" alt="快捷选择拆分向量2D 2​" loading="lazy" decoding="async" /><figcaption>快捷选择拆分向量2D 2​</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/视角移动/快捷选择拆分向量2D​ 1.webp" alt="快捷选择拆分向量2D​ 1" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>快捷选择拆分向量2D​ 1</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/视角移动/快捷选择拆分向量2D 2​.webp" alt="快捷选择拆分向量2D 2​" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>快捷选择拆分向量2D 2​</figcaption></figure>
 <h3 id="编写视角移动" class="doc-h3"><a class="doc-anchor" href="#编写视角移动" aria-label="本节链接">#</a>编写视角移动</h3>
 <p>连接yaw输入和pitch输入的执行引脚</p>
 <p>因为yaw负责左右视角移动，pitch负责上下视角移动，所以将2D向量的X连接到控制器Yaw输入的Val输入引脚，将2D向量的Y连接到控制器Pitch输入的Val输入引脚</p>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/视角移动/连接yaw pitch.webp" alt="连接yaw pitch" loading="lazy" decoding="async" /><figcaption>连接yaw pitch</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/视角移动/连接yaw pitch.webp" alt="连接yaw pitch" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>连接yaw pitch</figcaption></figure>
 <h3 id="实现视角移动" class="doc-h3"><a class="doc-anchor" href="#实现视角移动" aria-label="本节链接">#</a>实现视角移动</h3>
 <p><strong>点击编译</strong>后测试，会发现左右视角移动正常，但是上下视角移动颠倒</p>
 <p>解决方案有两个：</p>
 <p>1.将y轴输入值取反：</p>
 <ul class="doc-ul"><li>在事件图表界面右键搜索输入*，选择运算符乘</li><li>将左上方引脚连接到向量2D的Y引脚，左上角连接到控制器Pitch输入的Val输入引脚</li><li>在添加引脚的左侧输入框内修改数值为-1.0</li></ul>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/视角移动/上下视角移动颠倒解决方案1.webp" alt="上下视角移动颠倒解决方案1" loading="lazy" decoding="async" /><figcaption>上下视角移动颠倒解决方案1</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/视角移动/上下视角移动颠倒解决方案1.webp" alt="上下视角移动颠倒解决方案1" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>上下视角移动颠倒解决方案1</figcaption></figure>
 <p>2.在映射上下文<strong>IMC_Input</strong>中继续修改IA_Look2：</p>
 <ul class="doc-ul"><li>展开IA_Look2的选择键值栏，在修改器栏选择添加元素</li><li>在新增的索引栏选择否定，取消XZ选项，仅保留Y的勾选</li><li><strong>注意</strong>：此方案不需要更改原有事件图表中的连接</li></ul>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/视角移动/上下视角移动颠倒解决方案2添加修改器.webp" alt="上下视角移动颠倒解决方案2添加修改器" loading="lazy" decoding="async" /><figcaption>上下视角移动颠倒解决方案2添加修改器</figcaption></figure>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/视角移动/上下视角移动颠倒解决方案2取消勾选XZ.webp" alt="上下视角移动颠倒解决方案2取消勾选XZ" loading="lazy" decoding="async" /><figcaption>上下视角移动颠倒解决方案2取消勾选XZ</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/视角移动/上下视角移动颠倒解决方案2添加修改器.webp" alt="上下视角移动颠倒解决方案2添加修改器" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>上下视角移动颠倒解决方案2添加修改器</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/视角移动/上下视角移动颠倒解决方案2取消勾选XZ.webp" alt="上下视角移动颠倒解决方案2取消勾选XZ" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>上下视角移动颠倒解决方案2取消勾选XZ</figcaption></figure>
 <h2 id="4添加注释" class="doc-h2"><a class="doc-anchor" href="#4添加注释" aria-label="本节链接">#</a>4.添加注释</h2>
 <p>长按鼠标左键，框选住需要注释的节点群，松开后<strong>按键盘C键</strong></p>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/注释效果图.webp" alt="注释效果图" loading="lazy" decoding="async" /><figcaption>注释效果图</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/注释效果图.webp" alt="注释效果图" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>注释效果图</figcaption></figure>
 <h2 id="5实现自动门功能" class="doc-h2"><a class="doc-anchor" href="#5实现自动门功能" aria-label="本节链接">#</a>5.实现自动门功能</h2>
 <h3 id="导入素材" class="doc-h3"><a class="doc-anchor" href="#导入素材" aria-label="本节链接">#</a>导入素材</h3>
 <p>在虚幻引擎界面<a class="doc-link" href="#/docs/ue5/unreal5-notes">已经安装Fab插件</a>之后，在项目界面内的<strong>窗口</strong>或<strong>内容侧滑菜单界</strong>面选择Fab商城</p>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/自动门/Fab​选项-窗口.webp" alt="Fab​选项-窗口" loading="lazy" decoding="async" /><figcaption>Fab​选项-窗口</figcaption></figure>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/自动门/Fab​选项-内容侧滑菜单.webp" alt="Fab​选项-内容侧滑菜单" loading="lazy" decoding="async" /><figcaption>Fab​选项-内容侧滑菜单</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/自动门/Fab​选项-窗口.webp" alt="Fab​选项-窗口" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>Fab​选项-窗口</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/自动门/Fab​选项-内容侧滑菜单.webp" alt="Fab​选项-内容侧滑菜单" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>Fab​选项-内容侧滑菜单</figcaption></figure>
 <ul class="doc-ul"><li>在弹出的Fab界面内的搜索框中输入<strong>wooden door</strong>，回车后在下方条件筛选栏的最后，选择<strong>更多筛选条件</strong>，之后选择价格，勾选免费</li><li>Fab商场全屏展开的情况下，直接选择<strong>价格</strong>筛选条件</li><li>如果Fab商城<strong>长时间</strong>无法加载成功，检查网络或选择<strong>加速器和梯子</strong></li></ul>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/自动门/Fab​商城筛选免费木门素材.webp" alt="Fab​商城筛选免费木门素材" loading="lazy" decoding="async" /><figcaption>Fab​商城筛选免费木门素材</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/自动门/Fab​商城筛选免费木门素材.webp" alt="Fab​商城筛选免费木门素材" width="1006" height="606" fetchpriority="low" decoding="async" /><figcaption>Fab​商城筛选免费木门素材</figcaption></figure>
 <p>在筛选后的界面内选择如图木门资源，点击购买之后选择<strong>添加到项目</strong></p>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/自动门/Fab​商城选择木门素材.webp" alt="Fab​商城选择木门素材" loading="lazy" decoding="async" /><figcaption>Fab​商城选择木门素材</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/自动门/Fab​商城选择木门素材.webp" alt="Fab​商城选择木门素材" width="1006" height="606" fetchpriority="low" decoding="async" /><figcaption>Fab​商城选择木门素材</figcaption></figure>
 <ul class="doc-ul"><li>出现<strong>内容浏览器</strong>，代表素材导入成功，此时可关闭Fab商城</li><li>将内容浏览器显示的路径<strong>/Game/Fab/Wooden_Door</strong>进行复制，之后关闭内容浏览器</li><li>打开内容侧滑菜单，将复制的路径覆盖到当前目录上，路径对应根目录下Fab目录的Wooden_Door目录</li><li>目录中包含六个文件，第一个02_defalut为材质，是第二个素材Door门和第六个素材DoorFrame门框的材质，决定了门的外观，后续三个Door_Door_*是纹理，类似于贴图，可以使用在第一个素材材质上面</li><li>关键在于第二个素材和第六个素材<strong>静态网格体</strong>，可以理解为模型</li></ul>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/自动门/木门素材导入成功标志.webp" alt="木门素材导入成功标志" loading="lazy" decoding="async" /><figcaption>木门素材导入成功标志</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/自动门/木门素材导入成功标志.webp" alt="木门素材导入成功标志" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>木门素材导入成功标志</figcaption></figure>
 <h3 id="修改门框碰撞体" class="doc-h3"><a class="doc-anchor" href="#修改门框碰撞体" aria-label="本节链接">#</a>修改门框碰撞体</h3>
 <p>将DoorFrame门框拖拽到关卡内，在<strong>运行后</strong>移动角色穿过门框，会发现门框<strong>无法穿过</strong></p>
 <p><strong>双击DoorFrame</strong>，点击右上角光照，选择<strong>玩家碰撞</strong>，之后可以发现<strong>门框中间是实心的</strong>，因此角色无法通过</p>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/自动门/门框-碰撞模式.webp" alt="门框-碰撞模式" loading="lazy" decoding="async" /><figcaption>门框-碰撞模式</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/自动门/门框-碰撞模式.webp" alt="门框-碰撞模式" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>门框-碰撞模式</figcaption></figure>
 <p>选择标签页下方的碰撞选项：</p>
 <ul class="doc-ul"><li>如果选择<strong>移除碰撞</strong>，再选择玩家碰撞模式观察，会发现在此模式中整个模型消失不见，说明整个门框都取消了碰撞体积</li><li>如果选择<strong>自动凸包碰撞</strong>，引擎会自动识别光照模式下可视模型范围，将对应模型转换为碰撞体<ul class="doc-ul doc-ul-sub"><li>选择自动凸包碰撞后，右下角会出现凸包分解窗口，如果在玩家碰撞模式下观察感觉碰撞体<strong>存在瑕疵</strong>，与观察模型相差较大，可以通过<strong>增加凸包数量、凸包精准度</strong>，来增加精确度</li><li>增加对应设置之后会<strong>增加游戏负荷</strong>，不利于游戏优化，需要进行取舍</li></ul></li></ul>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/自动门/门框​修改碰撞.webp" alt="门框​修改碰撞" loading="lazy" decoding="async" /><figcaption>门框​修改碰撞</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/自动门/门框​修改碰撞.webp" alt="门框​修改碰撞" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>门框​修改碰撞</figcaption></figure>
 <p>选择自动凸包碰撞，在凸包分解窗口选择应用之后，返回关卡FirstPerson标签，<strong>点击运行</strong>，可以发现此时门框内部角色可以穿过，但门框本体角色无法穿过</p>
 <h3 id="修改门框体积" class="doc-h3"><a class="doc-anchor" href="#修改门框体积" aria-label="本节链接">#</a>修改门框体积</h3>
 <p>目前门框在关卡内体积过大，在<strong>关卡场景或大纲窗口</strong>中左键单击<strong>DoorFrame</strong>之后，选择右下角细节窗口，在缩放一栏<strong>点击锁定</strong>，之后在XYZ任意一个输入框中输入<strong>0.48</strong></p>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/自动门/修改门框体积.webp" alt="修改门框体积" loading="lazy" decoding="async" /><figcaption>修改门框体积</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/自动门/修改门框体积.webp" alt="修改门框体积" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>修改门框体积</figcaption></figure>
 <h3 id="绑定门与门框" class="doc-h3"><a class="doc-anchor" href="#绑定门与门框" aria-label="本节链接">#</a>绑定门与门框</h3>
 <p>将门Door素材拖拽到关卡界面内，会发现门和门框都为静态资源，无法实现人物接近之后开关门的效果，因此需要将门和门框都<strong>放进蓝图</strong>内，作为编写蓝图类代码的一个资源</p>
 <p><strong>删除关卡界面内的门和门框</strong>，打开内容侧滑菜单，在code目录下<strong>新建蓝图类-Actor</strong>，命名为<strong>BP_Door</strong></p>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/自动门/新建Actor蓝图类.webp" alt="新建Actor蓝图类" loading="lazy" decoding="async" /><figcaption>新建Actor蓝图类</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/自动门/新建Actor蓝图类.webp" alt="新建Actor蓝图类" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>新建Actor蓝图类</figcaption></figure>
 <p>在内容侧滑菜单code目录下，<strong>左键双击</strong>新建的BP_Door，进入BP_Door的视口界面</p>
 <p>左键单击组件窗口下方的<strong>新建两次</strong>，选择<strong>静态网格体组件</strong>，一个命名为<strong>Door</strong>，一个命名为<strong>DoorFrame</strong></p>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/自动门/BP_Door中新增静态网格体组件.webp" alt="BP_Door中新增静态网格体组件" loading="lazy" decoding="async" /><figcaption>BP_Door中新增静态网格体组件</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/自动门/BP_Door中新增静态网格体组件.webp" alt="BP_Door中新增静态网格体组件" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>BP_Door中新增静态网格体组件</figcaption></figure>
 <p>可以观察到此时DoorFrame在Door分级下，此时<strong>DoorFrame为Door的子类</strong>，目前用不到父子类关系，因此可以左键长按DoorFrame拖动到Door栏，松开后DoorFrame与Door平级</p>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/自动门/调整静态网格体组件父子类关系.webp" alt="调整静态网格体组件父子类关系" loading="lazy" decoding="async" /><figcaption>调整静态网格体组件父子类关系</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/自动门/调整静态网格体组件父子类关系.webp" alt="调整静态网格体组件父子类关系" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>调整静态网格体组件父子类关系</figcaption></figure>
 <p>左键单击Door或DoorFrame，在右侧细节窗口出现内容，在静态网格体栏中选择绑定已有的Door或者DoorFrame资源</p>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/自动门/绑定资源.webp" alt="绑定资源" loading="lazy" decoding="async" /><figcaption>绑定资源</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/自动门/绑定资源.webp" alt="绑定资源" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>绑定资源</figcaption></figure>
 <p>在变换栏中的缩放为<strong>锁定状态</strong>下，在后续任意栏中输入0.48，调整两个模型的体积大小</p>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/自动门/调整体积大小.webp" alt="调整体积大小" loading="lazy" decoding="async" /><figcaption>调整体积大小</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/自动门/调整体积大小.webp" alt="调整体积大小" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>调整体积大小</figcaption></figure>
 <p>在Actor视口界面，手动调整门与门框的位置，可以在视口菜单的移动对齐数值设置按钮处设置移动模型的单位距离，<strong>闭关时为无极调整</strong></p>
 <p>可以在透视右侧的按钮处调整视角移动的速度，或者<strong>右键的同时移动滚轮</strong>来调整</p>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/自动门/调整门与门框的相对位置.webp" alt="调整门与门框的相对位置" loading="lazy" decoding="async" /><figcaption>调整门与门框的相对位置</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/自动门/调整门与门框的相对位置.webp" alt="调整门与门框的相对位置" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>调整门与门框的相对位置</figcaption></figure>
 <h3 id="编写单向自动门" class="doc-h3"><a class="doc-anchor" href="#编写单向自动门" aria-label="本节链接">#</a>编写单向自动门</h3>
 <p>为了实现在人物接近时门自动开关，需要进行碰撞检测，因此还需要在BP_Door中加入<strong>Box Collision</strong>，在视口界面的组件页下方左键单击添加，搜索选择Box Collision</p>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/自动门/搜索添加盒型碰撞.webp" alt="搜索添加盒型碰撞" loading="lazy" decoding="async" /><figcaption>搜索添加盒型碰撞</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/自动门/搜索添加盒型碰撞.webp" alt="搜索添加盒型碰撞" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>搜索添加盒型碰撞</figcaption></figure>
 <ul class="doc-ul"><li>如图，盒型碰撞实际为一个方形，当角色或模型进入方形范围内就会发生某种响应，触发一些逻辑，因此需要将方形范围覆盖整个门</li><li>选中组件窗口中新增的盒型碰撞Box，在细节窗口的形状页中，调整盒体范围，虽然调整缩放也可以调整盒体范围，但<strong>准标做法</strong>就是调整盒体范围的数值</li><li><strong>注意</strong>：可以将鼠标放置在数值上，鼠标光标显示为左右箭头时，<strong>左键长按往左右拉动</strong>，往右为数值调大，往左为数值调小</li></ul>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/自动门/调整盒型碰撞的覆盖范围.webp" alt="调整盒型碰撞的覆盖范围" loading="lazy" decoding="async" /><figcaption>调整盒型碰撞的覆盖范围</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/自动门/调整盒型碰撞的覆盖范围.webp" alt="调整盒型碰撞的覆盖范围" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>调整盒型碰撞的覆盖范围</figcaption></figure>
 <p>将盒型碰撞Box的<strong>细节页</strong>滑动到<strong>最底部</strong>，点击<strong>组件开始重叠时</strong>的右侧加号以及<strong>组件结束重叠时</strong>的右侧加号</p>
 <p>跳转到Box的事件图表，在事件图表中会新增组件开始重叠时和组件结束重叠时的节点，代表只要有模型<strong>进入和离开</strong>盒体范围，就会执行节点后续代码</p>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/自动门/新建盒体范围触发函数.webp" alt="新建盒体范围触发函数" loading="lazy" decoding="async" /><figcaption>新建盒体范围触发函数</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/自动门/新建盒体范围触发函数.webp" alt="新建盒体范围触发函数" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>新建盒体范围触发函数</figcaption></figure>
 <p>先将组件结束重叠时的节点移到一旁，在组件开始重叠时的节点右侧右键搜索输入time line，点击添加最底部的添加时间轴，命名为<strong>MyDoor</strong></p>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/自动门/添加时间轴.webp" alt="添加时间轴" loading="lazy" decoding="async" /><figcaption>添加时间轴</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/自动门/添加时间轴.webp" alt="添加时间轴" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>添加时间轴</figcaption></figure>
 <p><strong>时间轴</strong>节点的主要作用是为了实现<strong>数值的线性增长与减小</strong>，而门的开与关，可以视为<strong>门沿z轴旋转</strong>，即关门状态代表z轴旋转0度，关门状态代表z轴旋转±90度（视实际情况为准）</p>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/自动门/关门状态-旋转0度.webp" alt="关门状态-旋转0度" loading="lazy" decoding="async" /><figcaption>关门状态-旋转0度</figcaption></figure>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/自动门/开门状态状态-旋转90度.webp" alt="开门状态状态-旋转90度" loading="lazy" decoding="async" /><figcaption>开门状态状态-旋转90度</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/自动门/关门状态-旋转0度.webp" alt="关门状态-旋转0度" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>关门状态-旋转0度</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/自动门/开门状态状态-旋转90度.webp" alt="开门状态状态-旋转90度" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>开门状态状态-旋转90度</figcaption></figure>
 <p>打开BP_Door的事件图表界面，左键双击新建的时间轴MyDoor节点，在进入的详情界面内左键单击<strong>+轨道</strong></p>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/自动门/时间轴-新建轨道.webp" alt="时间轴-新建轨道" loading="lazy" decoding="async" /><figcaption>时间轴-新建轨道</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/自动门/时间轴-新建轨道.webp" alt="时间轴-新建轨道" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>时间轴-新建轨道</figcaption></figure>
 <ul class="doc-ul"><li>在新建的轨道界面内右键单击新建关键帧<strong>两次</strong>，在第一个时间输入框内输入0，对应值也为0，第二个时间输入框内输入1，对应值为-90，代表从0s到1s时间内，数值从0到-90线性减少，同时修改轨道右侧<strong>长度</strong>输入框内数值为1，对应关键帧的总时间长度</li><li>输入之后默认会跳转到无法完整观察到两个关键帧的部分，<strong>键盘F键</strong>或<strong>左键单击</strong>轨道界面左上角<strong>缩放进行水平和垂直匹配</strong>两个按键，就可以快速定位到已有的关键帧的部分</li><li>鼠标<strong>左键单击</strong>首尾帧任意一个点，即可对对应关键帧进行编辑</li><li><strong>注意</strong>：在输入时间和值之后，需要<strong>按键盘上的enter键</strong>，将已输入的数进行保存，不可直接将鼠标点击到别处，不按enter，如果不按，输入的数将无法保存到对应输入框中</li></ul>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/自动门/关键帧效果以及缩放调整.webp" alt="关键帧效果以及缩放调整" loading="lazy" decoding="async" /><figcaption>关键帧效果以及缩放调整</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/自动门/关键帧效果以及缩放调整.webp" alt="关键帧效果以及缩放调整" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>关键帧效果以及缩放调整</figcaption></figure>
 <ul class="doc-ul"><li>返回BP_Door的事件图表界面，在时间轴MyDoor节点旁右键搜索set rotation，选择<strong>Set Relative Rotation(Door)</strong>，设置相对旋转（Door）</li><li>其他设置相对旋转与左侧组件内资产一一对应，新增的节点区别仅在<strong>初始连接的节点</strong>不同</li><li>如果选错了，可以将初始连接的左侧节点删除，从<strong>组件</strong>处左键拖动对应节点到事件图表内，将右侧引脚左键长按连接到Set Relative Rotation节点的目标引脚；或者直接将<strong>组件</strong>处左键拖动对应节点到Set Relative Rotation节点的<strong>目标引脚</strong>，可以直接连接</li></ul>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/自动门/新增​设置相对旋转.webp" alt="新增​设置相对旋转" loading="lazy" decoding="async" /><figcaption>新增​设置相对旋转</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/自动门/新增​设置相对旋转.webp" alt="新增​设置相对旋转" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>新增​设置相对旋转</figcaption></figure>
 <p>将时间轴MyDoor节点的update引脚左键长按连接到Set Relative Rotation节点的左侧执行引脚处，因为<strong>仅需要对Z轴进行旋转</strong>，所以右键New Rotation，选择分割结构体引脚，将Z轴独立出来</p>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/自动门/分割相对旋转的结构体引脚.webp" alt="分割相对旋转的结构体引脚" loading="lazy" decoding="async" /><figcaption>分割相对旋转的结构体引脚</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/自动门/分割相对旋转的结构体引脚.webp" alt="分割相对旋转的结构体引脚" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>分割相对旋转的结构体引脚</figcaption></figure>
 <ul class="doc-ul"><li>将时间轴MyDoor的Reverse 新建轨道0引脚左键长按连接到刚刚分割出的New Rotation Z引脚处</li><li>将组件开始重叠时的执行引脚左键长按连接到时间轴MyDoor的执行引脚</li><li>将组件结束重叠时的执行引脚左键长按连接到时间轴MyDoor的Reverse引脚，代表相反执行，会从时间轴的1s逆向执行到0s</li><li>左键单击左上角编译和保存，返回关卡界面，将BP_Door左键长按拖动到关卡界面内，单击运行或Alt P，检查运行效果</li></ul>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/自动门/单向自动门​最终连接效果图.webp" alt="单向自动门​最终连接效果图" loading="lazy" decoding="async" /><figcaption>单向自动门​最终连接效果图</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/自动门/单向自动门​最终连接效果图.webp" alt="单向自动门​最终连接效果图" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>单向自动门​最终连接效果图</figcaption></figure>
 <h3 id="编写双向自动门" class="doc-h3"><a class="doc-anchor" href="#编写双向自动门" aria-label="本节链接">#</a>编写双向自动门</h3>
 <p>单向门自动开合会存在角色反向进门会被开合的门模型卡住等问题，因此可以编写双向穿过门时，门都向外开关的双向自动门</p>
 <p>首先，需要在BP_Door的视口界面额外再添加一个盒体碰撞，命名为Box2，为了区分，可以将原来的盒体碰撞重命名（按F2或右键）为Box1</p>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/自动门/搜索添加盒型碰撞.webp" alt="搜索添加盒型碰撞" loading="lazy" decoding="async" /><figcaption>搜索添加盒型碰撞</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/自动门/搜索添加盒型碰撞.webp" alt="搜索添加盒型碰撞" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>搜索添加盒型碰撞</figcaption></figure>
 <p>如图，可以将门的旋转角度设置为±90度，将两个碰撞体的位置设置在门开关的模型之外，因为本教程设置门是<strong>向角色反方向开关</strong>，如果碰撞体在门旋转±90度模型以内，会出现时间轴被打断，门开关抽搐的情况</p>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/自动门/调整盒体碰撞位置.webp" alt="调整盒体碰撞位置" loading="lazy" decoding="async" /><figcaption>调整盒体碰撞位置</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/自动门/调整盒体碰撞位置.webp" alt="调整盒体碰撞位置" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>调整盒体碰撞位置</figcaption></figure>
 <p>双击事件图表中的时间轴MyDoor节点，进入MyDoor_Template，如图，继续新增一条轨道，在新增的轨道中新增两个关键帧，分别为时间0，值0，时间1，值90（与第一条轨道值相反）</p>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/自动门/时间轴-新建轨道2.webp" alt="时间轴-新建轨道2" loading="lazy" decoding="async" /><figcaption>时间轴-新建轨道2</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/自动门/时间轴-新建轨道2.webp" alt="时间轴-新建轨道2" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>时间轴-新建轨道2</figcaption></figure>
 <p>返回<strong>事件图表界面</strong>：</p>
 <ul class="doc-ul"><li>在<strong>组件</strong>窗口左键单击新增的Box2，在右侧<strong>细节</strong>窗口底部选择<strong>组件开始重叠时</strong>和<strong>组件结束重叠时</strong></li><li>右键搜索输入time line，新增时间轴，右侧右键搜索输入set rotation，新增Set Relative Rotation(Door)，右键New Rotation项，选择分割结构体引脚</li><li>将Box2的组件开始重叠时的执行引脚连接到新增的时间轴左侧执行引脚，将Box2的组件结束重叠时的执行引脚连接到新增的时间轴左侧Reverse引脚</li><li>将新增的时间轴右侧update引脚连接到新增的Set Relative Rotation(Door)的左侧执行引脚，将新增的时间轴的新增轨道连接到Set Relative Rotation(Door)的New Rotation Z</li><li>点击左上角<strong>编译</strong>和保存后，返回关卡界面，单击运行或者Alt P，检查运行结果，如果觉得开门触发的太早，可以进入BP_Door的视口界面，<strong>调整Box1和Box2盒体范围的Y数值</strong></li></ul>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/自动门/双向自动门最终连接效果图.webp" alt="双向自动门最终连接效果图" loading="lazy" decoding="async" /><figcaption>双向自动门最终连接效果图</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/自动门/双向自动门最终连接效果图.webp" alt="双向自动门最终连接效果图" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>双向自动门最终连接效果图</figcaption></figure>
 <h3 id="时间轴引脚知识补充" class="doc-h3"><a class="doc-anchor" href="#时间轴引脚知识补充" aria-label="本节链接">#</a>时间轴引脚知识补充</h3>
 <ul class="doc-ul"><li>Play：顺序播放时间轴设定的关键帧对应的数值，如果时间轴播放未完成，继续播放会延续上次未完成的时间轴继续播放<ul class="doc-ul doc-ul-sub"><li>举例：角色走到盒体碰撞范围时，门会从<strong>当前角度</strong>线性过渡到±90度之间，表现为门丝滑打开</li></ul></li><li>Play from Start：顺序播放时间轴设定的关键帧对应的数值，如果时间轴播放未完成，继续播放从头开始播放<ul class="doc-ul doc-ul-sub"><li>举例：角色每次进入盒体碰撞范围时，门会闪现到完全关闭的状态再次打开</li></ul></li><li>Stop：不管时间轴进行到哪里，立即停止<ul class="doc-ul doc-ul-sub"><li>举例：如果将组件结束重叠时，也就是角色离开碰撞范围连接到Stop，表现为角色远离门后，门不继续关闭，并且后续门不会执行关闭，只会继续打开</li></ul></li><li>Reverse：倒序播放时间轴设定的关键帧对应的数值，如果时间轴播放未完成，继续播放会延续上次未完成的时间轴继续倒序播放<ul class="doc-ul doc-ul-sub"><li>举例：角色离开盒体碰撞范围时，门会从<strong>已打开的角度</strong>倒序过渡到0度，表现为门丝滑关闭</li></ul></li><li>Reverse from End：倒序播放时间轴设定的关键帧对应的数值，如果时间轴播放未完成，继续播放从最后开始播放<ul class="doc-ul doc-ul-sub"><li>举例：角色每次离开盒体碰撞范围时，门会闪现到完全开门的状态再次关闭</li></ul></li><li>Set New Time：设定时间轴上一个指定的播放时间，联动下方的New Time数值</li></ul>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/自动门/时间轴节点.webp" alt="时间轴节点" loading="lazy" decoding="async" /><figcaption>时间轴节点</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图实战基础/自动门/时间轴节点.webp" alt="时间轴节点" width="364" height="359" fetchpriority="low" decoding="async" /><figcaption>时间轴节点</figcaption></figure>
 <h2 id="6常用流程控制节点" class="doc-h2"><a class="doc-anchor" href="#6常用流程控制节点" aria-label="本节链接">#</a>6.常用流程控制节点</h2>
