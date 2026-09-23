@@ -5,6 +5,15 @@ import { useInViewPause } from '../hooks/useInViewPause'
 import { SECTIONS, SECTION_IDS, HERO_ROLE } from '../data/navigation'
 import { SCROLL_MARGIN_DESKTOP_PX, SCROLL_MARGIN_MOBILE_PX } from '../data/scrollTargets'
 
+/** 导轨上展示的条目：**只要真正的页内章节**。
+ *
+ *  ⚠️ 2026-09：带 `href` 的条目（UE 文档区，跨视图跳转）曾以"额外入口"的身份挂在导轨末尾，
+ *  但它的标签在 `w-14` 的宽度里折成两行、语义也与章节不同（用户反馈"学习笔记的标签还没删掉"）。
+ *  现在文档入口只在**顶栏与页脚**提供，导轨回归纯章节导航。
+ *  ⚠️ 这里过滤的是「导轨节点」，`SECTION_IDS` 仍然包含 `docs`（滚动侦测与导航注册表共用它），
+ *  所以不要顺手去改 navigation.ts 的导出，否则会牵动 useScrollSpy 与 Tab Bar。 */
+const RAIL_SECTIONS = SECTIONS.filter((s) => !s.href)
+
 /** 导轨只在 md（768px）起可见（与 className 的 `hidden md:flex` 同源）。
  *  ⚠️ 这是**联动点**：改这里必须同步改下面的 className，反之亦然。 */
 const RAIL_QUERY = '(min-width: 768px)'
@@ -117,15 +126,9 @@ function Rail() {
         ? SCROLL_MARGIN_DESKTOP_PX
         : SCROLL_MARGIN_MOBILE_PX
       setPositions(
-        SECTIONS.map((sec) => {
+        RAIL_SECTIONS.map((sec) => {
           const el = document.getElementById(sec.id)
-          // 跨视图条目（UE 文档区，主页面里没有对应 section）：
-          // ⚠️ 不能压到 100% —— 它上面紧邻的「联系我」本身就在 97.5%（页面最后一段），
-          //    两个节点会叠在一起（实测 817px vs 828px，标签直接重叠）。
-          //    这里留 8% 间距贴在它上方，视觉上仍是"导轨末尾的额外入口"。
-          //    8% 是量出来的：容器高 766px 时 ≈61px，够放下两行标签（该「UE5 学习笔记」
-          //    在 w-14 的标签宽里会折成两行，节点行高 32px）而不与上一个节点相交。
-          if (!el) return 92
+          if (!el) return 0
           // 首屏（#top）在文档顶端，滚到它时 scrollY = 0
           if (sec.role === HERO_ROLE) return 0
           const sectionTop = el.getBoundingClientRect().top + window.scrollY
@@ -258,14 +261,14 @@ function Rail() {
           positions 为 null 时尚未测量，整组不渲染，避免节点先叠在顶端再散开的位移。 */}
       {positions && (
         <div className="rail-tube absolute right-0" style={{ width: 0 }}>
-          {SECTIONS.map((sec, i) => {
+          {RAIL_SECTIONS.map((sec, i) => {
             const isActive = active === sec.id
             return (
               <div key={sec.id} className="absolute right-0" style={{ top: `${positions[i]}%` }}>
-                {/* 带 href 的条目（UE 文档区）是跨视图跳转，不走 useAnchorScroll 的平滑滚动 */}
+                {/* 导轨里全是页内章节，直接走 useAnchorScroll 的平滑滚动 + 停稳纠正 */}
                 <a
-                  href={sec.href ?? `#${sec.id}`}
-                  onClick={sec.href ? undefined : (e) => onAnchorClick(e, sec.id)}
+                  href={`#${sec.id}`}
+                  onClick={(e) => onAnchorClick(e, sec.id)}
                   aria-current={isActive ? 'true' : undefined}
                   aria-label={sec.label}
                   title={sec.label}

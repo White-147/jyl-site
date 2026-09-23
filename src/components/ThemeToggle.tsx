@@ -140,7 +140,10 @@ export function ThemeToggle({
   }
 
   return (
-    <div className="relative">
+    // ⚠️ 外层这个 div 只负责给下拉菜单提供定位上下文（`absolute` 相对它）。
+    //    它必须是 `inline-flex`：默认的块级 div 会撑满父容器高度，
+    //    在顶栏那一组 flex 里量出来就成了 64px 高而不是按钮的 36px（实测踩过）。
+    <div className="relative inline-flex items-center">
       <button
         type="button"
         onClick={(e) => {
@@ -150,11 +153,16 @@ export function ThemeToggle({
         aria-label={`主题：${MODE_META[mode].label}（${MODE_META[mode].desc}），点击选择`}
         title={`主题：${MODE_META[mode].label}（${MODE_META[mode].desc}）`}
         aria-expanded={open}
-        className={`inline-flex items-center justify-center text-slate-600 transition-all duration-200 [transition-timing-function:var(--ease-out-sharp)] hover:text-brand-700 dark:text-slate-300 dark:hover:text-brand-200 ${
+        // ⚠️ 顶栏实例（square）走 `.bar-control`：静置无底无边框，与笔记/返回顶部/简历同一材质。
+        //    历史上这里写的是「白底 + 1px 边框」，在顶栏那一组里是**唯一**带持久底与边框的控件，
+        //    正是用户反馈的"右侧图标格式不统一"的根源。不要改回去。
+        //    `dot` 变体是独立的小圆点样式（另有用途），不参与顶栏统一。
+        //    注意：`variant === 'row'` 的分支在函数上半段已经 return，这里不可能再是 row。
+        className={
           variant === 'dot'
-            ? 'h-4 w-4 hover:scale-110'
-            : 'h-9 w-9 rounded-lg border border-slate-200 bg-white hover:border-brand-300 dark:border-slate-700 dark:bg-slate-800 dark:hover:border-brand-500'
-        }`}
+            ? 'inline-flex h-4 w-4 items-center justify-center text-slate-600 transition-transform duration-200 hover:scale-110 dark:text-slate-300'
+            : 'bar-control'
+        }
       >
         <ModeIcon mode={mode} className={variant === 'dot' ? 'h-4 w-4' : 'h-4.5 w-4.5'} />
       </button>
