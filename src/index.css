@@ -986,6 +986,19 @@ details[open] .chevron-up-down {
   color: var(--color-slate-400);
 }
 
+/* 文档大纲的「目录树」：用一条竖线把二、三级挂到文档名之下。
+   为什么需要它：原实现只用缩进区分层级（level 2 是 `pl-3`、level 3 是 `pl-5`，差 4px），
+   视觉上几乎没有层级感，读者看到的是"一长串没头没尾的条目"。
+   ⚠️ 只作用于大纲列表（`.rail-tree`），不要扩散到正文。 */
+.rail-tree > ul {
+  margin-left: 3px;
+  padding-left: 8px;
+  border-left: 1px solid var(--color-slate-200);
+}
+.dark .rail-tree > ul {
+  border-left-color: var(--color-slate-700);
+}
+
 /* 打印一律拦截：站点不提供打印版式（固定网格、玻璃层、导航栏打印出来是半成品），
    改为显示 index.html 里那段静态提示，引导到带水印的 PDF 简历。
 

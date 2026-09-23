@@ -246,7 +246,10 @@ function convert(md, ctx, docId) {
       const text = h[2].trim()
       // 文档第一个标题（# 一级）用作页面标题，不进大纲
       const id = slugify(text, usedSlugs)
-      toc.push({ id, label: text, level })
+      // ⚠️ 大纲标签必须去掉行内标记：原文里 `### **第三个按钮 - 模式**` 这类写法
+      //    （ue5-window-base.md 就有一处）会把 `**` 原样带进目录，显示成 "**第三个按钮 - 模式**"。
+      //    正文渲染保留加粗（那是作者本意），只有大纲标签用纯文本。
+      toc.push({ id, label: stripInline(text), level })
       html.push(
         `<h${level} id="${escapeAttr(id)}" class="doc-h${level}">` +
           `<a class="doc-anchor" href="#${escapeAttr(id)}" aria-label="本节链接">#</a>` +

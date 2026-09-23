@@ -140,30 +140,62 @@ export default function Docs({ docId, anchor }: { docId?: string; anchor?: strin
     </ul>
   )
 
-  /** 当前篇大纲（桌面右栏、xl 以下的左栏、手机抽屉三处共用） */
+  /** 当前篇大纲（桌面右栏、xl 以下的左栏、手机抽屉三处共用）。
+   *
+   *  层级用「目录树」表达而不是靠缩进量（2026-09 改版）：
+   *    · level 1 = 文档名，实心方块 + 加粗，作为整棵树的根；
+   *    · level 2/3 = 竖线（`rail-tree` 的 border-left）+ 分支符 `├` / `└`；
+   *    · 字号 12px：实测最长标签 17 字（`roll、yaw、pitch知识点`）在 13px 下要 212px，
+   *      而右栏可用文字宽只有 192px（A 方案），12px 下正好放得下、**不换行**。
+   *      换行会把目录拉得又长又乱，这是本次加宽 + 缩字号的唯一目的。
+   *    · 兜底：仍溢出的个别标签用 `truncate` + `title`，宁可省略号也不换行。 */
   const outline = current ? (
     <ul className="space-y-0.5">
-      {current.toc.map((t) => (
-        <li key={t.id}>
-          <a
-            href={docsHref(current.id, t.id)}
-            onClick={(e) => {
-              e.preventDefault()
-              goToAnchor(t.id)
-              setNavOpen(false)
-            }}
-            className={`block border-l-2 py-1 text-[13px] leading-snug transition-colors ${
-              t.level >= 3 ? 'pl-5' : 'pl-3'
-            } ${
-              activeAnchor === t.id
-                ? 'border-brand-500 font-medium text-brand-700 dark:text-brand-200'
-                : 'border-slate-200 text-slate-500 hover:border-brand-300 hover:text-brand-700 dark:border-slate-700 dark:text-slate-400 dark:hover:text-brand-200'
-            }`}
-          >
-            {t.label}
-          </a>
-        </li>
-      ))}
+      {current.toc.map((t, idx) => {
+        const isLast = idx === current.toc.length - 1
+        const nextLevel = current.toc[idx + 1]?.level ?? 0
+        const isBranchEnd = nextLevel <= t.level || isLast
+        return (
+          <li key={t.id} className={t.level === 1 ? 'mt-1 first:mt-0' : ''}>
+            <a
+              href={docsHref(current.id, t.id)}
+              onClick={(e) => {
+                e.preventDefault()
+                goToAnchor(t.id)
+                setNavOpen(false)
+              }}
+              title={t.label}
+              className={`group flex items-center gap-1.5 py-1 text-[12px] leading-tight transition-colors ${
+                activeAnchor === t.id
+                  ? 'font-medium text-brand-700 dark:text-brand-200'
+                  : 'text-slate-500 hover:text-brand-700 dark:text-slate-400 dark:hover:text-brand-200'
+              }`}
+              style={{ paddingLeft: `${(t.level - 1) * 14}px` }}
+            >
+              {t.level === 1 ? (
+                <span
+                  className={`h-1.5 w-1.5 shrink-0 rounded-[2px] ${
+                    activeAnchor === t.id ? 'bg-brand-600 dark:bg-brand-300' : 'bg-slate-400 dark:bg-slate-500'
+                  }`}
+                  aria-hidden="true"
+                />
+              ) : (
+                <span
+                  className={`shrink-0 font-mono text-[10px] leading-none ${
+                    activeAnchor === t.id ? 'text-brand-500 dark:text-brand-300' : 'text-slate-300 dark:text-slate-600'
+                  }`}
+                  aria-hidden="true"
+                >
+                  {isBranchEnd ? '└' : '├'}
+                </span>
+              )}
+              <span className={`truncate ${t.level === 1 ? 'font-semibold text-slate-600 dark:text-slate-300' : ''}`}>
+                {t.label}
+              </span>
+            </a>
+          </li>
+        )
+      })}
     </ul>
   ) : null
 
@@ -242,9 +274,11 @@ export default function Docs({ docId, anchor }: { docId?: string; anchor?: strin
   }
 
   return (
-    // ⚠️ 宽度口径（2026-09 放大）：外层 100rem（1600px），左右栏收窄到 192 / 176，间距 24。
-    //    改动前是 88rem + 240 / 208 + gap 32 —— 实测 1440 下内容列只有 848px、1920 下被 88rem 封顶
-    //    在 848px 不动（左右各空 256px），所以"内容区小 + 没占满"是同一个原因。
+    // ⚠️ 宽度口径（2026-09 两轮调整，改之前先看 docs/联动维护点.md 第 13 条的硬约束表）
+    //    第一轮：外层 88rem → 100rem，左右栏 240/208 → 192/176（内容列 848 → 961@1440）。
+    //    第二轮：左右栏 → 208/224（A 方案），因为大纲最长标签 17 字在 13px 下要 212px，
+    //            右栏可用文字宽必须 ≥192px 才能不换行；内容列 1184 → 1144（@1600 容器）。
+    //    注意两个值分别在 `md:grid-cols` 与 `xl:grid-cols` 里，改一处要连另一处一起看。
     //    改后内容列：1440 → 948，1920 → 1180。
     <div className="mx-auto max-w-[100rem] px-4 pb-24 pt-6 sm:px-6 lg:pt-10">
       {/* 顶部：返回主站 + 阅读顺序说明。
@@ -259,9 +293,7 @@ export default function Docs({ docId, anchor }: { docId?: string; anchor?: strin
           </svg>
           返回作品集
         </a>
-        <span className="text-sm text-slate-400 dark:text-slate-500">
-          {ready.length} 篇 · 按顺序阅读
-        </span>
+        <span className="text-sm text-slate-400 dark:text-slate-500">{ready.length} 篇笔记</span>
       </div>
 
       {/* 手机端吸顶条：目录入口。`sticky top-16` = 正好贴在常驻顶栏下沿，
@@ -317,19 +349,22 @@ export default function Docs({ docId, anchor }: { docId?: string; anchor?: strin
               </button>
             </div>
             {docTree}
+            <p className="mt-3 px-2.5 text-[11px] leading-relaxed text-slate-400 dark:text-slate-500">
+              01–05 为建议阅读顺序（界面在前、蓝图在后）。
+            </p>
             {current.toc.length > 0 && (
               <>
                 <p className="mt-5 border-t border-slate-200 pt-4 text-xs font-semibold uppercase tracking-widest text-slate-400 dark:border-slate-700 dark:text-slate-500">
                   本篇大纲
                 </p>
-                <div className="mt-3">{outline}</div>
+                <div className="rail-tree mt-2.5">{outline}</div>
               </>
             )}
           </div>
         </>
       )}
 
-      <div className="md:grid md:grid-cols-[12rem_minmax(0,1fr)] md:gap-6 xl:grid-cols-[12rem_minmax(0,1fr)_11rem]">
+      <div className="md:grid md:grid-cols-[13rem_minmax(0,1fr)] md:gap-6 xl:grid-cols-[13rem_minmax(0,1fr)_14rem]">
         {/* 左：文档树（+ xl 以下顺带放本篇大纲 —— 右侧栏在 xl 以下不显示，没有它会没大纲可看） */}
         <aside className="hidden md:block">
           <div className="md:sticky md:top-24 md:max-h-[calc(100vh-8rem)] md:overflow-y-auto md:pr-1">
@@ -338,8 +373,11 @@ export default function Docs({ docId, anchor }: { docId?: string; anchor?: strin
             </p>
             <div className="mt-3">{docTree}</div>
 
+            {/* 「按顺序阅读」全站只在这里说一次（2026-09 精简）：
+                原来在页头计数、侧栏注释、目录末行、正文头部各说一遍，属于同一句话的四份拷贝。
+                序号 01–05 本身已经说明顺序，这里只补一句"为什么是这个顺序"。 */}
             <p className="mt-4 px-2.5 text-[11px] leading-relaxed text-slate-400 dark:text-slate-500">
-              按 01 → 05 顺序阅读；每篇头部标注前置、尾部给出下一篇。
+              01–05 为建议阅读顺序（界面在前、蓝图在后）；每篇头部标注前置、尾部给出下一篇。
             </p>
 
             {current.toc.length > 0 && (
@@ -347,7 +385,7 @@ export default function Docs({ docId, anchor }: { docId?: string; anchor?: strin
                 <p className="mt-6 border-t border-slate-200 pt-4 text-xs font-semibold uppercase tracking-widest text-slate-400 dark:border-slate-700 dark:text-slate-500">
                   本篇大纲
                 </p>
-                <div className="mt-3">{outline}</div>
+                <div className="rail-tree mt-2.5">{outline}</div>
               </div>
             )}
           </div>
@@ -422,13 +460,15 @@ export default function Docs({ docId, anchor }: { docId?: string; anchor?: strin
           </nav>
         </main>
 
-        {/* 右：本篇大纲（宽屏常驻；xl 以下由左栏与手机抽屉承担，三处共用同一个 `outline`） */}
+        {/* 右：本篇大纲（宽屏常驻；xl 以下由左栏与手机抽屉承担，三处共用同一个 `outline`）。
+            宽度 14rem（224px）= A 方案：可用文字宽 192px，12px 字号下最长标签（17 字）刚好不换行。
+            加宽的代价是内容列从 1184 → 1144（仍远大于加宽前的 961）。 */}
         <aside className="hidden xl:block">
           <nav aria-label="本篇大纲" className="sticky top-24 max-h-[calc(100vh-8rem)] overflow-y-auto">
             <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500">
               本篇大纲
             </p>
-            <div className="mt-3">{outline}</div>
+            <div className="rail-tree mt-2.5">{outline}</div>
           </nav>
         </aside>
       </div>
