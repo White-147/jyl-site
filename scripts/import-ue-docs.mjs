@@ -136,7 +136,7 @@ function inline(text, ctx) {
   out = out.replace(/!\[([^\]]*)\]\(([^)\s]+)\)/g, (_m, alt, src) => {
     const { file, url } = imageSrc(src)
     ctx.images.add(file)
-    return keep(figure(url, alt))
+    return keep(figure(url, alt, ctx.imgIndex++))
   })
 
   // 链接：[text](url)。⚠️ 链接文本在**清洗行内标记之后**再 escape —— 笔记里大量写作
@@ -178,12 +178,66 @@ function shortUrl(u) {
   }
 }
 
-/** 图片统一包 figure：灯箱由 React 端用事件委托接管（见 Docs.tsx 的 data-doc-image）。 */
-function figure(url, alt) {
+/**
+ * 读取 WebP 的真实像素尺寸（只解析文件头，不解码像素）。
+ *
+ * ⚠️ 为什么必须做（2026-09 实测的教训）：
+ *   正文里的图都带 `loading="lazy"`，而 `<img>` 又没有 `width`/`height` ——
+ *   浏览器在图片加载完成前不知道它多高，于是**文档高度随图片逐张加载不断增长**
+ *   （实测同一页的 max scroll 从 4194 一路涨到 9684）。
+ *   后果是锚点导航全乱：点目录时按"当时的高度"定位，跳完图片加载、高度变化，
+ *   元素就跑掉了（实测偏差 96～1900px，且越靠后越离谱）。
+ *   写上 width/height（配 CSS 的 `width:100%;height:auto`）后，浏览器**按比例预留空间**，
+ *   文档高度从第一帧起就是真值，跳转一次到位，顺带也消除了图片加载引起的布局抖动。
+ */
+function webpSize(file) {
+  try {
+    const b = readFileSync(file)
+    if (b.length < 30 || b.toString('ascii', 0, 4) !== 'RIFF' || b.toString('ascii', 8, 12) !== 'WEBP')
+      return null
+    const fourCC = b.toString('ascii', 12, 16)
+    if (fourCC === 'VP8X') {
+      // 扩展格式：24 位小端存 (宽-1)、(高-1)
+      const w = 1 + (b[24] | (b[25] << 8) | (b[26] << 16))
+      const h = 1 + (b[27] | (b[28] << 8) | (b[29] << 16))
+      return { w, h }
+    }
+    if (fourCC === 'VP8 ') {
+      // 有损：帧头里 14 位存宽、14 位存高
+      const w = (b[26] | (b[27] << 8)) & 0x3fff
+      const h = (b[28] | (b[29] << 8)) & 0x3fff
+      return { w, h }
+    }
+    if (fourCC === 'VP8L') {
+      // 无损：1 字节签名后的 4 字节里，14 位宽、14 位高
+      const bits = b[21] | (b[22] << 8) | (b[23] << 16) | (b[24] << 24)
+      return { w: 1 + (bits & 0x3fff), h: 1 + ((bits >> 14) & 0x3fff) }
+    }
+    return null
+  } catch {
+    return null
+  }
+}
+
+/** 图片统一包 figure：灯箱由 React 端用事件委托接管（见 Docs.tsx 的 data-doc-image）。
+ *  `width`/`height` 由 WebP 文件头读出，用来预留空间（原因见 webpSize 的注释）。
+ *
+ *  ⚠️ 只在**第一张**图用 `loading="lazy"`，其余用 `eager` + 低优先级（2026-09 实测的取舍）：
+ *    懒加载意味着"没滚到就不加载"，而图片没加载时虽然有了 width/height、比例知道了，
+ *    **文档总高度却还会随着加载继续增长** —— 于是文档末尾的锚点永远跳不到：
+ *    实测点最后一个大纲项时 `scrollTop` 已经到顶（16160），标题仍在容器顶下方 602px。
+ *    正文图片是 WebP、全篇合计约 1.3MB，`fetchpriority="low"` 让它们不抢首屏带宽即可。
+ *    正确性优先：锚点跳不过去是功能缺陷，图片晚几百毫秒到不是。
+ */
+function figure(url, alt, index = 0) {
+  // url 形如 `docs/ue5/images/xxx.webp`，落盘在 public/ 下
+  const size = webpSize(join(root, 'public', url))
+  const dim = size ? ` width="${size.w}" height="${size.h}"` : ''
+  const loading = index === 0 ? ' loading="lazy"' : ' fetchpriority="low"'
   const caption = alt && alt.trim() ? `<figcaption>${escapeHtml(alt.trim())}</figcaption>` : ''
   return (
     `<figure class="doc-figure">` +
-    `<img data-doc-image src="${escapeAttr(url)}" alt="${escapeAttr(alt || '')}" loading="lazy" decoding="async" />` +
+    `<img data-doc-image src="${escapeAttr(url)}" alt="${escapeAttr(alt || '')}"${dim}${loading} decoding="async" />` +
     `${caption}</figure>`
   )
 }
@@ -224,7 +278,7 @@ function convert(md, ctx, docId) {
       ctx.images.add(file)
       // 原文里图没有独立说明文字，用文件名兜底做 caption（去掉扩展名、把分隔符换成空格太激进了，保持原名）
       const alt = file.split('/').pop().replace(/\.[^.]+$/, '')
-      html.push(figure(url, alt))
+      html.push(figure(url, alt, ctx.imgIndex++))
       i++
       continue
     }
@@ -344,7 +398,8 @@ for (const doc of DOCS) {
     continue
   }
   const md = readFileSync(src, 'utf8')
-  const ctx = { images: new Set(), docById }
+  // imgIndex 用于"只让第一张图懒加载"（见 figure 函数的注释）
+  const ctx = { images: new Set(), docById, imgIndex: 0 }
   // 一级标题作为页面标题，块级转换从它之后开始（仍会渲染成 h1）
   const { html, toc } = convert(md, ctx, doc.id)
   ctx.images.forEach((f) => allImages.add(f))

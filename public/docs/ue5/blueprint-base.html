@@ -7,10 +7,10 @@
 <h2 id="2创建蓝图" class="doc-h2"><a class="doc-anchor" href="#2创建蓝图" aria-label="本节链接">#</a>2.创建蓝图</h2>
 <h3 id="步骤" class="doc-h3"><a class="doc-anchor" href="#步骤" aria-label="本节链接">#</a>步骤</h3>
 <ul class="doc-ul"><li>在内容侧滑菜单的内容目录下右键新增文件夹，重命名为Code，存放后续蓝图</li><li>在新建的Code目录下选择右键菜单中的蓝图类，选择需要的父类</li></ul>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图基础/新建文件夹.webp" alt="新建文件夹" loading="lazy" decoding="async" /><figcaption>新建文件夹</figcaption></figure>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图基础/新建蓝图类.webp" alt="新建蓝图类" loading="lazy" decoding="async" /><figcaption>新建蓝图类</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图基础/新建文件夹.webp" alt="新建文件夹" width="1600" height="1000" loading="lazy" decoding="async" /><figcaption>新建文件夹</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图基础/新建蓝图类.webp" alt="新建蓝图类" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>新建蓝图类</figcaption></figure>
 <h3 id="各父类讲解" class="doc-h3"><a class="doc-anchor" href="#各父类讲解" aria-label="本节链接">#</a>各父类讲解</h3>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图基础/蓝图类父类.webp" alt="蓝图类父类" loading="lazy" decoding="async" /><figcaption>蓝图类父类</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图基础/蓝图类父类.webp" alt="蓝图类父类" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>蓝图类父类</figcaption></figure>
 <h4 id="actor" class="doc-h4"><a class="doc-anchor" href="#actor" aria-label="本节链接">#</a>Actor</h4>
 <p>定义：<strong>Actor</strong> 是可以放置在关卡中的任意对象，如摄像机、静态网格体或玩家出生点。Actor支持3D变换，如平移、旋转和缩放。你可以通过gameplay代码（C++或蓝图）来创建和销毁Actor。在C++中，<code>AActor</code> 是所有Actor的基类。</p>
 <h4 id="pawn" class="doc-h4"><a class="doc-anchor" href="#pawn" aria-label="本节链接">#</a>Pawn</h4>
@@ -35,53 +35,53 @@
 <h2 id="3actor界面" class="doc-h2"><a class="doc-anchor" href="#3actor界面" aria-label="本节链接">#</a>3.Actor界面</h2>
 <h3 id="视口" class="doc-h3"><a class="doc-anchor" href="#视口" aria-label="本节链接">#</a>视口</h3>
 <ul class="doc-ul"><li>组件：是一种可以被添加到Actor的功能性部件。在向Actor添加组件后，该ActorIU可以使用该组件提供的功能，如：<ul class="doc-ul doc-ul-sub"><li>聚光源组件（Spot Light Component）可以让你的Actor发出聚光灯一样的光线。</li><li>旋转移动组件（Rotating Movement Component）可以让你的Actor旋转。</li><li>音频组件（Audio Component）可以让你的Actor播放音效。</li><li>组件必须附加到Actor，不能独立存在。</li></ul></li><li>图表：视口中的图表一般用于分类</li><li>函数：类比于C++或C#中的函数或方法</li><li>变量：类比于C++或C#中的变量</li></ul>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图基础/Actor视口.webp" alt="Actor视口" loading="lazy" decoding="async" /><figcaption>Actor视口</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图基础/Actor视口.webp" alt="Actor视口" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>Actor视口</figcaption></figure>
 <h3 id="构造脚本" class="doc-h3"><a class="doc-anchor" href="#构造脚本" aria-label="本节链接">#</a>构造脚本</h3>
 <p>蓝图类拖拽到场景内之后，构造脚本立即执行；事件图表在点击运行后开始执行</p>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图基础/Actor构建脚本.webp" alt="Actor构建脚本" loading="lazy" decoding="async" /><figcaption>Actor构建脚本</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图基础/Actor构建脚本.webp" alt="Actor构建脚本" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>Actor构建脚本</figcaption></figure>
 <h3 id="事件图表" class="doc-h3"><a class="doc-anchor" href="#事件图表" aria-label="本节链接">#</a>事件图表</h3>
 <h4 id="定义" class="doc-h4"><a class="doc-anchor" href="#定义" aria-label="本节链接">#</a>定义</h4>
 <p><strong>事件图表（Event Graphs）</strong> 是蓝图图表的最常见类型。每个新建的蓝图类（Blueprint Class）在创建时都将包含一个事件图表。事件图表通常包含蓝图的游戏进程行为的网络，而<strong>事件</strong>、 <strong>自定义事件</strong>和 <strong>输入</strong> 节点则通过事件图表来启动执行流。</p>
 <ul class="doc-ul"><li>事件开始运行：当关卡开始运行时，此节点后续节点会开始运行</li><li>事件Actor开始重叠：当物体和Actor物体重叠时，此节点后续节点会开始运行（触发器）</li><li>事件Tick：当Actor生成后，每一帧都会执行此节点后续节点</li></ul>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图基础/Actor事件图表.webp" alt="Actor事件图表" loading="lazy" decoding="async" /><figcaption>Actor事件图表</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图基础/Actor事件图表.webp" alt="Actor事件图表" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>Actor事件图表</figcaption></figure>
 <h4 id="节点和引脚的中文化" class="doc-h4"><a class="doc-anchor" href="#节点和引脚的中文化" aria-label="本节链接">#</a>节点和引脚的中文化</h4>
 <p>如果事件图表的节点显示为英文，可以选择编辑中的<strong>编辑器偏好设置</strong>，勾选区域和语言中的<strong>使用本地化图标编辑器节点和引脚命名</strong></p>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图基础/Actor事件图表中文.webp" alt="Actor事件图表中文" loading="lazy" decoding="async" /><figcaption>Actor事件图表中文</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图基础/Actor事件图表中文.webp" alt="Actor事件图表中文" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>Actor事件图表中文</figcaption></figure>
 <h3 id="第一段代码" class="doc-h3"><a class="doc-anchor" href="#第一段代码" aria-label="本节链接">#</a>第一段代码</h3>
 <h4 id="定义-2" class="doc-h4"><a class="doc-anchor" href="#定义-2" aria-label="本节链接">#</a>定义</h4>
 <ul class="doc-ul"><li>在Actor事件图表界面，左键长按事件开始运行节点右下角的<strong>执行</strong>，向其他位置拖出</li><li>松开鼠标左键后，弹出如图所示界面，在搜索框中输入print，寻找输出函数</li></ul>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图基础/创建函数.webp" alt="创建函数" loading="lazy" decoding="async" /><figcaption>创建函数</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图基础/创建函数.webp" alt="创建函数" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>创建函数</figcaption></figure>
 <h4 id="编写" class="doc-h4"><a class="doc-anchor" href="#编写" aria-label="本节链接">#</a>编写</h4>
 <ul class="doc-ul"><li>选中输出String的函数后，在<strong>Print String界面</strong>修改默认的<strong>Hello</strong>文本，改为HelloWorld文本</li><li>修改后如图，Actor窗口和内容侧滑菜单关于此Actor物体多出<strong>星号标记</strong>，表示未保存</li><li>在运行和保存之前，需要先点击左上角的<strong>编译</strong>，之后点击保存或Ctrl S，界面内星号标记消失</li><li><strong>仅限开发</strong>是指此节点仅在开发过程中可见，在游戏打包后，外部人员无法获取、观察到此节点效果</li></ul>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图基础/代码编译和保存.webp" alt="代码编译和保存" loading="lazy" decoding="async" /><figcaption>代码编译和保存</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图基础/代码编译和保存.webp" alt="代码编译和保存" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>代码编译和保存</figcaption></figure>
 <h4 id="运行" class="doc-h4"><a class="doc-anchor" href="#运行" aria-label="本节链接">#</a>运行</h4>
 <ul class="doc-ul"><li>事件图表中将代码写好，点击<strong>编译</strong>和保存后</li><li>返回关卡界面，呼出内容侧滑菜单，长按左键，将Actor物体拖拽到关卡内</li></ul>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图基础/运行Actor代码-拖拽物体到关卡内.webp" alt="运行Actor代码-拖拽物体到关卡内" loading="lazy" decoding="async" /><figcaption>运行Actor代码-拖拽物体到关卡内</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图基础/运行Actor代码-拖拽物体到关卡内.webp" alt="运行Actor代码-拖拽物体到关卡内" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>运行Actor代码-拖拽物体到关卡内</figcaption></figure>
 <p>拖拽到关卡内效果如图，点击开始运行关卡或Ctrl P</p>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图基础/运行Actor代码-开始运行.webp" alt="运行Actor代码-开始运行" loading="lazy" decoding="async" /><figcaption>运行Actor代码-开始运行</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图基础/运行Actor代码-开始运行.webp" alt="运行Actor代码-开始运行" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>运行Actor代码-开始运行</figcaption></figure>
 <p>运行效果如图，代表运行成功，可按<strong>esc退出</strong></p>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图基础/运行Actor代码-运行效果.webp" alt="运行Actor代码-运行效果" loading="lazy" decoding="async" /><figcaption>运行Actor代码-运行效果</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图基础/运行Actor代码-运行效果.webp" alt="运行Actor代码-运行效果" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>运行Actor代码-运行效果</figcaption></figure>
 <h4 id="执行引脚和运行顺序" class="doc-h4"><a class="doc-anchor" href="#执行引脚和运行顺序" aria-label="本节链接">#</a>执行引脚和运行顺序</h4>
 <ul class="doc-ul"><li>每个节点都有如图的执行引脚，程序会按照前后顺序执行各个节点的代码内容</li><li>修改原有节点的输出内容，更改为<strong>1</strong>，并在原节点处执行引脚新增新节点，输出内容设置为<strong>2</strong></li><li>修改完成后点击编译，保存可以暂时不点，<strong>未编译代码无法在关卡内正常运行</strong></li></ul>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图基础/执行顺序-编写代码.webp" alt="执行顺序-编写代码" loading="lazy" decoding="async" /><figcaption>执行顺序-编写代码</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图基础/执行顺序-编写代码.webp" alt="执行顺序-编写代码" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>执行顺序-编写代码</figcaption></figure>
 <p>运行效果如图所示，<strong>先输出2，再输出1</strong></p>
 <p>顺序为出栈顺序，<strong>先进后出</strong></p>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图基础/执行顺序-运行效果.webp" alt="执行顺序-运行效果" loading="lazy" decoding="async" /><figcaption>执行顺序-运行效果</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图基础/执行顺序-运行效果.webp" alt="执行顺序-运行效果" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>执行顺序-运行效果</figcaption></figure>
 <h4 id="输入引脚" class="doc-h4"><a class="doc-anchor" href="#输入引脚" aria-label="本节链接">#</a>输入引脚</h4>
 <p>在事件图表界面的左下角<strong>变量栏</strong>，点击<strong>新增变量</strong>，修改命名为String</p>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图基础/输入引脚-新增变量.webp" alt="输入引脚-新增变量" loading="lazy" decoding="async" /><figcaption>输入引脚-新增变量</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图基础/输入引脚-新增变量.webp" alt="输入引脚-新增变量" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>输入引脚-新增变量</figcaption></figure>
 <ul class="doc-ul"><li>如果最开始没有修改命名，可以<strong>右键选择重命名</strong>或者按<strong>F2</strong>进行</li><li>点击变量右侧默认布尔的变量类型，修改变量类型</li></ul>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图基础/输入引脚-修改变量类型.webp" alt="输入引脚-修改变量类型" loading="lazy" decoding="async" /><figcaption>输入引脚-修改变量类型</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图基础/输入引脚-修改变量类型.webp" alt="输入引脚-修改变量类型" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>输入引脚-修改变量类型</figcaption></figure>
 <ul class="doc-ul"><li>左键单击新增的变量，右侧出现该变量<strong>细节</strong>界面</li><li>可在细节界面修改变量名、变量类型、变量值，以及<strong>添加变量描述</strong></li><li>修改变量参数需要<strong>先完成编译</strong></li></ul>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图基础/输入引脚-修改变量值.webp" alt="输入引脚-修改变量值" loading="lazy" decoding="async" /><figcaption>输入引脚-修改变量值</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图基础/输入引脚-修改变量值.webp" alt="输入引脚-修改变量值" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>输入引脚-修改变量值</figcaption></figure>
 <p><strong>左键长按</strong>新增变量，拖拽到事件图表界面内，选择出现的窗口中的<strong>获取String</strong></p>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图基础/输入引脚-获取变量.webp" alt="输入引脚-获取变量" loading="lazy" decoding="async" /><figcaption>输入引脚-获取变量</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图基础/输入引脚-获取变量.webp" alt="输入引脚-获取变量" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>输入引脚-获取变量</figcaption></figure>
 <ul class="doc-ul"><li>点击获取String之后出现新节点，<strong>左键长按</strong>新节点的右侧，拖拽到需要连接的节点左侧，完成连接</li><li>连接之后可以观察到，原有的in String后续的可填写内容消失</li></ul>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图基础/输入引脚-拖拽连接.webp" alt="输入引脚-拖拽连接" loading="lazy" decoding="async" /><figcaption>输入引脚-拖拽连接</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图基础/输入引脚-拖拽连接.webp" alt="输入引脚-拖拽连接" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>输入引脚-拖拽连接</figcaption></figure>
 <p><strong>点击编译后</strong>，在关卡内执行运行，效果如图，显示内容为变量值</p>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图基础/输入引脚-执行效果.webp" alt="输入引脚-执行效果" loading="lazy" decoding="async" /><figcaption>输入引脚-执行效果</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图基础/输入引脚-执行效果.webp" alt="输入引脚-执行效果" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>输入引脚-执行效果</figcaption></figure>
 <h4 id="取消后续节点操作" class="doc-h4"><a class="doc-anchor" href="#取消后续节点操作" aria-label="本节链接">#</a>取消后续节点操作</h4>
 <p>删除后续节点：<strong>右键</strong>节点<strong>选择删除</strong>，或选中节点后<strong>按del键</strong></p>
 <p>取消节点连接：<strong>先按alt键</strong>，再<strong>左键</strong>节点的执行引脚</p>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图基础/删除节点.webp" alt="删除节点" loading="lazy" decoding="async" /><figcaption>删除节点</figcaption></figure>
-<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图基础/删除连接.webp" alt="删除连接" loading="lazy" decoding="async" /><figcaption>删除连接</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图基础/删除节点.webp" alt="删除节点" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>删除节点</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/蓝图基础/删除连接.webp" alt="删除连接" width="1600" height="1000" fetchpriority="low" decoding="async" /><figcaption>删除连接</figcaption></figure>
