@@ -151,12 +151,18 @@
         }
       }
       /* 内容列：对应 `max-w-4xl`（56rem）。
-         visibility: hidden 而不是 display: none —— 保留占位，避免骨架自身在挂载前
-         还要再发生一次「无内容→有内容」的高度变化。这里内容本来就不参与观感，
-         所以隐藏它不会让任何东西消失。 */
+         ⚠️ 2026-09 起**不再隐藏**（原来是 visibility: hidden）：
+           隐藏的理由是"骨架文字与 Hero 对不齐会跳"，但实测对不齐的真因是**内容不一致** ——
+           骨架写的是旧的 3 条方向、且缺少第二行简介，而 Hero 是 4 条方向 + 两行简介。
+           现在骨架内容与 Hero.tsx 逐项对齐（见下方 DOM 结构注释），所以可以放心显示：
+             · 文字**现在就能读**，不必等 React（实测首屏 2.4s 可见 → 6.6s 才有内容）
+             · 浏览器在骨架阶段就有 LCP 候选（原来整段 hidden，实测 lcp = null）
+           可见后字体用系统回退、字体到位后再换 Noto Sans SC —— 换字会带来极轻微的重排，
+           但**不产生布局位移**（行数一致、行高接近）。
+           ⚠️ 改 Hero.tsx 的任何文案后，必须同步改下面的骨架，否则又会回到"交接时跳动"。
+             骨架文案与 `src/data/profile.json` 的一致性由 scripts/check-hero-skeleton.mjs 校验。 */
       .hero-col {
         max-width: 56rem;
-        visibility: hidden;
       }
       /* 背景层（光斑+网格）：独立于背景色，CSS 应用后 0.9s 平滑淡入，
          与外部 CSS 的全站背景无缝过渡（深色同步） */
@@ -277,6 +283,38 @@
       }
       .dark .hero-shell .s2,
       .dark .hero-shell .s3 { color: #95a0a3; }
+      /* 方向行：移动端每行一项（纵向），≥640px 一行横向 + 圆点分隔。
+         对应 Hero.tsx 的 `flex flex-col gap-1 … sm:flex-row sm:items-center sm:gap-2.5`。 */
+      .hero-shell .s3 {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+      @media (min-width: 640px) {
+        .hero-shell .s3 {
+          flex-direction: row;
+          align-items: center;
+          gap: 0.625rem;
+        }
+      }
+      .hero-shell .s3 .dir {
+        display: flex;
+        align-items: center;
+        gap: 0.625rem;
+      }
+      /* 方向之间的圆点：首项没有，且只在横向布局下出现（Hero.tsx 的 `hidden … sm:inline-block`） */
+      .hero-shell .s3 .dir + .dir::before {
+        content: "";
+        display: none;
+        width: 0.25rem;
+        height: 0.25rem;
+        flex-shrink: 0;
+        border-radius: 9999px;
+        background-color: rgb(148 163 184 / 0.7);
+      }
+      @media (min-width: 640px) {
+        .hero-shell .s3 .dir + .dir::before { display: inline-block; }
+      }
       /* 首屏短句：对应 `mt-6 text-base leading-relaxed` */
       .hero-shell .s4 {
         font-size: var(--sk-s4);
@@ -285,17 +323,36 @@
         margin: 1.5rem 0 0;
       }
       .dark .hero-shell .s4 { color: #c6ccce; }
+      /* 简介两行：移动端**只显示第一行**（= profile.heroLineMobile），桌面端显示两行完整句。
+         对应 Hero.tsx 的 `block font-medium sm:hidden` + `hidden sm:block`：
+         桌面两句共用一个容器（而移动短句是独立容器），这里用相邻兄弟选择器表达同一件事。
+         ⚠️ 用 `+` 而不是 `:nth-of-type`：p 元素的 nth-of-type 会把上面的 `.s1/.s2/.s3`
+            一起算进去，n+2 会误伤骨架自己的行（踩过）。 */
+      .hero-shell .s4 + .hero-lines { display: none; }
+      .hero-shell .s4 + .hero-lines,
+      .hero-shell .s4 + .hero-lines + .hero-lines { margin-top: 0; }
+      @media (min-width: 640px) {
+        .hero-shell .s4 + .hero-lines { display: block; }
+      }
       /* ⚠️ 这里曾有 47 行 `.hero-shell .cta` / `.btn-primary` / `.btn-ghost` 的按钮样式，
          2026-09 删除。原因：首屏的行动按钮已从 Hero.tsx 移除（简历下载进了常驻顶栏），
          骨架的 `.hero-col` 又是 `visibility: hidden`，那些规则**永远不会生效** ——
          它们只是让首屏 HTML 白白多背 1.4KB 关键 CSS，并让下一个人以为首屏还有按钮。 */
     </style>
     <div id="root">
-      <!-- 骨架的 DOM 层级与 Hero.tsx 一一对应：
-             section.hero-shell            → <section>
-             div.hero-inner                → <div hero-viewport mx-auto max-w-6xl …>
-             div.hero-col                  → <div max-w-4xl>
-           缩进层级故意保持与 app 相同，便于对照维护。 -->
+      <!-- 骨架的 DOM 层级与 Hero.tsx **逐项**对应（改一处必须改另一处）：
+             section.hero-shell                 → <section id="top">
+             div.hero-inner                     → <div hero-viewport mx-auto max-w-6xl …>
+             div.hero-col                       → <div max-w-4xl>
+             span.eyebrow + span.dot            → 求职状态徽标
+             div.m1 > h1 + img.avatar           → 名字 + 头像
+             p.s1                               → profile.title
+             p.s2                               → profile.subtitle
+             div.s3（内含 span.dir × N）        → profile.directions（**N 必须相同**，当前 4 条）
+             p.s4                               → 手机端 profile.heroLineMobile；桌面端 heroLines 两行
+          缩进层级故意保持与 app 相同，便于对照维护。
+          ⚠️ 内容漂移的后果是"交接时首屏跳动"，历史上就是这么错的（骨架少 1 条方向、少 1 行简介）。
+             跑 `node scripts/check-hero-skeleton.mjs` 可校验本段与 profile.json 是否一致。 -->
       <section class="hero-shell" aria-hidden="true">
         <div class="hero-inner">
           <div class="hero-col">
@@ -306,8 +363,15 @@
             </div>
             <p class="s1">信息技术综合岗位</p>
             <p class="s2">数据科学与大数据技术本科</p>
-            <p class="s3">数据工程 · 业务系统交付 · Windows 原生桌面端工程化</p>
+            <div class="s3">
+              <span class="dir">数据工程</span>
+              <span class="dir">业务系统交付</span>
+              <span class="dir">Windows 原生桌面端工程化</span>
+              <span class="dir">游戏开发与引擎应用</span>
+            </div>
             <p class="s4">从页面到桌面的全链路交付</p>
+            <p class="s4 hero-lines">4年信息技术从业经验，覆盖应用开发、数据质检、ERP实施、团队协作四条线；近期在系统学习虚幻引擎。</p>
+            <p class="s4 hero-lines">擅长在技术与业务之间搭桥——理解需求、梳理流程、落地交付。</p>
           </div>
         </div>
       </section>
