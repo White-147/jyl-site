@@ -75,6 +75,14 @@ export interface SkillProfile {
   label: string
   /** 岗位说明（如过渡兼职标注） */
   note?: string
+  /**
+   * 该画像的「高频常用」快捷筛选词（点击即填进搜索框）。空数组 = 不渲染那一行。
+   *
+   * ⚠️ 这个字段必须存在数据库的 `skill_profiles.quick_tags` 里，不能只写在 JSON：
+   *    `npm run build` 会先跑 db:export 用数据库覆盖 `src/data/*.json`，
+   *    只写在 JSON 里的 UI 配置会在下一次构建时静默消失。
+   */
+  quickTags?: string[]
   groups: SkillGroup[]
 }
 

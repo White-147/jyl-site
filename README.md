@@ -131,7 +131,8 @@ jyl-site/
 配套机制：
 
 - **演示提示条**：`scripts/polish-previews.mjs` 向每个预览页注入「演示模式 · 后端未部署」提示（**按项目品牌配色、深浅色双态**），并将缺后端报错优雅替换；幂等，重跑即更新
-- **预览图标**：每个预览页与 `404.html` 均声明 favicon + 180×180 apple-touch-icon（移动端历史页大图标），图标由 `scripts/gen-preview-icons.ps1` 从各项目 logo 生成（SyLabAI 使用韶远/Accela 徽标截取）。**注意**：主站自身的 favicon 由 `scripts/gen_icons.py` 单独生成，两者不是同一套
+- **预览图标**：预览页与 `404.html` 声明 favicon，其中 4 个预览另声明 180×180 apple-touch-icon（移动端历史页大图标），由 `scripts/gen-preview-icons.ps1` 从各项目 logo 生成（SyLabAI 使用韶远/Accela 徽标截取）。**例外**：`book-recommendation` 只用 `favicon.ico` —— 它的 logo 是 366×85 横排字标，而这个脚本是把源图**拉伸**进方形框（不保持宽高比），生成出来是变形的，故不声明。**注意**：主站自身的 favicon 由 `scripts/gen_icons.py` 单独生成，两者不是同一套
+- **预览产物同步**：`node scripts/sync-preview.mjs <源工程 dist> public/preview/<名字>` —— 把本地源工程的生产构建拷成站内预览，顺带补图标声明并**校验资源引用是相对路径**（绝对路径会导致整页 404）。⚠️ 源工程构建必须 `--mode embedded` **且** `NODE_ENV=production`：只给 `--mode embedded` 时 `NODE_ENV` 会变成 `embedded`，webpack 不走 production（实测仍是 `eval` devtool、不压缩，`book-recommendation` 的 `js/` 从 4.67MB 变成 1.05MB 全靠这一步）
 - **深链刷新兜底**：`public/404.html` 识别预览路径并跳回应用入口（BrowserRouter 应用刷新不再 404）
 - **演示模式开关**：各项目以构建时环境变量启用（不污染正常开发），如 `npx vite build --mode embedded` / `npm run build -- --mode embedded`
 - **iframe 防护**：`polish-previews.mjs` 同时向每个预览页注入 `frame-ancestors 'self'` CSP 与 frame-busting 脚本，阻止预览页被外部站点嵌套抓取

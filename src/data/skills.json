@@ -4,6 +4,7 @@
       "id": "general",
       "label": "通用",
       "note": "",
+      "quickTags": [],
       "groups": [
         {
           "title": "系统与软件",
@@ -60,6 +61,16 @@
       "id": "ai",
       "label": "AI 全栈开发",
       "note": "",
+      "quickTags": [
+        "Java",
+        "React",
+        ".NET",
+        "Python",
+        "AI",
+        "Docker",
+        "OCR",
+        "桌面"
+      ],
       "groups": [
         {
           "title": "前端框架",
@@ -231,6 +242,15 @@
       "id": "gamedev",
       "label": "游戏开发 / UE5",
       "note": "",
+      "quickTags": [
+        "Unreal",
+        "蓝图",
+        "输入",
+        "碰撞",
+        "Timeline",
+        "Actor",
+        "C++"
+      ],
       "groups": [
         {
           "title": "引擎与项目工作流",
@@ -315,6 +335,7 @@
       "id": "data",
       "label": "数据工程与大数据",
       "note": "",
+      "quickTags": [],
       "groups": [
         {
           "title": "数据采集与清洗",
@@ -358,6 +379,7 @@
       "id": "erp",
       "label": "ERP 实施",
       "note": "",
+      "quickTags": [],
       "groups": [
         {
           "title": "系统测试与反馈",
@@ -394,6 +416,7 @@
       "id": "qa",
       "label": "AI 数据质检",
       "note": "",
+      "quickTags": [],
       "groups": [
         {
           "title": "数据质量核查",
@@ -429,6 +452,7 @@
       "id": "tutor",
       "label": "助教 / 培训",
       "note": "",
+      "quickTags": [],
       "groups": [
         {
           "title": "课程讲解",
@@ -463,6 +487,7 @@
       "id": "other",
       "label": "其他（过渡兼职）",
       "note": "语音主播 / 游戏代肝 / 汽配厂流水线，均为短期过渡经历。",
+      "quickTags": [],
       "groups": [
         {
           "title": "语音主播",
