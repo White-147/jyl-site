@@ -531,7 +531,7 @@ details[open] .chevron-up-down {
 }
 
 /* ===== 常驻顶部栏（TopBar，全端显示）与右侧导轨的几何变量 =====
-   为什么有这根栏：把「文档入口 / 返回顶部 / 主题 / 下载简历」四件全局操作收敛到一处。
+   为什么有这根栏：把「笔记 / 返回顶部 / 主题 / 简历」四件全局操作收敛到一处。
    迭代前主题控件分散在三个浮层里（手机吸顶胶囊、底部 Tab Bar、玻璃管管底），
    而文档区这三处都没渲染 → 文档区根本无法切主题；右侧导轨也因此被塞进两个管外控件。
 
@@ -544,47 +544,143 @@ details[open] .chevron-up-down {
 :root {
   --site-bar-h: 4rem; /* = TopBar 的 h-16 */
   --rail-top: calc(var(--site-bar-h) + 0.875rem);
-  --rail-bottom: 4.5rem;
+  --rail-bottom: 3rem;
 }
 
-/* 玻璃材质（两档：手机更高不透明度、≥640px 放开）。
-   设计依据：这是全站**唯一**的常驻模糊浮层（Blur-Budget 只给需要透视的固定层），
-   底部 Tab Bar 也改成同材质，两处合计仍在预算内。
+/* ===== 顶栏玻璃（2026-09 由"毛玻璃"升级为 iOS 26 风格玻璃）=====
+   与旧版的四点差别（这是观感差异的全部来源）：
+     1. 底色由**垂直渐变**承担（顶部厚、底部薄），不是一整块平铺的半透明色；
+     2. **去掉通栏 1px 实线**，改用顶部 1px 内高光（`inset 0 1px 0`）表达玻璃的上缘反光；
+        深色模式反过来用内暗边 —— 与 DESIGN.md 的 Tonal-First Rule 一致（深色不靠亮边浮起）；
+     3. `brightness()` 参与：浅色模式提亮一点避免发灰，深色模式压暗一点避免"灰雾"；
+     4. **贴顶与滚动两档**：贴顶时更薄（接近透明，对应参考站的"纯透明"观感），
+        滚动后加深一档保住正文对比度（`.is-scrolled` 由 TopBar 按 scrollY > 8 切换）。
 
    ⚠️ 只写标准 `backdrop-filter`，**不要**再手写 `-webkit-backdrop-filter`。
    踩过的坑（2026-09）：两者都写时，构建用的 lightningcss 会把它们当成同一条属性做合并，
-   结果是**标准属性和前缀属性都可能被精简掉一个** —— 实测产物里只剩下
-   `-webkit-backdrop-filter:blur(14px)saturate(1.4)`，而 Chrome 不认这个前缀，
-   于是玻璃效果在 Chrome/Firefox 里**完全不生效**（只有 Safari 有），
-   而 `getComputedStyle(el).backdropFilter` 返回 `none`，排查时极易误判成"选择器写错了"。
-   正确做法：只写标准属性，让构建工具按 browserslist 目标自己决定是否补前缀。 */
+   结果是只留下一份 —— 实测产物里只剩下 `-webkit-backdrop-filter`，
+   而 Chrome 不认这个前缀，于是玻璃在 Chrome/Firefox 里**完全不生效**（只有 Safari 有），
+   `getComputedStyle(el).backdropFilter` 还返回 `none`，排查时极易误判成"选择器写错了"。 */
 .site-bar {
-  background: rgb(255 255 255 / 0.82);
-  backdrop-filter: blur(14px) saturate(1.4);
-  border-bottom: 1px solid rgb(223 226 227 / 0.8);
-  box-shadow: 0 1px 0 rgb(255 255 255 / 0.6) inset;
+  background-image: linear-gradient(
+    to bottom,
+    rgb(255 255 255 / 0.42),
+    rgb(255 255 255 / 0.26)
+  );
+  backdrop-filter: blur(20px) saturate(1.8) brightness(1.06);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.55);
+  transition:
+    background-image var(--duration-reveal) var(--ease-out-soft),
+    box-shadow var(--duration-reveal) var(--ease-out-soft);
+}
+.site-bar.is-scrolled {
+  background-image: linear-gradient(
+    to bottom,
+    rgb(255 255 255 / 0.68),
+    rgb(255 255 255 / 0.5)
+  );
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.6),
+    0 1px 12px rgb(157 83 0 / 0.06);
 }
 .dark .site-bar {
-  background: rgb(18 20 21 / 0.76);
-  border-bottom-color: rgb(44 50 52 / 0.9);
-  box-shadow: 0 1px 0 rgb(255 255 255 / 0.06) inset;
+  background-image: linear-gradient(
+    to bottom,
+    rgb(18 20 21 / 0.5),
+    rgb(18 20 21 / 0.34)
+  );
+  backdrop-filter: blur(20px) saturate(1.8) brightness(0.95);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.07);
 }
-@media (min-width: 640px) {
-  .site-bar {
-    background: rgb(255 255 255 / 0.6);
-    backdrop-filter: blur(16px) saturate(1.6);
-  }
-  .dark .site-bar {
-    background: rgb(18 20 21 / 0.62);
-  }
+.dark .site-bar.is-scrolled {
+  background-image: linear-gradient(
+    to bottom,
+    rgb(18 20 21 / 0.76),
+    rgb(18 20 21 / 0.6)
+  );
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.08),
+    0 1px 12px rgb(0 0 0 / 0.18);
 }
-/* 不支持 backdrop-filter 时退回高不透明度底，避免"半透明却看不清字" */
+/* 不支持 backdrop-filter 时退回不透明度更高的底，避免"半透明却看不清字" */
 @supports not (backdrop-filter: blur(1px)) {
-  .site-bar {
-    background: rgb(255 255 255 / 0.96);
+  .site-bar,
+  .site-bar.is-scrolled {
+    background-image: none;
+    background-color: rgb(255 255 255 / 0.96);
   }
-  .dark .site-bar {
-    background: rgb(18 20 21 / 0.96);
+  .dark .site-bar,
+  .dark .site-bar.is-scrolled {
+    background-color: rgb(18 20 21 / 0.96);
+  }
+}
+
+/* ===== 顶栏控件组（.bar-control）：四个控件共用一个类 =====
+   口径（用户明确要求"格式统一、不要方钮、走玻璃简约风"）：
+     静置 → 无底、无边框，只有图标/文字本身；
+     hover / focus-visible → 浮出**与顶栏同源的玻璃底**（半透明 + 同款模糊 + 内高光）。
+   历史上主题钮是"白底 + 1px 实边框"，而笔记/返回顶部/简历没有底 —— 那一处不一致
+   就是"右侧图标格式不统一"的根源。**不要给其中任何一个单独加持久底或边框。**
+   触控目标：视觉高 36px，但用伪元素把可点区域外扩到 44px（PRODUCT.md 的移动端要求）。 */
+.bar-control {
+  position: relative;
+  display: inline-flex;
+  height: 2.25rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  border-radius: 0.75rem;
+  padding-inline: 0.5rem;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  /* 颜色按"顶栏玻璃底色"实测选取，不走 slate token ——
+     玻璃底的明度随滚动位置与下方内容变化，用固定值才能把对比度锁在 4.5:1 以上。
+     浅色档 #333a3d（11.17:1），深色档 #dde0e2（13.93:1）。 */
+  color: #333a3d;
+  background: transparent;
+  transition:
+    background-color var(--duration-micro) var(--ease-out-soft),
+    color var(--duration-micro) var(--ease-out-soft),
+    box-shadow var(--duration-micro) var(--ease-out-soft);
+}
+.bar-control::after {
+  /* 44px 触控目标：视觉不放大，只把可点区域撑开 */
+  content: "";
+  position: absolute;
+  inset: -0.25rem -0.125rem;
+}
+.bar-control:hover {
+  color: var(--color-brand-700);
+  background-color: rgb(255 255 255 / 0.32);
+  backdrop-filter: blur(14px) saturate(1.6);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.5);
+}
+.bar-control:focus-visible {
+  outline: none;
+  color: var(--color-brand-700);
+  background-color: rgb(255 255 255 / 0.36);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.5),
+    0 0 0 2px rgb(242 169 59 / 0.6);
+}
+.dark .bar-control {
+  color: #dde0e2;
+}
+.dark .bar-control:hover {
+  color: var(--color-brand-200);
+  background-color: rgb(255 255 255 / 0.09);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.1);
+}
+.dark .bar-control:focus-visible {
+  background-color: rgb(255 255 255 / 0.11);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.1),
+    0 0 0 2px rgb(242 169 59 / 0.55);
+}
+@media (prefers-reduced-motion: reduce) {
+  .site-bar,
+  .bar-control {
+    transition: none;
   }
 }
 
@@ -594,12 +690,19 @@ details[open] .chevron-up-down {
   bottom: var(--rail-bottom);
 }
 @media (prefers-reduced-transparency: reduce) {
-  .site-bar {
-    background: rgb(255 255 255 / 0.98);
+  .site-bar,
+  .site-bar.is-scrolled {
+    background-image: none;
+    background-color: rgb(255 255 255 / 0.98);
     backdrop-filter: none;
   }
-  .dark .site-bar {
-    background: rgb(18 20 21 / 0.98);
+  .dark .site-bar,
+  .dark .site-bar.is-scrolled {
+    background-color: rgb(18 20 21 / 0.98);
+  }
+  .bar-control:hover {
+    background-color: rgb(157 83 0 / 0.08);
+    backdrop-filter: none;
   }
 }
 
