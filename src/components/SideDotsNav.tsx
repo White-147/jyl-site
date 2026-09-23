@@ -2,9 +2,8 @@ import { useEffect, useMemo, useState, useSyncExternalStore } from 'react'
 import { useScrollSpy } from '../hooks/useScrollSpy'
 import { useAnchorScroll } from '../hooks/useAnchorScroll'
 import { useInViewPause } from '../hooks/useInViewPause'
-import { SECTIONS, SECTION_IDS, HERO_ID, HERO_ROLE } from '../data/navigation'
+import { SECTIONS, SECTION_IDS, HERO_ROLE } from '../data/navigation'
 import { SCROLL_MARGIN_DESKTOP_PX, SCROLL_MARGIN_MOBILE_PX } from '../data/scrollTargets'
-import ThemeToggle from './ThemeToggle'
 
 /** 导轨只在 md（768px）起可见（与 className 的 `hidden md:flex` 同源）。
  *  ⚠️ 这是**联动点**：改这里必须同步改下面的 className，反之亦然。 */
@@ -120,8 +119,13 @@ function Rail() {
       setPositions(
         SECTIONS.map((sec) => {
           const el = document.getElementById(sec.id)
-          // 跨视图条目（UE 文档区，主页面里没有对应 section）不参与比例计算，压到管底
-          if (!el) return 100
+          // 跨视图条目（UE 文档区，主页面里没有对应 section）：
+          // ⚠️ 不能压到 100% —— 它上面紧邻的「联系我」本身就在 97.5%（页面最后一段），
+          //    两个节点会叠在一起（实测 817px vs 828px，标签直接重叠）。
+          //    这里留 8% 间距贴在它上方，视觉上仍是"导轨末尾的额外入口"。
+          //    8% 是量出来的：容器高 766px 时 ≈61px，够放下两行标签（该「UE5 学习笔记」
+          //    在 w-14 的标签宽里会折成两行，节点行高 32px）而不与上一个节点相交。
+          if (!el) return 92
           // 首屏（#top）在文档顶端，滚到它时 scrollY = 0
           if (sec.role === HERO_ROLE) return 0
           const sectionTop = el.getBoundingClientRect().top + window.scrollY
@@ -195,15 +199,16 @@ function Rail() {
   }, [])
 
   return (
-    // `contents`：内层不再生成盒子，管体/节点/主题按钮仍是外层 nav 的子节点，
-    // 定位与层级与拆分前逐像素一致（唯一变化是把 ref 从最外层挪到了这一层）。
+    // `contents`：内层不再生成盒子，管体与节点仍是外层 nav 的子节点。
+    // ⚠️ 2026-09：管外的「返回顶部」与「主题」已移除 —— 两者都收敛到常驻顶栏
+    //   （`TopBar.tsx`）。管体因此可以真正贴到顶栏下沿，导轨只剩「节点 + 液柱」一件事。
     <nav
       ref={railRef}
       className={`contents ${inView ? '' : 'anim-paused'}`}
     >
-      {/* 玻璃管：顶部图标与底部主题之间贯穿（光纤质感） */}
+      {/* 玻璃管：从顶栏下沿贯穿到底部（光纤质感） */}
       <div
-        className="fixed bottom-14 right-[21px] top-14 w-2 overflow-hidden rounded-full border border-white/60 bg-white/40 shadow-[inset_0_0_6px_rgba(157,83,0,0.4),0_0_10px_rgba(157,83,0,0.15)] backdrop-blur-sm dark:border-white/20 dark:bg-white/10"
+        className="rail-tube fixed right-[21px] w-2 overflow-hidden rounded-full border border-white/60 bg-white/40 shadow-[inset_0_0_6px_rgba(157,83,0,0.4),0_0_10px_rgba(157,83,0,0.15)] backdrop-blur-sm dark:border-white/20 dark:bg-white/10"
         aria-hidden="true"
       >
         {/* 阅读进度液柱：从顶部向下延伸。
@@ -240,48 +245,19 @@ function Rail() {
         </div>
       </div>
 
-      {/* 管外顶部：返回顶部。
-          它是**管外操作**，不是章节节点 —— 与管外底部的「主题」对称，
-          所以不参与节点样式、也不与液柱比色（历史上它曾是首屏节点的载体，
-          ↑ 图标横跨管体、激活色又与液柱起点完全相同，导致既不同构又看不见）。 */}
-      <div className="absolute right-0 top-7">
-        <a
-          href={`#${HERO_ID}`}
-          onClick={(e) => onAnchorClick(e, HERO_ID)}
-          aria-label="返回顶部"
-          title="返回顶部"
-          className="group flex items-center justify-end gap-2.5 pr-[4px] transition-transform duration-200 [transition-timing-function:var(--ease-out-sharp)] hover:scale-110"
-        >
-          <span className="w-14 text-right text-xs text-slate-400 transition-colors group-hover:text-brand-700 dark:text-slate-400 dark:group-hover:text-brand-200">
-            返回顶部
-          </span>
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="h-4 w-4 text-slate-500 transition-colors group-hover:text-brand-700 dark:text-slate-400 dark:group-hover:text-brand-200"
-            aria-hidden="true"
-          >
-            <path d="M12 19V5M5 12l7-7 7 7" />
-          </svg>
-        </a>
-      </div>
-
       {/* 节点区：位置 = 「该板块滚到停靠位时的滚动进度」，与液柱同一套度量，
           因此液面会精确穿过节点中心。
 
-          容器几何必须与玻璃管**完全一致**（管体是 `top-14 bottom-14`，
-          即 inset 上下各 3.5rem）：这样 0% 落在管顶、100% 落在管底。
-          早先用 `inset-0` 是错误的 —— 那让容器等于整个视口高（900px 而不是 788px），
-          比例被放大，偏差反而更大（实测 −210px）。
-          也不能用 top-14/bottom-14 之外的做法：容器必须与管体同高同起点。
+          ⚠️ 容器几何必须与玻璃管**完全一致**：两者都用 `.rail-tube` 的同一组
+          CSS 变量（`--rail-top` / `--rail-bottom`，见 index.css），
+          这样 0% 落在管顶、100% 落在管底。
+          历史教训：早先用 `inset-0`（等于整个视口高）导致比例被放大、偏差 −210px；
+          后来又必须与管体的 `top-14 bottom-14` 手工对齐 —— 手工同步两次是隐患，
+          所以 2026-09 起改成共用 `.rail-tube` 的定位变量。
 
           positions 为 null 时尚未测量，整组不渲染，避免节点先叠在顶端再散开的位移。 */}
       {positions && (
-        <div className="absolute bottom-14 right-0 top-14">
+        <div className="rail-tube absolute right-0" style={{ width: 0 }}>
           {SECTIONS.map((sec, i) => {
             const isActive = active === sec.id
             return (
@@ -320,11 +296,6 @@ function Rail() {
           })}
         </div>
       )}
-
-      {/* 管外底部：主题切换（整行可点，与节点行同构） */}
-      <div className="absolute bottom-7 right-0">
-        <ThemeToggle placement="left" variant="row" label="主题" />
-      </div>
     </nav>
   )
 }

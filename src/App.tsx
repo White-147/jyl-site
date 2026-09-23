@@ -2,7 +2,7 @@ import { ThemeProvider } from './hooks/useTheme'
 import useReadOnlyGuard from './hooks/useReadOnlyGuard'
 import { useDeepLinkCorrection } from './hooks/useAnchorScroll'
 import { useDocsRoute } from './hooks/useDocsRoute'
-import Navbar from './components/Navbar'
+import TopBar from './components/TopBar'
 import Hero from './components/Hero'
 import About from './components/About'
 import Projects from './components/Projects'
@@ -11,7 +11,6 @@ import Experience from './components/Experience'
 import Education from './components/Education'
 import Contact from './components/Contact'
 import Footer from './components/Footer'
-import BackToTop from './components/BackToTop'
 import MobileTabBar from './components/MobileTabBar'
 import SideDotsNav from './components/SideDotsNav'
 import Docs from './components/Docs'
@@ -27,11 +26,17 @@ export default function App() {
 
   return (
     <ThemeProvider>
-      {/* 文档区是**独立视图**：顶部胶囊导航与页脚保留（返回主站的路径），
-          但首屏/滚动侦测/右侧导轨/底部 Tab Bar 全部不渲染 —— 它们依赖的 section
-          在这个视图里并不存在。 */}
+      {/* ⚠️ 布局骨架（2026-09 改版，见 docs/联动维护点.md 第 3 / 5 / 6 条）
+            · `TopBar` 是**全端常驻**的顶部栏，主页面与文档区共用 —— 它承载
+              「文档入口 / 返回顶部 / 主题 / 下载简历」四件全局操作。
+              关键收益：文档区现在也能切主题（此前主题控件只挂在主页面那三个浮层里，
+              而文档区一个都不渲染）。
+            · 原 `Navbar`（手机吸顶胶囊）与 `BackToTop`（手机浮动圆钮）已删除，
+              职责全部并入 TopBar；右侧玻璃管只保留「章节节点 + 液柱」。
+            · 底部 Tab Bar 仍只在主页面渲染（文档区没有可滚动的章节），
+              视觉改成与顶栏同材质的浮动胶囊。 */}
       <div className="app-root min-h-screen font-sans text-slate-900 dark:text-slate-100">
-        <Navbar />
+        <TopBar />
         {route.isDocs ? (
           <main>
             <Docs docId={route.docId} anchor={route.anchor} />
@@ -47,7 +52,6 @@ export default function App() {
               <Education />
               <Contact />
             </main>
-            <BackToTop />
             <SideDotsNav />
             <MobileTabBar />
           </>

@@ -12,10 +12,12 @@ import {
  * 主题状态（全站单一来源）。
  *
  * ⚠️ 为什么要有这个 Provider（见 docs/联动维护点.md 第 3 条）
- * `ThemeToggle` 在移动端会被渲染**两次**（顶部 `Navbar` 与底部 `MobileTabBar`）。
+ * `ThemeToggle` 会出现**两个实例**（常驻顶栏 `TopBar` 与移动端底部 `MobileTabBar`）。
  * 之前每个实例各自持有 `useState`，靠 `localStorage` 间接同步 —— 没有订阅机制，
  * 一处切换另一处不会重渲染，理论上会漂移（实际未复现，但属隐患）。
  * 现在提升为 Context：两个实例消费同一份状态，不可能不一致。
+ * 2026-09 起顶栏是**全端常驻**的，两种视图（主页面 / UE 文档区）都挂在同一个 Provider 下，
+ * 所以文档区也能切主题 —— 这正是之前缺控件导致的问题。
  *
  * 另外把 `theme-color` 的同步也收在这里，只写**一个** meta 标签。
  * 旧实现是两个带 `media="(prefers-color-scheme: …)"` 的 meta + JS 覆写两者，

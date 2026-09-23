@@ -157,28 +157,10 @@ export default function Hero() {
             </code>
           </div>
 
-          {/* 主行动：简历下载 + 查看项目（招聘者 5 秒路径；移动端并排两列一屏可见） */}
-          <div data-hero="fade" className="mt-8 grid grid-cols-2 gap-3 sm:flex sm:items-center">
-            <a
-              href={profile.resumeUrl}
-              download
-              className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-brand-700 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-800 sm:w-auto dark:bg-brand-700 dark:hover:bg-brand-600"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden="true">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />
-              </svg>
-              下载简历
-            </a>
-            <a
-              href="#projects"
-              className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-brand-300 bg-white px-5 py-2.5 text-sm font-semibold text-brand-700 transition-colors hover:border-brand-400 hover:bg-brand-50 sm:w-auto dark:border-brand-500/40 dark:bg-slate-900 dark:text-brand-300 dark:hover:border-brand-400"
-            >
-              查看项目
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden="true">
-                <path d="M7 17 17 7M7 7h10v10" />
-              </svg>
-            </a>
-          </div>
+          {/* 首屏不再放行动按钮（2026-09）：简历下载已进常驻顶栏，始终可见；
+              「查看项目」也由顶栏之下的第一个区块（项目作品）自然承接 ——
+              首屏因此以「名字 / 定位 / 三行简介 / 等宽彩蛋」收尾，不再被按钮截断。
+              ⚠️ index.html 的首屏骨架里有对应的 `.cta` 块，已同步移除（第 1 条联动点）。 */}
         </div>
       </div>
 

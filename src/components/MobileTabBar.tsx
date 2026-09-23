@@ -7,19 +7,26 @@ import { CHAPTERS, SECTION_IDS } from '../data/navigation'
 // 带 href 的条目是跨视图跳转（UE 文档区），也不进 Tab Bar（底部只放"滚到某一段"）。
 const tabs = CHAPTERS.filter((s) => s.id !== 'education' && !s.href)
 
-/** 移动端底部常驻 Tab Bar（2026 主流：可见性 + 拇指区，替代汉堡菜单） */
+/** 移动端底部常驻 Tab Bar（章节跳转）。
+ *
+ *  ⚠️ 2026-09 改版：只在**手机**出现（顶栏已改为全端常驻，两者在手机端同时存在，
+ *  顶栏管全局操作、本栏管章节跳转）。视觉上从「满宽白条」改为**同材质的浮动胶囊**，
+ *  与顶栏成为一套语言 —— 原来的满宽纯色条正是"太传统"的那个观感。
+ *
+ *  ⚠️ 高度与占位**故意不变**（`min-h-14` 的条目 + 安全区）：`#contact` 末尾的收尾呼吸区
+ *  是按"页面最大滚动量"校准过的（见 docs/联动维护点.md 第 6 条），改高度会让它滚不到停靠位。
+ *  浮动胶囊用 `pb-[env(safe-area-inset-bottom)]` 保留安全区，容器高度因此与改版前一致。
+ */
 export default function MobileTabBar() {
   const active = useScrollSpy(SECTION_IDS)
   const { onAnchorClick } = useAnchorScroll()
 
   return (
-    // `mobile-flat-bar`：<768px 关掉 backdrop-blur（见 index.css 该类的注释）。
-    // 本栏常驻屏幕底部，模糊是持续的逐帧开销；靠提高底色不透明度维持可读性。
     <nav
-      className="mobile-flat-bar fixed inset-x-0 bottom-0 z-50 border-t border-slate-200/70 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-sm md:hidden dark:border-slate-800/70 dark:bg-slate-950/95"
+      className="pointer-events-none fixed inset-x-0 bottom-0 z-40 px-3 pb-[max(0.5rem,env(safe-area-inset-bottom))] md:hidden"
       aria-label="移动端导航"
     >
-      <div className="mx-auto flex max-w-md items-stretch justify-around">
+      <div className="pointer-events-auto mx-auto flex max-w-md items-stretch justify-around overflow-hidden rounded-2xl border border-white/60 bg-white/72 shadow-[0_8px_28px_rgba(157,83,0,0.16)] backdrop-blur-md backdrop-saturate-150 dark:border-white/12 dark:bg-slate-900/66 dark:shadow-[0_8px_28px_rgba(0,0,0,0.45)]">
         {tabs.map((tab) => {
           const isActive = active === tab.id
           return (
@@ -28,7 +35,7 @@ export default function MobileTabBar() {
               href={`#${tab.id}`}
               onClick={(e) => onAnchorClick(e, tab.id)}
               aria-current={isActive ? 'page' : undefined}
-              className={`flex min-h-14 flex-1 flex-col items-center justify-center gap-0.5 text-[11px] font-medium transition-colors ${
+              className={`flex min-h-[3.25rem] flex-1 flex-col items-center justify-center gap-0.5 text-[11px] font-medium transition-colors ${
                 isActive
                   ? 'text-brand-700 dark:text-brand-200'
                   : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
