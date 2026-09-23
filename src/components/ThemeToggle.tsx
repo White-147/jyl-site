@@ -156,8 +156,9 @@ export function ThemeToggle({
         // ⚠️ 顶栏实例（square）走 `.bar-control`：静置无底无边框，与笔记/返回顶部/简历同一材质。
         //    历史上这里写的是「白底 + 1px 边框」，在顶栏那一组里是**唯一**带持久底与边框的控件，
         //    正是用户反馈的"右侧图标格式不统一"的根源。不要改回去。
+        //    传了 `label` 时按钮显示「图标 + **当前模式名**」——这既是四个控件格式统一所需，
+        //    也让"当前是自动/浅色/深色"不必点开菜单就能看到。
         //    `dot` 变体是独立的小圆点样式（另有用途），不参与顶栏统一。
-        //    注意：`variant === 'row'` 的分支在函数上半段已经 return，这里不可能再是 row。
         className={
           variant === 'dot'
             ? 'inline-flex h-4 w-4 items-center justify-center text-slate-600 transition-transform duration-200 hover:scale-110 dark:text-slate-300'
@@ -165,6 +166,7 @@ export function ThemeToggle({
         }
       >
         <ModeIcon mode={mode} className={variant === 'dot' ? 'h-4 w-4' : 'h-4.5 w-4.5'} />
+        {variant !== 'dot' && label && <span>{MODE_META[mode].label}</span>}
       </button>
       {open && menu}
     </div>

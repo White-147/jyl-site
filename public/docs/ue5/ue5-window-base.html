@@ -1,0 +1,129 @@
+<h1 id="虚幻引擎界面基础操作" class="doc-h1"><a class="doc-anchor" href="#虚幻引擎界面基础操作" aria-label="本节链接">#</a>虚幻引擎界面基础操作</h1>
+<hr class="doc-hr" />
+<h2 id="1-菜单栏" class="doc-h2"><a class="doc-anchor" href="#1-菜单栏" aria-label="本节链接">#</a>1. 菜单栏</h2>
+<h3 id="文件" class="doc-h3"><a class="doc-anchor" href="#文件" aria-label="本节链接">#</a>文件</h3>
+<h4 id="功能" class="doc-h4"><a class="doc-anchor" href="#功能" aria-label="本节链接">#</a>功能</h4>
+<p>提供新建关卡、打开关卡等选项</p>
+<h4 id="关卡概念" class="doc-h4"><a class="doc-anchor" href="#关卡概念" aria-label="本节链接">#</a>关卡概念</h4>
+<ul class="doc-ul"><li>当前视口中看到的场景就是一个关卡</li><li>类似于游戏中的&quot;地图&quot;（如 CSGO 中的炙热沙城、炼狱小镇）</li><li><strong>关卡 ≈ 游戏内的地图</strong></li></ul>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/菜单栏/文件.webp" alt="文件" loading="lazy" decoding="async" /><figcaption>文件</figcaption></figure>
+<h3 id="编辑" class="doc-h3"><a class="doc-anchor" href="#编辑" aria-label="本节链接">#</a>编辑</h3>
+<ul class="doc-ul"><li>这个二级菜单的上方按钮基本用不到，因为基本都是使用快捷键</li><li>下方存在编辑器偏好设置、键盘快捷键、项目设置和插件</li></ul>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/菜单栏/编辑.webp" alt="编辑" loading="lazy" decoding="async" /><figcaption>编辑</figcaption></figure>
+<h3 id="窗口" class="doc-h3"><a class="doc-anchor" href="#窗口" aria-label="本节链接">#</a>窗口</h3>
+<ul class="doc-ul"><li>改变布局的入口</li><li>可以添加、删除以及把误删的一些界面改回来</li></ul>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/菜单栏/窗口.webp" alt="窗口" loading="lazy" decoding="async" /><figcaption>窗口</figcaption></figure>
+<h3 id="工具" class="doc-h3"><a class="doc-anchor" href="#工具" aria-label="本节链接">#</a>工具</h3>
+<ul class="doc-ul"><li><strong>优化游戏性能</strong>的入口</li></ul>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/菜单栏/工具.webp" alt="工具" loading="lazy" decoding="async" /><figcaption>工具</figcaption></figure>
+<h3 id="构建" class="doc-h3"><a class="doc-anchor" href="#构建" aria-label="本节链接">#</a>构建</h3>
+<ul class="doc-ul"><li>可以用于<strong>优化场景性能</strong></li><li>在开发过程中所有设置选项保持默认即可，设置高了会导致卡顿</li></ul>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/菜单栏/构建.webp" alt="构建" loading="lazy" decoding="async" /><figcaption>构建</figcaption></figure>
+<h3 id="平台" class="doc-h3"><a class="doc-anchor" href="#平台" aria-label="本节链接">#</a>平台</h3>
+<ul class="doc-ul"><li>用于<strong>游戏打包</strong>、上线或者发给外部人员游玩时，打包成可运行文件的入口</li></ul>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/菜单栏/平台.webp" alt="平台" loading="lazy" decoding="async" /><figcaption>平台</figcaption></figure>
+<h3 id="选择" class="doc-h3"><a class="doc-anchor" href="#选择" aria-label="本节链接">#</a>选择</h3>
+<ul class="doc-ul"><li>用于选择场景内物体的入口</li><li>可进行全选、反向全选，以及分类全选</li><li>一般情况下用的比较少</li></ul>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/菜单栏/选择.webp" alt="选择" loading="lazy" decoding="async" /><figcaption>选择</figcaption></figure>
+<h3 id="actor" class="doc-h3"><a class="doc-anchor" href="#actor" aria-label="本节链接">#</a>Actor</h3>
+<h4 id="功能-2" class="doc-h4"><a class="doc-anchor" href="#功能-2" aria-label="本节链接">#</a>功能</h4>
+<p>用于编辑选中的物体</p>
+<h4 id="界面状态" class="doc-h4"><a class="doc-anchor" href="#界面状态" aria-label="本节链接">#</a>界面状态</h4>
+<ul class="doc-ul"><li><strong>图一</strong>：未选中物体时的空白界面</li><li><strong>图二</strong>：选中物体时的界面</li><li><strong>选中方式</strong>：<ul class="doc-ul doc-ul-sub"><li>单击界面内物体</li><li>直接点击<strong>右侧大纲界面</strong>内的条目（大纲包含界面内所有物体）</li></ul></li></ul>
+<h4 id="注意点" class="doc-h4"><a class="doc-anchor" href="#注意点" aria-label="本节链接">#</a>注意点</h4>
+<p>选中大纲内<strong>分组</strong>时因为未选中具体物体，Actor 界面显示为图一的空白状态</p>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/菜单栏/Actor未选中物体状态.webp" alt="Actor未选中物体状态" loading="lazy" decoding="async" /><figcaption>Actor未选中物体状态</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/菜单栏/Actor选中物体状态.webp" alt="Actor选中物体状态" loading="lazy" decoding="async" /><figcaption>Actor选中物体状态</figcaption></figure>
+<h3 id="帮助" class="doc-h3"><a class="doc-anchor" href="#帮助" aria-label="本节链接">#</a>帮助</h3>
+<p>各类网页链接入口，<a class="doc-link" href="#/docs/ue5/unreal5-notes">学习笔记中的自助答疑方法中已经详细说明</a></p>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/菜单栏/帮助.webp" alt="帮助" loading="lazy" decoding="async" /><figcaption>帮助</figcaption></figure>
+<hr class="doc-hr" />
+<h2 id="2-标签页" class="doc-h2"><a class="doc-anchor" href="#2-标签页" aria-label="本节链接">#</a>2. 标签页</h2>
+<ul class="doc-ul"><li>和浏览器标签页同理，可以进行窗口的标签页合并以及标签页的窗口化独立分割</li><li><strong>注意</strong>：鼠标中键可以快速关闭当前标签，因此也需要注意不要误触</li></ul>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/菜单栏/标签页.webp" alt="标签页" loading="lazy" decoding="async" /><figcaption>标签页</figcaption></figure>
+<hr class="doc-hr" />
+<h2 id="3-主工具栏" class="doc-h2"><a class="doc-anchor" href="#3-主工具栏" aria-label="本节链接">#</a>3. 主工具栏</h2>
+<p>在日常开发虚幻引擎游戏中使用最多的功能：</p>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/主工具栏/主工具栏.webp" alt="主工具栏" loading="lazy" decoding="async" /><figcaption>主工具栏</figcaption></figure>
+<h3 id="第一个按钮-保存" class="doc-h3"><a class="doc-anchor" href="#第一个按钮-保存" aria-label="本节链接">#</a>第一个按钮 - 保存</h3>
+<p>快捷键 Ctrl+S</p>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/主工具栏/保存.webp" alt="保存" loading="lazy" decoding="async" /><figcaption>保存</figcaption></figure>
+<h3 id="第二个按钮-浏览相关关卡" class="doc-h3"><a class="doc-anchor" href="#第二个按钮-浏览相关关卡" aria-label="本节链接">#</a>第二个按钮 - 浏览相关关卡</h3>
+<p>默认跳转到你上一个操作的位置。</p>
+<p><strong>举例</strong>：如果上一个双击打开了文件，点击定位到那个文件；如果上一个是点击了某个关卡，点击跳转到关卡文件</p>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/主工具栏/浏览相关关卡.webp" alt="浏览相关关卡" loading="lazy" decoding="async" /><figcaption>浏览相关关卡</figcaption></figure>
+<h3 id="第三个按钮-模式" class="doc-h3"><a class="doc-anchor" href="#第三个按钮-模式" aria-label="本节链接">#</a><strong>第三个按钮 - 模式</strong></h3>
+<p>点击切换不同模式，默认选择模式，快捷键为 Shift+数字键。</p>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/主工具栏/模式.webp" alt="模式" loading="lazy" decoding="async" /><figcaption>模式</figcaption></figure>
+<p><strong>切换到地形模式后可以对界面内地形进行编辑</strong></p>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/主工具栏/地形模式.webp" alt="地形模式" loading="lazy" decoding="async" /><figcaption>地形模式</figcaption></figure>
+<h3 id="第四个按钮-快速添加到项目" class="doc-h3"><a class="doc-anchor" href="#第四个按钮-快速添加到项目" aria-label="本节链接">#</a>第四个按钮 - 快速添加到项目</h3>
+<p>可以快速添加物品到项目中，也是外部资源导入项目的入口</p>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/主工具栏/快速添加到项目.webp" alt="快速添加到项目" loading="lazy" decoding="async" /><figcaption>快速添加到项目</figcaption></figure>
+<h3 id="第五个按钮-蓝图" class="doc-h3"><a class="doc-anchor" href="#第五个按钮-蓝图" aria-label="本节链接">#</a>第五个按钮 - 蓝图</h3>
+<p>可以快速打开项目中的蓝图，使用较少</p>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/主工具栏/蓝图.webp" alt="蓝图" loading="lazy" decoding="async" /><figcaption>蓝图</figcaption></figure>
+<h3 id="第六个按钮-关卡序列" class="doc-h3"><a class="doc-anchor" href="#第六个按钮-关卡序列" aria-label="本节链接">#</a>第六个按钮 - 关卡序列</h3>
+<p>可以添加关卡序列，制作过场动画</p>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/主工具栏/关卡序列.webp" alt="关卡序列" loading="lazy" decoding="async" /><figcaption>关卡序列</figcaption></figure>
+<hr class="doc-hr" />
+<h2 id="4-视口工具栏" class="doc-h2"><a class="doc-anchor" href="#4-视口工具栏" aria-label="本节链接">#</a>4. 视口工具栏</h2>
+<p>操作场景相关的内容</p>
+<h3 id="前四个按钮" class="doc-h3"><a class="doc-anchor" href="#前四个按钮" aria-label="本节链接">#</a>前四个按钮</h3>
+<p>在<a class="doc-link" href="#/docs/ue5/unreal5-notes">学习笔记中的变换工具快捷键中已经详细说明</a>中已有说明，第一个按钮为默认选择，即选择模式</p>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/视口工具栏/视口工具栏.webp" alt="视口工具栏" loading="lazy" decoding="async" /><figcaption>视口工具栏</figcaption></figure>
+<h3 id="预设比例" class="doc-h3"><a class="doc-anchor" href="#预设比例" aria-label="本节链接">#</a>预设比例</h3>
+<ul class="doc-ul"><li>如下图后面三个预设比例选项分别对应上图平移、旋转、缩放的单次数值</li><li>即平移的单位距离，旋转的单位角度以及缩放的单位比例</li><li>将对应<strong>选项点击关闭</strong>后，不会无法平移、旋转、缩放，而是进入<strong>无极调整</strong>的状态</li></ul>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/视口工具栏/数值设置.webp" alt="数值设置" loading="lazy" decoding="async" /><figcaption>数值设置</figcaption></figure>
+<h3 id="摄像机速度" class="doc-h3"><a class="doc-anchor" href="#摄像机速度" aria-label="本节链接">#</a>摄像机速度</h3>
+<ul class="doc-ul"><li>设置在编辑模式下视角移动的速度</li><li>编辑模式下的视角移动方式在<a class="doc-link" href="#/docs/ue5/unreal5-notes">学习笔记中的编辑模式下的视角移动方式</a>中已有说明</li><li><strong>快捷键</strong>：右键+滚轮，当滚轮向上滑动时速度提高，向下滑动时速度降低</li></ul>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/视口工具栏/摄像机速度.webp" alt="摄像机速度" loading="lazy" decoding="async" /><figcaption>摄像机速度</figcaption></figure>
+<h3 id="光照" class="doc-h3"><a class="doc-anchor" href="#光照" aria-label="本节链接">#</a>光照</h3>
+<p>使用频率不高，主要用于检查游戏内光影效果，可以切换到不同光照效果</p>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/视口工具栏/光照.webp" alt="光照" loading="lazy" decoding="async" /><figcaption>光照</figcaption></figure>
+<hr class="doc-hr" />
+<h2 id="5大纲视图" class="doc-h2"><a class="doc-anchor" href="#5大纲视图" aria-label="本节链接">#</a>5.大纲视图</h2>
+<p>场景中的所有元素都会在大纲视图中进行列举展示</p>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/大纲视图/大纲视图.webp" alt="大纲视图" loading="lazy" decoding="async" /><figcaption>大纲视图</figcaption></figure>
+<h3 id="元素的重命名" class="doc-h3"><a class="doc-anchor" href="#元素的重命名" aria-label="本节链接">#</a>元素的重命名</h3>
+<ul class="doc-ul"><li>元素过多时，可以对元素进行重命名并在大纲视图中的搜索中进行搜索</li><li>重命名的快捷键：F2</li></ul>
+<h3 id="元素在场景中的快速定位" class="doc-h3"><a class="doc-anchor" href="#元素在场景中的快速定位" aria-label="本节链接">#</a>元素在场景中的快速定位</h3>
+<ul class="doc-ul"><li>选中需要定位元素后<strong>按F键</strong></li><li><strong>双击所选元素</strong></li></ul>
+<p>视角就会立刻转到元素所在位置并且显示选中状态</p>
+<h3 id="细节" class="doc-h3"><a class="doc-anchor" href="#细节" aria-label="本节链接">#</a>细节</h3>
+<ul class="doc-ul"><li>图一是在没有选中物体时，细节界面没有内容</li><li>图二是选中物体时，细节界面内容</li></ul>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/大纲视图/细节-未选中状态.webp" alt="细节-未选中状态" loading="lazy" decoding="async" /><figcaption>细节-未选中状态</figcaption></figure>
+<p>细节可以针对选中的物体进行数值化、精细化的操作，譬如图中可以直接填写选中物体位置、旋转、缩放的各项具体数值，或者材质、物理模拟等</p>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/大纲视图/细节-选中状态.webp" alt="细节-选中状态" loading="lazy" decoding="async" /><figcaption>细节-选中状态</figcaption></figure>
+<p>当缩放文本右侧的锁点击锁上之后，缩放仅会<strong>进行等比例缩放</strong>，不能对XYZ轴进行单独调整</p>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/大纲视图/细节-等比例缩放.webp" alt="细节-等比例缩放" loading="lazy" decoding="async" /><figcaption>细节-等比例缩放</figcaption></figure>
+<h3 id="世界场景设置" class="doc-h3"><a class="doc-anchor" href="#世界场景设置" aria-label="本节链接">#</a>世界场景设置</h3>
+<p>如果没有该设置的，可以在窗口中点击添加</p>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/大纲视图/世界场景设置.webp" alt="世界场景设置" loading="lazy" decoding="async" /><figcaption>世界场景设置</figcaption></figure>
+<p>用于编辑关卡相关设置</p>
+<hr class="doc-hr" />
+<h2 id="6底边栏" class="doc-h2"><a class="doc-anchor" href="#6底边栏" aria-label="本节链接">#</a>6.底边栏</h2>
+<h3 id="内容侧滑菜单" class="doc-h3"><a class="doc-anchor" href="#内容侧滑菜单" aria-label="本节链接">#</a>内容侧滑菜单</h3>
+<ul class="doc-ul"><li>快捷键：Crtl+空格</li><li>游戏内需要使用的所有资源、素材都会显示在其中</li><li>包括模型、代码、动画等</li></ul>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/底边栏/内容侧滑菜单.webp" alt="内容侧滑菜单" loading="lazy" decoding="async" /><figcaption>内容侧滑菜单</figcaption></figure>
+<h4 id="场景内元素快速定位" class="doc-h4"><a class="doc-anchor" href="#场景内元素快速定位" aria-label="本节链接">#</a>场景内元素快速定位</h4>
+<p>右键场景大纲内元素，选择第一项浏览至资产</p>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/底边栏/大纲元素右键.webp" alt="大纲元素右键" loading="lazy" decoding="async" /><figcaption>大纲元素右键</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/底边栏/场景元素右键.webp" alt="场景元素右键" loading="lazy" decoding="async" /><figcaption>场景元素右键</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/底边栏/元素定位到内容侧滑菜单.webp" alt="元素定位到内容侧滑菜单" loading="lazy" decoding="async" /><figcaption>元素定位到内容侧滑菜单</figcaption></figure>
+<h4 id="目录排布" class="doc-h4"><a class="doc-anchor" href="#目录排布" aria-label="本节链接">#</a>目录排布</h4>
+<ul class="doc-ul"><li>在内容侧滑菜单的路径选择中<strong>点击所有</strong>，进入根目录</li><li>默认根目录下为<strong>内容和引擎</strong></li></ul>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/底边栏/根目录内容.webp" alt="根目录内容" loading="lazy" decoding="async" /><figcaption>根目录内容</figcaption></figure>
+<p><strong>引擎目录没有的</strong>，点击内容侧滑菜单右上角齿轮图标，点击勾选引擎目录即可</p>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/底边栏/勾选引擎目录.webp" alt="勾选引擎目录" loading="lazy" decoding="async" /><figcaption>勾选引擎目录</figcaption></figure>
+<p>在创建空白项目时，内容子目录应该为空，如果选择模板进行开发，内容子目录下有内容</p>
+<p>引擎子目录为虚幻引擎自带的内容，<strong>一般情况下不要动</strong>，类似于Windows系统下C盘的Windows文件夹下的内容</p>
+<h3 id="输出日志" class="doc-h3"><a class="doc-anchor" href="#输出日志" aria-label="本节链接">#</a>输出日志</h3>
+<ul class="doc-ul"><li><strong>debug</strong>最直接的方式，可以直观的从日志内找到所有需要的信息</li><li>位置在底部内容侧滑菜单的右侧第一个按钮</li></ul>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/底边栏/输出日志.webp" alt="输出日志" loading="lazy" decoding="async" /><figcaption>输出日志</figcaption></figure>
+<h3 id="诊断" class="doc-h3"><a class="doc-anchor" href="#诊断" aria-label="本节链接">#</a>诊断</h3>
+<p>在<strong>优化游戏性能</strong>时可以直接参考的数据窗口</p>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/底边栏/诊断.webp" alt="诊断" loading="lazy" decoding="async" /><figcaption>诊断</figcaption></figure>
+<h3 id="保存内容" class="doc-h3"><a class="doc-anchor" href="#保存内容" aria-label="本节链接">#</a>保存内容</h3>
+<p>点击之后可以直观检查本次所有未保存的改动，并且可以点击进行保存</p>
+<figure class="doc-figure"><img data-doc-image src="docs/ue5/images/底边栏/保存.webp" alt="保存" loading="lazy" decoding="async" /><figcaption>保存</figcaption></figure>
