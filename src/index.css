@@ -866,21 +866,6 @@ details[open] .chevron-up-down {
   contain-intrinsic-size: auto 2200px;
 }
 
-/* ⚠️ 锚点跳转期间临时关掉上面的优化（2026-09 实测的必需配套）。
-   为什么：未渲染子树按 `contain-intrinsic-size`（2200px）参与布局，而**文档区正文列
-   远比技能区高** —— 一个几千字的区块被估成 2200px，七八个叠起来就把文档撑成真实高度的两三倍，
-   于是"点目录跳转"会按虚高的位置定位、随后区块逐个渲染、高度缩回，落点全错
-   （实测偏差 96～1900px，最后一个大纲项差 1234px；`scrollTop` 甚至卡在被夹住的旧最大值上）。
-   做法：跳转前先让全部内容参与布局（值一帧），跳到真值位置，跳完恢复 —— 优化照旧生效，
-   只是不在"跳转这一瞬"。见 Docs.tsx 的 scrollToAnchor。
-
-   用**属性选择器而不是直接写内联样式**：要禁用的是 `.cv-section`（正文的祖先链上），
-   而 `scrollRef` 指向的是外层滚动容器 —— 内联样式加在错的元素上不会生效（踩过）。
-   选择器带 `md:` 同一断点前提：手机端本来就是页面滚动，没有这个问题。 */
-html[data-anchor-jump] .cv-section {
-  content-visibility: visible;
-}
-
 /* ===== UE 文档区正文排版（.doc-content，见 src/components/Docs.tsx） =====
    内容来自 scripts/import-ue-docs.mjs 转换出的静态 HTML，样式全部落在这里，
    组件那边只负责容器与交互（灯箱、锚点）。
