@@ -52,7 +52,9 @@ function New-SylabIcon {
 
 New-ContainIcon -SourcePath "$root\milu-studio\brand\logo.png" -OutPath "$root\milu-studio\apple-touch-icon.png"
 New-ContainIcon -SourcePath "$root\milu-assistant-web\logo.png" -OutPath "$root\milu-assistant-web\apple-touch-icon.png"
-New-ContainIcon -SourcePath "$root\book-recommendation\img\logo.80aea0bc.png" -OutPath "$root\book-recommendation\apple-touch-icon.png"
+# book-recommendation 不生成 apple-touch-icon（2026-09 移除）：
+#   它的 logo.png 是 366×85 的横排字标，而这个函数是把源图**拉伸**进 180×180 方框（不保持宽高比），
+#   生成出来的图标一直是变形的。该书签图标用 favicon.ico 即可，不要在预览页里声明 apple-touch-icon。
 New-ContainIcon -SourcePath "$root\xiao-lou-ai\chuangjing-logo-shell.png" -OutPath "$root\xiao-lou-ai\apple-touch-icon.png"
 New-SylabIcon -OutPath "$root\sylab-ai\apple-touch-icon.png"
 New-SylabIcon -OutPath "$root\sylab-ai\favicon-32.png" -Size 32

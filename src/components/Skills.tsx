@@ -6,10 +6,6 @@ import SectionHeading from './SectionHeading'
 
 const skillProfiles = skillsData.skillProfiles as SkillProfile[]
 
-/** 快捷过滤标签（高频方向，点击即搜索；仅硬技术栈分支「AI 全栈开发」显示） */
-const QUICK_TAGS = ['Java', 'React', '.NET', 'Python', 'AI', '大数据', '数据库', '桌面']
-const QUICK_TAG_PROFILE_IDS = new Set(['ai'])
-
 /** 模糊 like 归一化：
  *  1) fold：小写 + NFKC（全角→半角）
  *  2) compact：fold 后再去空格/连字符/点（"springboot" 命中 "Spring Boot"）
@@ -47,7 +43,11 @@ export default function Skills() {
     () => (active ? active.groups.reduce((n, g) => n + g.items.length, 0) : 0),
     [active],
   )
-  const showQuickTags = QUICK_TAG_PROFILE_IDS.has(active?.id ?? '')
+  // 高频快捷词改为**按画像从数据里取**（2026-09）：
+  // 原来是一份写死的全局常量 + 一个只含 'ai' 的白名单集合，于是只有 AI 全栈画像有快捷词；
+  // 现在每个画像在 `skills.json` 的 `quickTags` 里各自声明（经数据库 skill_profiles.quick_tags 往返），
+  // 空数组即不显示这一行 —— 组件侧不再有任何"哪个画像该显示"的名单。
+  const quickTags = active?.quickTags ?? []
 
   return (
     <section id="skills" className="relative anchor-offset section-base">
@@ -134,10 +134,11 @@ export default function Skills() {
             <p className="mt-2.5 text-xs leading-relaxed text-slate-400 dark:text-slate-500">{active.note}</p>
           )}
 
-          {/* 高频快捷标签：点击即过滤（仅含硬技术栈的岗位显示） */}
-          {showQuickTags && (
+          {/* 高频快捷标签：点击即过滤。按画像从数据取（见上方 quickTags），空则不渲染 */}
+          {quickTags.length > 0 && (
             <div className="mt-3 flex flex-wrap items-center gap-1.5">
-              {QUICK_TAGS.map((tag) => {
+              <span className="mr-0.5 text-[11px] font-medium text-slate-400 dark:text-slate-500">高频</span>
+              {quickTags.map((tag) => {
                 const tagActive = fold(query) === fold(tag)
                 return (
                   <button

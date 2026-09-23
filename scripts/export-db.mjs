@@ -45,7 +45,7 @@ const projects = db
 write('projects.json', { projectTags: [...new Set(projects.flatMap((p) => p.tags))], projects })
 
 // skills（多岗位模板聚合：岗位 → 分组 → 词条）
-const profiles = db.prepare('SELECT id, label, note FROM skill_profiles ORDER BY rowid').all()
+const profiles = db.prepare('SELECT id, label, note, quick_tags FROM skill_profiles ORDER BY rowid').all()
 const skillRows = db
   .prepare('SELECT profile_id, group_name, items FROM skills ORDER BY rowid')
   .all()
@@ -54,6 +54,8 @@ const skillProfiles = profiles.map((p) => ({
   id: p.id,
   label: p.label,
   note: p.note,
+  // 高频快捷筛选词（见 seed-db.mjs 的建表注释：放数据库里才不会被 db:export 覆盖掉）
+  quickTags: JSON.parse(p.quick_tags ?? '[]'),
   groups: skillRows.filter((s) => s.profileId === p.id).map(({ title, items }) => ({ title, items })),
 }))
 write('skills.json', { skillProfiles })

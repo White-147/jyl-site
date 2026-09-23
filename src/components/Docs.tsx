@@ -409,10 +409,14 @@ export default function Docs({ docId, anchor }: { docId?: string; anchor?: strin
                 但那是 **aside 的盒子**，套在里面的 div 依然粘不住（sticky 认的是父级内容盒）。
               所以：让 aside 保持默认 stretch、自身 `position: sticky`，
               它的容器就是整行高的 grid area，粘住行程足够。
-            ⚠️ `top-16` 是顶栏高度；`md:py-6` 给内容上下留白（sticky 元素有 padding 不影响粘性）。
+            ⚠️ `top-16` 是顶栏高度。
+            ⚠️ **垂直留白只放 bottom，不要用对称的 `py-6`**（2026-09 修正）：
+              sticky 元素自身的 padding 会把它往下推 —— 两栏原来是 `py-6`，实测侧栏首行文字
+              落在 193px 而正文标题在 159px，**侧栏比正文低 34px**（用户反馈"感觉像是在中间"）。
+              现在顶边贴齐（都在 104px 起），只在底部留 24px，长内容滚到底时不会顶在边缘上。
             ⚠️ `max-h-[calc(100dvh-6rem)]` + `overflow-y-auto`：窄于 xl 时这一栏还要放大纲，
               内容会超过视口，必须让**它自己**能滚，否则底部内容永远看不到。 */}
-        <aside className="hidden md:sticky md:top-16 md:block md:max-h-[calc(100dvh-6rem)] md:overflow-y-auto md:py-6 md:pr-1">
+        <aside className="hidden md:sticky md:top-16 md:block md:max-h-[calc(100dvh-6rem)] md:overflow-y-auto md:pb-6 md:pr-1">
           <a
             href="#top"
             className="mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 transition-colors hover:text-brand-700 dark:text-slate-400 dark:hover:text-brand-200"
@@ -448,7 +452,8 @@ export default function Docs({ docId, anchor }: { docId?: string; anchor?: strin
         </aside>
 
         {/* 中：正文。data-copyable = 只读保护白名单，放开这一整块的选择与复制。
-            `md:py-6` 是正文列自己的上下留白（外层在桌面端已去掉 padding）。 */}
+            正文列自己留上下白（`md:py-6`）—— 滚动容器的 padding-bottom 在内容末尾不可靠，
+            所以上下留白都放在列自己身上，与左右两栏的 `pb-6` 口径一致。 */}
         <main className="min-w-0 md:py-6">
           <header className="mb-6 border-b border-slate-200 pb-5 dark:border-slate-700">
             <div className="flex flex-wrap items-center gap-2.5">

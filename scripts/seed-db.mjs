@@ -57,7 +57,11 @@ db.exec(`
     rowid INTEGER PRIMARY KEY AUTOINCREMENT,
     id    TEXT NOT NULL UNIQUE,
     label TEXT NOT NULL,
-    note  TEXT NOT NULL DEFAULT ''
+    note  TEXT NOT NULL DEFAULT '',
+    -- 该岗位画像的「高频常用」快捷筛选词（JSON 字符串数组）。
+    -- 警告：必须放在数据库里而不是组件里 —— npm run build 会先跑 db:export 用数据库覆盖
+    --   src/data/*.json，任何只写在 JSON 里的 UI 配置会在下一次构建时静默消失（2026-09 踩过）。
+    quick_tags TEXT NOT NULL DEFAULT '[]'
   );
 
   CREATE TABLE experience (
@@ -115,10 +119,12 @@ projects.forEach((p, i) =>
 
 // skills（多岗位模板：岗位 → 分组 → 词条，均按数组顺序入库）
 const { skillProfiles } = read('skills.json')
-const insProf = db.prepare('INSERT INTO skill_profiles (id, label, note) VALUES (?, ?, ?)')
+const insProf = db.prepare(
+  'INSERT INTO skill_profiles (id, label, note, quick_tags) VALUES (?, ?, ?, ?)',
+)
 const insSkill = db.prepare('INSERT INTO skills (profile_id, group_name, items) VALUES (?, ?, ?)')
 for (const p of skillProfiles) {
-  insProf.run(p.id, p.label, p.note ?? '')
+  insProf.run(p.id, p.label, p.note ?? '', JSON.stringify(p.quickTags ?? []))
   for (const g of p.groups) insSkill.run(p.id, g.title, JSON.stringify(g.items))
 }
 
