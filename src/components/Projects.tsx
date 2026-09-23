@@ -308,33 +308,10 @@ export default function Projects() {
           <p className="mt-8 text-center text-sm text-slate-500 dark:text-slate-400">该方向下暂无项目展示。</p>
         )}
 
-        {/* 学习笔记入口：不是项目（没有仓库、没有交付物），所以不塞进 projects 数据里变成"假项目"，
-            而是在项目列表末尾给一张轻量入口卡。筛选状态下也显示 —— 它是常驻的站内内容入口。 */}
-        <Reveal className="mt-10">
-          <a
-            href="#/docs/ue5"
-            className="group flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-5 transition-all hover:-translate-y-0.5 hover:border-brand-300 hover:shadow-md sm:p-6 dark:border-slate-800 dark:bg-slate-800 dark:hover:border-brand-500/60"
-          >
-            <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-2">
-                <h3 className="text-lg font-bold text-ink dark:text-ink-light">UE5 学习笔记</h3>
-                <span className="rounded-full bg-brand-50 px-2 py-0.5 text-[11px] font-semibold text-brand-700 dark:bg-brand-500/10 dark:text-brand-200">
-                  技术文档
-                </span>
-              </div>
-              <p className="mt-1.5 max-w-[46rem] text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-                虚幻引擎学习过程中的完整笔记：引擎与 Fab、项目模板、编辑器界面、蓝图与增强输入。
-                站内阅读版支持大纲跳转与配图放大，比原始 Markdown 清楚。
-              </p>
-            </div>
-            <span className="inline-flex shrink-0 items-center gap-1.5 text-sm font-semibold text-brand-700 transition-colors group-hover:text-brand-800 dark:text-brand-200 dark:group-hover:text-brand-100">
-              打开文档区
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true">
-                <path d="M5 12h14M13 5l7 7-7 7" />
-              </svg>
-            </span>
-          </a>
-        </Reveal>
+        {/* 学习笔记入口**不在这里**（2026-09 移除）：
+            它原来在项目列表末尾还有一张卡片，与顶栏的「笔记」控件是同一个目标的两处入口。
+            顶栏那个是常驻的（任何滚动位置都可用），这里再放一张只是重复。
+            真要把 UE 笔记当成"作品"展示时，应该走 projects 数据 + 截图，而不是一张纯导航卡。 */}
       </div>
     </section>
   )

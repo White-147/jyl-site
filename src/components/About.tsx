@@ -104,21 +104,27 @@ export default function About() {
             <div className="glass-card-strong h-full rounded-2xl p-6 sm:p-7">
               <p className="font-display text-lg font-normal tracking-tight text-brand-700 dark:text-brand-200">{anchor}</p>
               <div className="mt-4 space-y-4">
-                {about.map((para) => (
-                  <div key={para.phase}>
-                    {para.texts.map((text, i) => (
-                      <p
-                        key={text.slice(0, 12)}
-                        className={`text-base leading-snug text-slate-600 text-pretty sm:leading-relaxed dark:text-slate-300 ${
-                          i === 0 ? '' : 'mt-1.5'
-                        }`}
-                      >
-                        {i === 0 && (
-                          <span className="font-semibold text-brand-700 dark:text-brand-200">{para.phase} </span>
-                        )}
-                        {text}
-                      </p>
-                    ))}
+                {about.map((phase) => (
+                  <div key={phase.phase} className="space-y-1.5">
+                    {phase.texts.map((entry) => {
+                      // 两种写法：字符串（无标签）与 `{ label, text }`（行内彩色标签）。
+                      // 现在数据里**四段都带标签**（早期 / 近期 / 日常 / 目前），
+                      // 它们是并列的四个时间视角，视觉上必须完全一致 —— 所以共用同一个样式，
+                      // 而不是"第一段特殊"。字符串分支只是给未来的无标签段落留的路。
+                      const text = typeof entry === 'string' ? entry : entry.text
+                      const label = typeof entry === 'string' ? null : entry.label
+                      return (
+                        <p
+                          key={text.slice(0, 12)}
+                          className="text-base leading-snug text-slate-600 text-pretty sm:leading-relaxed dark:text-slate-300"
+                        >
+                          {label && (
+                            <span className="font-semibold text-brand-700 dark:text-brand-200">{label} </span>
+                          )}
+                          {text}
+                        </p>
+                      )
+                    })}
                   </div>
                 ))}
               </div>
