@@ -500,16 +500,17 @@ details[open] .chevron-up-down {
 
 /* 锚点停靠偏移（单一来源，见 src/data/scrollTargets.ts 与 docs/联动维护点.md 第 6 条）。
    ⚠️ 不能用 `@utility` + 嵌套 `@media` 实现：实测 Tailwind v4 的 @utility 会把嵌套的
-   @media 丢掉，只生成基础声明（.anchor-offset{scroll-margin-top:104px}），
-   结果是所有断点都取同一个值 —— 手机端的 104px 会一直被用到桌面端。
+   @media 丢掉，只生成基础声明（.anchor-offset{scroll-margin-top:112px}），
+   结果是所有断点都取同一个值 —— 手机端的值会一直被用到桌面端。
    所以这里用普通类 + 显式 @media，写在 `@import "tailwindcss"` 之后，
-   与工具类同层级且顺序在后，优先级足够。 */
+   与工具类同层级且顺序在后，优先级足够。
+   数值口径：TopBar 高 64px + 呼吸间隙（手机 48 / ≥640px 40），改 TopBar 高度必须同步改。 */
 .anchor-offset {
-  scroll-margin-top: 104px;
+  scroll-margin-top: 112px;
 }
 @media (min-width: 640px) {
   .anchor-offset {
-    scroll-margin-top: 88px;
+    scroll-margin-top: 104px;
   }
 }
 
@@ -529,15 +530,76 @@ details[open] .chevron-up-down {
   }
 }
 
-/* 移动端去掉常驻毛玻璃（2026-09 性能修复）。
-   `backdrop-filter` 在移动端每帧都要重新采样背景，是滚动掉帧的常见来源；
-   这里的两处（吸顶胶囊导航、底部 Tab Bar）**一直贴在屏幕上**，代价是持续的。
-   两者都是「半透明白 + 细边」的观感，靠提高不透明度即可维持，不需要真模糊。
-   只作用于 <768px：≥768px 没有底部 Tab Bar、胶囊导航也已隐藏，模糊本来就不参与合成。 */
-@media (max-width: 767px) {
-  .mobile-flat-bar {
-    -webkit-backdrop-filter: none;
+/* ===== 常驻顶部栏（TopBar，全端显示）与右侧导轨的几何变量 =====
+   为什么有这根栏：把「文档入口 / 返回顶部 / 主题 / 下载简历」四件全局操作收敛到一处。
+   迭代前主题控件分散在三个浮层里（手机吸顶胶囊、底部 Tab Bar、玻璃管管底），
+   而文档区这三处都没渲染 → 文档区根本无法切主题；右侧导轨也因此被塞进两个管外控件。
+
+   ⚠️ `--site-bar-h` 是**全站锚点偏移的唯一几何来源**：
+     `src/data/scrollTargets.ts`（JS 侧判定线）、`.anchor-offset`（CSS 侧 scroll-margin）、
+     `.rail-tube`（导轨起点）三处都按这个高度推算。改 h-16 必须同步改那两处（第 6 条联动点）。
+   ⚠️ `--rail-top/bottom` 只给 `.rail-tube` 用，管体与节点容器共用同一组值 ——
+     历史上这两处是手工同步的（管体 top-14/bottom-14，节点容器也写一份），
+     一旦漏改就会出现"液面与节点系统性错位"（实测曾偏 −210px）。 */
+:root {
+  --site-bar-h: 4rem; /* = TopBar 的 h-16 */
+  --rail-top: calc(var(--site-bar-h) + 0.875rem);
+  --rail-bottom: 4.5rem;
+}
+
+/* 玻璃材质（两档：手机更高不透明度、≥640px 放开）。
+   设计依据：这是全站**唯一**的常驻模糊浮层（Blur-Budget 只给需要透视的固定层），
+   底部 Tab Bar 也改成同材质，两处合计仍在预算内。
+
+   ⚠️ 只写标准 `backdrop-filter`，**不要**再手写 `-webkit-backdrop-filter`。
+   踩过的坑（2026-09）：两者都写时，构建用的 lightningcss 会把它们当成同一条属性做合并，
+   结果是**标准属性和前缀属性都可能被精简掉一个** —— 实测产物里只剩下
+   `-webkit-backdrop-filter:blur(14px)saturate(1.4)`，而 Chrome 不认这个前缀，
+   于是玻璃效果在 Chrome/Firefox 里**完全不生效**（只有 Safari 有），
+   而 `getComputedStyle(el).backdropFilter` 返回 `none`，排查时极易误判成"选择器写错了"。
+   正确做法：只写标准属性，让构建工具按 browserslist 目标自己决定是否补前缀。 */
+.site-bar {
+  background: rgb(255 255 255 / 0.82);
+  backdrop-filter: blur(14px) saturate(1.4);
+  border-bottom: 1px solid rgb(223 226 227 / 0.8);
+  box-shadow: 0 1px 0 rgb(255 255 255 / 0.6) inset;
+}
+.dark .site-bar {
+  background: rgb(18 20 21 / 0.76);
+  border-bottom-color: rgb(44 50 52 / 0.9);
+  box-shadow: 0 1px 0 rgb(255 255 255 / 0.06) inset;
+}
+@media (min-width: 640px) {
+  .site-bar {
+    background: rgb(255 255 255 / 0.6);
+    backdrop-filter: blur(16px) saturate(1.6);
+  }
+  .dark .site-bar {
+    background: rgb(18 20 21 / 0.62);
+  }
+}
+/* 不支持 backdrop-filter 时退回高不透明度底，避免"半透明却看不清字" */
+@supports not (backdrop-filter: blur(1px)) {
+  .site-bar {
+    background: rgb(255 255 255 / 0.96);
+  }
+  .dark .site-bar {
+    background: rgb(18 20 21 / 0.96);
+  }
+}
+
+/* 右侧玻璃管与节点容器共用的定位（起点在顶栏下沿、终点在视口底部上方） */
+.rail-tube {
+  top: var(--rail-top);
+  bottom: var(--rail-bottom);
+}
+@media (prefers-reduced-transparency: reduce) {
+  .site-bar {
+    background: rgb(255 255 255 / 0.98);
     backdrop-filter: none;
+  }
+  .dark .site-bar {
+    background: rgb(18 20 21 / 0.98);
   }
 }
 

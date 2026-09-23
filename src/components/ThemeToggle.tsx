@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { MODE_META, MODES, useTheme, type ThemeMode } from '../hooks/useTheme'
 
 function ModeIcon({ mode, className }: { mode: ThemeMode; className?: string }) {
@@ -23,9 +23,12 @@ function ModeIcon({ mode, className }: { mode: ThemeMode; className?: string }) 
  *  placement: up/down/left（下拉弹出方向）；variant: square 方钮 / dot 圆形小钮 / row 整行
  *
  *  ⚠️ 本组件**不持有**主题 state（见 docs/联动维护点.md 第 3 条）。
- *  移动端会同时渲染两个实例（顶部 `Navbar` + 底部 `MobileTabBar`），
- *  状态与 `theme-color` 同步统一由 `useTheme()` 提供，两处不可能不一致。 */
-export default function ThemeToggle({
+ *  状态与 `theme-color` 同步统一由 `useTheme()` 提供，多个实例（顶栏 + 底部 Tab Bar）
+ *  读的是同一个 Provider，不可能不一致。
+ *
+ *  ⚠️ 2026-09：`export` 而不是 `export default` —— 与项目里其它组件统一，
+ *  避免出现「有的默认导出、有的具名导出」两套写法。 */
+export function ThemeToggle({
   placement = 'down',
   variant = 'square',
   label,
@@ -37,16 +40,30 @@ export default function ThemeToggle({
   const { mode, setMode } = useTheme()
   const [open, setOpen] = useState(false)
 
-  // 点击外部关闭下拉
+  // 点击外部关闭下拉。
+  //
+  // ⚠️ 这里有个 React 事件模型的坑（2026-09 实测修掉）：
+  // React 17+ 把合成事件挂在 #root 容器上，**冒泡阶段的 document 监听器反而先于**
+  // 菜单项的 onClick 执行（document 比 #root 浅），于是 `setOpen(false)` 会先把菜单卸载，
+  // 用户点「浅色」什么都不会发生 —— 表现为"菜单能开、选项点了没反应"。
+  // 修法：监听器挂**捕获阶段**（在任何合成事件之前执行），并且**判断点击目标是否在菜单内**：
+  //   菜单内 → 交给菜单项自己的 onClick（先 setMode 再 setOpen(false)）
+  //   菜单外 → 关闭
+  // 注意菜单内的 stopPropagation 拦不住捕获阶段的监听器，所以必须做目标判断，不能只靠 stopPropagation。
+  const menuRef = useRef<HTMLDivElement>(null)
   useEffect(() => {
     if (!open) return
-    const close = () => setOpen(false)
-    document.addEventListener('click', close)
-    return () => document.removeEventListener('click', close)
+    const onDocClick = (e: MouseEvent) => {
+      if (menuRef.current?.contains(e.target as Node)) return
+      setOpen(false)
+    }
+    document.addEventListener('click', onDocClick, true)
+    return () => document.removeEventListener('click', onDocClick, true)
   }, [open])
 
   const menu = (
     <div
+      ref={menuRef}
       onClick={(e) => e.stopPropagation()}
       className={`absolute z-50 w-36 overflow-hidden rounded-xl border border-slate-200/70 bg-white/90 shadow-lg backdrop-blur-md dark:border-slate-700 dark:bg-slate-800/90 ${
         placement === 'left'
