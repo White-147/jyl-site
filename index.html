@@ -45,6 +45,28 @@
     </script>
   </head>
   <body>
+    <!-- ===== Liquid Glass 折射滤镜（顶栏用，见 src/index.css 的 .site-bar）=====
+         ⚠️ 必须留在 DOM 里且**不能 display:none**，否则 filter 引用解析不到；
+           `position:absolute; width:0; height:0` 是安全的隐藏方式。
+         ⚠️ 只用 `feTurbulence`（生成器原语）造位移场，**不要用 `feImage`**：
+           实测（Chrome 153）feImage 的 data URI 在 backdrop-filter 里根本进不来 ——
+           带 `in2="map"` 与不写 `in2` 两版截图逐点完全相同，位移退化成恒等。
+           kube.io 那套「透镜贴图」方案就卡在这里，本项目上一轮因此误判成"折射不可用"。
+         ⚠️ 参数取"大尺度水波"而不是细密噪点：baseFrequency 横向 0.006（周期约 167px）、
+           纵向 0.05（一个波段正好铺满边缘带），再对噪声做一次小半径模糊让弯折更柔。 -->
+    <svg class="lg-filter-defs" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+      <filter id="lg-refract" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+        <feTurbulence type="fractalNoise" baseFrequency="0.006 0.02" numOctaves="2" seed="9" result="noise" />
+        <feGaussianBlur in="noise" stdDeviation="1.6" result="soft" />
+        <feDisplacementMap in="SourceGraphic" in2="soft" scale="11" xChannelSelector="R" yChannelSelector="G" />
+      </filter>
+      <!-- 面板用的弱档：区块主容器面积大（几百 px），位移一大就像哈哈镜，所以 scale 收到 6 -->
+      <filter id="lg-refract-soft" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+        <feTurbulence type="fractalNoise" baseFrequency="0.004 0.008" numOctaves="2" seed="4" result="noise" />
+        <feGaussianBlur in="noise" stdDeviation="2.4" result="soft" />
+        <feDisplacementMap in="SourceGraphic" in2="soft" scale="6" xChannelSelector="R" yChannelSelector="G" />
+      </filter>
+    </svg>
     <!-- 首屏专属字体内嵌（base64）：名字草书 + 得意黑随 HTML 一起到达，
          避免额外字体请求延迟导致的 fallback→覆盖切换；其余字体走 assets 文件 + preload -->
     <!-- firstscreen-fonts-inline:start -->
@@ -65,6 +87,10 @@
     <style id="theme-bg-inline">
       body { background-color: #fafbfb; }
       .dark body { background-color: #121415; }
+      /* 打印拦截提示的屏幕隐藏必须**内联**：它的规则原本只在外链 CSS 里，
+         外链到达之前那行字会直接显形（用户 2026-09 的截图里就拍到了）。
+         这里用同一个类名、同一优先级，`@media print` 里的 `!important` 照样压得住。 */
+      .print-blocked { display: none; }
     </style>
     <!-- 首屏静态骨架：React 挂载前直接可见（消除 JS 加载期白屏）；
          挂载后 createRoot 替换 #root 内容，<style> 常驻 body 兜底样式过渡。
@@ -77,304 +103,213 @@
            H1 与副题的字号（Tailwind 的 --text-* 是 clamp 值，不是固定 px）
            头像尺寸 / 各段 margin
          骨架里使用的 clamp 值抄自 src/index.css 的 @theme --text-*，改字体比例时要一起改。 -->
-    <style id="hero-shell-style">
-      /* ===== 与 Hero.tsx 对应的设计常量 =====
-         Hero.tsx 的类名 → 这里的手写 CSS（骨架必须独立生效，不能依赖外部样式表）：
-           section                         → .hero-shell（无内边距，min-height 见 .hero-inner）
-           .hero-viewport                  → .hero-inner
-           .max-w-4xl                      → max-width: 56rem
-           .hero-shell .avatar (h-16/w-16 / sm:h-24/w-24)
-           .text-6xl / sm:text-7xl         → --sk-h1
-           .text-2xl / sm:text-4xl         → --sk-s1
-           .text-xs  / .text-sm            → --sk-s2
-           .text-base                      → --sk-s4 */
-      .hero-shell {
-        --sk-h1: clamp(2.25rem, 1.75rem + 2.5vw, 3.75rem);
-        --sk-s1: clamp(1.3125rem, 1.1875rem + 0.625vw, 1.5rem);
-        --sk-ebrow: clamp(0.6875rem, 0.6563rem + 0.1563vw, 0.75rem);
-        --sk-s2: clamp(0.8125rem, 0.7656rem + 0.2344vw, 0.875rem);
-        --sk-s4: clamp(0.9375rem, 0.875rem + 0.3125vw, 1rem);
-        --sk-gap: 0.75rem;
-        --sk-card-pad: 1rem;
-        font-family: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, -apple-system, sans-serif;
-        color: #536c70;
+    <!-- ===== 首屏加载页 =====
+         它承担 React 挂载前的**全部**空窗，是这一段时间里唯一可见的东西。
+
+         ⚠️ 为什么现在敢这么做：静态 Hero 骨架已删除。以前那段时间显示的是骨架，
+            而骨架只覆盖 Hero、且不认识路由 —— 用户 2026-09 的截图里，"文档区直开"
+            和"主页冷启动"看到的是同一个主站 Hero 半成品，就是这个原因。
+            删掉骨架、由这一层独占空窗之后，"半加载"在物理上不可能出现。
+
+         ⚠️ 兜底策略改过（这是上一版真正的 bug）：上一版 4s 到点就**无条件放行**，
+            开发服务器挂载慢时它会在 React 挂载前撤走，露出骨架 —— 也就是用户看到的
+            "开屏动画走完之后依旧是首屏半加载"。现在**只有 React 真的挂载了才撤**，
+            超时只换提示文案，绝不揭示一个没画完的页面。
+
+         ⚠️ 进度必须来自真实信号，不做假进度条：
+              fonts = document.fonts.ready ─┐
+              paint = 连续两帧可绘         ├─ 各占 1/3
+              app   = React 挂载并渲染完   ┘   ← **唯一决定放行的信号** -->
+    <div id="boot" role="status" aria-live="polite" aria-label="正在加载">
+      <div class="boot-stage" aria-hidden="true">
+        <span class="boot-beam"></span>
+        <span class="boot-core"></span>
+      </div>
+      <div class="boot-readout">
+        <span class="boot-pct"><b id="boot-pct">0</b>%</span>
+        <span class="boot-hint" id="boot-hint"></span>
+      </div>
+    </div>
+    <style id="boot-style">
+      #boot {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: clamp(1.5rem, 4vh, 2.75rem);
         background-color: #fafbfb;
-        position: relative;
+        transition: opacity 0.42s cubic-bezier(0.22, 1, 0.36, 1);
       }
-      @media (min-width: 640px) {
-        .hero-shell {
-          --sk-h1: clamp(2.5rem, 1.875rem + 3.125vw, 4.25rem);
-          --sk-s1: clamp(1.75rem, 1.5rem + 1.25vw, 2.25rem);
-          --sk-gap: 1.5rem;
-          --sk-card-pad: 1.75rem;
-        }
-      }
-      .dark .hero-shell {
-        color: #c6ccce;
+      .dark #boot {
         background-color: #121415;
       }
-      /* 最外层容器：对应 Hero.tsx 的 `hero-viewport mx-auto flex max-w-6xl flex-col justify-start
-         px-4 pb-12 pt-10 sm:justify-center sm:px-6 sm:pb-24 sm:pt-14` + index.css 的 .hero-viewport。
-
-         ⚠️ 骨架只负责「背景」，前景文字一律不可见（这是修复跳动的最终方案）
-         为什么不再尝试对齐文字位置：
-           app 在 ≥640px 用 `justify-content: center` + `min-height: max(731px, 100svh - 4rem)`。
-           内容高于容器时居中退化为贴顶，于是**首项位置 = 0.706 × 容器高度** ——
-           它是一个随视口高度连续变化的比例，而骨架无法用「与容器高度同源」的度量复现它：
-             · 固定 px：无法覆盖所有屏幕（实测 640-1500px 高度跨度下偏差 12-818px）
-             · 百分比 padding：按**宽度**解析，不是高度，反而偏出 900px+
-             · grid 的 fr 轨道：只对已分配的行生效，单行自动放置时直接塌陷（实测偏 56-409px）
-             · vh / svh：在无头仿真下不随视口变化，无法验证；生产环境可响应但不可回归测试
-           水平方向已逐项精确对齐（x 与宽度均 0 误差），垂直方向无法收敛到 0。
-
-         结论：让骨架**不渲染前景文字**，只保留背景层与光斑（见下方 .hero-col 的 visibility）。
-         没有前景内容就没有可错位的东西，跳动从根上消失，代价是 React 挂载前的一瞬
-         （实测 150-260ms）首屏只有背景。 */
-      .hero-inner {
+      #boot.is-out {
+        opacity: 0;
+        pointer-events: none;
+      }
+      /* 一道竖向细光：上下淡出、中间最亮，靠 scaleY 呼吸而不是改高度（只动合成层） */
+      .boot-stage {
         position: relative;
-        max-width: 72rem;
-        margin: 0 auto;
+        width: 1px;
+        height: clamp(9rem, 30vh, 17rem);
+        background-image: linear-gradient(
+          to bottom,
+          transparent,
+          rgba(120, 140, 143, 0.55) 22%,
+          rgba(157, 83, 0, 0.9) 50%,
+          rgba(120, 140, 143, 0.55) 78%,
+          transparent
+        );
+        transform-origin: center;
+        animation: boot-breathe 2.6s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+      }
+      .dark .boot-stage {
+        background-image: linear-gradient(
+          to bottom,
+          transparent,
+          rgba(230, 232, 233, 0.28) 22%,
+          rgba(242, 169, 59, 0.95) 50%,
+          rgba(230, 232, 233, 0.28) 78%,
+          transparent
+        );
+      }
+      /* 光核：细光正中一颗很小的亮斑 + 一圈光晕，缓慢上下浮 */
+      .boot-core {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 3px;
+        height: 3px;
+        margin: -1.5px 0 0 -1.5px;
+        border-radius: 9999px;
+        background-color: #9d5300;
+        box-shadow: 0 0 12px 4px rgba(217, 122, 6, 0.4);
+        animation: boot-drift 2.6s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+      }
+      .dark .boot-core {
+        background-color: #f2a93b;
+        box-shadow: 0 0 14px 5px rgba(242, 169, 59, 0.45);
+      }
+      .boot-readout {
         display: flex;
         flex-direction: column;
-        justify-content: flex-start;
-        min-height: 731px;
-        /* 用 vh 而不是 svh：骨架的职责只是「第一帧就占住正确高度」，
-           而 vh 在各环境下的解析都稳定。实测 svh 在骨架阶段与应用挂载后会算出不同值，
-           导致首屏交接时 body 高度跳 12px（CLS 0.014）。
-           应用侧仍用 svh（见 index.css 的 .hero-viewport），那是它该关心的事。 */
-        min-height: max(731px, calc(100vh - 4rem));
-        padding: 2.5rem 1rem 3rem;
-      }
-      @media (min-width: 640px) {
-        .hero-inner {
-          padding: 3.5rem 1.5rem 6rem;
-        }
-      }
-      /* 内容列：对应 `max-w-4xl`（56rem）。
-         ⚠️ 2026-09 起**不再隐藏**（原来是 visibility: hidden）：
-           隐藏的理由是"骨架文字与 Hero 对不齐会跳"，但实测对不齐的真因是**内容不一致** ——
-           骨架写的是旧的 3 条方向、且缺少第二行简介，而 Hero 是 4 条方向 + 两行简介。
-           现在骨架内容与 Hero.tsx 逐项对齐（见下方 DOM 结构注释），所以可以放心显示：
-             · 文字**现在就能读**，不必等 React（实测首屏 2.4s 可见 → 6.6s 才有内容）
-             · 浏览器在骨架阶段就有 LCP 候选（原来整段 hidden，实测 lcp = null）
-           可见后字体用系统回退、字体到位后再换 Noto Sans SC —— 换字会带来极轻微的重排，
-           但**不产生布局位移**（行数一致、行高接近）。
-           ⚠️ 改 Hero.tsx 的任何文案后，必须同步改下面的骨架，否则又会回到"交接时跳动"。
-             骨架文案与 `src/data/profile.json` 的一致性由 scripts/check-hero-skeleton.mjs 校验。 */
-      .hero-col {
-        max-width: 56rem;
-      }
-      /* 背景层（光斑+网格）：独立于背景色，CSS 应用后 0.9s 平滑淡入，
-         与外部 CSS 的全站背景无缝过渡（深色同步） */
-      .hero-shell::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        pointer-events: none;
-        opacity: 0;
-        animation: demo-shell-fade 0.9s ease 0.12s forwards;
-        background-image:
-          radial-gradient(ellipse 55% 42% at 50% 14%, rgba(242, 169, 59, 0.1), transparent 70%),
-          linear-gradient(to right, rgba(120, 140, 143, 0.1) 1px, transparent 1px),
-          linear-gradient(to bottom, rgba(120, 140, 143, 0.1) 1px, transparent 1px);
-        background-size: auto, 48px 48px, 48px 48px;
-      }
-      .dark .hero-shell::before {
-        background-image:
-          radial-gradient(ellipse 55% 42% at 50% 14%, rgba(242, 169, 59, 0.12), transparent 70%),
-          linear-gradient(to right, rgba(120, 140, 143, 0.07) 1px, transparent 1px),
-          linear-gradient(to bottom, rgba(120, 140, 143, 0.07) 1px, transparent 1px);
-      }
-      @keyframes demo-shell-fade {
-        to { opacity: 1; }
-      }
-      /* 求职徽标：对应 `inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs`
-         （Hero.tsx 里 py-1 / text-xs 在所有断点一致，不要给它加响应式字号）
-         字号必须用 --sk-ebrow（= text-xs）而不是 --sk-s2（= text-sm），否则整列下移 5px。 */
-      .hero-shell .eyebrow {
-        display: inline-flex;
         align-items: center;
         gap: 0.5rem;
-        align-self: flex-start;
-        padding: 0.25rem 0.75rem;
-        border: 1px solid #a7f3d0;
-        border-radius: 9999px;
-        background: #ecfdf5;
-        color: #047857;
-        font-size: var(--sk-ebrow);
-        line-height: 1.333;
-        font-weight: 500;
+        font-family: "Victor Mono", ui-monospace, SFMono-Regular, Consolas, monospace;
+        font-size: 0.6875rem;
+        letter-spacing: 0.18em;
+        color: rgba(71, 85, 105, 0.75);
       }
-      .dark .hero-shell .eyebrow {
-        border-color: rgba(16, 185, 129, 0.3);
-        background: rgba(16, 185, 129, 0.1);
-        color: #34d399;
+      .dark .boot-readout {
+        color: rgba(203, 213, 225, 0.7);
       }
-      .hero-shell .dot {
-        width: 0.5rem;
-        height: 0.5rem;
-        border-radius: 9999px;
-        background: #10b981;
-        display: inline-block;
+      .boot-pct b {
+        font-weight: 400;
+        font-variant-numeric: tabular-nums;
       }
-      /* 名字行：对应 `mt-6 flex items-center gap-5 sm:mt-8 sm:gap-8` */
-      .hero-shell .m1 {
-        display: flex;
-        align-items: center;
-        gap: 1.25rem;
-        margin-top: 1.5rem;
+      .boot-hint {
+        min-height: 1em;
+        font-size: 0.625rem;
+        letter-spacing: 0.06em;
+        opacity: 0.75;
       }
-      @media (min-width: 640px) {
-        .hero-shell .m1 {
-          gap: 2rem;
-          margin-top: 2rem;
+      @keyframes boot-breathe {
+        0%,
+        100% {
+          transform: scaleY(0.82);
+          opacity: 0.7;
+        }
+        50% {
+          transform: scaleY(1);
+          opacity: 1;
         }
       }
-      /* 名字：对应 `font-handwrite text-6xl leading-[1.08] tracking-tight sm:text-7xl`
-         font-weight 是 400（font-normal），不是 900 —— 历史上骨架写成 900 会触发合成加粗 */
-      .hero-shell h1 {
-        font-size: var(--sk-h1);
-        line-height: 1.08;
-        font-weight: 400;
-        letter-spacing: -0.025em;
-        color: #1a1c1e;
-        margin: 0;
-        font-family: "Liu Jian Mao Cao", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
-      }
-      .dark .hero-shell h1 { color: #e6e8e9; }
-      /* 头像：对应 `h-16 w-16 sm:h-24 sm:w-24 rounded-full object-cover`
-         注意源图是 400x560 的竖版，靠 object-fit: cover 裁成圆形 */
-      .hero-shell .avatar {
-        width: 4rem;
-        height: 4rem;
-        border-radius: 9999px;
-        object-fit: cover;
-        box-shadow: 0 4px 12px rgba(26, 28, 30, 0.12);
-        outline: 4px solid #fbecd3;
-        outline-offset: -1px;
-        flex-shrink: 0;
-      }
-      @media (min-width: 640px) {
-        .hero-shell .avatar { width: 6rem; height: 6rem; }
-      }
-      .dark .hero-shell .avatar { outline-color: rgba(242, 169, 59, 0.28); }
-      /* 定位副题：对应 `font-display mt-3 text-2xl leading-[1.12] tracking-tight sm:mt-4 sm:text-4xl`
-         font-weight 是 400（font-normal） */
-      .hero-shell .s1 {
-        font-size: var(--sk-s1);
-        line-height: 1.12;
-        font-weight: 400;
-        letter-spacing: -0.025em;
-        color: #9d5300;
-        margin: 0.75rem 0 0;
-        font-family: "Smiley Sans", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
-      }
-      @media (min-width: 640px) {
-        .hero-shell .s1 { margin-top: 1rem; }
-      }
-      .dark .hero-shell .s1 { color: #f3d9ac; }
-      /* 学历 / 方向行：对应 `mt-2 text-sm font-medium` 与 `mt-1.5 text-sm font-medium sm:mt-2` */
-      .hero-shell .s2,
-      .hero-shell .s3 {
-        font-size: var(--sk-s2);
-        font-weight: 500;
-        color: #536c70;
-        margin: 0.5rem 0 0;
-      }
-      .dark .hero-shell .s2,
-      .dark .hero-shell .s3 { color: #95a0a3; }
-      /* 方向行：移动端每行一项（纵向），≥640px 一行横向 + 圆点分隔。
-         对应 Hero.tsx 的 `flex flex-col gap-1 … sm:flex-row sm:items-center sm:gap-2.5`。 */
-      .hero-shell .s3 {
-        display: flex;
-        flex-direction: column;
-        gap: 0.25rem;
-      }
-      @media (min-width: 640px) {
-        .hero-shell .s3 {
-          flex-direction: row;
-          align-items: center;
-          gap: 0.625rem;
+      @keyframes boot-drift {
+        0%,
+        100% {
+          transform: translateY(-1.15rem);
+        }
+        50% {
+          transform: translateY(1.15rem);
         }
       }
-      .hero-shell .s3 .dir {
-        display: flex;
-        align-items: center;
-        gap: 0.625rem;
+      @media (prefers-reduced-motion: reduce) {
+        #boot,
+        .boot-pct b {
+          transition-duration: 1ms;
+        }
+        .boot-stage,
+        .boot-core {
+          animation: none;
+        }
       }
-      /* 方向之间的圆点：首项没有，且只在横向布局下出现（Hero.tsx 的 `hidden … sm:inline-block`） */
-      .hero-shell .s3 .dir + .dir::before {
-        content: "";
-        display: none;
-        width: 0.25rem;
-        height: 0.25rem;
-        flex-shrink: 0;
-        border-radius: 9999px;
-        background-color: rgb(148 163 184 / 0.7);
-      }
-      @media (min-width: 640px) {
-        .hero-shell .s3 .dir + .dir::before { display: inline-block; }
-      }
-      /* 首屏短句：对应 `mt-6 text-base leading-relaxed` */
-      .hero-shell .s4 {
-        font-size: var(--sk-s4);
-        line-height: 1.625;
-        color: #3b5155;
-        margin: 1.5rem 0 0;
-      }
-      .dark .hero-shell .s4 { color: #c6ccce; }
-      /* 简介两行：移动端**只显示第一行**（= profile.heroLineMobile），桌面端显示两行完整句。
-         对应 Hero.tsx 的 `block font-medium sm:hidden` + `hidden sm:block`：
-         桌面两句共用一个容器（而移动短句是独立容器），这里用相邻兄弟选择器表达同一件事。
-         ⚠️ 用 `+` 而不是 `:nth-of-type`：p 元素的 nth-of-type 会把上面的 `.s1/.s2/.s3`
-            一起算进去，n+2 会误伤骨架自己的行（踩过）。 */
-      .hero-shell .s4 + .hero-lines { display: none; }
-      .hero-shell .s4 + .hero-lines,
-      .hero-shell .s4 + .hero-lines + .hero-lines { margin-top: 0; }
-      @media (min-width: 640px) {
-        .hero-shell .s4 + .hero-lines { display: block; }
-      }
-      /* ⚠️ 这里曾有 47 行 `.hero-shell .cta` / `.btn-primary` / `.btn-ghost` 的按钮样式，
-         2026-09 删除。原因：首屏的行动按钮已从 Hero.tsx 移除（简历下载进了常驻顶栏），
-         骨架的 `.hero-col` 又是 `visibility: hidden`，那些规则**永远不会生效** ——
-         它们只是让首屏 HTML 白白多背 1.4KB 关键 CSS，并让下一个人以为首屏还有按钮。 */
     </style>
+    <script>
+      (function () {
+        var boot = document.getElementById('boot')
+        if (!boot) return
+        var pctEl = document.getElementById('boot-pct')
+        var hintEl = document.getElementById('boot-hint')
+        var state = { fonts: false, paint: false, app: false }
+        var shown = 0
+        var revealed = false
+        function score() {
+          return Math.round(((state.fonts ? 1 : 0) + (state.paint ? 1 : 0) + (state.app ? 1 : 0)) / 3 * 100)
+        }
+        /* 百分比平滑爬升：数字不能做 CSS 过渡，用 rAF 插值，避免 0→33→66 的跳变 */
+        function tick() {
+          var target = score()
+          if (shown !== target) {
+            shown += shown < target ? Math.max(1, Math.ceil((target - shown) / 6)) : -1
+            if (shown > target) shown = target
+            if (pctEl) pctEl.textContent = String(shown)
+          }
+          if (!revealed && state.app) reveal()
+          requestAnimationFrame(tick)
+        }
+        function reveal() {
+          revealed = true
+          /* 等到 100% 再撤，让读数走到头，不半路消失 */
+          var wait = function () {
+            if (shown < 100) return setTimeout(wait, 60)
+            boot.classList.add('is-out')
+            setTimeout(function () {
+              if (boot.parentNode) boot.parentNode.removeChild(boot)
+            }, 460)
+          }
+          wait()
+        }
+        if (document.fonts && document.fonts.ready) {
+          document.fonts.ready.then(function () {
+            state.fonts = true
+          })
+        } else {
+          state.fonts = true
+        }
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () {
+            state.paint = true
+          })
+        })
+        /* React 挂载完成 —— **唯一**的放行条件 */
+        window.addEventListener('app:ready', function () {
+          state.app = true
+        })
+        /* 超时只换提示，**绝不**放行：没有 app:ready 就说明页面还没画好，
+           这时候撤掉加载页只会露出一个空壳（这正是上一版的 bug）。 */
+        setTimeout(function () {
+          if (!state.app && hintEl) hintEl.textContent = '加载较慢，请稍候…'
+        }, 8000)
+        setTimeout(function () {
+          if (!state.app && hintEl) hintEl.textContent = '加载失败，请刷新页面'
+        }, 20000)
+        requestAnimationFrame(tick)
+      })()
+    </script>
     <div id="root">
-      <!-- 骨架的 DOM 层级与 Hero.tsx **逐项**对应（改一处必须改另一处）：
-             section.hero-shell                 → <section id="top">
-             div.hero-inner                     → <div hero-viewport mx-auto max-w-6xl …>
-             div.hero-col                       → <div max-w-4xl>
-             span.eyebrow + span.dot            → 求职状态徽标
-             div.m1 > h1 + img.avatar           → 名字 + 头像
-             p.s1                               → profile.title
-             p.s2                               → profile.subtitle
-             div.s3（内含 span.dir × N）        → profile.directions（**N 必须相同**，当前 4 条）
-             p.s4                               → 手机端 profile.heroLineMobile；桌面端 heroLines 两行
-          缩进层级故意保持与 app 相同，便于对照维护。
-          ⚠️ 内容漂移的后果是"交接时首屏跳动"，历史上就是这么错的（骨架少 1 条方向、少 1 行简介）。
-             跑 `node scripts/check-hero-skeleton.mjs` 可校验本段与 profile.json 是否一致。 -->
-      <section class="hero-shell" aria-hidden="true">
-        <div class="hero-inner">
-          <div class="hero-col">
-            <span class="eyebrow"><span class="dot"></span>求职中 · 到岗时间可沟通</span>
-            <div class="m1">
-              <h1>蒋宇龙</h1>
-              <img class="avatar" src="images/avatar-blue.webp" alt="" width="400" height="560" />
-            </div>
-            <p class="s1">信息技术综合岗位</p>
-            <p class="s2">数据科学与大数据技术本科</p>
-            <div class="s3">
-              <span class="dir">数据工程</span>
-              <span class="dir">业务系统交付</span>
-              <span class="dir">Windows 原生桌面端工程化</span>
-              <span class="dir">游戏开发与引擎应用</span>
-            </div>
-            <p class="s4">从页面到桌面的全链路交付</p>
-            <p class="s4 hero-lines">4年信息技术从业经验，覆盖应用开发、数据质检、ERP实施、团队协作四条线；近期在系统学习虚幻引擎。</p>
-            <p class="s4 hero-lines">擅长在技术与业务之间搭桥——理解需求、梳理流程、落地交付。</p>
-          </div>
-        </div>
-      </section>
     </div>
     <!-- 打印拦截提示：只在 @media print 下显示（见 src/index.css 的 print 段）。
          必须放在 body 直属层、不能放进 React 应用内部——应用整体被 display:none 后

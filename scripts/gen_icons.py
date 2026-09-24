@@ -122,7 +122,14 @@ def main():
         raise SystemExit(f'缺少字体源：{FONT}')
 
     print('站点图标（石墨底 + 琥珀字）：')
-    for size in (16, 32, 48, 192, 512):
+    # ⚠️ 2026-09 审计后只保留**真正被引用**的尺寸：
+    #      favicon-32  → index.html + 404.html
+    #      favicon-192 → index.html + manifest.webmanifest + TopBar 品牌图标
+    #      favicon-512 / maskable-512 / apple-touch-icon → manifest / iOS
+    #    删掉的 favicon-16.png 与 favicon-48.png 全站零引用（492 B + 1.6 KB）；
+    #    删掉的 public/images/icon-jiang-192.png 与 favicons/favicon-192.png **字节完全相同**，
+    #    TopBar 改为直接引用 favicons/favicon-192.png。这三个都不要加回来。
+    for size in (32, 192, 512):
         save_png(make_tile(size), os.path.join(FAVICON_DIR, f'favicon-{size}.png'),
                  quantize=size <= 48)
 
@@ -131,9 +138,6 @@ def main():
 
     print('Android 自适应图标（maskable）：')
     save_png(make_maskable(512), os.path.join(FAVICON_DIR, 'maskable-512.png'))
-
-    print('导航栏图标（与 favicon 同一标记，供 navbar 直接引用）：')
-    save_png(make_tile(192), os.path.join(IMAGE_DIR, 'icon-jiang-192.png'))
 
     print('完成。')
 

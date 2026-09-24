@@ -100,7 +100,7 @@ export default function About() {
         <div className="mt-5 grid gap-5 sm:mt-12 lg:grid-cols-2">
           {/* 简介卡：学历锚点 + 阶段化叙事（早期 / 近期 / 日常） */}
           <Reveal>
-            <div className="glass-card-strong h-full rounded-2xl p-6 sm:p-7">
+            <div className="glass-panel glass-lit h-full rounded-2xl p-6 sm:p-7">
               <p className="font-display text-lg font-normal tracking-tight text-brand-700 dark:text-brand-200">{anchor}</p>
               <div className="mt-4 space-y-4">
                 {about.map((phase) => (
@@ -132,7 +132,7 @@ export default function About() {
 
           {/* 多定位卡：四个岗位方向一句话定位 + 各方向关键词（招聘者快速抓取可投方向，与技能区画像互补） */}
           <Reveal delay={120}>
-            <div className="glass-card-strong relative h-full overflow-hidden rounded-2xl p-6 sm:p-7">
+            <div className="glass-panel glass-lit relative h-full overflow-hidden rounded-2xl p-6 sm:p-7">
               <div
                 className="pointer-events-none absolute inset-0 opacity-[0.3] dark:opacity-15"
                 aria-hidden="true"
@@ -190,7 +190,7 @@ export default function About() {
           <div className="grid gap-4 sm:mx-auto sm:max-w-5xl sm:grid-cols-2 sm:gap-5">
             {links.map((link, i) => (
               <Reveal key={link.title} delay={i * 110}>
-                <div className="group glass-card h-full rounded-2xl p-4 transition-all hover:-translate-y-0.5 hover:border-brand-300 hover:shadow-md sm:p-5 xl3:p-6 dark:hover:border-brand-500/50">
+                <div className="group glass-card h-full rounded-2xl p-4 glass-lit sm:p-5 xl3:p-6 dark:hover:border-brand-500/50">
                   <div className="flex items-baseline justify-between gap-3">
                     <h3 className="text-lg font-bold text-ink dark:text-ink-light">{link.title}</h3>
                     <span className="shrink-0 rounded-full bg-brand-50 px-2 py-0.5 text-[11px] font-semibold text-brand-700 dark:bg-brand-500/10 dark:text-brand-200">

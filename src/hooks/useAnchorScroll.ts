@@ -107,26 +107,42 @@ export function useAnchorScroll() {
 }
 
 /**
- * 深链兜底：URL 带 `#id` 直接打开时，浏览器可能同样少滚一段。
+ * 深链兜底：URL 带 `#id` 打开时，浏览器可能同样少滚一段。
  * 页面静定后校验一次，偏差则静默纠正（不改动 hash）。
+ *
+ * ⚠️ 必须**同时监听 `hashchange`**（2026-09 修）。只跑一次挂载的话，
+ *    从文档区点 `#projects` 这类跨区入口会失效：hash 变了、App 切回了主站，
+ *    但这个 hook 早就跑完了，而浏览器原生跳转发生在那一刻 `#projects` 还不存在 ——
+ *    实测结果是「路由切过去了，页面停在 scrollY=0，#projects 在视口下方 2130px」。
+ *    代价是主站内部点锚点时这里也会跟着校验一次，和 `onAnchorClick` 的落点修正重叠；
+ *    两者都只在偏差 > 6px 时才动手，重复执行是幂等的。
  */
 export function useDeepLinkCorrection() {
   useEffect(() => {
-    const id = location.hash.replace(/^#/, '')
-    if (!id || id === HERO_ID) return
-    // 路由型 hash（`#/docs/ue5/...`）不是页内锚点：既没有对应元素，也不该被"纠正"。
-    // 文档区自己处理 `?s=<heading id>` 的定位（见 Docs.tsx）。
-    if (id.startsWith('/')) return
-    const el = document.getElementById(id)
-    if (!el) return
-    const expected = expectedOffset()
-    const timer = window.setTimeout(() => {
-      void settleAndMeasure(el, expected).then((err) => {
-        if (err > TOLERANCE_PX) {
-          el.scrollIntoView({ block: 'start', behavior: 'instant' as ScrollBehavior })
-        }
-      })
-    }, 900)
-    return () => window.clearTimeout(timer)
+    let timer = 0
+    const correct = () => {
+      window.clearTimeout(timer)
+      const id = location.hash.replace(/^#/, '')
+      if (!id || id === HERO_ID) return
+      // 路由型 hash（`#/docs/...`）不是页内锚点：既没有对应元素，也不该被"纠正"。
+      // 文档区自己处理 `?s=<heading id>` 的定位（见 Docs.tsx）。
+      if (id.startsWith('/')) return
+      // 跨区跳转时目标元素要等 React 渲染完才存在，所以延后一轮再查
+      timer = window.setTimeout(() => {
+        const el = document.getElementById(id)
+        if (!el) return
+        void settleAndMeasure(el, expectedOffset()).then((err) => {
+          if (err > TOLERANCE_PX) {
+            el.scrollIntoView({ block: 'start', behavior: 'instant' as ScrollBehavior })
+          }
+        })
+      }, 260)
+    }
+    correct()
+    window.addEventListener('hashchange', correct)
+    return () => {
+      window.removeEventListener('hashchange', correct)
+      window.clearTimeout(timer)
+    }
   }, [])
 }

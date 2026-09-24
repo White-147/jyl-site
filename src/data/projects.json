@@ -194,6 +194,7 @@
         "协同过滤"
       ],
       "link": "https://github.com/White-147/BookRecommendation",
+      "docsUrl": "#/docs/thesis",
       "screenshot": "projects/book-recommendation.webp",
       "previewUrl": "preview/book-recommendation/",
       "previewNote": "界面演示（内置示例数据）：后端已停用，图书/推荐为演示数据"

@@ -18,7 +18,7 @@ const tagColor: Record<ProjectTag, string> = {
 /** 项目动作元数据（数据驱动）：三类动作的样式统一从品牌色板派生，
  *  功能靠图标 + 文案区分（不再各用一套色板）；GitHub 入口仍在标题行图标。 */
 interface ProjectAction {
-  key: 'demo' | 'preview' | 'download'
+  key: 'demo' | 'preview' | 'download' | 'docs'
   label: string
   title?: string
   href: string
@@ -56,6 +56,26 @@ function buildProjectActions(project: Project): ProjectAction[] {
       ),
     })
   }
+  /**
+   * 毕业设计原文（项目 → 文档区的反向入口）。
+   *
+   * 关系存在数据库的 `projects.docs_url` 里（经 `projects.json` → `npm run db:seed` 入库），
+   * **不在这里判断 id** —— 哪些项目有原文是数据，不是组件逻辑。
+   * 文档区那一侧的对应入口在 `build-docs.mjs` 的 `SECTIONS[].relatedProject`（正向：论文 → 项目）。
+   */
+  if (project.docsUrl) {
+    actions.push({
+      key: 'docs',
+      label: '毕业设计原文',
+      title: '在站内阅读毕业设计全文（含系统设计与实现细节）',
+      href: project.docsUrl,
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5" aria-hidden="true">
+          <path d="M4 4h10a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3V4zm3 3h6M7 11h6M7 15h4" />
+        </svg>
+      ),
+    })
+  }
   if (project.downloadUrl) {
     actions.push({
       key: 'download',
@@ -83,7 +103,7 @@ function ProjectRow({ project, index }: { project: Project; index: number }) {
 
   return (
     <Reveal>
-      <article className="group border-b border-slate-200/70 py-6 transition-colors hover:bg-slate-50/70 first:pt-0 last:border-0 dark:border-slate-800/70 dark:hover:bg-slate-800/40">
+      <article id={`project-${project.id}`} className="group glass-card glass-lit scroll-mt-24 mb-4 rounded-2xl p-5 last:mb-0 sm:p-6">
         <div className="grid gap-4 sm:grid-cols-[3.5rem_minmax(0,1fr)] sm:gap-5">
           {/* 行号（编辑索引感） */}
           <span
@@ -216,7 +236,7 @@ function ProjectRow({ project, index }: { project: Project; index: number }) {
                 {shownStack.map((item) => (
                   <span
                     key={item}
-                    className="rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                    className="glass-chip rounded-full px-2 py-0.5 text-[11px]"
                   >
                     {item}
                   </span>
@@ -286,10 +306,10 @@ export default function Projects() {
               type="button"
               onClick={() => setActive(tag)}
               aria-pressed={active === tag}
-              className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+              className={`glass-lit rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
                 active === tag
                   ? 'bg-brand-700 text-white shadow-sm dark:bg-brand-700'
-                  : 'border border-slate-300 bg-white text-slate-600 hover:border-brand-400 hover:text-brand-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-brand-500 dark:hover:text-brand-200'
+                  : 'glass-chip hover:text-brand-700 dark:hover:text-brand-200'
               }`}
             >
               {tag}

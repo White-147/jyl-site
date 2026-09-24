@@ -77,7 +77,7 @@ export default function Education() {
         <div className="mt-5 grid gap-5 sm:mt-12 lg:grid-cols-3">
           {/* 学校竖卡 */}
           <Reveal className="lg:col-span-1">
-            <div className="glass-card-strong flex h-full flex-col justify-center gap-5 rounded-2xl p-6 sm:p-8">
+            <div className="glass-panel glass-lit flex h-full flex-col justify-center gap-5 rounded-2xl p-6 sm:p-8">
               <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-700 dark:bg-brand-500/10 dark:text-brand-200">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6" aria-hidden="true">
                   <path d="M22 10 12 5 2 10l10 5 10-5z" />

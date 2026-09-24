@@ -35,6 +35,7 @@ db.exec(`
     details    TEXT NOT NULL,
     stack      TEXT NOT NULL,
     link       TEXT NOT NULL,
+    docs_url   TEXT,
     screenshot TEXT,
     demo_url      TEXT,
     demo_note     TEXT,
@@ -92,7 +93,7 @@ for (const [k, v] of Object.entries(profile)) insProfile.run(k, JSON.stringify(v
 // projects（按数组顺序记录 sort）
 const { projects } = read('projects.json')
 const insProj = db.prepare(
-  'INSERT INTO projects (sort, id, name, tags, period, summary, details, stack, link, screenshot, demo_url, demo_note, preview_url, preview_note, download_url, download_note, download_hint, highlight) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+  'INSERT INTO projects (sort, id, name, tags, period, summary, details, stack, link, docs_url, screenshot, demo_url, demo_note, preview_url, preview_note, download_url, download_note, download_hint, highlight) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
 )
 projects.forEach((p, i) =>
   insProj.run(
@@ -105,6 +106,7 @@ projects.forEach((p, i) =>
     JSON.stringify(p.details),
     JSON.stringify(p.stack),
     p.link,
+    p.docsUrl ?? null,
     p.screenshot ?? null,
     p.demoUrl ?? null,
     p.demoNote ?? null,

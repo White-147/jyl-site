@@ -1,30 +1,20 @@
 import { useEffect, useState } from 'react'
-import { parseDocsHash } from '../components/Docs'
+import { parseDocsHash, type DocsRoute } from '../data/docs'
 
 /**
- * 极简 hash 路由：只服务 UE 文档区（`#/docs/ue5/<docId>`）。
+ * 极简 hash 路由：只服务文档区（`#/docs/<分区>/<页>`）。
  *
- * 为什么用 hash 而不是路径路由：
- *   站点部署在 GitHub Pages（无服务端重写），路径路由要靠 404.html 兜底，
- *   而 `public/404.html` 现在承担的是**预览产物深链**的兜底。hash 不需要任何服务端配合，
- *   在 GitHub Pages、Cloudflare Pages、本地 file:// 预览下行为完全一致。
+ * 解析本身在 `src/data/docs.ts`（与拼地址的 docsHref 同源），这里只负责
+ * "订阅 hashchange + 管好文档区特有的两件副作用"。
  *
  * 为什么不用 react-router：全站只有"主页 / 文档区"两个视图，
  *   引一个路由库只为解析一个 hash，不划算。
  */
-interface DocsRoute {
-  isDocs: boolean
-  docId?: string
-  anchor?: string
-}
+const read = (): DocsRoute | null =>
+  typeof window === 'undefined' ? null : parseDocsHash(window.location.hash)
 
-const read = (): DocsRoute => {
-  const parsed = typeof window === 'undefined' ? null : parseDocsHash(window.location.hash)
-  return parsed ? { isDocs: true, docId: parsed.docId, anchor: parsed.anchor } : { isDocs: false }
-}
-
-export function useDocsRoute(): DocsRoute {
-  const [route, setRoute] = useState<DocsRoute>(read)
+export function useDocsRoute(): { isDocs: boolean; section?: string; pageId?: string; anchor?: string } {
+  const [route, setRoute] = useState<DocsRoute | null>(read)
 
   useEffect(() => {
     const onHash = () => setRoute(read())
@@ -32,10 +22,12 @@ export function useDocsRoute(): DocsRoute {
     return () => window.removeEventListener('hashchange', onHash)
   }, [])
 
-  // 视图切换时把滚动位置交还给新视图（否则从文档底部切回主页会落在半空）
+  // 视图切换时把滚动位置交还给新视图（否则从文档底部切回主页会落在半空）。
+  // ⚠️ `'instant'` 而不是 `'auto'`：`auto` 会套用 html 上的 `scroll-behavior: smooth`，
+  //    切视图时能看见"整页自己滚回顶部"的动画。
   useEffect(() => {
-    if (route.isDocs) window.scrollTo({ top: 0, behavior: 'auto' })
-  }, [route.isDocs])
+    if (route) window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior })
+  }, [route?.section, route?.pageId])
 
   /**
    * 文档区的「固定外壳」开关。
@@ -52,17 +44,14 @@ export function useDocsRoute(): DocsRoute {
    */
   useEffect(() => {
     const mq = window.matchMedia('(min-width: 768px)')
-    const apply = () => {
-      const on = route.isDocs && mq.matches
-      document.documentElement.classList.toggle('docs-shell', on)
-    }
+    const apply = () => document.documentElement.classList.toggle('docs-shell', Boolean(route) && mq.matches)
     apply()
     mq.addEventListener('change', apply)
     return () => {
       mq.removeEventListener('change', apply)
       document.documentElement.classList.remove('docs-shell')
     }
-  }, [route.isDocs])
+  }, [Boolean(route)])
 
-  return route
+  return { isDocs: Boolean(route), section: route?.section, pageId: route?.pageId, anchor: route?.anchor }
 }

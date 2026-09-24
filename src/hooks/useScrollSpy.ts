@@ -43,7 +43,7 @@ export function useScrollSpy(ids: string[]) {
     const update = () => {
       cancelAnimationFrame(raf)
       raf = requestAnimationFrame(() => {
-        // ⚠️ `#docs` 是**跨视图**入口（hash 路由 `#/docs/ue5`），主页面里没有这个 section。
+        // ⚠️ `#docs` 是**跨视图**入口（hash 路由 `#/docs`），主页面里没有这个 section。
         // 这里提前退出并保持上一次的高亮，否则滚到底部时它会把高亮抢走。
         if (!els.some((el) => el !== null)) return
 
