@@ -218,6 +218,15 @@ components:
 - ⚠️ 预展开过的区块**必须退出 IntersectionObserver 的管理**（`preRevealed` ref）。只 `setVisible(true)` 不够：观察器紧接着就会对折叠线以下的元素回调 `isIntersecting: false`，把它们又按回不可见。实测症状是"5 个区块拿到 `reveal-instant`，却只有 1 个真的可见"。
 - ⚠️ `@media print` 下 `.reveal` 一律可见：打印与整页快照都不会滚动，观察器永远不触发。
 
+**The Four-Edge Rule（玻璃件）.** 每一档玻璃都必须给**上缘 + 下缘**两条内高光，外加一道底部厚度阴影（`--panel-rim` / `--panel-rim-b` / `--panel-depth`），边框色在浅色下必须是**深色发丝线**。
+- 用户 2026-09 实拍反馈：「项目区每个项目之间、技能区最底部栏、工作经历最底部栏、教育背景的底边，玻璃的样式都没有显示完全」。根因是当时三档玻璃**只写了上缘** `inset 0 1px 0`，而 `--panel-edge` 在浅色下是 `rgb(255 255 255 / 0.62)` —— 白线画在浅底上等于没有，于是面板往下"逐渐消失"。
+- 口径：**上缘冷白 = 受光；下缘暖暗 = 玻璃压住地面反光**；两者合起来才读得出厚度。浅色 `--panel-edge: rgb(15 23 42 / 0.1)`（与 `.glass-chip` 的 `--chip-edge` 同源），深色 `rgb(255 255 255 / 0.1)`。
+**The No-Containment Rule（玻璃件）.** 玻璃元素**或它们的祖先**都不要再加 `content-visibility: auto` / `contain: paint` / `overflow: hidden`。
+- `content-visibility: auto` 隐含 `contain: layout paint style`，而 `contain: paint` 有两个致命副作用：
+  1. **裁切后代到本元素的盒子**。`.reveal` 未显示时的入场位移是 `transform: translateY(14px)`，被它下移的 wrapper 越过容器底边后**被直接裁掉** —— 实测三个区块的 `scrollHeight` 比盒高正好多 14px，用户看到的就是"玻璃底部缺了一块"。**不要**靠"光源错觉"去解释它。
+  2. **制造 backdrop root**。其内所有 `.glass-panel` 的 `backdrop-filter` 只能采样该子树、采不到背后的页面内容 —— **折射等于没开**，而且不报错、从截图上极难看出来。
+- 2026-09 第七轮因此从 `.cv-section` 上移除了 `content-visibility: auto`（它只用在技能 / 工作经历 / 教育背景三个区块）。失去的那点渲染跳过，远小于上面两个缺陷。
+- 判定方法：把一个玻璃面板的 `backdrop-filter` 临时设成 `none` 再截图，**前后必须不同** —— 相同就说明折射被祖先的 containment 掐死了。
 **The One-Theme Rule（玻璃件）.** `.glass-panel` / `.glass-card` / `.glass-chip` 三档共用一套变量（`--panel-*` / `--chip-*` / `--glass-*`），**深浅色只换变量、不换规则**。组件里**禁止**再写 `dark:bg-slate-*` / `dark:border-slate-*` 这类手工配对 —— 那正是用户说的"框纯色"：浅色写一遍、深色再覆盖一遍，而 `dark:bg-slate-800` 会把 `.glass-panel` 的 `--panel-tint-strong` 整个盖掉，玻璃就没了。第五轮已把 Skills / Experience / Projects / Contact 里的这类残留全部删除。
 
 ### Shadow Vocabulary
@@ -230,12 +239,21 @@ components:
 ### Named Rules
 **The Tonal-First Rule.** 先用背景色阶表达层级，阴影只在浅色模式补最后一档。深色模式下盒阴影的 opacity 必须 ≤ 0.10 或直接为 0。
 
-**The Blur-Budget Rule.** 全站 `backdrop-filter` 元素不超过 **20 个**（2026-09 第五轮从 12 上调；这条件由 `npm run docs:anchors` 里的一条断言守着，**超了会红**，不要靠肉眼）。允许的范围是：**固定 / 浮层元素**（顶部栏折射层、底部 Tab Bar、导航玻璃管、灯箱、主题下拉）、**每个区块的主容器**（`.glass-panel`）、以及**顶栏的四个控件**（`.bar-control` 的"玻璃叠玻璃"）。**区块内的小卡（`.glass-card`）与项目行仍然禁止加 `backdrop-filter`** —— 它们走色阶 + 泛光，静态小卡数量多、面积碎，合成开销是真的。
+**The Blur-Budget Rule.** 全站 `backdrop-filter` 元素不超过 **26 个**（2026-09 第六轮定稿；实测峰值 **23 个**，出现在首屏）。这条件由 `npm run docs:anchors` 里的一条断言守着，**超了会红**，不要靠肉眼。
+- ⚠️ 断言数的是**真实 DOM 元素个数**，不是"元素种类"。早期版本按 className 去重，于是 8 个 `.glass-panel` 只算 1 个，口径偏松、根本守不住规则 —— 改口径后实测才从"11 类"变成"23 个"。
+- 允许的范围：**固定 / 浮层元素**（顶部栏折射层、底部 Tab Bar、导航玻璃管、灯箱、主题下拉）、**每个区块的主容器与证书卡**（`.glass-panel`）、**顶栏四个控件**（`.bar-control` 的"玻璃叠玻璃"）。
+- **区块内的小卡（`.glass-card`）与项目行仍然禁止加 `backdrop-filter`** —— 它们走色阶 + 泛光。静态小卡数量多、面积碎，合成开销是真的。
 
-**The Lit-Glass Rule.** 悬停 / 键盘聚焦 / 当前项时的反馈是**整面玻璃泛光**，不是描边换色。用户原话：「不是现在这种周围一圈框个颜色的效果，而是整个玻璃泛光的效果，类似于玻璃边缘照到太阳的那种发亮」。实现是工具类 `.glass-lit`：`::after` 铺满整块、`z-index:-1` 让光在文字**下面**亮，两层径向渐变（上方 `--glass-sheen` 冷白环境光 + 下方 `--glass-glow-warm` 琥珀暖光），配 `box-shadow` 亮边与 `translateY(-2px)`。
-- 组件里**不要**再写 `hover:border-brand-300` / `hover:border-brand-400` 这类描边变色（第五轮已全部删除）；`hover:text-*` 这类文字变色保留。
-- 触发条件统一为 `:hover` / `:focus-visible` / `[aria-current="true"]` / `[aria-pressed="true"]` / `[aria-selected="true"]`，深浅色共用一套规则、只换 token。
-- 覆盖面：关于我的 6 张卡片、区块玻璃面板、技能区分类按钮与高频标签、项目区筛选按钮与项目行、联系区的 GitHub 与下载简历按钮、顶栏四个控件。
+**The Lit-Glass Rule.** 悬停 / 键盘聚焦 / 当前项时的反馈是**整面玻璃泛光**，不是描边换色。用户原话：「不是现在这种周围一圈框个颜色的效果，而是整个玻璃泛光的效果，类似于玻璃边缘照到太阳的那种发亮」。实现是工具类 `.glass-lit`：`::after` 铺满整块、`z-index:-1` 让光在文字**下面**亮。
+- ⚠️ **光必须四周均匀，且聚在边缘而不是铺满整面**（2026-09 第六轮定稿，这里改错过两次）：
+  - 第一版把暖光径向渐变锚在 `at 50% 118%`（面板下沿之外）→ 光从底下"升起来"，整块玻璃读成**底部打了一束聚光灯**，还把下沿洗白，看起来像"玻璃缺了个底"。
+  - 第二版改成 `at 50% 50%` 铺满 → 四周是均匀了，但**整面被染成暖黄** —— 那不是"散光"，是"染色"。
+  - 现在：`radial-gradient(115% 115% at 50% 50%, transparent 52%, var(--glass-glow-warm) 100%)`，**中间 52% 透空、光只聚在四边**；外发光 `0 0 30px -4px`（**不带垂直偏移**）；再加一条 `inset 0 0 22px -14px` 的内缘暖光与之呼应。
+  - 顶部冷白保留**略强**（`at 50% -20%`，用户确认）：玻璃确实先被上方环境光照到，但幅度压小，不形成"上亮下暗"。
+- **静置一律不发光**，全站唯一例外是**顶栏右侧那几个图标**（`.bar-control`）—— 用户明确："主站仅改顶栏右侧图标，其他只改悬停"。它们静置就带 `0 0 0 1px` + `0 0 16px -8px` 的一圈均匀边缘光。
+- 组件里**不要**再写 `hover:border-brand-300` / `hover:border-brand-400` 这类描边变色（已全部删除）；`hover:text-*` 这类文字变色保留。
+- 触发条件统一为 `:hover` / `:focus-visible` / `[aria-current="true"]` / `[aria-pressed="true"]` / `[aria-selected="true"]`，深浅色共用一套规则、只换 token。**不抬升**（用户：「不需要大范围的向上跳的逻辑，悬停住有效果就行」）。
+- 覆盖面：关于我的 6 张卡片、区块玻璃面板、教育背景四张证书卡、技能区分类按钮与高频标签、项目区筛选按钮与项目行、联系区四颗入口、顶栏四个控件。
 
 ## 5. Components
 

@@ -466,15 +466,18 @@ body::before {
 :root {
   --panel-tint: rgb(255 255 255 / 0.5);
   --panel-tint-strong: rgb(255 255 255 / 0.62);
-  --panel-edge: rgb(255 255 255 / 0.62);
-  --panel-rim: rgb(255 255 255 / 0.6);
+  /* 浅色下边框必须是**深色发丝线**：白线在浅底上等于没有，那正是"玻璃样式显示不完全"。 */
+  --panel-edge: rgb(15 23 42 / 0.1);
+  --panel-rim: rgb(255 255 255 / 0.9);
+  --panel-rim-b: rgb(15 23 42 / 0.07);
   --panel-shadow: 0 1px 2px rgb(157 83 0 / 0.06);
 }
 .dark {
   --panel-tint: rgb(27 30 32 / 0.55);
   --panel-tint-strong: rgb(27 30 32 / 0.68);
-  --panel-edge: rgb(255 255 255 / 0.09);
-  --panel-rim: rgb(255 255 255 / 0.07);
+  --panel-edge: rgb(255 255 255 / 0.1);
+  --panel-rim: rgb(255 255 255 / 0.09);
+  --panel-rim-b: rgb(0 0 0 / 0.4);
   --panel-shadow: 0 2px 10px rgb(0 0 0 / 0.2);
   /* 深色下"照到太阳"要靠更亮的暖光才看得出来；冷白高光反而要压住，
      否则会把深色玻璃洗成灰雾（与 DESIGN.md 的 Tonal-First Rule 一致）。 */
@@ -483,11 +486,15 @@ body::before {
   --glass-rim-lit: rgb(255 255 255 / 0.3);
   --glass-edge-lit: rgb(242 169 59 / 0.55);
 }
+/* ⚠️ 三档玻璃都必须给**上缘 + 下缘**两条内高光，外加一道底部厚度阴影。
+   只写上缘时面板往下会"逐渐消失"，浅色下尤其明显（用户实拍反馈的就是这个）。
+   上缘冷白 = 受光；下缘暖暗 = 玻璃压住地面反光；两者合起来才读得出"一块玻璃"。 */
 .glass-panel {
   background: var(--panel-tint-strong);
   border: 1px solid var(--panel-edge);
   box-shadow:
     inset 0 1px 0 var(--panel-rim),
+    inset 0 -1px 0 var(--panel-rim-b),
     var(--panel-shadow);
   backdrop-filter: url(#lg-refract-soft) saturate(1.12);
 }
@@ -506,7 +513,10 @@ body::before {
 .glass-card {
   background: var(--panel-tint);
   border: 1px solid var(--panel-edge);
-  box-shadow: var(--panel-shadow);
+  box-shadow:
+    inset 0 1px 0 var(--panel-rim),
+    inset 0 -1px 0 var(--panel-rim-b),
+    var(--panel-shadow);
 }
 /* 强玻璃：用于含正文的区域，tint 更高保证可读性 */
 .glass-card-strong {
@@ -514,6 +524,7 @@ body::before {
   border: 1px solid var(--panel-edge);
   box-shadow:
     inset 0 1px 0 var(--panel-rim),
+    inset 0 -1px 0 var(--panel-rim-b),
     var(--panel-shadow);
 }
 
@@ -537,9 +548,16 @@ body::before {
   z-index: -1;
   border-radius: inherit;
   pointer-events: none;
+  /* ⚠️ 暖光的锚点必须在**正中**：原先是 `at 50% 118%`（面板下沿之外），
+     于是光从底下"升起来"，整块玻璃读成"底部打了一束聚光灯"（用户 2026-09 反馈）。
+     顶部冷白保留**略强**（玻璃确实先被上方环境光照到），但幅度压小，不形成"上亮下暗"。 */
+  /* ⚠️ 暖光必须是**边缘聚光**，不是整面染色。
+     用户的原话是"玻璃片放在阳光下面**四周**都散着光" —— 所以中间要透空、光聚在四边：
+     径向渐变从 52% 处才开始上色，到边缘最浓。第一版写成 `at 50% 50%` 直接铺满，
+     结果整块面板被染成暖黄（实拍确认过），那不是"散光"而是"整面发黄"。 */
   background:
-    radial-gradient(125% 95% at 50% -25%, var(--glass-sheen), transparent 62%),
-    radial-gradient(95% 75% at 50% 118%, var(--glass-glow-warm), transparent 70%);
+    radial-gradient(125% 95% at 50% -20%, var(--glass-sheen), transparent 60%),
+    radial-gradient(115% 115% at 50% 50%, transparent 52%, var(--glass-glow-warm) 100%);
   opacity: 0;
   transition: opacity var(--duration-base, 280ms) var(--ease-out-soft);
 }
@@ -552,10 +570,15 @@ body::before {
 }
 .glass-lit:hover,
 .glass-lit:focus-visible {
+  /* ⚠️ 外发光**不带垂直偏移**：原来是 `0 10px 30px -8px`，光只落在下方，
+     与面光叠加成"底部聚光灯"。改成 0 0 → 四周均匀散开。
+     第三条 `inset 0 0 22px -14px` 是**内缘**的一圈暖光，与外面的光晕呼应，
+     让"四边散光"发生在玻璃的边界上，而不是把面板中央染黄。 */
   box-shadow:
     inset 0 1px 0 var(--glass-rim-lit),
     0 0 0 1px var(--glass-edge-lit),
-    0 10px 30px -8px var(--glass-glow-warm);
+    inset 0 0 22px -14px var(--glass-glow-warm),
+    0 0 30px -4px var(--glass-glow-warm);
   /* 刻意不抬升：用户 2026-09「不需要大范围的向上跳的逻辑，悬停住有效果就行」。 */
 }
 /* 当前 / 选中项：亮边常驻，但不抬升（避免"选中=浮起来"的误读） */
@@ -591,7 +614,9 @@ body::before {
   background: var(--chip-tint);
   border: 1px solid var(--chip-edge);
   color: var(--chip-text);
-  box-shadow: inset 0 1px 0 var(--panel-rim);
+  box-shadow:
+    inset 0 1px 0 var(--panel-rim),
+    inset 0 -1px 0 var(--panel-rim-b);
 }
 :root {
   --chip-tint: rgb(255 255 255 / 0.5);
@@ -911,10 +936,12 @@ details[open] .chevron-up-down {
   /* 底色几乎去掉（0.1 → 0.04）：控件的"底"应当来自折射本身。
      平涂底色会把它读成"一块浅灰方块"而不是玻璃（用户：「底还是纯色」）。 */
   background-color: rgb(255 255 255 / 0.04);
+  /* 静置就带一圈**四周均匀**的边缘光（用户确认：静置态只给顶栏这几个图标加）。
+     这是全站唯一一处静置发光的面板类元素，其余一律只在悬停时亮。 */
   box-shadow:
     inset 0 1px 0 var(--glass-rim-lit),
-    inset 0 -1px 0 rgb(255 255 255 / 0.22),
-    0 1px 2px rgb(15 23 42 / 0.05);
+    inset 0 -1px 0 var(--panel-rim-b),
+    0 0 16px -8px var(--glass-glow-warm);
   /* 顶栏既然透明（白叠层 12%→5%），深色截图从下面滚过时深色文字会掉对比度。
      补一层**浅色晕**保住可读性，而不是把玻璃加厚 —— 加厚就把"透明"这件事又抵消了。
      `drop-shadow` 作用在整个控件（填充 + 图标 + 文字）上，形成一圈很淡的光晕。 */
@@ -984,10 +1011,12 @@ details[open] .chevron-up-down {
   /* ⚠️ 这里原来是 0.07 的**平涂白** —— 正是用户说的"深色下看起来还是老样子的纯色底子"。
      压到 0.05，把"底"交给折射本身，只留下缘暖光（--glass-edge-lit）+ 上缘冷光。 */
   background-color: rgb(255 255 255 / 0.05);
+  /* 与浅色档同口径：静置就带一圈**四周均匀**的边缘光
+     （全站唯一一处静置发光的面板类元素，其余一律只在悬停时亮） */
   box-shadow:
     inset 0 1px 0 var(--glass-rim-lit),
-    inset 0 -1px 0 var(--glass-edge-lit),
-    0 1px 2px rgb(0 0 0 / 0.3);
+    inset 0 -1px 0 var(--panel-rim-b),
+    0 0 16px -8px var(--glass-glow-warm);
 }
 .dark .bar-control:hover {
   color: var(--color-brand-200);
@@ -1073,23 +1102,26 @@ details[open] .chevron-up-down {
   }
 }
 
-/* 首屏以下的区块跳过「初始渲染」（content-visibility: auto）。
-   浏览器会跳过这些子树的布局与绘制，直到它们接近视口，滚动时也会自动回收已离屏的部分。
-   这是本页最"长"的一类优化：整页有 7 个区块、几十张卡片，首屏只需要 Hero。
+/* ===== 曾经在这里的 `content-visibility: auto` 已移除（2026-09 第七轮）=====
+   它本来是"首屏以下的区块跳过初始渲染"的优化（整页 7 个区块、几十张卡片，首屏只需要 Hero）。
+   但它隐含 `contain: layout paint style`，而 `contain: paint` 的定义行为是
+   **把后代裁切到本元素的盒子**，于是带来两个实测到的缺陷：
 
-   ⚠️ 只加在**区块内容容器**上，不加在 <section> 上：
-     · 锚点停靠（scroll-margin-top）与「#contact 收尾呼吸区」都挂在 section 上，必须保持正常布局；
-     · 首屏 Hero 与紧随其后的 About **不加**（About 内部有 IntersectionObserver 与链路卡测量）。
-   ⚠️ contain-intrinsic-size 是必需的：没有它，未渲染子树的自然尺寸按 0 计，
-     滚动条会随滚动不断"长出来"。这里 `auto 2200px` 取的是**移动端**（单列、最长的技能区）
-     的近似高度，宁可高估也不要低估：高估只是让滚动条一开始偏长、随后缩回；
-     低估则会让滚动条一路变长（观感更差）。
-     `auto` 关键字很关键：某个区块渲染过一次后，浏览器会记住它的真实尺寸并复用它，
-     所以第二个来回（以及之后所有访问）不再有偏差。
-   改区块数量或大幅改版式后，这个估计值可以重新用 DevTools 量一次（不是硬约束）。 */
+   1. **玻璃面板底部被切掉 14px**。`.reveal` 未显示时的入场位移是 `transform: translateY(14px)`，
+      它把包裹面板的 wrapper 整体下移，绘制盒越过容器底边 → 被直接裁掉。
+      实测三个区块的 `scrollHeight` 比盒高**正好多 14px**，溢出最多的后代就是
+      `div.reveal … transform: matrix(1,0,0,1,0,14)`。
+      用户原话：「玻璃不全……就是那些底部缺了一块，被直接切掉了」。
+   2. **区块内的玻璃面板折射全程失效**。`contain: paint` 会**制造 backdrop root**，
+      于是 `.glass-panel` 的 `backdrop-filter: url(#lg-refract-soft)` 只能采样区块内部、
+      采不到区块背后的页面内容 —— 折射等于没开，而且**不报错、从截图上很难看出来**。
+
+   代价是失去那点渲染跳过。全站只有 3 个区块（技能 / 工作经历 / 教育背景）用过它，
+   内容以文字与 webp 为主，这点收益远小于上面两个缺陷。**不要加回来。**
+   类名 `.cv-section` 仍被三个组件引用（作为"这里曾经用过 content-visibility"的记号），
+   保留空规则以免选择器悬空。 */
 .cv-section {
-  content-visibility: auto;
-  contain-intrinsic-size: auto 2200px;
+  /* 有意留空 */
 }
 
 /* ===== UE 文档区正文排版（.doc-content，见 src/components/Docs.tsx） =====
