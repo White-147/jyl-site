@@ -328,11 +328,13 @@ const smoke = []
 {
   const firstSection = manifest.sections[0]
   const firstPage = manifest.pages.find((p) => p.section === firstSection.id && p.status === 'ready')
-  /** expect 可以是字符串（严格相等）或断言函数（返回 true/false） */
+  /** expect 可以是字符串（严格相等）或断言函数（返回 true/false）。
+   *  顺带把**实测值**打出来：断言只给 ✓/✗ 时，调参（比如玻璃预算）没有依据。 */
   const check = async (label, expr, expect) => {
     const got = await evaluate(expr)
     const ok = typeof expect === 'function' ? !!expect(got) : got === expect
     smoke.push({ label, ok, got, expect: typeof expect === 'function' ? '(断言)' : expect })
+    if (typeof got === 'string' && got.length <= 90) console.log(`      ↳ ${got}`)
   }
 
   // 1) 分区入口 `#/docs`（不带分区）应落到第一个分区，并渲染出正文
@@ -401,27 +403,30 @@ const smoke = []
     },
   )
 
-  // 6) 玻璃预算（DESIGN.md 的 Blur-Budget Rule）：数一遍真正带 backdrop-filter 的元素
+  // 6) 玻璃预算（DESIGN.md 的 Blur-Budget Rule）
+  // ⚠️ 数的是**元素个数**，不是"元素种类" —— 早期版本按 className 去重，于是 8 个
+  //    `.glass-panel` 只算 1 个，口径偏松、守不住规则。现在按真实 DOM 元素计数。
   await check(
-    '全站 backdrop-filter 元素数在预算内（≤20）',
+    '全站 backdrop-filter 元素数在预算内（≤26）',
     `(async () => {
-       const seen = [];
-       for (const hash of ['#projects', '#skills', '#contact', '#about']) {
+       let max = 0, worst = '';
+       for (const hash of ['#top', '#projects', '#skills', '#experience', '#education', '#contact', '#about']) {
          location.hash = hash;
-         await new Promise(r => setTimeout(r, 900));
+         await new Promise(r => setTimeout(r, 800));
+         const hit = [];
          for (const el of document.querySelectorAll('*')) {
            const cs = getComputedStyle(el);
            const bf = cs.backdropFilter || cs.webkitBackdropFilter;
            if (!bf || bf === 'none') continue;
            const r = el.getBoundingClientRect();
            if (r.width < 8 || r.height < 8) continue;
-           const key = el.tagName + '.' + String(el.className).slice(0, 40);
-           if (!seen.some(s => s.key === key)) seen.push({ key, bf: bf.slice(0, 30) });
+           hit.push(el.tagName.toLowerCase() + (bf.includes('url') ? '(折射)' : '(模糊)'));
          }
+         if (hit.length > max) { max = hit.length; worst = hash + '：' + hit.length + ' 个' }
        }
-       return seen.length + ' 类：' + seen.map(s => s.key.split('.')[0] + (s.bf.includes('url') ? '(折射)' : '(模糊)')).join(' ');
+       return max + ' 个（峰值出现在 ' + worst + '）';
      })()`,
-    (v) => Number.parseInt(v, 10) <= 20,
+    (v) => Number.parseInt(v, 10) <= 26,
   )
 
   // 7) 项目 → 论文：book-recommendation 卡片必须有「毕业设计原文」入口

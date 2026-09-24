@@ -619,7 +619,7 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
                       href={docsHref(section.id, n.firstPage.id)}
                       title={`${n.title}（${n.firstPage.title}）`}
                       onClick={() => setNavOpen(false)}
-                      className="flex min-w-0 flex-1 items-baseline rounded-md py-[3px] pr-2 text-[12px] leading-snug text-slate-400 transition-colors hover:text-brand-700 dark:text-slate-500 dark:hover:text-brand-200"
+                      className="flex min-w-0 flex-1 items-baseline rounded-md py-[3px] pr-2 text-[13.5px] font-semibold leading-snug text-slate-500 transition-colors hover:text-brand-700 dark:text-slate-400 dark:hover:text-brand-200"
                     >
                       <span className="min-w-0 truncate">{n.title}</span>
                     </a>

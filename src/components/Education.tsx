@@ -23,7 +23,7 @@ function ProofCard({
       onClick={() => onOpen(item)}
       aria-label={`放大查看 ${item.name} 证明`}
       title="点击查看证明图片"
-      className="glass-card group flex w-full cursor-zoom-in flex-col gap-2.5 rounded-2xl p-4 text-left transition-all hover:-translate-y-0.5 hover:border-brand-300 hover:shadow-md dark:hover:border-brand-500/60"
+      className="glass-panel glass-lit group flex w-full cursor-zoom-in flex-col gap-2.5 rounded-2xl p-4 text-left hover:-translate-y-0.5 hover:border-brand-300 hover:shadow-md dark:hover:border-brand-500/60"
     >
       {/* 名称优先：整行全宽，避免长名称换行挤字 */}
       <span className="block text-sm font-semibold leading-snug text-slate-800 dark:text-slate-100">
