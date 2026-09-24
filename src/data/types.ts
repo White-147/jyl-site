@@ -32,6 +32,11 @@ export interface Project {
   downloadNote?: string
   /** 下载动作可见文案提示（浅灰小字，与整体 meta 样式一致） */
   downloadHint?: string
+  /**
+   * 站内文档区的对应入口（如 `#/docs/thesis`）。有值时卡片上出现「毕业设计原文」按钮。
+   * 与文档区那侧的 `DocSection.relatedProject` 互为反向入口，两边都由数据驱动、不在组件里判断 id。
+   */
+  docsUrl?: string
 }
 
 export interface AboutPara {
@@ -114,7 +119,7 @@ export interface EducationData {
   awards: AwardItem[]
 }
 
-/* ---------- UE5 学习笔记文档区（src/data/ue5-docs.json，由 scripts/import-ue-docs.mjs 生成） ---------- */
+/* ---------- 文档区（src/data/docs.json，由 scripts/build-docs.mjs 生成，不进 git） ---------- */
 
 interface DocHeading {
   /** 标题锚点 id（由转换器按标题文本生成，稳定且可分享） */
@@ -124,28 +129,86 @@ interface DocHeading {
   level: number
 }
 
-interface DocEntry {
+/** 文档分区（顺序即导航顺序：毕业论文 → UE 理论 → UE 实战） */
+export interface DocSection {
   id: string
-  title: string
-  subtitle?: string
-  /** 阅读顺序（01–05）。侧栏与正文头部都显示，依赖关系靠它表达 */
-  order?: number
-  /** 主题分组（界面 / 蓝图…）。侧栏在组间加留白，正文头部显示为徽标 */
-  group?: string
-  /** 前置文档（正文头部显示「前置：xxx」），无前置为 null */
-  prereq?: { id: string; title: string } | null
-  /** 下一篇（同组内按 order 推导；篇尾 CTA 用），本组最后一篇为 null */
-  next?: { id: string; title: string } | null
-  /** ready = 已导入并生成 HTML；pending = 只占位显示（笔记尚未导入本站） */
-  status: 'ready' | 'pending'
-  toc: DocHeading[]
-  /** ready 时的 HTML 文件名（位于 public/docs/ue5/ 下） */
-  html?: string
+  /** 完整分区名（侧栏与分区切换用） */
+  label: string
+  /** 手机端分段控件的短名（论文 / 理论 / 实战） */
+  short: string
+  /** 分区说明（分区落地页用） */
+  blurb: string
+  /**
+   * 配套项目 id（`src/data/projects.json` 里的 id）。有值时每页页头显示
+   * 「配套项目：<项目名> →」，指向主页项目区 `#projects`。关系只在 build-docs.mjs 里声明一次。
+   */
+  relatedProject?: string
+  /** 已导入的篇数 */
+  ready: number
+  /** 分区内的总条目数（含待导入） */
+  total: number
+  chars: number
+  images: number
 }
 
-export interface Ue5DocsManifest {
+/**
+ * 文档页。
+ *
+ * ⚠️ 一篇**源**会被拆成多页（见 scripts/build-docs.mjs 的装箱逻辑）：
+ *    早期「一篇源 = 一页」时，最长的一篇在手机上要滚 56 屏。
+ *    所以「文档」这个概念在数据上分两层：`source`（源，如 ue5-window-base）
+ *    与 `id`（页，如「1. 菜单栏」）。路由用的是**页**：`#/docs/<分区>/<页 id>`。
+ */
+export interface DocPage {
+  id: string
+  section: string
+  /** 所属源（一篇源拆出的多页共享它，用来在侧栏里成组） */
+  source: string
+  /** 源标题（侧栏的分组名，如「界面基础操作」） */
+  chapter: string
+  /**
+   * 页面主题（= 页内第一个非「祖先块」的标题）。
+   *
+   * ⚠️ 不是「第一个块的标题」。拆出来的页往往以容器标题开头，
+   *    直接取第一个块会把标题写成章名（「2 系统相关技术介绍」），
+   *    而这一页实际装的是 2.1 大数据平台 —— 真正的主题反而看不到。
+   */
+  title: string
+  /** 左栏层级：源 → ...ancestors → 本页。空数组 = 直接挂在源下面 */
+  ancestors: string[]
+  /** 本页实际装了哪几节（装箱会把相邻小节并成一页）；>1 时左栏提示「还包含…」 */
+  labels: string[]
+  /** 最近两级祖先（正文头部的面包屑用） */
+  crumbs: string[]
+  subtitle?: string | null
+  /** 在本源内的页序（01、02…） */
+  order?: number
+  /** 分区内的主题分组（入门 / 界面 / 蓝图…） */
+  group?: string | null
+  /** 前置文档（正文头部显示「前置：xxx」），无前置为 null */
+  prereq?: { id: string; title: string } | null
+  /**
+   * 下一篇（按**清单顺序**推导：源内下一页；源末页 → 下一个源的第一页）。
+   * `sameDoc` 决定篇尾文案：true = 「下一节：<页标题>」，false = 「下一篇：<源标题>」。
+   */
+  next?: { id: string; title: string; sameDoc: boolean } | null
+  /** ready = 已生成 HTML；pending = 只占位显示（笔记尚未导入本站） */
+  status: 'ready' | 'pending'
+  toc: DocHeading[]
+  /** ready 时的 HTML 路径，相对 public/（前端 fetch 时前面补 `docs/`） */
+  html?: string | null
+  /** 体量统计（构建期算的，手机屏口径）—— 给自检与排查用，界面不依赖它 */
+  stats: { chars: number; images: number; screens: number }
+}
+
+export interface DocsManifest {
   /** 生成说明（该文件为产物，勿手改） */
   _note: string
-  docsRoot: string
-  docs: DocEntry[]
+  /**
+   * 每份源自己的 H1（只有单个顶层标题时才算「文档标题」）。
+   * 这一层故意不渲染（与源标题重复），记录它是让自检能把「故意不渲染」和「丢了」区分开。
+   */
+  docTitles?: Record<string, string | null>
+  sections: DocSection[]
+  pages: DocPage[]
 }

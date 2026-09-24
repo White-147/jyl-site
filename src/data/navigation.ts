@@ -1,6 +1,8 @@
 /** 全站区块注册表：导航、滚动侦测、移动端 Tab Bar、右侧导航共用同一数据源。
  *  新增/调整区块只需修改此处。 */
 
+import { DOCS_HOME } from './docs'
+
 interface SectionDef {
   id: string
   /** 完整描述（右侧玻璃管导航用，无歧义） */
@@ -20,7 +22,7 @@ interface SectionDef {
   /** 是否是一个「有正文的章节」。`false` 用于首屏这类只有背景没有正文的条目。 */
   isChapter?: boolean
   /**
-   * 非页内锚点的自定义地址（目前只有 UE 文档区用：`#/docs/ue5`）。
+   * 非页内锚点的自定义地址（目前只有文档区用：`#/docs`）。
    * 带 href 的条目仍然注册在案（右侧导轨会显示、也能被高亮），
    * 但点击时走**整页跳转**而不是 `useAnchorScroll` 的平滑滚动 —— 见 SideDotsNav 的判断。
    */
@@ -78,17 +80,19 @@ export const SECTIONS: SectionDef[] = [
     icon: 'M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z',
   },
   {
-    // 独立文档区（不是主页面上的可滚动区块）：href 走 hash 路由 `#/docs/ue5`，
+    // 独立文档区（不是主页面上的可滚动区块）：href 走 hash 路由 `#/docs`，
     // 由 App.tsx 切换视图。**排最后**且在移动端 Tab Bar 里被过滤掉
     // （见 MobileTabBar 的 tabs 过滤），因为它是跨页跳转而不是"滚到某一段"。
+    // ⚠️ 文档区现在是三分区（毕业论文 / UE 理论 / UE 实战）；`#/docs` 不带分区时
+    //    由 Docs.tsx 落到第一个分区。分区的地址规则只在 src/data/docs.ts 里定义。
     id: 'docs',
-    label: 'UE5 学习笔记',
+    label: '笔记与毕业论文',
     shortLabel: '笔记',
     // ⚠️ 必需：SectionHeading 的编号总数取 CHAPTERS.length，
     //    漏掉这个标记，文档区会被算作第 7 个章节 → 全站编号变成 0x / 07（实测踩过）。
     isChapter: false,
     icon: 'M4 4h10a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3V4zm3 3h6M7 11h6M7 15h4',
-    href: '#/docs/ue5',
+    href: DOCS_HOME,
   },
 ]
 

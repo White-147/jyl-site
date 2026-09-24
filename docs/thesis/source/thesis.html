@@ -1,0 +1,963 @@
+<h1 id="摘要">摘 要 / Abstract</h1>
+<p><strong>摘 要:</strong> 为了提高图书馆系统的用户体验，本文对基于用户行为的推荐算法进行研究，实现了基于Spark计算框架的实时图书推荐系统，在使用给予物品的协同过滤推荐时应用皮尔逊相关系数来衡量两者的相似度。在系统实现上，MySQL被用于部署特征库，Hive被用于存储大数据推荐信息，Spark Steaming批处理引擎被用于实现定期的推荐数据更新。前端采用Vue.js和Element框架搭建，后端通过Spring Boot读取和处理MySQL保存的数据，采用Spring Security设置拦截器，确保数据的安全性，使用Axios实现前后端的数据传输，使用Selenium完成网络爬虫获取数据缺失部分。</p>
+<p><strong>关键词:</strong>图书推荐，Spark，Spring Boot，Vue.js</p>
+<p><strong>Abstract:</strong> In order to improve the user experience of the library system, this paper investigates the recommendation algorithm based on user behavior and implements a real-time book recommendation system based on Spark computing framework, applying Pearson correlation coefficient to measure the similarity between the two when using collaborative filtering recommendations given to items. For the system implementation, MySQL is used to deploy feature libraries, Hive is used to store big data recommendation information, and Spark Steaming batch engine is used to implement regular recommendation data updates. The front-end is built with Vue.js and Element framework, the back-end reads and processes the data saved by MySQL through Spring Boot, Spring Security is used to set up interceptors to ensure the security of the data, Axios is used to realize the data transfer between the front and back-end, and Selenium is used to complete the web crawler to get the missing part of the data.</p>
+<p><strong>Keywords:</strong> book recommendation, spark, spring boot, vue.js</p>
+<h1 id="绪论">1 绪论</h1>
+<h2 id="研究背景与意义">1.1 研究背景与意义</h2>
+<p>在科学技术不断进步的今天，数字化技术促进了全世界范围内经济的发展，它不仅可以帮助我们更好地整理、分析、利用各种要素，而且还可以极大地提升我们的生活水平，推进国家的繁荣昌盛。在全球经济衰退、新冠肺炎爆发的作用下，相对于产品和资本的全球流动受阻，新一轮数据技术相关驱动的全球数字经济仍保持持续增长，国内外大数据产业也保持着良好的发展态势，这其中也包括在线图书馆。张佳佳和章宜玉认为，随着网络技术的普及，一种全新的图书借阅管理模式应运而生，它以其卓越的便利性，大大促进了文化知识的传播，有效地提高了社会的文化素养水平<sup>[1]</sup>。</p>
+<p>虽然网络书库给用户带来了个人借阅信息管理的便利，然而，随着行业的发展，信息过载的问题也不可避免。著名的互联网图书零售商亚马逊的平台上有7000多万册图书，在如此规模的图书面前，会造成书城的顾客因认知能力有限而降低管理决策质量，无法从中选择心仪的图书产品。基于大数据的推荐系统巧妙地解决了上述问题，马鸿健认为，基于大数据的图书推荐系统是指通过大数据算法对大量的图书进行考量，然后给所有用户提供一个专有的图书推荐代码序列的系统<sup>[2]</sup>。</p>
+<h2 id="大数据处理技术的发展历程">1.2 大数据处理技术的发展历程</h2>
+<p>Nutch的创始人Doug Cutting受到谷歌三篇论文的启发，用了若干年时间实现了DFS和MapReduce机制。2005年，Hadoop作为Lucene子项目Nutch的一部分正式被引入Apache基金会，随后又从Nutch中剥离，成为一套完整独立的软件，起名为Hadoop，这其中主要包括Hadoop 分布式文件系统 HDFS 和大数据计算引擎 MapReduce。</p>
+<p>Hadoop兴起后，Yahoo开发Pig试图简化MapReduce的大数据编程，Pig是一种脚本语言，使用类 SQL 的语法，经过编译后会生成 MapReduce 程序，但使用Pig依然需要学习新的脚本语法，于是Facebook为了降低大数据的开发门槛，发布了使用SQL语句的 Hive。随后，众多 Hadoop 周边产品开始出现，大数据生态体系逐渐形成。</p>
+<h2 id="国内外研究现状">1.3 国内外研究现状</h2>
+<p>1991年，美国首先提出了数字图书馆的概念，并且引领着其他国家的发展，他们纷纷采取行动，建立起具有针对性的个人化图书推荐系统，以满足读者的需求。</p>
+<p>随着科技的发展，越来越多的国际高校开发出具备个性化的图书推荐服务，其中最具代表性的是康奈尔大学的MyLibrary@cornell、斯坦福大学的Fab、美国华盛顿大学的MyGateway、加利福尼亚大学的Melvyl以及联邦德国卡尔斯鲁厄学院的Big Tip，它们为读者提供更加便捷的阅读体验。</p>
+<p>在推荐算法的采用和研究方面，斯坦福大学的Fab系统软件采用了混合协作过滤和基于内容的方法来推荐图书。以图书信息作为基础，通过共享查询频率构建出一个完整的图书推荐系统。</p>
+<p>国内的研究和应用发展相对落后，提供个性化图书推荐服务的高校数量较少，而且这些服务的个性化水平也不够高。其中，厦门大学的My Library、中国人民大学的KingBase以及清华大学的Open BookMark都是比较知名的。</p>
+<h2 id="章节安排">1.4 章节安排</h2>
+<p>本文一共分为七个章节，每章安排如下:</p>
+<p>第一章为概述，主要讲述该课题研究的必要性以及大数据的发展情况。</p>
+<p>第二章对推荐系统中的关键技术进行简单的介绍，为后续章节的详细实现做基础铺垫。</p>
+<p>第三章对推荐系统的需求分析进行详细的叙述。</p>
+<p>第四章对推荐系统的设计进行详细的叙述。</p>
+<p>第五章对推荐系统的实现方法进行详细的叙述。</p>
+<p>第六章在完成推荐系统的设计与实现之后，对系统的测试方法、测试用例以及开发过程中遇到的问题和对应的解决方法进行介绍。</p>
+<h1 id="系统相关技术介绍">2 系统相关技术介绍</h1>
+<h2 id="大数据平台">2.1 大数据平台</h2>
+<h3 id="hadoop分布式文件系统hdfs">2.1.1 Hadoop分布式文件系统HDFS</h3>
+<p>HDFS（Hadoop Distributed File System）是一种高效的分布式数据库，它能够支持大规模的数据集，支持多个服务器之间的数据交换，而且它的访问界面也比传统的文档管理软件更加友好。架构组成上（如图2-1），HDFS是一个主/从体系结构<sup>[3]</sup>。其中Master被称为NameNode，主要负责管理和维护系统所有文件和目录的元数据和数据块的映射信息，而Slave被称为DataNode，主要负责存储实际的数据块以及执行数据块的读写。</p>
+<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image4.webp" alt="image4" width="589" height="351" fetchpriority="low" decoding="async" /></p>
+<p>图2-1 HDFS架构</p>
+<h3 id="基于hadoop的数据仓库工具-hive">2.1.2 基于Hadoop的数据仓库工具 Hive</h3>
+<p>Hive是一款强大的Hadoop数据仓库工具，它能够把复杂的数据转换成一张清晰的表格，并且采用类SQL查询的方式，极大地提高了对大规模数据的管控能力，减轻了传统的数据分析者的负担<sup>[4]</sup>。Hive通过提供JDBC/ODBC接口，采用统一的元数据管理，能够更轻松地将Spark和Pig这些大数据应用程序进行集成和开发<sup>[5]</sup>。</p>
+<h3 id="计算引擎spark">2.1.3 计算引擎Spark</h3>
+<p>Spark是一款基于内存式的专为大规模数据处理而设计的快速通用计算引擎，Spark与传统的MapReduce相比，不仅具备出色的运行效率、便捷的操作体验以及广泛的应用范围，而且还具备更多的功能。</p>
+<p>在底层架构上，Spark采用类似于Hadoop的主从分布式架构，更可根据需求灵活改变运行模式和对应的架构，其主要组件分别为:负责管理和调度集群整体资源的ClusterManger，负责实际计算的节点Worker，控制应用生命周期的SparkContext，负责创建和关闭SparkContext的Driver，通用架构如图2-2。</p>
+<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image5.webp" alt="image5" width="825" height="354" fetchpriority="low" decoding="async" /></p>
+<p>图2-2 Spark通用架构</p>
+<p>技术栈构成中包括5个部件,Spark Core提供内存计算Spark Streaming提供实时计算,Spark SQL为用户提供即时查询,MLlib是机器学习的提供者,GraphX给出了图处理。</p>
+<p>Spark 可以和Hadoop 的生态系统实现完美的融合，因此可以更高效的访问大数据平台，如HDFS、HBase 和Hive，从而提升了数据处理的效率和可靠性<sup>[6]</sup>。</p>
+<h3 id="分布式发布订阅消息系统-kafka">2.1.4 分布式发布订阅消息系统 Kafka</h3>
+<p>Kafka原为Linkedin研发的分布式产品、支持分区和多副本功能，基于ZooKeeper协同工作的分布式消息系统，具体结构见图2-3。Kafka的核心作用之一，就是可以做到快速有效的数据处理，从而适应各种应用场景。</p>
+<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image6.webp" alt="image6" width="1674" height="769" fetchpriority="low" decoding="async" /></p>
+<p>图2-3 Kafka架构图</p>
+<p>基于Kafka架构，Kafka提供了两种消息队列的通信模式:点对点模式和发布订阅模式。点对点模式通常是基于拉取或者轮询的消息传送模型，它的核心思想是一个消息被一个消费者接收，并且只能接受一个消息。在这种模式下，消费者无法确定哪些消息需要被消费，也不能确定其他消息的存在</p>
+<p>发布订阅模式是一种基于消息推送的消息传输方式，它允许多个用户加入其中。当用户加入消息队列时，系统会自动将消息推送给已经加入其中的用户。</p>
+<h2 id="基于协同过滤的推荐算法">2.2 基于协同过滤的推荐算法</h2>
+<p>协同过滤算法是一个完全依赖于用户与商品间行为关系的推荐算法。协同过滤算法有两种，基于项目的协同过滤算法与基于用户的协同过滤算法，前者是向用户推荐类似于自己以前所喜爱的东西；后者是向使用者推荐和自己兴趣类似的用户所喜爱的东西<sup>[7]</sup>。</p>
+<h3 id="基于物品的协同过滤">2.2.1 基于物品的协同过滤</h3>
+<p>基于物品的协同过滤算法没有使用物品相关的内容属性来计算项目间相似度，其主要是通过对用户行为记录进行分析，来计算出物品间相似度。算法得出物品A与物品B相似度较大是由于喜爱物品A的大部分用户也喜爱物品B所致。基于物品的协同过滤算法可以概括为表2-1。</p>
+<p>表2-1 基于物品的协同过滤算法计算步骤</p>
+<figure class="doc-code"><figcaption>输入:用户历史行为A</figcaption><pre><code>步骤1:根据用户的历史行为A计算出用户对于物品的的偏好值UP，得出用户-物品偏好矩阵PM；
+步骤2:基于PM，计算物品的共现关系CR，结合物品相关性算法ICA，得出物品相似度矩阵SM；
+步骤3:基于PM和SM，得出用户-物品推荐矩阵UGM；
+步骤4:基于UGM，去除用户已感兴趣的物品集合IL后，按照评分降序排列，得出推荐矩阵RM。</code></pre></figure>
+<h3 id="基于用户的协同过滤">2.2.2 基于用户的协同过滤</h3>
+<p>基于用户的协同过滤推荐，其基本原理为，基于所有使用者对于商品或资讯的喜好，找出和当前用户喜好类似的“邻居”用户群。根据邻居历史喜好信息，向当前的用户提供推荐。基于用户的协同过滤算法可总结如表2-2所示。</p>
+<p>表2-2 基于用户的协同过滤算法计算步骤</p>
+<figure class="doc-code"><figcaption>输入:用户-物品评分矩阵UGM</figcaption><pre><code>步骤1:根据用户-物品评分矩阵UGM进行评分,计算所述用户与所述其他用户的相似度，获取用户相似度清单SL；
+步骤2:根据SL进行计算,获取待推荐用户的最近邻用户集合N,去除待推荐用户已感兴趣的物品集合IL后，得出推荐物品矩阵GM；
+步骤3:基于UGM和GM，得出推荐物品评分矩阵GRM，按照评分降序排列，得出推荐矩阵RM。</code></pre></figure>
+<h2 id="皮尔逊相关性系数">2.3 皮尔逊相关性系数</h2>
+<p>皮尔逊相关是英国统计学家皮尔逊于20世纪提出的一种测算平行线相关的方法，皮尔逊相关性系数是协方差与标准偏差的比率,其公式计算如2-1所显示。皮尔逊系数绝对值取值范围为[0,1]且绝对值愈趋近于1,则相关性愈强。</p>
+<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image7.webp" alt="image7" width="763" height="96" fetchpriority="low" decoding="async" /></p>
+<p>公式2-1 皮尔逊系数公式</p>
+<p>计算皮尔逊相关系数，首先需要获得公式中X和Y值，本系统通过用户行为日志中用户是否对物品是否做出操作来构建用户行为向量，再根据用户行为向量得出用户-图书向量矩阵，于是可以构建如图2-4所示的用户-图书向量矩阵。</p>
+<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image8.webp" alt="image8" width="445" height="209" fetchpriority="low" decoding="async" /></p>
+<p>图2-4 用户-图书向量矩阵</p>
+<p>上图所示矩阵是由四位用户对四本书的行为向量构成的矩阵，譬如(1,1)代表第一位用户对第一本书的操作，当某位用户对某本书进行操作之后，就会产生行为向量，矩阵中对应位置就会变为1。此时可以根据矩阵得出每个向量的均值μ，将公式2-1中标准差写成带有向量均值μ的形式（公式2-2），带入公式2-2中即可求出皮尔逊系数。</p>
+<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image9.webp" alt="image9" width="841" height="138" fetchpriority="low" decoding="async" /></p>
+<p>公式2-2 皮尔逊系数完整表示</p>
+<h2 id="爬虫技术">2.4 爬虫技术</h2>
+<p>Selenium是2004年在芝加哥ThoughtWorks公司的一个叫 Jason Huggins的程序员为了实现自动化测试实现的JavaScriptTestRunner程序演化而来，目前Selenium是Selenium WebDriver、Selenium RC、Selenium IDE、Selenium Grid等等一系列工具的总称，支持的开发语言有Java、Python、C#、ruby<sup>[8]</sup>。</p>
+<p>Selenium支持以无界面的方式直接访问各种常见的浏览器，从而节省系统资源的同时提高访问效率，能够通过发送指令，实现快速的页面截图、点击等功能，其中包括网络爬虫，并且由于Selenium的自动化操作，它有很多应对网站反爬虫的措施<sup>[9]</sup>。</p>
+<h2 id="前后端实现技术">2.5 前后端实现技术</h2>
+<h3 id="渐进式javascript框架-vue.js">2.5.1 渐进式JavaScript框架 Vue.js</h3>
+<p>Vue.js是一种具有渐进式特性的用户界面框架，它具有自底而上逐层应用的特点，使得用户能够轻松地学习和使用它。它的核心库专注于视图层，使得能够与第三方库或现有项目实现无缝的整合。Vue独特的双向数据绑定功能，使得其在处理复杂的dom对象时，能够达到远超过传统的处理能力。</p>
+<p>Element是一个由Vue的桌面应用程序库，具有出色的稳定性和可扩展性。Element采用的模块化设计理念，包含了例如表单、日期、导航、布局等常用的组件也有像提示框、弹窗、菜单、分页等更为复杂的组件。</p>
+<h3 id="开源可视化库-echarts">2.5.2 开源可视化库 ECharts</h3>
+<p>ECharts是一个基于 JavaScript 的开放式可视化库，它能够轻松地应对 PC 与移动端的多种操作，并且能够与当前主流浏览器相匹配。其基础架构为 ZRender，能够为用户带来更加生动、有趣的、具有个人风格的数字可视化图像，包括传统的折线图、柱状图等，以及各种其他的图像处理功能，帮助用户更好的管理和分析各种复杂的信息。ECharts还拥有强大的增强型渲染功能，它们不仅可以处理千万级的数据量，还可以实现快速的缩放、平移和其他操作。这些特性使得ECharts在大数据项目中展示数据的使用体验良好。</p>
+<h3 id="基于promise的网络请求库-axios">2.5.3 基于promise的网络请求库 Axios</h3>
+<p>最初浏览器页面向服务器请求数据时，整个页面都会刷新，当我们只需要请求部分数据时，返回整个页面会造成网络资源的占用，为了提高数据请求效率，异步网络请求Ajax应运而生，它能够要求页面不被刷新的前提下载入数据，这就意味着Ajax能够在没有重新载入全页时，更新网页某一部分。Promise技术为ajax提供了一种封装，它可以支持node.js、浏览器以及其他多种应用程序，从而实现了从前端到后端的高效连接，这就是Axios。</p>
+<h3 id="spring-boot框架">2.5.4 Spring Boot框架</h3>
+<p>Spring是一个 Java SE/EE应用的开放式框架，反转控制面向切面编程为内核，其中包括用户界面访问控制、用户界面访问等。Spring体系结构如图2-5所示。</p>
+<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image10.webp" alt="image10" width="368" height="277" fetchpriority="low" decoding="async" /></p>
+<p>图2-5 Spring体系架构</p>
+<p>Spring Boot旨在大大减少Spring应用的开发复杂度，它以Boot这个术语来表达迅速启动的概念，取代以往使用SpringMVC+Spring+Mybatis的复杂步骤，使得Spring Boot的使用更加便捷、高效。通过使用更多的标准配置，可以有效地减少Spring的编写时间。 Spring Boot汇聚了众多流行的第三方库，并且几乎无须额外的配置就可以为开发者使用。</p>
+<h3 id="spring-security框架">2.5.5 Spring Security框架</h3>
+<p>Spring Security基于Spring框架，为Web应用的安全性提供一个完整的解决方案。安全领域的两个主要领域是“认证”和“授权”（或者访问控制），一般而言,Web应用程序的安全性由用户认证（Authentication）和用户授权（Authorization）两部分组成，这两个点也正是Spring Security的重要核心功能之一。</p>
+<p>Spring Security通过Web过滤器（Filter）来保护Web资源，它们可以有效地阻止外部请求，从而确保web资源的安全性。通过使用JWT和Spring Security框架，我们的系统能够有效地进行用户认证。JWT (全称:Json Web Token)是一个开放标准，它可以有效地实现 JSON 对象之间的安全传输，从而提高了网络的可靠性和可用性。</p>
+<h1 id="系统需求分析">3 系统需求分析</h1>
+<h2 id="推荐算法需求分析">3.1 推荐算法需求分析</h2>
+<p>本系统提供了图书借阅、图书详情查看、收藏图书、图书归还等服务，用户使用这些服务时，会产生相应的行为。这些行为来自于用户自身的需求，代表了用户对所操作的书籍的某种程度上的兴趣，因此可以根据这些借阅行为建立一个模型，并隐式地对分值进行转换，以产生一个 "用户-物品-评分"的矩阵用于书籍推荐。</p>
+<p>对借书的时间成本和心理的分析表明，“借阅”、“收藏”、“查看”三种行为代表的偏好程度不同。其中“借阅”时间花费成本最高，代表的偏好程度最高，“收藏”其次，“查看”代表的偏好程度最低。物品相关性系数可以根据用户行为计算用户-物品的向量矩阵，再根据向量矩阵实现皮尔逊相关性系数。将待推荐物品的用户偏好值和待推荐物品与当前物品的相关性系数进行计算，最后得出推荐值。</p>
+<h2 id="推荐系统需求分析">3.2 推荐系统需求分析</h2>
+<h3 id="业务需求">3.2.1 业务需求</h3>
+<p>本系统根据大学图书馆的场景设计，服务对象为校内学生和教师以及校外人员，用户根据他们的课程或兴趣来借书。在传统的图书借阅场景中，用户是以被动的形式借阅图书的，在这种被动的借阅形式下面对成千上万的藏书，读者很难找到符合自己需求喜欢的书籍，对于图书馆来说，因为读者很难有效地使用图书馆的书籍，大量的书籍处于闲置状态。</p>
+<p>传统的图书馆系统受限于大数据技术的缺失，很难解决上述所有问题。因此，本文将针对上述问题设计图书推荐系统，变读者被动借书为图书馆主动荐书。</p>
+<h3 id="功能需求">3.2.2 功能需求</h3>
+<p>根据业务需求分析，本系统需要主动推荐图书，为了展示后台数据需要进行数据的可视化，本系统采用网站形式进行数据可视化。</p>
+<p>前端部分采用Vue和Element完成网页的架构和数据展示组件的实现，Axios完成前端向后端数据接口发送请求的功能，ECharts以折线图形式展示用户借阅频次数据。</p>
+<p>后端部分采用 Spring Boot来完成对系统数据库的数据对接和格式处理，使用Spring Security结合JWT实现用户登录验证以及登录密码加密等安全相关功能。</p>
+<p>大数据模块搭建MySQL和Hive提供存储平台，搭建Spark提供计算平台。</p>
+<h1 id="系统设计">4 系统设计</h1>
+<h2 id="系统总架构设计">4.1 系统总架构设计</h2>
+<p>系统架构分为前后端架构和大数据架构，分别如图4-1和图4-2所示。</p>
+<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image11.webp" alt="image11" width="556" height="563" fetchpriority="low" decoding="async" /></p>
+<p>图4-1 前后端系统架构图</p>
+<p>（1）数据存储层:通过MySQL为系统提供原始数据的保存以及初步的数据预处理。</p>
+<p>（2）数据处理层:通过SQL语句对数据进行初步处理，通过Spring Boot获取保存在MySQL中的系统原始数据并以字符串、数组等不同的格式发送到前端。</p>
+<p>（3）数据安全层:通过JWT实现Token数据的生成和验证；通过Spring Security的过滤器将请求头中未携带Token信息的请求进行拦截；通过Spring Security的加密算法实现对用户登录密码的加密。</p>
+<p>（4）数据可视化层:通过Element完成对网页的布局、组件的设计与实现；通过Vue提供Element实现的平台，完成动态数据的绑定，自带的Router路由组件实现路由跳转的守卫功能；通过ECharts更直观的展示用户借阅数据的频次。</p>
+<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image12.webp" alt="image12" width="525" height="518" fetchpriority="low" decoding="async" /></p>
+<p>图4-2 大数据系统架构</p>
+<p>（1）数据生成层:用户通过Vue.js搭建的网页进行操作，Axios向Spring Boot发送请求，Spring Boot向Kafka中生产数据。</p>
+<p>（2）数据传输层: Spark Streaming组件通过spark-streaming-kafka连接依赖消费Kafka的topic中的数据，Spark SQL组件通过spark-hive连接依赖保存到Hive中。</p>
+<p>（3）数据存储层:Hive存储大数据算法计算的过程数据，计算的推荐结果数据保存在MySQL中。</p>
+<p>（4）数据处理层:Hive借由Hadoop中的Yarn计算引擎对数据进行去重、导出等处理，Spark SQL组件通过代码对数据进行处理后保存到Hive中。</p>
+<h2 id="系统uml建模">4.2 系统UML建模</h2>
+<h3 id="uml简介">4.2.1 UML简介</h3>
+<p>UML统一建模语言是用来对软件密集系统进行可视化建模的一种语言。可以为软件系统建立可视化模型。UML系统开发中有三个主要模型:功能模型、对象模型、动态模型。</p>
+<p>功能模型是从用户的角度展示系统的功能，包括用例图，常在概要设计阶段使用；对象模型是采用对象、属性、操作、关联等概念展示系统的结构和基础，包括类别图、对象图，常在详细设计阶段使用；动态模型是展现系统的内部行为，包括序列图，活动图，状态图，常在详细设计阶段使用。本节通过用例图对系统概要设计进行介绍。</p>
+<h3 id="系统用例设计">4.2.2 系统用例设计</h3>
+<p>本系统参与者有游客和登录用户两种，用例图分别如图4-3和图4-4所示。</p>
+<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image13.webp" alt="image13" width="898" height="591" fetchpriority="low" decoding="async" /></p>
+<p>图4-3 游客用例图</p>
+<p>上图展示的是用户未登录时的参与者状态，可以对注册、登录和忘记密码三个用例进行关联。当用户注册、登录、忘记密码时，会对账户和密码进行校验。</p>
+<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image14.webp" alt="image14" width="1158" height="558" fetchpriority="low" decoding="async" /></p>
+<p>图4-4 登录用户用例图</p>
+<p>上图展示的是用户登录成功后的参与者状态，可以对图书管理和用户管理两个用例进行关联。图书管理有浏览图书、图书推荐、新书速递三个拓展用例，三个拓展用例各自都有图书详情查看、图书借阅、图书收藏三个拓展用例，其中图书详情查看还有相似图书推荐的拓展用例；用户管理有修改用户信息、用户归还图书和用户取消收藏三个拓展用例。</p>
+<h2 id="数据库设计">4.3 数据库设计</h2>
+<h3 id="系统e-r图设计">4.3.1 系统E-R图设计</h3>
+<p>根据需求分析可知，本系统存在用户和图书两个实体，用户和图书存在借阅关系。</p>
+<p>由于用户主要为本校登记学生或教师，故采用学号作为用户主键，校外人员采用账号替代学号。作为推荐系统的用户，需要登录的账号和密码信息，登录之后需要用户名、头像和登录日期的相关信息。</p>
+<p>本校图书馆保存图书信息由图书编号、图书名、图书作者、图书出版社和图书出版时间组成，其中图书编号与图书一一对应，故设为主键。为方便图书信息展示，本系统采用爬虫技术对图书封面信息进行补充。</p>
+<p>一位用户可以借阅多本图书，一本图书一次只能被一位用户借阅，因此用户和图书是一对多的关系。根据逻辑结构设计出的系统E-R图如图4-5所示。</p>
+<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image15.webp" alt="image15" width="1045" height="409" fetchpriority="low" decoding="async" /></p>
+<p>图4-5 系统E-R图</p>
+<h3 id="数据库表设计">4.3.2 数据库表设计</h3>
+<p>根据需求分析和系统E-R图设计，本系统数据库搭建了图书表、学生表、用户表、借阅信息表、收藏信息表、新书信息表、相似图书信息表、推荐图书信息表，数据库结构如图4-6所示。</p>
+<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image16.webp" alt="image16" width="205" height="291" fetchpriority="low" decoding="async" /></p>
+<p>图4-6 数据库结构图</p>
+<p>图中book为图书表，reader为学生表，newbook为新书信息表，lend为借阅信息表，collect为收藏信息表，user为用户表，relatedbook为相似图书信息表，recommend为推荐图书信息表。本章对数据库表进行详细说明。</p>
+<p>（1）图书表（book）：图书表中包括图书编号、图书名、图书作者、图书出版社、图书出版年份等信息，主要保存图书的相关信息。图书表的数据结构如表4-1所示。</p>
+<p class="doc-table-caption">表4-1 图书表</p>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 13%" />
+<col style="width: 10%" />
+<col style="width: 16%" />
+<col style="width: 19%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>字段名</th>
+<th>类型</th>
+<th>长度</th>
+<th>可否为空</th>
+<th>描述</th>
+<th>是否主键</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>M_CALL_NO</td>
+<td>varchar</td>
+<td>254</td>
+<td>否</td>
+<td>图书编号</td>
+<td>是</td>
+</tr>
+<tr class="even">
+<td>M_TITLE</td>
+<td>varchar</td>
+<td>254</td>
+<td>是</td>
+<td>图书名</td>
+<td>否</td>
+</tr>
+<tr class="odd">
+<td>M_AUTHOR</td>
+<td>varchar</td>
+<td>254</td>
+<td>是</td>
+<td>图书作者</td>
+<td>否</td>
+</tr>
+<tr class="even">
+<td>M_PUBLISHER</td>
+<td>varchar</td>
+<td>254</td>
+<td>是</td>
+<td>图书出版社</td>
+<td>否</td>
+</tr>
+<tr class="odd">
+<td>M_PUB_YEAR</td>
+<td>varchar</td>
+<td>254</td>
+<td>是</td>
+<td>图书出版年份</td>
+<td>否</td>
+</tr>
+</tbody>
+</table>
+<p>（2）学生表（reader）：学生表包括学生学号、学生姓名、学生学院等信息，主要保存学生相关信息。学生表结构如表4-2所示。</p>
+<p class="doc-table-caption">表4-2 学生表</p>
+<table>
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>字段名</th>
+<th>类型</th>
+<th>长度</th>
+<th>可否为空</th>
+<th>描述</th>
+<th>是否主键</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>CERT_ID</td>
+<td>varchar</td>
+<td>254</td>
+<td>否</td>
+<td>学生学号</td>
+<td>是</td>
+</tr>
+<tr class="even">
+<td>NAME</td>
+<td>varchar</td>
+<td>254</td>
+<td>否</td>
+<td>学生姓名</td>
+<td>否</td>
+</tr>
+<tr class="odd">
+<td>DEPT</td>
+<td>varchar</td>
+<td>254</td>
+<td>否</td>
+<td>学生学院</td>
+<td>否</td>
+</tr>
+</tbody>
+</table>
+<p>（3）用户表（user）：用户表包括账号、密码、用户名等信息，主要保存系统登录用户的相关信息。用户表的数据结构如表4-3所示。</p>
+<p class="doc-table-caption">表4-3 用户表</p>
+<table>
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>字段名</th>
+<th>类型</th>
+<th>长度</th>
+<th>可否为空</th>
+<th>描述</th>
+<th>是否主键</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>account</td>
+<td>varchar</td>
+<td>255</td>
+<td>否</td>
+<td>账号</td>
+<td>是</td>
+</tr>
+<tr class="even">
+<td>password</td>
+<td>varchar</td>
+<td>255</td>
+<td>否</td>
+<td>密码</td>
+<td>否</td>
+</tr>
+<tr class="odd">
+<td>username</td>
+<td>varchar</td>
+<td>255</td>
+<td>否</td>
+<td>用户名</td>
+<td>否</td>
+</tr>
+<tr class="even">
+<td>time</td>
+<td>date</td>
+<td>\</td>
+<td>否</td>
+<td>登录时间</td>
+<td>否</td>
+</tr>
+<tr class="odd">
+<td>head</td>
+<td>varchar</td>
+<td>500</td>
+<td>否</td>
+<td>用户头像</td>
+<td>否</td>
+</tr>
+<tr class="even">
+<td>CERT_ID</td>
+<td>varchar</td>
+<td>255</td>
+<td>否</td>
+<td>用户学号</td>
+<td>是</td>
+</tr>
+</tbody>
+</table>
+<p>根据E-R图设计，图书表中主键M_CALL_NO代表图书编号，同时作为lend、collect、newbook、relatedbook、recommend表中call_no的外键；reader表中主键cert_id代表学号，同时作为lend、collect、user、recommend表中cert_id的外键。</p>
+<h1 id="系统实现">5 系统实现</h1>
+<h2 id="协同过滤的实现">5.1 协同过滤的实现</h2>
+<h3 id="用户行为日志获取">5.1.1 用户行为日志获取</h3>
+<p>本系统通过后端请求接口进行埋点来获取用户行为，前端用户查看图书请求代码如代码-1所示，对应后端请求代码如代码-2所示。</p>
+<figure class="doc-code"><figcaption>代码-1</figcaption><pre><code>this.$http.get(&quot;/library/book/selectBookExtendByCallNo?callNo=&quot;
++ this.callNo + &quot;&amp;&amp;certId=&quot; + this.certId)</code></pre></figure>
+<p>在用户查看用户详情页时会向代码-2中接口发送get请求。</p>
+<figure class="doc-code"><figcaption>代码-2</figcaption><pre><code>@GetMapping(&quot;/selectBookExtendByCallNo&quot;)
+public Book queryBookByCallNo(@RequestParam(&quot;callNo&quot;) String callNo,
+@RequestParam(&quot;certId&quot;) String certId) {
+if (certId.length() &gt;= 10) {
+String str = certId + &quot;,&quot; + callNo + &quot;,&quot; + &quot;consultBook&quot;;
+kafkaTemplate.send(&quot;userLog&quot;, str);
+}
+return bookExtendService.queryBookByCallNo(certId, callNo);
+}</code></pre></figure>
+<p>代码-2会将用户学号、图书编号和用户行为以指定格式生产到Kafka的topic中，以此获取用户的行为。topic中消费的数据如图5-1所示。</p>
+<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image17.webp" alt="image17" width="1111" height="99" fetchpriority="low" decoding="async" /></p>
+<p>图5-1 topic用户行为日志</p>
+<h3 id="用户偏好值计算规则">5.1.2 用户偏好值计算规则</h3>
+<p>在偏好值的隐式分值转化中，需要给予“借阅”、“收藏”、“查看”相应的偏好值，根据各个行为在图书兴趣中的占比，给予占比赋予相应的分值，其中“借阅”代表兴趣度最高，赋予60%的占比，“收藏”兴趣度高于“查看”，因此“收藏”赋予25%占比，“查看”赋予15%占比。占比赋值代码如代码-3所示。</p>
+<figure class="doc-code"><figcaption>代码-3</figcaption><pre><code>val consultCountRDD: RDD[((String, String), BigDecimal)] =
+getCountRDD(logRDD, &quot;consultBook&quot;, BigDecimal(0.15))</code></pre></figure>
+<p>在实际用户操作过程中，会出现“查看”的操作频率远高于“借阅”的情况，这时“查看”的用户偏好值远大于“借阅”的用户偏好值，导致推荐结果不准确。因此，系统通过实现具有水平渐近线的单调递增函数来限制各个行为能够隐式转化的分值上限，本系统实现的是反比函数，关于占比上限公式S由公式5-1得出，实现代码如代码-4所示。</p>
+<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image18.webp" alt="image18" width="236" height="104" fetchpriority="low" decoding="async" /></p>
+<p>公式5-1 占比上限公式</p>
+<p>上式中，S对应用户实际偏好值，P对应preference，C对应用户行为次数，为防止出现用户只操作过一次导致偏好值为零的情况，反比函数的分子取占比值的一半，即各个占比的实际偏好值的取值范围为[P/2,P)。隐式转化结果如图5-2所示。</p>
+<figure class="doc-code"><figcaption>代码-4</figcaption><pre><code>private def getCountRDD(lineRDD: RDD[((String, String, String), Int)],
+action: String,
+preference: BigDecimal): RDD[((String, String), BigDecimal)] = {
+lineRDD.filter((line =&gt; line._1._3 == action)
+.map((line: ((String, String, String), Int)) =&gt; {
+val certID = line._1._1
+val callNo = line._1._2
+val value = line._2
+val result = preference - ((preference / 2.0) / BigDecimal(value.toDouble))
+((certID, callNo), result)
+}).reduceByKey((_: BigDecimal).+(_: BigDecimal))
+}</code></pre></figure>
+<p>代码-4传参情况如代码-3所示，lineRDD为读取的每一行用户行为对应的用户编号、图书编号、用户操作以及用户对图书某一种操作的次数，action为当前转化的用户行为，preference则为转化的用户行为对应的偏好值。代码首先通过过滤，留下转换对应的用户行为，然后通过实现公式2-1限制各个行为能够隐式转化的分值上限，最后进行相加后返回，为防止出现浮点数精度问题，返回值为BigDecimal类型。</p>
+<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image19.webp" alt="image19" width="473" height="121" fetchpriority="low" decoding="async" /></p>
+<p>图5-2 隐式转化结果</p>
+<p>上图CERT_ID为用户学号，CALL_NO为图书编号，preference为用户偏好值。以图书编号为键，对用户和用户偏好值进行归约即可得出用户偏好矩阵（如图5-3）。</p>
+<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image20.webp" alt="image20" width="524" height="118" fetchpriority="low" decoding="async" /></p>
+<p>图5-3 用户偏好矩阵</p>
+<h3 id="物品相关性计算规则">5.1.3 物品相关性计算规则</h3>
+<p>本系统采用通过Scala实现皮尔逊相关性系数来反映物品之间的相关性，第二章中曾介绍，计算皮尔逊系数首先需要计算出用户行为向量，而用户行为向量需要商品的共现关系，商品共现关系计算代码如代码-5所示。</p>
+<figure class="doc-code"><figcaption>代码-5</figcaption><pre><code>val sqlRDD: RDD[(String, String)] = spark.table(&quot;step1&quot;).rdd.map((x: Row) =&gt; {
+val certId: String = x.getAs[String](&quot;cert_id&quot;)
+val callNo: String = x.getAs[String](&quot;call_no&quot;)
+(certId, callNo)})
+val bookIdList: List[String] = sqlRDD.map((_: (String, String))._2).collect().toList
+var resultList: List[String] = List()
+for (item &lt;- bookIdList)
+for (item1 &lt;- bookIdList)
+resultList = resultList :+ item + &quot;\t&quot; + item1</code></pre></figure>
+<p>代码-5首先获取图5-3中的图书编号列存入列表中，然后对列表自身进行笛卡尔积，去除自身和自身的共现关系后即可获得商品的共现关系，结果如图5-4所示。</p>
+<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image21.webp" alt="image21" width="245" height="118" fetchpriority="low" decoding="async" /></p>
+<p>图5-4 商品共现关系</p>
+<p>根据图5-4中结果即可计算用户行为向量，代码如代码-6所示。</p>
+<figure class="doc-code"><figcaption>代码-6</figcaption><pre><code>step3RDD.map((bookId: (String, String)) =&gt; {
+val line: Array[String] = new Array[String](4)
+step2Array.foreach((strings: (String, String)) =&gt; {
+var userid = &quot;&quot;
+if (strings._2.contains(&quot;,&quot;)) {
+val ids: Array[String] = strings._2.split(&quot;,&quot;)
+val users: Array[String] = ids.map((id: String) =&gt; {
+val str: String = id.split(&quot;_&quot;)(0)
+str
+})
+users.foreach((u: String) =&gt; {
+userid += u + &quot;,&quot;
+})
+userid = userid.substring(0, userid.length - 1)
+} else
+userid += strings._2.split(&quot;_&quot;)(0)
+if (bookId._1 == strings._1) {
+if (line(0) == null &amp;&amp; line(1) == null) {
+line(0) = bookId._1
+line(1) = userid
+} else {
+line(2) = bookId._1
+line(3) = userid
+}
+}
+if (bookId._2 == strings._1) {
+if (line(0) == null &amp;&amp; line(1) == null) {
+line(0) = bookId._2
+line(1) = userid
+} else {
+line(2) = bookId._2
+line(3) = userid
+}
+}
+})
+(line(0), line(1), line(2), line(3), &quot;step4&quot;)
+})</code></pre></figure>
+<p>代码-6中，step2Array存储的是图3-3中的用户偏好矩阵，step3RDD中存储的是图5-4中的商品共现关系，首先通过用户偏好矩阵中preference列获取用户学号列表，再根据商品共现关系中的图书编号对应偏好矩阵中CALL_NO列，将对应的用户学号列表进行拼接，得出用户行为向量，结果如图5-5所示。</p>
+<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image22.webp" alt="image22" width="966" height="116" fetchpriority="low" decoding="async" /></p>
+<p>图5-5 用户行为向量</p>
+<p>根据上图用户行为向量即可进行向量矩阵的计算，实现代码如代码-7所示。</p>
+<figure class="doc-code"><figcaption>代码-7</figcaption><pre><code>val union: Int = firstUsers.length + lastUsers.length - intersection
+val firstMatrix = new Array[Int](union)
+val lastMatrix = new Array[Int](union)
+for (i &lt;- 0 until union) {
+if (i &lt; intersection) {
+firstMatrix(i) = 1
+lastMatrix(i) = 1
+} else if (i &gt;= intersection &amp;&amp; i &lt; firstUsers.length ||
+i &gt;= intersection &amp;&amp; i &lt; lastUsers.length) {
+firstMatrix(i) = 0
+lastMatrix(i) = 1
+} else {
+firstMatrix(i) = 1
+lastMatrix(i) = 0
+}</code></pre></figure>
+<p>代码-7首先获取两个用户行为向量构成的数组，数组中仅存储对图书进行过操作的用户。通过计算比较两个用户行为向量得出交集和并集数，快速搭建矩阵。构建两个长度为并集数的空数组，在两者交集数范围内，两个用户都对图书有操作，两者都赋值为1；在交集数范围外，则将行为向量较长的赋值为1，另一个赋值为0。用户行为向量矩阵构建完成之后，便可代入皮尔逊系数公式，实现代码如代码-8所示。</p>
+<figure class="doc-code"><figcaption>代码-8</figcaption><pre><code>var pearsonCoefficient: BigDecimal = 0.0
+if (union != intersection) {
+var numerator: BigDecimal = 0.0
+var firstDenominator: BigDecimal = 0.0
+var lastDenominator: BigDecimal = 0.0
+if (firstMatrix.length == lastMatrix.length)
+for (i &lt;- firstMatrix.indices) {
+numerator += (firstMatrix(i) - (firstUsers.length / union)) *
+(lastMatrix(i) - (lastUsers.length / union))
+firstDenominator = firstDenominator +
+BigDecimal(scala.math.pow(
+firstMatrix(i) - (firstUsers.length.toDouble / union.toDouble), 2))
+lastDenominator = firstDenominator +
+BigDecimal(scala.math.pow(
+lastMatrix(i) - (lastUsers.length.toDouble / union.toDouble), 2))}
+if (numerator == 0) {
+pearsonCoefficient = 0
+} else {
+pearsonCoefficient = numerator /
+BigDecimal(scala.math.sqrt(firstDenominator.toDouble)*scala.math.sqrt(lastDenominator.toDouble))
+pearsonCoefficient = scala.math.sqrt(scala.math.pow(pearsonCoefficient.toDouble, 2))
+}
+recommend = pearsonCoefficient}</code></pre></figure>
+<p>代码-8中计算分为分母分子两部分，分母通过Scala中math.pow方法实现开方运算，运算过程中浮点数将转化为BigDecimal类型进行运算。经实验发现，分子分母运算所需元素具有一定相关性，在分母运算为0时，分子也同时为0，因此在分子为0时将结果赋值为0，避免出现相除运算分母为0的情况。运算结果如图5-6所示。</p>
+<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image23.webp" alt="image23" width="441" height="115" fetchpriority="low" decoding="async" /></p>
+<p>图5-6 皮尔逊系数结果</p>
+<p>以CALL_NO列第一个图书编号为主键，第二个图书编号和系数值作为值构建物品相似矩阵，结果如图5-7所示。</p>
+<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image24.webp" alt="image24" width="1268" height="118" fetchpriority="low" decoding="async" /></p>
+<p>图5-7 物品相似矩阵</p>
+<h3 id="推荐值计算规则">5.1.4 推荐值计算规则</h3>
+<p>推荐值由用户偏好值和物品相关性相乘得出，实现代码如代码-9所示。</p>
+<figure class="doc-code"><figcaption>代码-9</figcaption><pre><code>val user: Array[(String, String, String)] =
+step2RDD.map((x: (String, String)) =&gt; {
+var result: Array[(String, String, String)] = Array.empty
+if (x._2.contains(&quot;,&quot;)) {
+val userPreference: Array[String] = x._2.split(&quot;,&quot;)
+val userPreferenceArray: Array[(String, String, String)] = userPreference.map((str: String) =&gt; {
+val strings: Array[String] = str.split(&quot;_&quot;)
+(x._1, strings(0), strings(1))})
+result = userPreferenceArray
+} else {
+val strings: Array[String] = x._2.split(&quot;_&quot;)
+result = Array((x._1, strings(0), strings(1)))
+}
+result
+})
+.flatMap((x: Array[(String, String, String)]) =&gt; x).collect()
+val book: Array[(String, String, String)] =
+step6RDD.map((x: (String, String)) =&gt; {
+val concurrenceMatrix: Array[String] = x._2.split(&quot;,&quot;)
+val concurrenceMatrixArray: Array[(String, String, String)] =
+concurrenceMatrix.map((str: String) =&gt; {
+val strings: Array[String] = str.split(&quot;~&quot;)
+(x._1, strings(0), strings(1))})
+concurrenceMatrixArray
+}).flatMap((x: Array[(String, String, String)]) =&gt; x).collect()
+var resultList: List[(String, Double)] = List()
+for (item &lt;- user)
+for (item1 &lt;- book)
+if (item._1 == item1._1)
+resultList = resultList :+ (item._2 + &quot;,&quot; + item1._2,
+(BigDecimal(item._3.toDouble) * BigDecimal(item1._3.toDouble)).toDouble)</code></pre></figure>
+<p>代码-9中step2RDD中存储的是图5-3的用户偏好矩阵，step6RDD中存储的是图5-7的物品相似矩阵。step2RDD最后以（图书编号，用户学号，偏好值）的格式保存在user变量中。Step6RDD将coefficient列中多个图书的相似值进行分割，最后以（被推荐图书编号，推荐图书编号，图书相似值）的格式保存在book变量中。</p>
+<p>遍历user和book两个列表，当列表中被推荐图书编号相同时，将用户对被推荐图书的偏好值和图书的相似值进行相乘，得出对用户的推荐图书的推荐值，最后在推荐列表中去除用户已经借阅过的即为最终的图书推荐表，结果如图5-8所示。</p>
+<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image25.webp" alt="image25" width="454" height="118" fetchpriority="low" decoding="async" /></p>
+<p>图5-8 图书推荐表</p>
+<h2 id="实时推荐系统的实现">5.2 实时推荐系统的实现</h2>
+<h3 id="数据获取模块">5.2.1 数据获取模块</h3>
+<h4 id="系统数据补充">5.2.1.1 系统数据补充</h4>
+<p>本系统图书数据缺失系统所需的封面图片信息，因此需要借由爬虫工具获取缺失的信息。本系统采用Selenium实现爬虫功能，相关代码如代码-10所示。</p>
+<figure class="doc-code"><figcaption>代码-10</figcaption><pre><code>for result in result_list:
+chrome_options = webdriver.ChromeOptions()
+chrome_options.add_argument('--headless')
+chrome_options.add_argument('window-size=1920x1080')
+chrome_options.add_argument('--start-maximized')
+prefs = {&quot;profile.managed_default_content_settings.images&quot;: 2}
+chrome_options.add_experimental_option(&quot;prefs&quot;, prefs)
+wd=webdriver.Chrome(
+options=chrome_options, service=Service(r'./tool/chromedriver.exe'))
+wd.implicitly_wait(30)
+wd.get(&quot;https://www.dangdang.com/&quot;)
+wd.find_element(By.ID, 'key_S').send_keys(result[0])
+wd.implicitly_wait(10)
+search_element = wd.find_element(By.ID, &quot;form_search_new&quot;)
+time.sleep(2)
+search_element.find_element(By.CLASS_NAME, &quot;button&quot;).click()
+try:
+src=wd.find_element(By.NAME,&quot;itemlist-picture&quot;)
+.find_element(By.XPATH, &quot;./img&quot;)
+.get_attribute(&quot;src&quot;)
+SQL().save(src, result[0])
+except Exception as e:
+SQL().save(&quot;not found&quot;, result[0])
+continue
+wd.close()
+wd.quit()</code></pre></figure>
+<p>第二章中介绍Selenium支持无界面操作浏览器，本系统选择Chrome浏览器进行操作。代码-10中通过webdriver获取ChromeOptions配置，添加headless启动无界面访问模式，设置window-size和start-maximized解决无界面打开浏览器没法选中网页元素问题，添加prefs字典设置启动网页时无需加载网页图片，节约网络资源需求；implicitly_wait方法为加载网页的等候时间，单位为秒；find_element.click方法表示寻找H5代码中的对应元素后进行点击操作；find_element方法可以通过多种方法寻找元素，包括name标签、id标签、class标签，也可以通过Xpath相对或绝对路径定位元素。SQL()对象为自定义的Python对接mysql的类。</p>
+<h4 id="大数据平台数据获取">5.2.1.2 大数据平台数据获取</h4>
+<p>本系统大数据平台通过分析用户行为日志数据产生推荐数据，用户行为日志通过后端请求端口在前端发送请求时向Kafka的指定话题发送指定内容，埋点代码如代码-11所示，相关配置如图5-9所示。</p>
+<figure class="doc-code"><figcaption>代码-11</figcaption><pre><code>@GetMapping(&quot;/selectBookExtendByCallNo&quot;)
+public Book queryBookByCallNo(@RequestParam(&quot;callNo&quot;) String callNo,
+@RequestParam(&quot;certId&quot;) String certId) {
+if (certId.length() &gt;= 10) {
+String str = certId + &quot;,&quot; + callNo + &quot;,&quot; + &quot;consultBook&quot;;
+kafkaTemplate.send(&quot;userLog&quot;, str);}
+return bookExtendService.queryBookByCallNo(certId, callNo);
+}</code></pre></figure>
+<p>代码-11指定了向Kafka中userlog的topic发送数据，此时Spring Boot作为生产者向Kafka生产数据。</p>
+<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image26.webp" alt="image26" width="925" height="241" fetchpriority="low" decoding="async" /></p>
+<p>图5-9 spring-kafka配置</p>
+<p>图5-4配置指定了Kafka所搭建的主机IP和对应的端口，以及发送信息的格式。</p>
+<p>在Kafka正常启动，Spring Boot成功发送信息到topic中后，Spark可以通过spark-streaming-kafka组件，获取userlog的topic中的数据并写入数据库，Spark Streaming代码如代码-12所示，配置工具类代码如代码-13所示。</p>
+<figure class="doc-code"><figcaption>代码-12</figcaption><pre><code>val sparkConf = new SparkConf()
+sparkConf.setMaster(&quot;local&quot;).setAppName(&quot;streamingApp&quot;)
+.set(&quot;hive.exec.dynamic.partition.mode&quot;, &quot;nonstrict&quot;)
+val ssc = new StreamingContext(sparkConf, Minutes(1))
+val topic = &quot;userLog&quot;
+val kafkaDStream = KafkaUtil.getKafkaSteam(topic, ssc)
+val logDStream = kafkaDStream.map((_.value())
+logDStream.foreachRDD((rdd: RDD[String]) =&gt; {
+val spark: SparkSession = SparkSession.builder()
+.config(sparkConf).enableHiveSupport().getOrCreate()
+import spark.implicits._
+val logRDD= rdd.map( x =&gt; {
+val strings: Array[String] = x.split(&quot;,&quot;)
+(strings(0), strings(1), strings(2), &quot;userlog&quot;)})
+logRDD.toDF(&quot;cert_id&quot;, &quot;call_no&quot;, &quot;action&quot;, &quot;part&quot;).write.partitionBy(&quot;part&quot;)
+.mode(SaveMode.Append).format(&quot;hive&quot;).saveAsTable(&quot;userlog&quot;)</code></pre></figure>
+<p>代码-12首先获取配置对象，设置运行的模式及项目名称，然后设置批处理的间隔时间，以此实现实时推荐，再根据设置的间隔时间定时向指定的topic消费<sup>[10,11]</sup>。在获取到topic中信息后，通过Spark SQL组件写入Hive，Hive中用户行为日志如图5-10所示。</p>
+<figure class="doc-code"><figcaption>代码-13</figcaption><pre><code>private val properties = PropertiesUtil.load(&quot;config.properties&quot;)
+private val broker_list: String = properties.getProperty(&quot;kafka.broker&quot;)
+var consumerConfigs: mutable.Map[String, Object] = collection.mutable.Map(
+ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG -&gt; broker_list,
+ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG -&gt; classOf[StringDeserializer],
+ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG -&gt; classOf[StringDeserializer],
+ConsumerConfig.GROUP_ID_CONFIG -&gt; &quot;userLog&quot;,
+ConsumerConfig.AUTO_OFFSET_RESET_CONFIG -&gt; &quot;latest&quot;,
+ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG -&gt; (false: lang.Boolean))
+def getKafkaSteam(topic: String,
+ssc: StreamingContext): InputDStream[ConsumerRecord[String, String]] = {
+KafkaUtils.createDirectStream[String, String](ssc,LocationStrategies.PreferConsistent,
+ConsumerStrategies.Subscribe[String, String](Array(topic), consumerConfigs))}</code></pre></figure>
+<p>代码-13首先通过读取配置文件中搭建Kafka的主机IP和对应端口获取Kafka，其次通过可变的Map对象配置当前消费的服务器列表、消费时获取信息的类型、消费的topic名称、获取topic消息后开始消费的偏移量等。</p>
+<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image27.webp" alt="image27" width="829" height="127" fetchpriority="low" decoding="async" /></p>
+<p>图5-10 用户行为日志</p>
+<p>图5-2中cert_id为用户学号，call_no为图书编号，action为用户操作，partition为Hive表的分区。第二章中介绍Hive是基于Hadoop的数据仓库，因此在启动Hive前需要将Hadoop相关工具启动。</p>
+<h3 id="数据展示模块">5.2.2 数据展示模块</h3>
+<h4 id="推荐系统界面">5.2.2.1 推荐系统界面</h4>
+<p>系统界面使用Vue+ElementUI框架和ECharts实现数据可视化，注册界面和主页界面如图5-11和图5-12所示。</p>
+<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image28.webp" alt="image28" width="1229" height="684" fetchpriority="low" decoding="async" /></p>
+<p>图5-11 注册界面</p>
+<p>图5-11中注册表格会进行数据校验，部分数据校验规则代码如代码-14所示。</p>
+<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image29.webp" alt="image29" width="1255" height="711" fetchpriority="low" decoding="async" /></p>
+<p>图5-12 主页界面</p>
+<p>图5-12中的系统首页界面主要负责展示信息，其中包括用户相关信息、用户借书预览信息、用户归还图书提醒、用户借阅频次统计图，其中用户借阅频次统计图通过ECharts实现，代码如代码15和代码-16所示。</p>
+<figure class="doc-code"><figcaption>代码-14</figcaption><pre><code>let checkAccount = (rule, value, callback) =&gt; {
+let regAccount = /[a-zA-z0-9]$/
+if (value === &quot;&quot;)
+callback(new Error(&quot;请输入账号&quot;))
+else if (regAccount.test(value) === false)
+callback(new Error(&quot;请输入英文或数字&quot;))
+else {
+this.$http.get(&quot;/sys/user/selectByAccount?account=&quot; + this.registerForm.account).then((res) =&gt; {
+if (res.data.data)
+callback(new Error(&quot;账号已被注册&quot;))
+else callback()})
+}};</code></pre></figure>
+<p>代码-14参数列表中rule为验证规则参数，value为输入值，callback为验证返回结果。首先会提示用户输入；通过添加正则表达式，仅允许输入英文或数字；最后检查输入值是否存在于数据库中，如果获取成功则证明账号已存在，提示用户更换注册的账号。</p>
+<figure class="doc-code"><figcaption>代码-15</figcaption><pre><code>this.$http.get(&quot;/library/lend/queryLends?certId=&quot;+this.loginForm.certId).then((res)=&gt;{
+let lend = res.data.data.forEach(item =&gt; {
+date.push(item.lendDate)
+if (!num[item.lendDate]) num[item.lendDate] = 1
+else num[item.lendDate] += 1})
+for (let key in num)
+numEachDay.push(num[key])
+date = [...new Set(date)]
+let myECharts = echarts.init(this.$refs.echarts)</code></pre></figure>
+<p>代码-15中先向后端发送请求获取用户的所有借阅记录，再通过借阅日期建立借阅频次字典，最后将借阅日期进行格式化和去重，完成数据处理部分。</p>
+<figure class="doc-code"><figcaption>代码-16</figcaption><pre><code>let option = {
+title: {text: '用户借阅频次'},
+xAxis: {
+type: 'category',
+name: '借阅时间',
+boundaryGap: false,
+data: date},
+yAxis: {type: 'value' ,name: '借阅量', min: 0, max: 5},
+tooltip: {
+trigger: 'axis',
+backgroundColor: 'rgba(32, 33, 36,.7)',
+borderColor: 'rgba(32, 33, 36,0.20)',
+borderWidth: 1,
+textStyle: {color: '#fff', fontSize: '12'},
+axisPointer: {
+type: 'cross', label: {backgroundColor: '#6a7985'}}},
+series: [{data: numEachDay, type: 'line'}]}
+myECharts.setOption(option);</code></pre></figure>
+<p>代码-16负责设置ECharts表格的标题、xy轴数据等，tooltip中设置当鼠标悬浮在ECharts表格中时，展示表格中放置点的详细数据。</p>
+<h4 id="前后端可视化工具">5.2.2.2 前后端可视化工具</h4>
+<p>在Windows控制台中通过命令进入Vue的项目目录，输入vue ui命令，即可进入Vue的项目可视化管理界面，部分界面如图5-13所示。</p>
+<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image30.webp" alt="image30" width="1219" height="688" fetchpriority="low" decoding="async" /></p>
+<p>图5-13 Vue项目依赖管理界面</p>
+<p>上图展示的是Vue的项目依赖管理界面，此界面中可以进行项目依赖的添加，查看已添加依赖的详情信息、对应依赖的官网跳转以及已添加依赖的删除或版本修改等功能。</p>
+<p>系统后端使用Spring Boot实现数据的处理和对接<sup>[12]</sup>，并通过实现Swagger完成后端对接文档，实现了后端接口数据的可视化，Swagger部分界面如图5-14所示。</p>
+<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image31.webp" alt="image31" width="1171" height="530" fetchpriority="low" decoding="async" /></p>
+<p>图5-14 Swagger主页部分界面</p>
+<p>上图展示为Swagger主页界面，展示后端文档的项目名称、作者等信息。菜单栏中借阅信息等模块对应Spring Boot中Controller模块，关键代码如代码-17所示。</p>
+<figure class="doc-code"><figcaption>代码-17</figcaption><pre><code>@Api(tags = &quot;图书馆图书&quot;, value = &quot;Book&quot;)
+@RestController
+@RequestMapping(&quot;/library/book&quot;)
+@Autowired
+private IBookService bookService;
+@ApiOperation(value = &quot;查询分页图书&quot;, notes = &quot;分页图书信息&quot;)
+@GetMapping(&quot;/list&quot;)
+public PageUtils list(@ApiParam(&quot;查询的条件&quot;) BookQueryDTO queryDTO) {
+return bookService.queryPage(queryDTO);}</code></pre></figure>
+<p>第二章曾介绍，Spring Boot简化了Spring的开发过程，其中使用注释可以减少代码量。Api注释设置Swagger菜单栏信息，RequestMapping注释设置接口访问的路径，Autowired注释注入Service模块实现，ApiOperation注释和ApiParam注释设置Swagger文档以及调试模块（图5-15和图5-16）的提示信息，GetMapping注释定义请求类型为get请求。</p>
+<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image32.webp" alt="image32" width="1320" height="828" fetchpriority="low" decoding="async" /></p>
+<p>图5-15 Swagger接口文档界面</p>
+<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image33.webp" alt="image33" width="1331" height="847" fetchpriority="low" decoding="async" /></p>
+<p>图5-16 Swagger接口调试界面</p>
+<p>图5-15中列举了代码-17查询分页图书接口的详细信息，包括接口路径、请求类型、请求参数列表信息等，图5-16调试界面可以输入参数列表，点击发送后，可以在相应内容中查看前端获取的数据信息。输入的参数列表中红框标识的代表必须输入的信息。</p>
+<h4 id="大数据工具可视化平台">5.2.2.3 大数据工具可视化平台</h4>
+<p>由于Kafka支持分布式安装，在多机器消费生产数据时难以查看和管理各个主机上Zookeeper和Kafka的启动状态和消费情况，于是本系统搭建了EFAK(Eagle For Apache Kafka)实现了Kafka启动数据的可视化等功能，部分界面如图5-17所示。</p>
+<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image34.webp" alt="image34" width="1159" height="648" fetchpriority="low" decoding="async" /></p>
+<p>图5-17 EFAK主页</p>
+<p>图5-17最上方会显示当前访问Kafka的主机数量，已建立的topic数量，正在运行的Zookeeper数量；中部会显示各个时间段不同主机消费生产的数据占比；下方会显示当前正常运行的topic占比，当前topic消费生产的具体数据大小以及近期消费生产数据的柱状图分布。菜单栏中可选择Topics或Consumers可进一步获取更详细的访问统计信息。</p>
+<p>HDFS启动成功后会开启网页访问端口9870，而Yarn会开启网页访问端口8088，通过可以访问网页查看和操作组件信息，HDFS文件系统界面如图5-18所示，Yarn网页界面如图5-19所示。</p>
+<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image35.webp" alt="image35" width="1206" height="567" fetchpriority="low" decoding="async" /></p>
+<p>图5-18 HDFS文件系统界面</p>
+<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image36.webp" alt="image36" width="1257" height="403" fetchpriority="low" decoding="async" /></p>
+<p>图5-19 Yarn网页界面</p>
+<p>图5-18界面可以查看目录的权限，目录的创建者名称等信息，进行文件系统的文件上传或下载，目录的跳转和删除或是文件详细信息的查看和删除等操作，同第二章介绍一样，HDFS的操作和普通文件系统几乎一致。图5-19中可以查看Hadoop中正在运行的任务的ID、创建任务的用户名等信息。</p>
+<h3 id="数据处理模块">5.2.3 数据处理模块</h3>
+<h4 id="数据预处理">5.2.3.1 数据预处理</h4>
+<p>本系统大数据平台相关数据存储在Hive数据仓库中，Hive可以通过建立分区表，将一张表根据业务逻辑分为多个功能区，当单张表数据量巨大，而且查询又经常限定某一个类别，那么可以将表按照该类别进行分区，以提高数据查询效率，减少资源开销。分区底层实现逻辑为:在一个表对应的目录下，一个分区对应一个目录，HDFS存储的分区表数据如图5-20所示。</p>
+<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image37.webp" alt="image37" width="1248" height="383" fetchpriority="low" decoding="async" /></p>
+<p>图5-20 HDFS分区表数据</p>
+<p>上图为userlog表的userlog分区在HDFS中的表数据，Hive表数据默认存储在HDFS的/user/hive/warehouse目录下，userlog目录下存储对应的表信息，part=userlog目录下存储表分区为userlog的分区信息。第二章中介绍过Hive是将MapReduce语句转化成SQL语句，图中为Spark执行Hive的write语句后保存的数据。</p>
+<p>在数据备份功能上，Hive可以通过类SQL语句，将查询结果以指定的数据格式和字段的分割符导出到本地或HDFS上，命令如图5-21所示，导出结果如图5-22所示。</p>
+<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image38.webp" alt="image38" width="804" height="101" fetchpriority="low" decoding="async" /></p>
+<p>图5-21 Hive数据导出命令</p>
+<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image39.webp" alt="image39" width="670" height="99" fetchpriority="low" decoding="async" /></p>
+<p>图5-22 Hive导出数据</p>
+<p>图5-21中展示的是进入Hive数据仓库控制台之后输入的数据导出命令。第一行通过file协议设置将数据输出到本地指定目录中；第二行设置导出数据的分隔符；第三行设置导出数据的文件格式，Hive底层为MapReduce程序，默认同时生成文本文件和文件完整检验文件；第四行设置需要导出的数据，Hive导出的数据为SQL查询语句的结果。图5-22中通过输出命令cat查看导出数据的内容。</p>
+<h4 id="推荐功能的实现">5.2.3.2 推荐功能的实现</h4>
+<p>本系统除第三章介绍的基础推荐功能外，还有新书速递和相似图书两个推荐功能。新书速递实现代码如代码-18所示。</p>
+<figure class="doc-code"><figcaption>代码-18</figcaption><pre><code>val now: Date = new Date()
+val dateFormat: SimpleDateFormat = new SimpleDateFormat(&quot;yyyy&quot;)
+val date: Int = Integer.parseInt(dateFormat.format(now))
+val dateR1: Regex = &quot;\\d{4}&quot;.r
+val dateR2: Regex = &quot;\\d{4}.\\d{2}&quot;.r
+val dateR3: Regex = &quot;\\d{4}.\\d{2}.\\d{2}&quot;.r
+val dateRDD: RDD[(String, String)] =
+bookRDD.filter((_: (String, String))._2 != null)
+.filter((x: (String, String)) =&gt; {
+dateR1.matches(x._2) ||
+dateR2.matches(x._2) ||
+dateR3.matches(x._2)
+})
+var minYear: Int = 10
+dateRDD.collect().foreach((d: (String, String)) =&gt; {
+val year: Int = Integer.parseInt(d._2.substring(0, 4))
+if (date - year &lt; minYear &amp;&amp; year &lt; date)
+minYear = date - year
+})
+val resultRDD: RDD[(String, String)] = dateRDD.filter(x =&gt; {
+val year: Int = x._2.substring(0, 4).toInt
+date - year == minYear
+})</code></pre></figure>
+<p>代码-18首先获得当前年份，然后通过正则表达式将出版年份格式为“yyyy”或“yyyy.mm”或“yyyy.mm.dd”的保留，之后通过遍历图书出版年份计算得出与当前年份最相近的年份差，最后将与当前年份最相近的出版年份对应的图书保留并保存到对应的数据库表中即可。相似图书实现代码如代码-19所示。</p>
+<figure class="doc-code"><figcaption>代码-19</figcaption><pre><code>val step5RDD: RDD[(String, String)] = spark
+.table(&quot;step5&quot;).rdd.map((x: Row) =&gt; {
+val callNo: String = x.getAs[String](&quot;call_no&quot;)
+callNo
+}).map((x: String) =&gt; {
+val strings: Array[String] = x.split(&quot;,&quot;)
+(strings(0), strings(1))
+})</code></pre></figure>
+<p>代码-19中step5RDD中存储的是第三章中皮尔逊系数非零的两本书的图书编号和对应的皮尔逊系数，将step5RDD两本书的图书编号取出并去重后，保存到对应数据库表中即可。</p>
+<h3 id="数据安全模块">5.2.4 数据安全模块</h3>
+<h4 id="用户登录验证">5.2.4.1 用户登录验证</h4>
+<p>本系统通过JWT生成Token信息，相关代码如代码-20所示。</p>
+<figure class="doc-code"><figcaption>代码-20</figcaption><pre><code>public static String getToken(Map&lt;String, String&gt; map) {
+JWTCreator.Builder builder = JWT.create();
+map.forEach(builder::withClaim);
+Calendar calendar = Calendar.getInstance();
+calendar.add(Calendar.DATE, 7);
+Map&lt;String, Object&gt; header = new HashMap&lt;&gt;();
+header.put(&quot;alg&quot;, &quot;HS256&quot;);
+header.put(&quot;typ&quot;, &quot;JWT&quot;);
+return builder.withHeader(header)
+.withExpiresAt(calendar.getTime())
+.sign(Algorithm
+.HMAC256(SystemConstant.SYSTEM_TOKEN_PREFIX));
+}
+public static DecodedJWT verify(String token) {
+DecodedJWT verify = null;
+try {
+verify = JWT.require(Algorithm
+.HMAC256(SystemConstant.SYSTEM_TOKEN_PREFIX))
+.build().verify(token);
+} catch (Exception e) {
+e.printStackTrace();
+}
+return verify;
+}</code></pre></figure>
+<p>代码-20中，getToken方法为生成Token的方法，builder通过传入的Map对象将其中的账号相关信息保存到Token中；calendar设置Token的过期时间，过期的Token信息将被视为非法请求；header通过Map键值对保存Token编码的格式；最后builder加载calendar和header的设置，为了防止外界通过Token获取账号相关的信息，在Token开头添加SYSTEM_TOKEN_PREFIX常量值，常量值为自定义的字符串。</p>
+<p>DecodeJWT方法校验Token是否合法，首先检查Token开头是否为添加的自定义字符串，其次判断Token信息是否在有效期内，两者都通过时，当前Token才判断为合法。</p>
+<p>本系统在用户登录成功后，会将生成的Token信息添加在登录成功的请求头中（代码如代码-21所示），前端就可以获取到生成的Token信息<sup>[13]</sup>。</p>
+<figure class="doc-code"><figcaption>代码-21</figcaption><pre><code>protected void successfulAuthentication(HttpServletRequest request,
+HttpServletResponse response,
+FilterChain chain,
+Authentication authResult) throws IOException, ServletException {
+Map&lt;String, String&gt; map = new HashMap&lt;&gt;();
+map.put(&quot;account&quot;, authResult.getName());
+String token = JWTUtils.getToken(map);
+response.addHeader(&quot;Authorization&quot;, SystemConstant.SYSTEM_TOKEN_PREFIX + token);
+response.addHeader(&quot;Access-Control-Expose-Headers&quot;, &quot;Authorization&quot;);
+response.setContentType(&quot;application/json;charset=utf-8&quot;);
+response.setStatus(HttpServletResponse.SC_OK);
+PrintWriter writer = response.getWriter();
+Map&lt;String, Object&gt; resultMap = new HashMap&lt;&gt;();
+resultMap.put(&quot;code&quot;, HttpServletResponse.SC_OK);
+resultMap.put(&quot;msg&quot;, &quot;认证通过&quot;);
+writer.write(JSON.toJSONString(resultMap));
+writer.flush();
+writer.close();
+}</code></pre></figure>
+<p>代码-21中，当用户登录成功后会调用JWT工具类，将生成的Token信息以Authorization为键的形式添加在请求头。前端用户登录成功后便可将请求头中的Token信息保存（代码如代码-22所示），通过Axios在每次向后端接口发送请求时携带在请求头携带Token信息将当前请求标记为合法请求，代码如代码-23所示。</p>
+<figure class="doc-code"><figcaption>代码-22</figcaption><pre><code>this.$http.post(&quot;/login&quot;, this.loginForm).then((res) =&gt; {
+if (res.data.code === 200) {
+sessionStorage.setItem(&quot;token&quot;, res.headers.authorization)
+}</code></pre></figure>
+<p>用户在登录成功后，在请求头中以Authorization为键的信息以token为键保存在sessionStorage中，再向后端接口发送请求，获取用户登录信息，以loginForm为键保存在sessionStorage中。</p>
+<figure class="doc-code"><figcaption>代码-23</figcaption><pre><code>Axios.interceptors.request.use(config =&gt; {
+config.headers['Authorization'] = sessionStorage.getItem('token');
+return config;
+}, error =&gt; {
+return Promise.reject(error);
+})</code></pre></figure>
+<p>代码-23修改Axios发送请求的配置，将sessionStorage中以token为键的信息保存到请求头中。修改后前端发送的请求的请求头中都将携带Token信息，后端便可通过Spring Security的过滤器链机制将未携带Token信息的请求进行拦截<sup>[14]</sup>，代码如代码-24所示。</p>
+<figure class="doc-code"><figcaption>代码-24</figcaption><pre><code>protected void doFilterInternal(HttpServletRequest request
+, HttpServletResponse response
+, FilterChain chain)
+throws IOException, ServletException {
+String authorization = request.getHeader(&quot;Authorization&quot;);
+if (authorization != null
+&amp;&amp; authorization.startsWith(SystemConstant.SYSTEM_TOKEN_PREFIX)) {
+String token = authorization
+.replace(SystemConstant.SYSTEM_TOKEN_PREFIX, &quot;&quot;);
+DecodedJWT verify = JWTUtils.verify(token);
+if (verify == null) {responseLogin(response);}
+String account = verify.getClaim(&quot;account&quot;).asString();
+List&lt;GrantedAuthority&gt; list = new ArrayList&lt;&gt;();
+list.add(new SimpleGrantedAuthority(&quot;ADMIN&quot;));
+UsernamePasswordAuthenticationToken authenticationToken =
+new UsernamePasswordAuthenticationToken
+(account, &quot;&quot;, list);
+SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+chain.doFilter(request, response);}
+}</code></pre></figure>
+<p>代码-24首先获取请求头中Authorization为键的信息，如果获取成功，则调用JWT工具类中的验证方法检验Token是否合法；如果Token合法则允许请求通过；如果为非法请求，除了登录和注册需要的请求外都进行拦截。</p>
+<p>为保证用户以非常手段获取登录资源，前端通过Vue的路由组件禁止用户未登录时访问首页界面，并且禁止了浏览器的前进后退操作，代码如代码-25所示。</p>
+<figure class="doc-code"><figcaption>代码-25</figcaption><pre><code>router.beforeEach((to, from, next) =&gt; {
+let loginInfo = sessionStorage.getItem('loginForm')
+if (to.name === 'Login' || to.name === 'Register')
+next();
+else if (to.name !== 'Login' &amp;&amp; !loginInfo)
+next({name: 'Login'});
+else next();})
+router.afterEach((to, from) =&gt; {
+history.pushState(null, null,
+location.protocol + '/' + location.host + '/#' + to.path)})</code></pre></figure>
+<p>代码-25通过Vue的路由组件监视路由跳转的前后阶段，这种写法被称为路由守卫。路由守卫在当前路由为Login界面时，会试图获取sessionStorage中用户的登录信息，如果sessionStorage不存在登录信息，则只允许向登录和注册界面跳转，向其他界面跳转时路由会重定向到登录界面；在用户使用浏览器前进后退时，路由会重定向到当前界面。</p>
+<h4 id="登录密码加密">5.2.4.2 登录密码加密</h4>
+<p>由于sessionStorage中存储着用户登录信息，包括账户和密码，为保证用户账号的安全性，本系统在用户注册和重置密码时会将密码加密之后返回到前端，代码如代码-26所示。</p>
+<figure class="doc-code"><figcaption>代码-26</figcaption><pre><code>public UserDetails loadUserByUsername(String account)
+throws UsernameNotFoundException {
+User user = userService.queryByAccount(account);
+if (user != null) {
+List&lt;GrantedAuthority&gt; list = new ArrayList&lt;&gt;();
+list.add(new SimpleGrantedAuthority(&quot;ADMIN&quot;));
+return new org.springframework.security.core.userdetails.User
+(user.getAccount(),
+new BCryptPasswordEncoder()
+.encode(user.getPassword()),
+list);
+}
+return null;
+}</code></pre></figure>
+<p>在用户成功登录后，会将用户密码进行加密后进行返回，Spring Security中设置相同的加密算法即可对密码进行检验，代码如代码-27所示。</p>
+<figure class="doc-code"><figcaption>代码-27</figcaption><pre><code>protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+auth.userDetailsService(userDetailsService).passwordEncoder(new BCryptPasswordEncoder());}</code></pre></figure>
+<h1 id="系统测试">6 系统测试</h1>
+<h2 id="测试方法简介">6.1 测试方法简介</h2>
+<p>软件测试是使用人工或自动的手段来运行或测定某个软件系统的过程，其目的在于检验它是否满足规定的需求或弄清预期结果与实际结果之间的差别。</p>
+<p>从是否关心软件内部结构和具体实现的角度划分，测试方法分为白盒测试、黑盒测试。</p>
+<p>白盒测试方法主要是借助程序内部的逻辑和相关信息，通过检测内部动作是否按照设计规格说明书的设定进行，检查每一条通路能否正常工作，有代码检查法、静态结构分析法、静态质量度量法、逻辑覆盖法、基本路径测试法等。</p>
+<p>黑盒测试与白盒测试相反，测试人员根据需求规格说明书设计测试实例，并检查程序的功能是否能够按照规范说明准确无误的运行，包括等价类划分法、边界值分析法、错误推测法、因果图法、判定表驱动法、正交试验设计法、功能图法、场景法等。</p>
+<p>从是否执行程序的角度划分，测试方法又可分为静态测试和动态测试。静态测试包括代码检查、静态结构分析、代码质量度量等。动态测试包括构造测试实例、执行程序和分析程序的输出结果。本系统主要采用动态测试。</p>
+<h2 id="测试用例的设计">6.2 测试用例的设计</h2>
+<p class="doc-table-caption">表6-1 测试用例</p>
+<table>
+<colgroup>
+<col style="width: 4%" />
+<col style="width: 6%" />
+<col style="width: 15%" />
+<col style="width: 21%" />
+<col style="width: 30%" />
+<col style="width: 21%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>ID</th>
+<th>测试项目</th>
+<th>用例标题</th>
+<th>预设条件</th>
+<th>操作步骤</th>
+<th>预期输出</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>登录</td>
+<td>填写符合要求的数据进行登录</td>
+<td><p>1.已在登录界面</p>
+<p>2.数据已在对应数据库中</p>
+<p>3.前后端项目已启动</p></td>
+<td><p>1.在账号输入框输入123456</p>
+<p>2.在密码输入框输入123456</p>
+<p>3.点击登录或回车</p></td>
+<td>跳转到主页</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>注册</td>
+<td>输入不符合验证条件的注册信息进行注册</td>
+<td><p>1.已在注册界面</p>
+<p>2.前后端项目已启动</p></td>
+<td><p>1.在账号输入框输入已注册账号</p>
+<p>2.在账号输入框输入中文</p>
+<p>3.在学号输入框输入已注册学号</p></td>
+<td>输入框出现相应错误提示</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>数据展示</td>
+<td>图书借阅界面显示数据库中保存的图书相关信息</td>
+<td>前后端项目已启动</td>
+<td><p>1.登录账户</p>
+<p>2.进入图书借阅界面</p></td>
+<td>图书借阅界面以分页形式加载出数据库中保存的图书数据</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>图书推荐</td>
+<td>用户对图书进行操作后推荐数据定时更新</td>
+<td><p>1.前后端项目已启动</p>
+<p>2.Linux系统已开机</p>
+<p>3.大数据项目已启动</p></td>
+<td><p>1.登录账户</p>
+<p>2.对图书进行查看或借阅或收藏操作</p></td>
+<td><p>1.Kafka中消费到用户操作</p>
+<p>2.Hive表数据更新</p></td>
+</tr>
+</tbody>
+</table>
+<h2 id="问题与调试">6.3 问题与调试 </h2>
+<p>Vue的路由组件在向自身跳转时可实现页面刷新的功能，但向自身路由跳转时，路由组件会向网页开发者控制台返回错误信息，如图6-1所示。</p>
+<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image40.webp" alt="image40" width="1065" height="203" fetchpriority="low" decoding="async" /></p>
+<p>图6-1 Vue跳转自身报错信息</p>
+<p>由于该报错不影响系统功能，因此本系统重写Vue的路由组件中的跳转路由方法，将该报错信息进行捕获，代码如代码-28所示。</p>
+<figure class="doc-code"><figcaption>代码-28</figcaption><pre><code>const originalPush = VueRouter.prototype.push
+VueRouter.prototype.push = function push (location) {
+return originalPush.call(this, location).catch(err =&gt; err)
+}</code></pre></figure>
+<p>Vue支持快捷的动态数据绑定，其中包括图片的动态数据绑定，但在img标签的src属性动态绑定的数据为拼接的字符串时（代码如代码-29所示），网页开发者控制台会返回错误信息，如图6-2所示。</p>
+<figure class="doc-code"><figcaption>代码-29</figcaption><pre><code>&lt;img :src=&quot;'@/assets/image/head/' + this.loginForm.head&quot; alt=&quot;暂未找到图片&quot;&gt;</code></pre></figure>
+<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image41.webp" alt="image41" width="787" height="563" fetchpriority="low" decoding="async" /></p>
+<p>图6-2 动态绑定拼接字符报错</p>
+<p>对网页解析的实际HTML代码分析后发现直接拼接字符会解析错误，将拼接字符封装成方法返回值即可解决解析问题，封装方法代码如代码-30所示。</p>
+<figure class="doc-code"><figcaption>代码-30</figcaption><pre><code>getPath() {return this.loginForm.head ?require('@/assets/image/head/' + this.loginForm.head) : ''}</code></pre></figure>
+<p>Spring Security过滤链会对Spring Boot获取的数据库数据和Spring Boot项目中的静态资源都进行权限认证，由于Swagger属于非登录用户访问资源，因此开放静态资源的访问权限前，Swagger网页无法访问，开放静态资源代码如代码-31所示。</p>
+<figure class="doc-code"><figcaption>代码-31</figcaption><pre><code>public void configure(WebSecurity web) throws Exception {
+web.ignoring().antMatchers(HttpMethod.GET, &quot;/**&quot;);
+}</code></pre></figure>
+<p>Spark Streaming在运行时如果同Spark Core或Spark SQL一样在结尾加上stop或close方法，会在一次批处理后终止程序，Spark启动日志显示程序结束运行。将stop或close方法换成awaitTermination方法即可正常执行定时的批处理程序。</p>
+<h1 id="结-论">结 论</h1>
+<p>本文旨在探讨图书推荐系统的设计和实现，从必要性和发展趋势两个方面进行深入分析，最终确定该课题的研究重点。在对系统进行详细介绍前，本文先对系统中使用到的各个模块中的核心技术进行了简单的介绍。</p>
+<p>针对系统实现的重难点，本文先从推荐算法入手，通过对使用场景的分析，完成推荐值模型的搭建。在推荐系统的设计章节详细介绍本系统设计的合理性和可靠性，推荐系统的实现章节就整个系统各个模块的实现流程进行了详实的说明。</p>
+<p>本系统采用大数据全分布式架构，支持巨量数据的读写；前端采用Vue框架实现，相较于原生HTML，代码解析速度更快，动态数据绑定更便捷；后端采用Spring Boot框架实现，相较于Spring框架，开发代码量更少，项目运行效率更高，通过实现Swagger对后端项目数据实现了可视化，提高了项目的规范程度，简化了前端格式转化的步骤。</p>
+<p>但由于本系统大数据平台在Linux系统运行，前后端在Windows系统运行，数据加载相较于单系统项目更长；系统原始数据存储在MySQL数据库中，不支持数据备份和分区，存在数据安全隐患；本系统采用多项目多系统实现，整体运行内存占用较高。</p>
+<p>本系统原始数据存储在MySQL数据库中，支持数据备份和分区，存在数据安全隐患，可以将数据存放在hbase非结构性数据库中，hbase为大数据工具之一，支持数据的备份和分区,可以提高数据的安全性和可靠性。</p>
+<p>本系统采用前后端分离、多系统实现，虽然搭建在服务器中，但Tomcat服务器是在本地不同端口上启动的，虽然Tomcat服务器支持移动端访问，但是移动端不支持多端口访问，因此可以将整个项目搭建在一个服务器中，这样就可以支持移动端的访问。</p>
+<h1 id="参-考-文-献">参 考 文 献</h1>
+<p>[1] 张佳佳,章宜玉.基于数据挖掘的图书推荐系统的分析与设计[J].信息记录材料.2022,23(09):237-239</p>
+<p>[2] 马鸿健,张耘凡,陈金,部洪超.高校图书推荐系统设计与实现[J].信息技术与信息化.2021,(12):49-52</p>
+<p>[3] 花维.基于Hadoop框架与用户行为特征感知的智能图书推荐系统设计[J].2022,30(24): 24-27</p>
+<p>[4] 张艳丽,吴淮北.Hive数据仓库在Hadoop大数据环境下数据的导入与应用[J].电脑编程技巧与维护. 2022(12): 97-99</p>
+<p>[5] Jankatti Santosh,B.K.Raghavendra,S.Raghavendra,Meenakshi Meenakshi. Performance evaluation of Map-reduce jar pig hive and spark with machine learning using big data[J].</p>
+<p>International Journal of Electrical and Computer Engineering.2020,10(4): 3811-3818</p>
+<p>[6] Omar Hoger Khayrolla,Jumaa Alaa Khalil.Big Data Analysis Using Apache Spark MLlib and Hadoop HDFS with Scala and Java.Kurdistan Journal of Applied Research[J].2019,4(1): 7-14</p>
+<p>[7] Moon Jaewan,Jeong Yoonki,Chae Dong-Kyu,Choi Jaeho,Shim Hyunjung.CoMix: Collaborative filtering with mixup for implicit datasets[J]. Information Sciences, 2023, 628: 254-268</p>
+<p>[8] 王旭丽.基于Selenium的自动化程序设计与实现[J].现代信息科技.2022,6(22): 12-15</p>
+<p>[9] 杨健,陈伟.基于Python的三种网络爬虫技术研究[J].软件工程.2023,26(02): 24-27</p>
+<p>[10] 施炤.基于Spark Streaming的实时数据处理系统设计与实现[J].现代信息科技.2020,4(20):10-12</p>
+<p>[11] 叶惠仙.基于Spark Streaming、Kafka构建数据中心加工引擎的实践[J]. 网络安全技术与应用. 2023(03):3</p>
+<p>[12] 王以伍,舒晖.基于Spring Boot+Vue前后端分离的高校实验室预约管理系统的设计与实现[J].现代计算机.2023,29(01):114-117</p>
+<p>[13] 肖双林,何迎生,田杰,侯冬晴.基于JWT+Spring Security的动态权限管理系统[J].信息与电脑(理论版).2021,33(14):131-134</p>
+<p>[14] 杜成龙,曹海平,吴亮.基于Spring Security的自定义用户认证和授权策略研究[J].信息系统工程.2022(09):75-78</p>
+<h1 id="致-谢">致 谢</h1>
+<p>四年的大学学习生涯转瞬即逝，时至今日，大一入学的情景依旧历历在目。四年间，我从对编程和代码一窍不通，在老师的悉心教导下，逐渐一知半解，直至理解了老师传授的知识。在论文文末，由衷地感谢一路以来一直支持鼓励我的的各位老师以及亲朋好友。</p>
+<p>首先要感谢的是我的班主任孙庆英老师，感谢她这四年来的教导与培养。这四年来，不管是学习上的问题，还是生活上的难处，孙老师都不辞辛苦地支持着我。遥想刚入学时，对未来充满迷茫的我希望孙老师能为我指明一条前进的方向，面对语无伦次但又十分无助的我，孙老师没有一点的不耐烦，而是仔细聆听我所说的一切，耐心的为我解疑答惑。可以说，没有当初孙老师的指引，也就不会有如今的我。</p>
+<p>感谢我的指导老师吴克力老师和李楠老师，在最开始写毕业论文时，我完全没有思路，是吴老师给了我许多建议，让我完成了这篇文章，而李老师更是解答了我在技术上的各种疑惑，在此由衷感谢两位老师的耐心指导！</p>
+<p>感谢计科学院的领导、老师和同学，感谢学院对我的栽培，给予我良好的学习氛围和发展空间。</p>
+<p>感谢家人一路以来的支持，谢谢你们一直以来对我的包容和理解，给予我不断前进探索的动力。</p>
+<p>最后，感谢审阅本文并提出批评指正意见的所有专家学者！</p>

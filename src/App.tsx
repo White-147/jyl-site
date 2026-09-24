@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { ThemeProvider } from './hooks/useTheme'
 import useReadOnlyGuard from './hooks/useReadOnlyGuard'
 import { useDeepLinkCorrection } from './hooks/useAnchorScroll'
@@ -21,8 +22,28 @@ export default function App() {
   useReadOnlyGuard()
   // 深链兜底：带 #id 直接打开时，浏览器可能少滚一段，静默纠正一次
   useDeepLinkCorrection()
-  // hash 路由：`#/docs/ue5/<id>` 切到 UE 文档区，其余情况是主页面
+  // hash 路由：`#/docs/<分区>/<页>` 切到文档区，其余情况是主页面
   const route = useDocsRoute()
+
+  /**
+   * 通知首屏加载页（`index.html` 的 `#boot`）可以撤了。
+   *
+   * ⚠️ 主站等**两帧**：第一帧 DOM 有了但还没画，第二帧才真的有像素；
+   *    只等一帧会在低端机上"白闪一帧"。
+   * ⚠️ 文档区**不走这里** —— 它的正文是运行时 fetch 的，由 `Docs.tsx` 在正文落 DOM 后发信号，
+   *    否则会出现"加载页撤了、正文还空着"。
+   */
+  useEffect(() => {
+    if (route.isDocs) return
+    let raf2 = 0
+    const raf1 = requestAnimationFrame(() => {
+      raf2 = requestAnimationFrame(() => window.dispatchEvent(new Event('app:ready')))
+    })
+    return () => {
+      cancelAnimationFrame(raf1)
+      cancelAnimationFrame(raf2)
+    }
+  }, [route.isDocs])
 
   return (
     <ThemeProvider>
@@ -39,7 +60,9 @@ export default function App() {
         <TopBar />
         {route.isDocs ? (
           <main>
-            <Docs docId={route.docId} anchor={route.anchor} />
+            {/* 文档区已按「分区 / 页」两级组织（#/docs/<分区>/<页>）——
+                一篇源会被拆成多页，所以路由传的是分区 + 页 id，不是文档 id */}
+            <Docs section={route.section} pageId={route.pageId} anchor={route.anchor} />
           </main>
         ) : (
           <>

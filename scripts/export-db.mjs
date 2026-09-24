@@ -32,6 +32,7 @@ const projects = db
     details: JSON.parse(r.details),
     stack: JSON.parse(r.stack),
     link: r.link,
+    ...(r.docs_url ? { docsUrl: r.docs_url } : {}),
     ...(r.screenshot ? { screenshot: r.screenshot } : {}),
     ...(r.demo_url ? { demoUrl: r.demo_url } : {}),
     ...(r.demo_note ? { demoNote: r.demo_note } : {}),

@@ -150,9 +150,24 @@
   --duration-reveal: 320ms;
   --duration-panel: 240ms;
 
-  /* 网格底纹：全站统一一处定义（原 body/Hero/联系区三处各自硬编码，色值与间距不一致） */
-  --grid-line: rgb(120 140 143 / 0.13);
+  /* 网格底纹：全站统一一处定义（原 body/Hero/联系区三处各自硬编码，色值与间距不一致）。
+     ⚠️ 2026-09 从 0.13 提到 0.2：玻璃面板的折射**要有东西可弯才看得见**，
+        用户在浅色下"看不清晰"就是因为这层网格太淡，弯了也看不出来。 */
+  --grid-line: rgb(120 140 143 / 0.2);
   --grid-size: 48px;
+
+  /* ===== 玻璃泛光（悬停 / 选中 / 当前）=====
+     用户 2026-09 的原话：「不是现在这种周围一圈框个颜色的效果，而是整个玻璃泛光的效果，
+     类似于玻璃边缘照到太阳的那种发亮」。所以这套 token 只做**面**上的光，
+     不做 `hover:border-*` 那种描边换色 —— 组件里原有的 `hover:border-brand-300` 一律删掉。
+       --glass-sheen      冷白高光：从上方压下来的环境光
+       --glass-glow-warm  琥珀泛光：玻璃边缘"照到太阳"的暖光，也是外侧辉光 */
+  --glass-sheen: rgb(255 255 255 / 0.9);
+  --glass-glow-warm: rgb(217 122 6 / 0.3);
+  --glass-rim-lit: rgb(255 255 255 / 1);
+  /* 浅色下"边缘发亮"不能靠白边（白底上白边等于没有），只能靠琥珀：
+     这一档从 0.5 提到 0.75，并用更深的 amber-600 而不是 amber-300。 */
+  --glass-edge-lit: rgb(217 122 6 / 0.75);
 
   /* 流体字号：min/max 用 rem（尊重浏览器缩放与用户字体设置），中间 rem+vw 渐变，
      320px→1440px 平滑缩放，无断点跳跃；PC/平板/手机三端文本自适应 */
@@ -219,6 +234,21 @@ body {
 .reveal.visible {
   opacity: 1;
   transform: none;
+}
+
+/* 首屏预展开的那一批（Reveal 在挂载时判定"在视口 2 倍高度以内"）不播过渡：
+   它们要跟首屏一起出现，淡入反而制造"还在加载"的等待感。见 Reveal.tsx。 */
+.reveal.reveal-instant,
+.reveal.reveal-instant.visible {
+  transition: none;
+}
+/* ⚠️ 打印下所有区块一律可见：整页快照 / 打印预览不会滚动，
+   观察器永远不触发，否则输出就是"Hero + 一大片空白"。 */
+@media print {
+  .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -418,29 +448,160 @@ body::before {
   opacity: 0.62;
 }
 
-/* 卡片三档（DESIGN.md 的 Blur-Budget Rule）：按「是否需要透视」划分。
-   实心面板见各组件的 bg-white + border；以下两档为半透明层。
+/* ===== 面板玻璃（.glass-panel）=====
+   用户 2026-09 的要求：「关于我 / 项目区 / 技能区 / 工作经历 / 教育背景 / 联系区现在都有类似的
+   玻璃方框，但都没有真正实现玻璃效果 —— 整体应用起来，这样深浅色仅需要调整背景和文本，
+   框体颜色就不需要再一起跟着变了。」
+
+   做法：**一处定义**，色值全部走变量，主题只换变量、不换规则。
+     · `--panel-tint`     底色（浅色偏白、深色偏石墨）
+     · `--panel-edge`     发丝边（白系，两套主题同一支，不再写 `dark:border-*`）
+     · `--panel-rim`      上缘内高光（折射之外唯一解释"这是玻璃"的东西）
+     · `--panel-shadow`   外阴影（由琥珀派生 rgb(157 83 0)，与主色同族）
+   折射用弱档 `lg-refract-soft`（scale 6）：面板面积大，位移一大就像哈哈镜。
+   ⚠️ 面板**有东西可弯**：`body::before` 是一层 fixed 的 48px 全局网格，
+      所以折射出来是"网格被玻璃轻轻扭了一下"，不是白做。
+   ⚠️ 折射只给**区块主容器**（用户确认的覆盖面，约 6 个元素），内部小卡仍走色阶：
+      这条是 DESIGN.md 的 Blur-Budget Rule 的性能约束，别顺手铺到所有卡片上。 */
+:root {
+  --panel-tint: rgb(255 255 255 / 0.5);
+  --panel-tint-strong: rgb(255 255 255 / 0.62);
+  --panel-edge: rgb(255 255 255 / 0.62);
+  --panel-rim: rgb(255 255 255 / 0.6);
+  --panel-shadow: 0 1px 2px rgb(157 83 0 / 0.06);
+}
+.dark {
+  --panel-tint: rgb(27 30 32 / 0.55);
+  --panel-tint-strong: rgb(27 30 32 / 0.68);
+  --panel-edge: rgb(255 255 255 / 0.09);
+  --panel-rim: rgb(255 255 255 / 0.07);
+  --panel-shadow: 0 2px 10px rgb(0 0 0 / 0.2);
+  /* 深色下"照到太阳"要靠更亮的暖光才看得出来；冷白高光反而要压住，
+     否则会把深色玻璃洗成灰雾（与 DESIGN.md 的 Tonal-First Rule 一致）。 */
+  --glass-sheen: rgb(255 255 255 / 0.15);
+  --glass-glow-warm: rgb(242 169 59 / 0.28);
+  --glass-rim-lit: rgb(255 255 255 / 0.3);
+  --glass-edge-lit: rgb(242 169 59 / 0.55);
+}
+.glass-panel {
+  background: var(--panel-tint-strong);
+  border: 1px solid var(--panel-edge);
+  box-shadow:
+    inset 0 1px 0 var(--panel-rim),
+    var(--panel-shadow);
+  backdrop-filter: url(#lg-refract-soft) saturate(1.12);
+}
+/* 没有 url() 折射能力时（Safari / Firefox）：面板退回一层轻模糊，
+   免得"半透明却没有分离感"。静态面板上这一档比顶栏更轻，避免观感发糊。 */
+@supports not (backdrop-filter: url(#lg-refract)) {
+  .glass-panel {
+    backdrop-filter: blur(6px) saturate(1.1);
+  }
+}
+
+/* 卡片层级（DESIGN.md）：薄玻璃与实心面板两档，色值同样只走变量。
    原 glass-card / glass-card-strong 带 backdrop-filter，但静态卡片坐在固定背景层上，
-   模糊的视觉收益接近零、合成开销真实存在，故移除模糊、保留 tint 与细亮边。
+   模糊的视觉收益接近零、合成开销真实存在，故这两档**不加折射**（折射只在 .glass-panel）。
    阴影色由琥珀派生（rgb(157 83 0) = brand-700），保持与主色同族。 */
 .glass-card {
-  background: rgb(255 255 255 / 0.55);
-  border: 1px solid rgb(255 255 255 / 0.65);
-  box-shadow: 0 1px 2px rgb(157 83 0 / 0.06);
-}
-.dark .glass-card {
-  background: rgb(27 30 32 / 0.55);
-  border-color: rgb(44 50 52 / 0.9);
+  background: var(--panel-tint);
+  border: 1px solid var(--panel-edge);
+  box-shadow: var(--panel-shadow);
 }
 /* 强玻璃：用于含正文的区域，tint 更高保证可读性 */
 .glass-card-strong {
-  background: rgb(255 255 255 / 0.74);
-  border: 1px solid rgb(255 255 255 / 0.7);
-  box-shadow: 0 1px 2px rgb(157 83 0 / 0.06);
+  background: var(--panel-tint-strong);
+  border: 1px solid var(--panel-edge);
+  box-shadow:
+    inset 0 1px 0 var(--panel-rim),
+    var(--panel-shadow);
 }
-.dark .glass-card-strong {
-  background: rgb(27 30 32 / 0.72);
-  border-color: rgb(44 50 52 / 0.9);
+
+/* ===== 玻璃泛光工具类（.glass-lit）=====
+   加在任何"一块玻璃"上：悬停 / 键盘聚焦 / 当前项时，**整面**玻璃亮起来。
+   ⚠️ 是**面光**不是描边：`::after` 铺满整块，两层径向渐变 —— 上方冷白环境光 + 下方琥珀暖光。
+      不要改成 `border-color` 那种"周围一圈框个颜色"，用户明确否掉了那种效果。
+   ⚠️ `z-index:-1` + `isolation:isolate`：让光**在文字下面**亮，而不是盖在文字上。
+      负 z 的子元素画在元素自身背景之上、正常流内容之下，正好是"玻璃材质本身在发光"。
+   ⚠️ 动效只走 `opacity` / `box-shadow` / `transform`，指数缓出（DESIGN.md 禁回弹）。 */
+.glass-lit {
+  position: relative;
+  isolation: isolate;
+  transition:
+    box-shadow var(--duration-base, 280ms) var(--ease-out-soft);
+}
+.glass-lit::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    radial-gradient(125% 95% at 50% -25%, var(--glass-sheen), transparent 62%),
+    radial-gradient(95% 75% at 50% 118%, var(--glass-glow-warm), transparent 70%);
+  opacity: 0;
+  transition: opacity var(--duration-base, 280ms) var(--ease-out-soft);
+}
+.glass-lit:hover::after,
+.glass-lit:focus-visible::after,
+.glass-lit[aria-current="true"]::after,
+.glass-lit[aria-pressed="true"]::after,
+.glass-lit[aria-selected="true"]::after {
+  opacity: 1;
+}
+.glass-lit:hover,
+.glass-lit:focus-visible {
+  box-shadow:
+    inset 0 1px 0 var(--glass-rim-lit),
+    0 0 0 1px var(--glass-edge-lit),
+    0 10px 30px -8px var(--glass-glow-warm);
+  /* 刻意不抬升：用户 2026-09「不需要大范围的向上跳的逻辑，悬停住有效果就行」。 */
+}
+/* 当前 / 选中项：亮边常驻，但不抬升（避免"选中=浮起来"的误读） */
+.glass-lit[aria-current="true"],
+.glass-lit[aria-pressed="true"],
+.glass-lit[aria-selected="true"] {
+  box-shadow:
+    inset 0 1px 0 var(--glass-rim-lit),
+    0 0 0 1px var(--glass-edge-lit);
+}
+.glass-lit:focus-visible {
+  outline: 2px solid var(--color-brand-400, #f2a93b);
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .glass-lit,
+  .glass-lit::after {
+    transition-duration: 1ms;
+  }
+  .glass-lit:hover,
+  .glass-lit:focus-visible {
+    transform: none;
+  }
+}
+
+/* ===== 玻璃小件（.glass-chip）：筛选标签 / 分类按钮 / 联系区按钮 =====
+   用户 2026-09：「项目区、技能区的筛选标签和联系我的 GitHub 和下载简历在深色模式下还留着
+   之前框纯色的逻辑，应该和别的大卡片逻辑保持一致」。
+   所以这一档和 `.glass-panel` 用**同一套 token**，深浅色只换变量、不换规则 ——
+   组件里那些 `border border-slate-300 bg-white … dark:border-slate-700 dark:bg-slate-900`
+   的手工配对一律删掉（那正是"框纯色"的来源，浅色深色各写一遍，谁也盖不过谁）。 */
+.glass-chip {
+  background: var(--chip-tint);
+  border: 1px solid var(--chip-edge);
+  color: var(--chip-text);
+  box-shadow: inset 0 1px 0 var(--panel-rim);
+}
+:root {
+  --chip-tint: rgb(255 255 255 / 0.5);
+  --chip-edge: rgb(15 23 42 / 0.12);
+  --chip-text: rgb(71 85 105);
+}
+.dark {
+  --chip-tint: rgb(255 255 255 / 0.06);
+  --chip-edge: rgb(255 255 255 / 0.1);
+  --chip-text: rgb(203 213 225);
 }
 
 /* 玻璃管阅读液柱：粒子缓慢上浮 + 呼吸闪烁（液体微粒感）。
@@ -567,6 +728,12 @@ details[open] .chevron-up-down {
   --site-bar-h: 4rem; /* = TopBar 的 h-16 */
   --rail-top: calc(var(--site-bar-h) + 0.875rem);
   --rail-bottom: 3rem;
+  /* 文档区横栏（返回作品集 + 分区切换）的高度。**只在文档区用**：
+     它参与两处几何 —— 三栏的高度 `calc(100dvh - --site-bar-h - --docs-subbar-h)`，
+     以及锚点落点（Docs.tsx 直接量它的 offsetHeight，不读这个变量）。
+     改这里要同时改 Docs.tsx 里横栏的 `h-[var(--docs-subbar-h)]` —— 其实只有这一处引用，
+     所以改一个值就够。 */
+  --docs-subbar-h: 3rem;
 }
 
 /* ===== 顶栏玻璃（2026-09 由"毛玻璃"升级为 iOS 26 风格玻璃）=====
@@ -585,47 +752,66 @@ details[open] .chevron-up-down {
    `getComputedStyle(el).backdropFilter` 还返回 `none`，排查时极易误判成"选择器写错了"。
    （lightningcss 本来就会按 targets 自动补 `-webkit-`：实测产物里标准属性与带前缀属性
      各出现 15 次，所以源码侧完全不需要手写。） */
+/* 折射滤镜的 SVG 定义（在 index.html 里）。用 0×0 绝对定位隐藏，
+   ⚠️ **不能 `display:none`** —— 那样 filter 引用会解析不到，折射整个失效且不报错。 */
+.lg-filter-defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
 .site-bar {
-  background-image: linear-gradient(
-    to bottom,
-    rgb(255 255 255 / 0.3),
-    rgb(255 255 255 / 0.16)
-  );
-  backdrop-filter: blur(20px) saturate(1.5);
-  /* 「镜面高光 + 侧缘亮线 + 离地阴影」三层（2026-09 第三轮，用户确认"补齐 + 侧缘亮线"）：
-     拆开 Liquid Glass 的 CSS 配方后，观感差距就落在这三行上 ——
-       · 顶部高光是**唯一**决定"读作玻璃还是读作一层色膜"的东西：
-         配方原话是"设成 85% 白就读作被照亮的倒角；降到 30% 面板立刻变平"。
-         我们原来只有 1px / 55%，正好卡在"平"的那一侧，所以一直"还是毛玻璃"。
-       · 底缘回弹光是玻璃下沿把地面反光带回来的一点亮度，缺了它面板像贴在屏上。
-       · 侧缘（左右各 1px）是用户明确要的"更接近 Material"那一档：
-         真实玻璃不只顶部受光，两侧边缘也会有连续的亮线。
-       · 外侧阴影给"离地感"：贴顶时很轻，滚动后加重（见 .is-scrolled）。
-     ⚠️ 白叠层从 42%/26% 降到 30%/16%，并**去掉 brightness(1.06)**、saturate 1.8 → 1.5：
-       实测原参数下浅色模式的顶栏采样到 `#ffffff` **纯白** —— brightness 与高饱和叠加后
-       把底色推到了上限，玻璃层内部已经没有明度差，于是读作"过于白、过于纯色"。
-     ⚠️ 折射（feDisplacementMap）实测**不可用**：本项目内做过两次独立验证，
-       第二次只用在 backdrop-filter 白名单内的原语（feGaussianBlur + feDisplacementMap），
-       三种变体（无滤镜 / 仅 blur / blur+位移）的截图**逐点像素完全相同** —— 位移没有渲染。
-       它需要把背景复制进面板里对齐，只对固定背景成立；顶栏常驻在滚动内容之上，前提不成立。
-       所以"更接近华为/iOS"的做法落在材质分层（见 .bar-control），不是折射。 */
+  /* ===== Liquid Glass：透明 + 边缘折射（2026-09 第四轮，用户定稿）=====     ⚠️ 这一轮换的是**机制**，不是参数：从「毛玻璃雾化」换成「透明玻璃 + 边缘折射」。
+        实测（本机 Chrome 153，scripts/_glassprobe.mjs / _lensprobe.mjs）：
+          · `backdrop-filter: url(#f)` + feTurbulence + feDisplacementMap → **可用**，
+            背景被真实弯折（截图逐点可辨）；
+          · `feImage`（data URI 位移贴图）→ **不可用**：带 in2 与不带 in2 两版逐点完全相同，
+            图像根本没进来。上一轮"折射不可用"的结论就是踩在这个上 —— kube.io 的方案依赖 feImage，
+            它在这里不生效，位移于是退化成恒等。
+        所以「边缘强、中间平」不能靠贴图，只能靠**结构**：折射只挂在上下两条边缘带上。
+     ⚠️ 顶栏**自身绝不能写 backdrop-filter**：它会成为 backdrop root，子元素的 backdrop-filter
+        就只能采到顶栏自己的底色、采不到页面内容 —— 折射会整个失效。这条写错了**不报错**，
+        只是"看起来什么也没发生"，极难排查。
+     ⚠️ 白叠层 30/16 → 12/5、滚动后不再加深（用户确认"保持透明"）：分离感交给折射。
+     ⚠️ 顶栏上有深色截图滚过时，深色文字会失去对比度 —— 用 drop-shadow 补一层浅色晕
+        （见 .bar-control），而不是把玻璃加厚。 */
+  background-image: linear-gradient(to bottom, rgb(255 255 255 / 0.12), rgb(255 255 255 / 0.05));
+  /* 「镜面高光 + 侧缘亮线」：折射之外唯一解释"这是玻璃"的东西，保留并强化顶部高光。 */
   box-shadow:
     inset 0 1.5px 0 rgb(255 255 255 / 0.85),
     inset 0 -1px 0 rgb(255 255 255 / 0.14),
     inset 1px 0 0 rgb(255 255 255 / 0.12),
     inset -1px 0 0 rgb(255 255 255 / 0.12),
     0 2px 10px rgb(0 0 0 / 0.04);
-  transition:
-    background-image var(--duration-reveal) var(--ease-out-soft),
-    box-shadow var(--duration-reveal) var(--ease-out-soft);
+  transition: box-shadow var(--duration-reveal) var(--ease-out-soft);
+}
+/* 折射带的宿主层：固定在视口顶部、与顶栏同高，z-index 压到顶栏之下（49 < 50）。
+   ⚠️ 这一层必须存在且必须是 `position: fixed` —— 折射带放在 `.site-bar` **内部**时不生效，
+      原因与实测证据见 TopBar.tsx 里那段注释。 */
+.site-bar-lens-layer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 4rem;
+  z-index: 49;
+  pointer-events: none;
+}
+/* 整栏折射：铺满顶栏高度（用户 2026-09 确认"现在仅仅是边缘一条线，要整个都出现水纹晕"）。
+   ⚠️ 用真实元素（TopBar.tsx 的 `.site-bar-lens-layer`），不要改回 `::before/::after`。
+   ⚠️ 只在紧贴屏顶的 8px 淡入：那一条没有内容经过，留个硬边反而像画面撕裂；
+      其余 8→64px 满强度，于是内容从玻璃下穿过时**整段都在弯**。 */
+.site-bar-lens {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  backdrop-filter: url(#lg-refract) saturate(1.15);
+  mask-image: linear-gradient(to bottom, transparent 0%, #000 12%, #000 100%);
 }
 .site-bar.is-scrolled {
-  background-image: linear-gradient(
-    to bottom,
-    rgb(255 255 255 / 0.62),
-    rgb(255 255 255 / 0.42)
-  );
-  /* 滚动后：高光略收（底色变厚了，再叠满高光会发白），外侧阴影加重给出"浮起" */
+  /* 滚动**不再加深底色**（用户确认"保持透明，内容从玻璃下穿过并被弯折"）。
+     只把外侧阴影加重一点，给出"离地"的层次。 */
   box-shadow:
     inset 0 1.5px 0 rgb(255 255 255 / 0.9),
     inset 0 -1px 0 rgb(255 255 255 / 0.18),
@@ -634,16 +820,9 @@ details[open] .chevron-up-down {
     0 6px 22px rgb(157 83 0 / 0.1);
 }
 .dark .site-bar {
-  background-image: linear-gradient(
-    to bottom,
-    rgb(18 20 21 / 0.5),
-    rgb(18 20 21 / 0.34)
-  );
-  backdrop-filter: blur(20px) saturate(1.5);
-  /* 深色模式的高光是"内暗边 + 顶部微亮"：与 DESIGN.md 的 Tonal-First Rule 一致 ——
-     深色不用亮边模拟浮起，所以这里刻意比浅色档弱一档（.07 而不是 .85）。
-     这里**保留** brightness(0.95)（浅色档已去掉）：深色下它压的是背景的灰雾，
-     而浅色下它会和 saturate 一起把底色推到纯白 —— 两档的取舍不同，不要一起改。 */
+  background-image: linear-gradient(to bottom, rgb(18 20 21 / 0.34), rgb(18 20 21 / 0.18));
+  /* 深色模式的高光是"内暗边 + 顶部微亮"：与 DESIGN.md 的 Tonal-First Rule 一致，
+     刻意比浅色档弱一档（.07 而不是 .85）。 */
   box-shadow:
     inset 0 1.5px 0 rgb(255 255 255 / 0.07),
     inset 0 -1px 0 rgb(255 255 255 / 0.04),
@@ -652,11 +831,6 @@ details[open] .chevron-up-down {
     0 2px 10px rgb(0 0 0 / 0.2);
 }
 .dark .site-bar.is-scrolled {
-  background-image: linear-gradient(
-    to bottom,
-    rgb(18 20 21 / 0.76),
-    rgb(18 20 21 / 0.6)
-  );
   box-shadow:
     inset 0 1.5px 0 rgb(255 255 255 / 0.1),
     inset 0 -1px 0 rgb(255 255 255 / 0.05),
@@ -664,7 +838,27 @@ details[open] .chevron-up-down {
     inset -1px 0 0 rgb(255 255 255 / 0.06),
     0 6px 22px rgb(0 0 0 / 0.34);
 }
-/* 不支持 backdrop-filter 时退回不透明度更高的底，避免"半透明却看不清字" */
+/* 没有 url() 折射能力的浏览器（Safari / Firefox）：边缘带是空的，
+   只好退回"顶栏整体一层轻模糊"来保持分离感 —— 这时的观感接近旧的毛玻璃，是能力所限。 */
+@supports not (backdrop-filter: url(#lg-refract)) {
+  .site-bar {
+    backdrop-filter: blur(16px) saturate(1.4);
+    background-image: linear-gradient(to bottom, rgb(255 255 255 / 0.42), rgb(255 255 255 / 0.26));
+  }
+  .dark .site-bar {
+    backdrop-filter: blur(16px) saturate(1.4);
+    background-image: linear-gradient(to bottom, rgb(18 20 21 / 0.62), rgb(18 20 21 / 0.44));
+  }
+  .site-bar-lens {
+    backdrop-filter: none;
+  }
+  /* 顶栏控件同样没有 url() 能力：退回轻模糊，保住"控件是一块独立玻璃"的层次 */
+  .bar-control,
+  .bar-control:hover {
+    backdrop-filter: blur(8px) saturate(1.1);
+  }
+}
+/* 连 backdrop-filter 都没有：退回不透明度更高的底，避免"半透明却看不清字" */
 @supports not (backdrop-filter: blur(1px)) {
   .site-bar,
   .site-bar.is-scrolled {
@@ -714,11 +908,23 @@ details[open] .chevron-up-down {
      ⚠️ 对比度：填充是**半透明白**，底下仍是顶栏玻璃，明度变化很小；
         文字色 #333a3d（11.17:1）在加入填充后只会更安全，不会跌破 4.5:1。
         改填充透明度后请重测对比度（见 docs/联动维护点.md 第 3 条）。 */
-  background-color: rgb(255 255 255 / 0.5);
+  /* 底色几乎去掉（0.1 → 0.04）：控件的"底"应当来自折射本身。
+     平涂底色会把它读成"一块浅灰方块"而不是玻璃（用户：「底还是纯色」）。 */
+  background-color: rgb(255 255 255 / 0.04);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.9),
-    inset 0 -1px 0 rgb(255 255 255 / 0.25),
-    0 1px 2px rgb(15 23 42 / 0.06);
+    inset 0 1px 0 var(--glass-rim-lit),
+    inset 0 -1px 0 rgb(255 255 255 / 0.22),
+    0 1px 2px rgb(15 23 42 / 0.05);
+  /* 顶栏既然透明（白叠层 12%→5%），深色截图从下面滚过时深色文字会掉对比度。
+     补一层**浅色晕**保住可读性，而不是把玻璃加厚 —— 加厚就把"透明"这件事又抵消了。
+     `drop-shadow` 作用在整个控件（填充 + 图标 + 文字）上，形成一圈很淡的光晕。 */
+  filter: drop-shadow(0 1px 2px rgb(255 255 255 / 0.55));
+  /* 「玻璃叠玻璃」：控件自己做一次折射。顶栏的折射层（z-49）画在顶栏（z-50）之下，
+     所以控件的底景里**已经包含折射结果**，这里再折一次就是字面意义的玻璃叠玻璃。
+     ⚠️ 实测可行（ON/OFF 对照：控件加 url() 折射后截图逐点变化）。
+     ⚠️ 用**强档** lg-refract（scale 11）而不是面板用的弱档：控件只有 68×36，
+        弱档（scale 6）在这么小的面积上折不出可见水纹。 */
+  backdrop-filter: url(#lg-refract) saturate(1.12);
   transition:
     background-color var(--duration-micro) var(--ease-out-soft),
     color var(--duration-micro) var(--ease-out-soft),
@@ -730,13 +936,32 @@ details[open] .chevron-up-down {
   position: absolute;
   inset: -0.25rem -0.125rem;
 }
+/* 悬停：**整面玻璃泛光**（用户明确否掉了"周围一圈框个颜色"）。
+   `::after` 已经被 44px 触控目标占用，所以光走 `::before`。 */
+.bar-control::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    radial-gradient(130% 110% at 50% -30%, var(--glass-sheen), transparent 62%),
+    radial-gradient(100% 90% at 50% 125%, var(--glass-glow-warm), transparent 72%);
+  opacity: 0;
+  transition: opacity var(--duration-micro) var(--ease-out-soft);
+}
 .bar-control:hover {
-  color: var(--color-brand-700);
-  background-color: rgb(255 255 255 / 0.72);
+  color: var(--color-brand-800, #804400);
+  background-color: rgb(255 255 255 / 0.16);
+  backdrop-filter: url(#lg-refract) saturate(1.15);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.95),
-    inset 0 -1px 0 rgb(255 255 255 / 0.3),
-    0 2px 6px rgb(15 23 42 / 0.1);
+    inset 0 1px 0 var(--glass-rim-lit),
+    0 0 0 1px var(--glass-edge-lit),
+    0 8px 22px -6px var(--glass-glow-warm);
+}
+.bar-control:hover::before {
+  opacity: 1;
 }
 .bar-control:disabled {
   /* 「返回顶部」贴顶时的禁用态：只降文字与图标的不透明度，**不动材质** ——
@@ -756,11 +981,12 @@ details[open] .chevron-up-down {
 }
 .dark .bar-control {
   color: #dde0e2;
-  /* 深色下按钮要比顶栏**更亮**才读作"浮起"（顶栏是 50%/34% 的深色叠层） */
-  background-color: rgb(255 255 255 / 0.07);
+  /* ⚠️ 这里原来是 0.07 的**平涂白** —— 正是用户说的"深色下看起来还是老样子的纯色底子"。
+     压到 0.05，把"底"交给折射本身，只留下缘暖光（--glass-edge-lit）+ 上缘冷光。 */
+  background-color: rgb(255 255 255 / 0.05);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.12),
-    inset 0 -1px 0 rgb(0 0 0 / 0.2),
+    inset 0 1px 0 var(--glass-rim-lit),
+    inset 0 -1px 0 var(--glass-edge-lit),
     0 1px 2px rgb(0 0 0 / 0.3);
 }
 .dark .bar-control:hover {
@@ -887,18 +1113,26 @@ details[open] .chevron-up-down {
   color: var(--color-slate-300);
 }
 
+/* ⚠️ 桌面端正文字号**保持 16px**（2026-09 用户明确要求："之前那一版的字号自然舒服"）。
+ *
+ * 试过一版 `clamp(17px, 1.25vw, 20px)`：那是为了让「正文吃满内容列」之后行长不失控。
+ * 实测 18–20px 偏大，用户否掉了。现在改成**给内容列加上限**（见 Docs.tsx 的 `md:max-w-[52rem]`）：
+ *   内容列 832px − 卡片内边距 64 = 内宽 768px → **恒定 48 字/行**，正好卡在 clreq 的横排上限。
+ * 代价是配图从 806 收到 768（1440 下只窄 5%）。两者选一，用户选了字号。 */
+
 /* 标题层级与间距：h2 上留白更足（大节之间要能一眼断开），h3/h4 递进收紧 */
 .doc-content .doc-h1,
 .doc-content .doc-h2,
 .doc-content .doc-h3,
 .doc-content .doc-h4 {
   position: relative;
-  /* 96px = 顶栏 64 + 呼吸 32，给**手机端**用：那时是页面在滚，标题要避开常驻顶栏。
-     ⚠️ 桌面端（≥768px）必须清零：那里换成了"固定外壳 + 内部滚动"，
-        落点留白由滚动容器的 `scroll-padding-top`（`scroll-pt-4`，16px）负责，
-        而这个 96px 会**叠加**上去 —— 实测标题落在滚动容器顶下方 112px（96 + 16），
-        看着就是"点了目录没跳到标题上"。见下方 @media 块。 */
-  scroll-margin-top: 96px;
+  /* 落点留白 = `--docs-anchor-offset`，由 Docs.tsx 量「顶栏 + 手机端吸顶条 + 间隙」写进来。
+     ⚠️ 这个值必须和 JS 的滚动落点、大纲高亮线**同源**（2026-09 修）：
+        以前这里硬写 96px，而手机端顶栏下面压着一条 53px 的「目录与大纲」吸顶条
+        （占 64..117），96 的落点正好被它盖住 —— 用户反馈"点了目录跳不准"就是这个。
+        现在三处一起跟着变量走，改吸顶条高度不用再改别处。
+     兜底的 96px 只在变量还没写进来时用得上（首帧）。 */
+  scroll-margin-top: var(--docs-anchor-offset, 96px);
   color: var(--color-ink);
   font-weight: 700;
   letter-spacing: -0.01em;
@@ -945,39 +1179,32 @@ details[open] .chevron-up-down {
   margin: 1.5rem 0 0.5rem;
 }
 
-/* 标题左侧的 # 锚点：常驻但很淡，hover 时才亮（与 MD 文档阅读器的惯例一致） */
-.doc-content .doc-anchor {
-  position: absolute;
-  left: -1.15em;
-  color: var(--color-slate-300);
-  text-decoration: none;
-  font-weight: 400;
-  opacity: 0;
-  transition: opacity var(--duration-micro) var(--ease-out-soft);
+/* ⚠️ 正文的**第一个标题**要去掉上边框与上留白（2026-09）。
+   页面标题现在就在正文里（页头只留「我在哪」），于是它成了卡片的第一个元素，
+   而 h2 的 `border-top` + `margin-top: 2.75rem` + `padding-top: 1.5rem` 是给
+   "跟在正文后面的 h2" 设计的 —— 出现在开头就是一条多余的横线加一片空白。
+   用 `#doc-top +` 精确命中：那个 span 是页面正文的固定首元素，紧跟其后的就是首个标题。 */
+.doc-content #doc-top + h1,
+.doc-content #doc-top + h2,
+.doc-content #doc-top + h3,
+.doc-content #doc-top + h4 {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
 }
-.dark .doc-content .doc-anchor {
-  color: var(--color-slate-600);
-}
-.doc-content .doc-h1:hover .doc-anchor,
-.doc-content .doc-h2:hover .doc-anchor,
-.doc-content .doc-h3:hover .doc-anchor,
-.doc-content .doc-h4:hover .doc-anchor,
-.doc-content .doc-anchor:focus-visible {
-  opacity: 1;
-}
-/* 窄屏没有左侧留白放 #，直接不显示（锚点仍可通过大纲跳转） */
-@media (max-width: 1023px) {
-  .doc-content .doc-anchor {
-    display: none;
-  }
-}
+
+/* 标题不再有悬停 `#` 锚点（2026-09 移除，用户明确要求）。
+   原先是给每个 h1–h4 前面插一个 `<a class="doc-anchor" href="#id">#</a>`，
+   `position: absolute; left: -1.15em`，悬停标题才浮出来、点了能跳到本节。
+   现在生成器（scripts/build-docs.mjs）**根本不输出这个元素**，所以这里也没有对应样式。
+   ⚠️ 标题的 `id` 必须保留 —— 右栏大纲、`?s=` 深链、互链的 `#锚点` 全靠它。
+   要恢复悬停复制链接，改生成器里 decorateHeadings 的返回值即可。 */
 
 .doc-content p {
   margin: 0.85rem 0;
-  /* ⚠️ 行宽上限：文档区在 1920 屏上内容列可达 1180px，中文一行会到 50+ 字，
-     读起来容易串行（DESIGN.md 要求 65–75ch）。这里只约束**纯段落**，
-     图片与列表不受影响（列表项短、图片本来就要宽）。52rem ≈ 44 个汉字。 */
-  max-width: 52rem;
+  /* ⚠️ **不设宽度上限**（2026-09 改）。原值 `max-width: 42rem`（672px）只约束段落，
+     而列表 784px、图片/表格 806px —— 同一屏三种右边线，用户反馈"部分文本没写满就换行"。
+     现在正文吃满内容列，右边线统一；行长靠上面那条 `font-size: clamp()` 控制。 */
 }
 .doc-content strong {
   font-weight: 700;
@@ -1081,6 +1308,94 @@ details[open] .chevron-up-down {
   text-align: center;
   font-size: var(--text-xs);
   color: var(--color-slate-400);
+}
+
+/* ===== 论文带来的两类新块：代码块与数据表 =====
+   来源不同：UE 笔记是手写 markdown，只有标题/列表/图片；毕业论文是 Word 原稿经 pandoc 转出，
+   带 33 个代码块（原稿里是单元格表格，见 scripts/prepare-thesis.mjs 的转换）与 4 张数据表。
+   `.doc-code` 由转换器产出；`table` 是 pandoc 的原生输出（没有类名），所以两条都要写。 */
+
+.doc-content .doc-code {
+  margin: 1.25rem 0;
+}
+/* 代码块标题（「代码-10」）：不做成醒目的题注，只当一行小标签，别抢正文注意力 */
+.doc-content .doc-code figcaption {
+  margin-bottom: 0.4rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-slate-400);
+}
+.doc-content .doc-code pre {
+  margin: 0;
+  padding: 0.9rem 1rem;
+  overflow-x: auto;
+  border: 1px solid var(--color-slate-200);
+  border-radius: 0.75rem;
+  background: var(--color-slate-50);
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  line-height: 1.65;
+  /* 代码要能横向滚，但不要被"任意断行"拆掉标识符 —— 覆盖 .doc-content 的 anywhere */
+  overflow-wrap: normal;
+  tab-size: 2;
+}
+.doc-content .doc-code code {
+  padding: 0;
+  background: none;
+  font-size: inherit;
+  white-space: pre;
+}
+.dark .doc-content .doc-code pre {
+  border-color: var(--color-slate-700);
+  background: var(--color-slate-900);
+}
+
+/* 数据表：窄屏允许横向滚动（列多的表在手机上必然超宽），另配表注 */
+.doc-content .doc-table-wrap {
+  margin: 1.25rem 0;
+  overflow-x: auto;
+}
+.doc-content .doc-table-caption {
+  margin: 1.25rem 0 0.4rem;
+  font-size: var(--text-xs);
+  color: var(--color-slate-400);
+}
+.doc-content table {
+  width: 100%;
+  margin: 1.25rem 0;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  overflow-wrap: anywhere;
+}
+.doc-content table th,
+.doc-content table td {
+  padding: 0.45rem 0.7rem;
+  border: 1px solid var(--color-slate-200);
+  text-align: left;
+  vertical-align: top;
+}
+.doc-content table thead th {
+  background: var(--color-slate-50);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.dark .doc-content table th,
+.dark .doc-content table td {
+  border-color: var(--color-slate-700);
+}
+.dark .doc-content table thead th {
+  background: var(--color-slate-900);
+}
+/* 表格单元格里 pandoc 会塞 `<p>`，段距会把行高撑开，这里清零 */
+.doc-content table p {
+  margin: 0;
+  max-width: none;
+}
+/* 上标（论文的引用标记 `[10,11]`） */
+.doc-content sup {
+  font-size: 0.72em;
+  vertical-align: super;
+  line-height: 0;
 }
 
 /* ===== 文档区的「固定外壳」（2026-09）=====

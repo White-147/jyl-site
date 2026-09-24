@@ -79,6 +79,9 @@ jyl-site/
 ├── database/
 │   └── portfolio.db          # ★ SQLite 内容库（内容源）
 ├── docs/
+│   ├── thesis/source/        # ★ 毕业论文源（pandoc 从 docx 转出的 HTML，由 prepare-thesis.mjs 生成）
+│   ├── theory/source/        # ★ UE 理论源（unreal5-notes / ue5-window-* / blueprint-*.md，来自本地笔记）
+│   ├── combat/source/        # ★ UE 实战源（目前只有标题行，导入后即为「待导入」）
 │   ├── 联动维护点.md          # ★ 「同一事实写在两处」的联动点清单（改动前必读）
 │   └── assets/screenshots/   # README 展示用站点截图
 ├── public/
@@ -88,6 +91,7 @@ jyl-site/
 │   ├── sitemap.xml           # 站点结构
 │   ├── manifest.webmanifest  # 站点图标清单（含 Android maskable）
 │   ├── preview/              # ★ 内嵌项目预览（各项目前端静态产物 + 演示注入）
+│   ├── docs/pages/           # 文档区页面产物（build-docs.mjs 生成，已 gitignore）
 │   ├── favicons/             # 站点图标（由 scripts/gen_icons.py 生成）
 │   ├── projects/*.webp       # 项目截图（构建资源）
 │   └── images/ certificates/ # 头像、导航图标、证书缩略图
@@ -97,12 +101,19 @@ jyl-site/
 │   ├── subset-fonts.mjs      #   站点五层字体子集化（新增文案后重新运行）
 │   ├── inline-firstscreen-fonts.mjs  # 首屏字体 base64 内联进 index.html（随上一步自动运行）
 │   ├── gen_icons.py          #   站点图标：从柳建毛草渲染「蒋」字标（npm run icons:gen）
+│   ├── build-docs.mjs         #   文档区构建：按「一屏预算」把源拆成页 + 生成导航与清单
+│   ├── check-docs.mjs         #   产物自检：源↔产物对账 / 悬空大纲 / 配图缺失 / 路由冲突 / 正文首标题
+│   ├── check-anchors.mjs      #   真浏览器断言：跨文档互链 / 侧栏折叠 / 锚点落点 / 玻璃预算 / 导航冒烟
+│   ├── prepare-thesis.mjs     #   论文 docx → HTML（抽图 / 代码表转 pre / 去封面目录）
+│   ├── optimize_images.py     #   配图压缩成 webp（论文与 UE 笔记共用）
+│   ├── gen_icons.py           #   站点图标：从柳建毛草渲染「蒋」字标（npm run icons:gen）
 │   ├── encode-contact.mjs    #   联系方式混淆表生成（改邮箱/GitHub 后运行）
 │   ├── watermark_resume.py   #   简历 PDF 全页对角水印（保留文本层）
 │   ├── polish-previews.mjs   #   预览页演示提示 + iframe 防护注入（重跑即覆盖更新）
 │   └── start-all.ps1 / .bat  #   面试演示：一键启动本站各项目（本地运行）
 ├── src/
 │   ├── data/*.json           # 构建数据（由数据库导出生成，勿手改）
+│   ├── data/docs.json        # 文档区清单与页面内容（build-docs.mjs 生成，已 gitignore）
 │   ├── data/navigation.ts    # 区块注册表（导航 / 滚动侦测 / 导轨共用单一数据源）
 │   ├── data/scrollTargets.ts # 锚点偏移单一来源（滚动侦测线同源）
 │   ├── data/contact.ts       # 联系方式混淆层
@@ -110,6 +121,7 @@ jyl-site/
 │   ├── fonts/                # 站点专用字体子集（subset-fonts.mjs 生成）
 │   ├── hooks/                # useTheme / useScrollSpy / useAnchorScroll / useInViewPause 等
 │   └── components/           # 页面组件
+├── .impeccable/design.json   # 设计 token 的机读侧车
 ├── .github/workflows/deploy.yml
 ├── DESIGN.md                 # 设计系统（颜色 / 字体 / 层级 / 组件 / 禁忌）
 ├── PRODUCT.md                # 产品与策略口径（用户 / 反参考 / 设计原则）
@@ -195,7 +207,7 @@ npm run build      # = db:export + 类型检查 + 构建
 
 ## 图片与命名规范
 
-- 站点图片统一放 `public/` 下，按类型分目录：`projects/`、`certificates/`、`images/`（头像与导航图标）、`favicons/`（站点图标）
+- 站点图片统一放 `public/` 下，按类型分目录：`projects/`、`certificates/`、`images/`（头像）、`favicons/`（站点图标，含导航栏引用的 `favicon-192.png`）
 - **命名规则**：小写 kebab-case（连字符分隔）；产品名保持紧凑（`milustudio`、`xiaolouai`），通用词用连字符（`milu-assistant-web`、`book-recommendation`、`cet-4`、`sanchuang-medal`）
 - `_archive/` 归档文件与 `public/` 站点文件一一对应、命名一致（简历 PDF 除外，保留原名便于识别）
 - 站点图标不入 `_archive/`：它是**生成物**，源是 `scripts/gen_icons.py` + 柳建毛草字体，改配色或换字只需重跑 `npm run icons:gen`
@@ -217,28 +229,32 @@ npm run build      # = db:export + 类型检查 + 构建
 > 需要注意静态托管都必须能直接跑这份 `dist/`（`base: './'`，相对路径，无平台特有配置）。
 
 
-## UE5 学习笔记文档区
+## 文档区（毕业论文 · UE 理论 · UE 实战）
 
-站内文档区位于 `#/docs/ue5`（hash 路由，不需要服务端重写），把桌面上的 UE 学习笔记
-（Typora 维护的 markdown）转成可读的文档站：左侧文档树 + 本篇大纲、标题锚点跳转、
-配图点击放大（复用站点灯箱）、**整块正文放开复制**（`data-copyable` 白名单）。
+站内文档区位于 `#/docs`（hash 路由，不需要服务端重写），把两类外部原稿转成可读的文档站：
+左侧分区 + 目录树 + 本篇大纲、标题锚点跳转、配图点击放大（复用站点灯箱）、
+**整块正文放开复制**（`data-copyable` 白名单）。三个分区：**毕业论文 / UE 理论 / UE 实战**。
 
-- 入口：顶栏「笔记」控件、项目区末尾的「UE5 学习笔记」卡片、页脚
-- **5 篇全部导入**，按实测出的依赖顺序排列（01 总览 → 02 界面基础 → 03 界面进阶 → 04 蓝图基础 → 05 蓝图编程基础）：
-  侧栏带序号 + 界面/蓝图两组留白，每篇正文头部标注「前置」、尾部给出「下一篇」（同组内按 order 推导）
-- 图片：193 张原始截图（124MB）压缩为 WebP 后约 13MB；`public/docs/ue5/images/` 只放 WebP，
-  原始 PNG 归档在 `_archive/ue5-notes/images/`
+- 入口：顶栏「笔记」控件、页脚
+- **源不是「一篇 = 一页」**：构建器按标题层级把每篇源**自动拆成多页**（预算 4 屏/页，手机口径，
+  实测平均 2.9 屏/篇）。原来的「一篇源 = 一页」在手机上要滚 56 屏，根本翻不到底。
+- 毕业论文：Word 原稿经 pandoc 转出（33 个代码块、41 张插图、4 张数据表），拆成 19 页
+- UE 理论与实战：Typora 维护的 markdown，共 37 页；实战两篇目前是占位（原文只有标题）
+- 图片：UE 笔记 223 张 + 论文 41 张，原图归档在 `_archive/`，`public/docs/**/images/` 只放 WebP
 
-内容流水线与维护步骤见 [`docs/联动维护点.md`](docs/联动维护点.md) 第 13 条：
+内容流水线与拆分规则见 [`docs/联动维护点.md`](docs/联动维护点.md) 第 13 条：
 
 ```bash
-python scripts/optimize_images.py _archive/ue5-notes/images public/docs/ue5/images --only-from-md docs/ue5/source/<name>.md
-node scripts/import-ue-docs.mjs     # 生成 public/docs/ue5/*.html + src/data/ue5-docs.json
+# UE 笔记更新
+python scripts/optimize_images.py _archive/ue5-notes/images public/docs/ue5/images --only-from-md docs/theory/source/<name>.md
 npm run fonts:subset                # 新汉字要进字体子集
-npm run build
+npm run build                       # prebuild 会自动跑 docs:build
+npm run docs:check                  # 产物自检（配图缺失 / 大纲悬空 / 互链死链 / 预算突破）
+node scripts/check-anchors.mjs      # 真浏览器断言锚点落点（三档视口）
 ```
 
-> `scripts/import-ue-docs.mjs` 自带自检：引用了但未转换的图片会直接报错退出，不会静默出裂图。
+> 页面 HTML 与清单是**构建产物，不进 git**，由 `predev` / `prebuild` 自动重建
+> —— 这样就不会再出现「忘了重跑转换器、站点还是旧内容，而构建照样成功」。
 
 
 ## 设计系统
@@ -253,20 +269,18 @@ npm run build
 - **颜色策略**：琥珀是唯一强调色，只出现在「可交互 / 当前 / 关键数字」三处，一屏覆盖不超过 10%。
 - **对比度**：正文色与背景组合 ≥ 4.5:1，装饰性图形边界 ≥ 3:1。`brand-500` / `brand-600` 只用于非文字元素，承载小字一律用 `brand-700`。深浅两套均以无头浏览器实测复核。
 - **字体五层体系**：正文 Noto Sans SC（自托管子集 4 字重）、展示层**得意黑**（区块标题/品牌）、名字**柳建毛草**（Hero 专属，草书）、数字 **Fraunces**（统计/强调数字）、等宽 **Victor Mono**（代码彩蛋/行号，含斜体变体）；`npm run fonts:subset` 按站点用字子集化并重新内联首屏字体。
-- **卡片三档**：实心面板（项目行/技能卡/经历卡，不透明 + 发丝边）｜ 轻色板（关于我/教育卡，半透明 + 发丝边，**不加模糊**）｜ 毛玻璃（仅常驻顶栏、底部 Tab、右侧玻璃管、灯箱等固定浮层）。划分依据是「是否需要透视」，不是重要性。
+- **卡片四档**（2026-09 重定，原「三档」已作废）：
+  1. **玻璃面板** `.glass-panel` —— 每个区块的**主容器**。半透明底 + 白系发丝边 + `backdrop-filter: url(#lg-refract-soft)` **折射**。色值全走变量，**主题只换变量不换规则**。
+  2. **色阶卡** `.glass-card` / `.glass-card-strong` —— 区块内小卡。同一套变量，**不加折射**。
+  3. **发丝线行** —— 用于不需要盒子分段的列表。
+  4. **毛玻璃** —— 仅固定与浮层元素（顶栏折射层、底部 Tab、右侧玻璃管、灯箱、主题下拉）。
+- **Liquid Glass 折射**（2026-09）：顶栏整栏 + 区块主容器用 `feTurbulence` + `feDisplacementMap` 真实弯折底景。⚠️ 只有 Chromium 支持 `backdrop-filter: url()`；Safari / Firefox 走 `@supports not` 回退到一层轻模糊。⚠️ **不要用 `feImage` 载入位移贴图** —— 实测它在 `backdrop-filter` 里进不来，位移会退化成恒等。
+- **悬停 = 整面泛光**（The Lit-Glass Rule）：`.glass-lit` 在悬停 / 键盘聚焦 / 当前项时让整块玻璃亮起（上方冷白环境光 + 下方琥珀暖光），**不是描边换色**，也不抬升。组件里禁止再写 `hover:border-*`。
+- **一处定义，主题只换变量**（The One-Theme Rule）：组件里禁止手工写 `dark:bg-slate-*` / `dark:border-slate-*` 配对 —— 那正是"框纯色"的来源，而且 `dark:bg-slate-800` 会把玻璃面板的底色整个盖掉。
+- **首屏**（The Boot-Screen Rule）：React 挂载前的空窗由 `index.html` 的 `#boot` 独占（竖向细光 + 真实进度读数），**只有 `app:ready` 才放行**，超时只换提示文案。静态 Hero 骨架已删除。
+- **首屏预展开**（The First-Screen Pre-Reveal Rule）：`Reveal` 在挂载时把视口 2 倍高度以内的区块直接显示且跳过过渡，避免"折叠线以下永远空白"。
 - **深色层级**：用背景色阶表达浮起（`#121415` → `#1b1e20` → `#23282b`），不依赖阴影。
 - **动效**：GSAP（Hero 入场序列 + About 链路连接线 scrub）+ IntersectionObserver 滚动渐显；时长 150–320ms、指数缓出、无回弹；无限循环动画（粒子、光斑）在元素离屏时自动暂停；全站尊重 `prefers-reduced-motion`。
-- **版式特色**：Hero 编辑式排版（名字超大 + 头像签名章 + 等宽代码彩蛋）；区块标题编辑式非对称（左标题 + 右编号 `01 / 06` + 延伸发丝线）；项目区「编辑索引行」差异化（行号 + 左右交错 + 发丝分隔，不用盒子）；技能区模糊搜索 + 双列网格（奇数张时末卡横跨两列）；About 阶段化叙事 + 能力链路数字卡。
+- **版式特色**：Hero 编辑式排版（名字超大 + 头像签名章 + 等宽代码彩蛋）；区块标题编辑式非对称（左标题 + 右编号 `01 / 06` + 延伸发丝线）；项目区**玻璃卡片行**（2026-09 从"发丝分隔、不用盒子"改成玻璃卡片，每行带 `id="project-<id>"` 作为跨区深链落点）；技能区模糊搜索 + 双列网格（奇数张时末卡横跨两列）；About 阶段化叙事 + 能力链路数字卡。
 
-## 项目亮点
 
-- 内容驱动架构：SQLite 单一内容源，JSON 由构建导出，改数据不碰代码。
-- 与简历同口径：站点简历下载与投递版保持同步更新，公司名、项目名、时间线一致。
-- **能脚本化的都脚本化了**：内容 `db:seed` / `db:export`、字体 `fonts:subset`、图标 `icons:gen`、联系方式 `contact:encode`、简历水印 `resume:watermark`、预览注入 `previews:polish`。
-- 字体子集化管线：按站点用字打包为单个 woff2（正文 Noto Sans SC 400/500/700 各约 145KB / 得意黑 138KB / 柳建毛草 10KB / Fraunces 18KB / Victor Mono 16+21KB）；**只内联首屏真正需要的 10KB 名字字体**，得意黑与其余字重走外部文件按需/分级 preload，既消除回退字体跳变又不拖慢首屏。
-- 图标与字体同源：favicon 的「蒋」字由柳建毛草现场渲染（`scripts/gen_icons.py`），与首屏名字同一套字形；全尺寸 favicon 合计约 62KB（原方案单张 512 就 118KB）。
-- 项目在线预览：`public/preview/` 内嵌 5 个项目前端 + 演示模式开关，作品集内即可直达"登录后首页"。
-- SPA 刷新兜底：`404.html` 单文件解决 BrowserRouter 深链刷新 404。
-- 全站可访问性：键盘焦点可见、ARIA 标注、`prefers-reduced-motion` 降级、安全区适配、WCAG 2.2 AA 对比度实测通过。
-- 自动化部署：推送即构建发布（GitHub Actions + GitHub Pages），无需手动操作。
-- 可维护性：设计系统与联动维护点成文（`DESIGN.md` / `PRODUCT.md` / `docs/联动维护点.md`），跨文件耦合都有注释指向文档。

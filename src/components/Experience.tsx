@@ -23,13 +23,13 @@ function ExperienceItem({ exp, index }: { exp: Experience; index: number }) {
           <span className="h-2.5 w-2.5 rounded-full bg-brand-700 ring-4 ring-brand-100 dark:bg-brand-300 dark:ring-brand-500/20" />
         </span>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-colors hover:border-brand-300 sm:p-6 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-brand-500/60">
+        <div className="glass-panel glass-lit rounded-2xl p-5 sm:p-6">
           <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
             <div>
               <h3 className="text-lg font-bold text-ink dark:text-ink-light">{exp.company}</h3>
               <p className="text-sm font-medium text-brand-700 dark:text-brand-200">{exp.role}</p>
             </div>
-            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+            <span className="glass-chip rounded-full px-3 py-1 text-xs font-medium">
               {exp.period}
             </span>
           </div>

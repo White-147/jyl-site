@@ -86,7 +86,7 @@ export default function Skills() {
               }}
               placeholder="输入关键词筛选技能"
               aria-label="搜索技能"
-              className="w-full rounded-xl border border-slate-300 bg-white py-2.5 pl-10 pr-10 text-base text-slate-700 shadow-sm outline-none transition-colors placeholder:text-slate-400 focus:border-brand-400 focus:ring-2 focus:ring-brand-400/30 sm:text-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:placeholder:text-slate-500 dark:focus:border-brand-500"
+              className="glass-chip w-full rounded-xl py-2.5 pl-10 pr-10 text-base outline-none transition-colors placeholder:text-slate-400 focus:border-brand-400 focus:ring-2 focus:ring-brand-400/30 sm:text-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:placeholder:text-slate-500 dark:focus:border-brand-500"
             />
             {query !== '' && (
               <button
@@ -117,10 +117,10 @@ export default function Skills() {
                   role="tab"
                   aria-selected={isActive}
                   onClick={() => setActiveId(p.id)}
-                  className={`shrink-0 rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+                  className={`glass-lit shrink-0 rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
                     isActive
                       ? 'bg-brand-700 text-white shadow-sm dark:bg-brand-700'
-                      : 'border border-slate-300 bg-white text-slate-600 hover:border-brand-400 hover:text-brand-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-brand-500 dark:hover:text-brand-200'
+                      : 'glass-chip hover:text-brand-700 dark:hover:text-brand-200'
                   }`}
                 >
                   {p.label}
@@ -146,10 +146,10 @@ export default function Skills() {
                     type="button"
                     onClick={() => setQuery(tagActive ? '' : tag)}
                     aria-pressed={tagActive}
-                    className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors ${
+                    className={`glass-lit rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors ${
                       tagActive
                         ? 'bg-brand-700 text-white shadow-sm dark:bg-brand-700'
-                        : 'border border-slate-300 bg-white text-slate-600 hover:border-brand-400 hover:text-brand-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-brand-500 dark:hover:text-brand-200'
+                        : 'glass-chip hover:text-brand-700 dark:hover:text-brand-200'
                     }`}
                   >
                     {tag}
@@ -183,7 +183,7 @@ export default function Skills() {
                   delay={(i % 2) * 80}
                   className={`reveal-group lg:h-full ${isLastOdd ? 'lg:col-span-2' : ''}`}
                 >
-                  <div className="h-full rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-colors hover:border-brand-300 sm:p-7 dark:border-slate-800 dark:bg-slate-800 dark:hover:border-brand-500/60">
+                  <div className="glass-panel glass-lit h-full rounded-2xl p-6 sm:p-7">
                     <div className="flex items-center gap-3">
                       <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-sm font-bold text-brand-700 dark:bg-brand-500/10 dark:text-brand-200">
                         {String(group.origIndex + 1).padStart(2, '0')}
@@ -199,7 +199,7 @@ export default function Skills() {
                         <span
                           key={item}
                           style={{ transitionDelay: `${j * 30}ms` }}
-                          className="chip rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
+                          className="chip glass-chip rounded-full px-3 py-1.5 text-sm"
                         >
                           {item}
                         </span>
@@ -211,7 +211,7 @@ export default function Skills() {
             })}
           </div>
         ) : (
-          <div className="mt-10 rounded-2xl border border-dashed border-slate-300 bg-white/60 p-10 text-center dark:border-slate-700 dark:bg-slate-900/60">
+          <div className="glass-chip mt-10 rounded-2xl border-dashed p-10 text-center/60">
             <p className="text-sm text-slate-500 dark:text-slate-400">未找到匹配的技术栈，换个关键词试试。</p>
             <button
               type="button"
