@@ -100,8 +100,10 @@
     monospace;
 
   /* 标题色（语义独立于色板：改主色时这两档通常保持不变） */
-  --color-ink: #1a1c1e; /* 浅色标题：石墨黑（画布 16.49:1） */
-  --color-ink-light: #e6e8e9; /* 深色正文/标题：深底 15.03:1 */
+  --color-ink: #221f1a; /* 浅色标题：暖墨黑（画布 15.50:1 AAA）
+     ⚠️ 2026-09 第十二轮：原 #1a1c1e 是**冷灰**（B>R），而它是全站标题/姓名的颜色，
+        暖调转向时漏改 —— 它一冷，整站文字就都偏冷。 */
+  --color-ink-light: #ece7df; /* 深色正文/标题：深底 15.16:1 AAA（原 #e6e8e9 为冷灰）*/
 
   /* 主色板「琥珀」。底座是纯中性石墨（见下方「中性色（石墨）」一段），
      琥珀是唯一强调色，只用于「可交互 / 当前 / 关键数字」。
@@ -621,13 +623,88 @@ html.docs-shell .cao-mark-layer {
 .dark .seal-mark-inner {
   filter: brightness(1.5) saturate(1.05);
 }
+/* ===== 手机/平板上的两个图案（2026-09 第十二轮）=====
+   用户原话：「检查手机端没有 PC 端左侧和右侧的图案，只有纯色背景，有些太素了，能不能也加上」。
+
+   ⚠️⚠️ 关键：**不能沿用 PC 那套 `position: fixed`**。
+     PC 上两株图案是"视口角落常驻"，因为宽屏两侧有留白；
+     但手机内容占满宽度、总高一万多像素 —— fixed 会让图案**全程贴着屏幕压在正文上**。
+     这正是当初用 `@media (max-width:1023px){display:none}` 把它俩隐藏的原因。
+     所以这里改成**段内绝对定位**：纹样挂在首屏容器内、印章挂在页脚内，
+     各随自己那一段出现与滚走，与正文零冲突。
+
+   几何依据（390×844 实测，见第十二轮的检查）：
+     · 首屏容器 64→844（高 780），而正文最低元素只到 424 → 下半部 356px 全空，放纹样正好；
+     · 页脚高 149、印章 52×52 置于右下 → 与文字相交数实测为 **0**。
+
+   ⚠️ 桌面端（≥1024px）这两个类必须隐藏，否则会与 PC 那两株重复。 */
+.hero-cao-mark {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  z-index: 0;
+  pointer-events: none;
+  width: 200px;
+  height: 168px;
+  background-image: var(--cao-mark);
+  background-repeat: no-repeat;
+  background-position: left bottom;
+  background-size: 200px 168px;
+  /* 比 PC 那株再淡一点：手机屏幕小，同样的不透明度会显得更跳 */
+  opacity: 0.3;
+}
+.dark .hero-cao-mark {
+  filter: invert(1) sepia(0.18) saturate(0.9) brightness(1.05);
+  opacity: 0.26;
+}
+.footer-seal-mark {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  z-index: 0;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* 用户定的尺寸：「印章缩到 52」 */
+  width: 52px;
+  height: 52px;
+  border: 1px solid rgb(242 169 59 / 0.5);
+  border-radius: 7px;
+  /* ⚠️ 页脚底色是 `--color-footer-dark` #100e0b（**浅深两档都是深色**），
+     所以这里不能跟主题走 —— 必须按"深底上的印章"来配色：
+     琥珀线 + 更亮的亮度，浅色主题下也一样。 */
+  opacity: 0.55;
+}
+.footer-seal-mark-inner {
+  display: block;
+  width: 21px;
+  height: 26px;
+  background-image: url("/assets/seal-rendong.webp");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  filter: brightness(1.5) saturate(1.05);
+}
+/* 桌面端：交给 PC 那两株（视口角落常驻），这两个段内的不显示 */
+@media (min-width: 1024px) {
+  .hero-cao-mark,
+  .footer-seal-mark {
+    display: none;
+  }
+}
+/* 文档区不显示（与 PC 两株同口径：文档区是阅读界面，装饰让位） */
+html.docs-shell .hero-cao-mark,
+html.docs-shell .footer-seal-mark {
+  display: none;
+}
+
 /* 窄屏与文档区：与卷草纹同口径，一律让位 */
 @media (max-width: 1023px) {
   .seal-mark-layer {
     display: none;
   }
-}
-html.docs-shell .seal-mark-layer {
+}html.docs-shell .seal-mark-layer {
   display: none;
 }
 @media print {
@@ -867,7 +944,9 @@ html.docs-shell .seal-mark-layer {
   --chip-tint: rgb(255 255 255 / 0.5);
   /* 同 `--panel-edge`：暖调转向时一并由冷蓝黑改为暖墨，否则胶囊会在暖底上泛青边 */
   --chip-edge: rgb(41 26 12 / 0.14);
-  --chip-text: rgb(82 70 56);
+  /* ⚠️ 2026-09 第十二轮（A 方案）：对齐 `--color-slate-600`，与卡片正文同一支暖墨。
+     原 rgb(82 70 56) 虽已偏暖但偏浅（8.65:1），比按钮该有的层级轻。 */
+  --chip-text: #3d3830;
   /* ===== 「点亮态」的底与文字（顶栏控件悬停 / 筛选胶囊选中**共用同一组值**）=====
      用户 2026-09 第八轮：「悬停和选中效果可以保持一致，等于就是选中是把悬停效果固定住」。
      所以这组值只有一处定义，`.bar-control:hover` 与 `.glass-chip-on` 都从这里取 ——
@@ -898,7 +977,9 @@ html.docs-shell .seal-mark-layer {
 .dark {
   --chip-tint: rgb(255 255 255 / 0.06);
   --chip-edge: rgb(255 255 255 / 0.1);
-  --chip-text: rgb(203 213 225);
+  /* ⚠️ 2026-09 第十二轮（A 方案）：原 rgb(203 213 225) 是 **slate-200 冷蓝**，
+     深色档独一份的冷色；改为与 `--color-slate-300` 同源的暖米灰。 */
+  --chip-text: #b3a894;
   --bar-control-lit-bg: rgb(255 255 255 / 0.13);
   --bar-control-lit-fg: #f3d9ac;
   --bar-rest-shadow: 0 0 16px -8px var(--glass-glow-warm);
@@ -1213,10 +1294,14 @@ details[open] .chevron-up-down {
   padding-inline: 0.5rem;
   font-size: var(--text-sm);
   font-weight: 500;
-  /* 颜色按"顶栏玻璃底色"实测选取，不走 slate token ——
-     玻璃底的明度随滚动位置与下方内容变化，用固定值才能把对比度锁在 4.5:1 以上。
-     浅色档 #333a3d（11.17:1），深色档 #dde0e2（13.93:1）。 */
-  color: #333a3d;
+  /* ⚠️ 2026-09 第十二轮（用户定向 A 方案）：**改走 token**，不再硬编码。
+     原来这里写死 #333a3d / #dde0e2 —— 两个都是**冷灰**，是暖调转向的漏网；
+     而且硬编码把 `--chip-text` 压掉了（那个变量定义了却从未生效）。
+     现在取 `--chip-text`：浅色 = slate-600 #3d3830（11.45:1），深色 = slate-300 #b3a894（5.88:1），
+     与卡片正文/次要文字同一支暖墨，色相统一；两档都 ≥AA。
+     ⚠️ 顶栏玻璃底的明度确实会随滚动变化，所以 `--chip-text` 必须始终在
+        "画布 + 0.5 白填充"这个最坏底上 ≥4.5:1 —— 上面两个值都已实测。 */
+  color: var(--chip-text);
   /* ===== 控件自身的玻璃层（2026-09 第三轮）=====
      用户的原话是"按钮和华为/iOS 的效果没有**对齐**"—— 指的不是几何位置（实测四个控件
      均 68px 宽、间距 4px、图标 18px、文字 28px、中心同一水平线，完全对齐），
@@ -1230,8 +1315,8 @@ details[open] .chevron-up-down {
         观感上成立，且不消耗模糊预算。Apple 实际渲染里按钮也并非都在做实时模糊。
 
      ⚠️ 对比度：填充是**半透明白**，底下仍是顶栏玻璃，明度变化很小；
-        文字色 #333a3d（11.17:1）在加入填充后只会更安全，不会跌破 4.5:1。
-        改填充透明度后请重测对比度（见 docs/联动维护点.md 第 3 条）。 */
+        文字色取 `--chip-text`（浅 11.45:1 / 深 5.88:1），在加入填充后只会更安全。
+        **改填充透明度或 --chip-text 后必须重测**（见 docs/联动维护点.md 第 3 条）。 */
   /* ===== 静置材质：**与 `.glass-chip` 同源**（2026-09 第九轮，用户定向）=====
      用户原话：「静态状态下，把顶栏的右侧按钮对齐到现在技能区和项目区的静态」。
      实测两者原来只差两项 —— 底（0.04 vs 0.5）与边框（无 vs 1px 发丝边），内高光早就一致。
@@ -1379,7 +1464,9 @@ details[open] .chevron-up-down {
      观感又变成"两条边"（与浅色档加白晕是同一个毛病的镜像）。
      深底上按钮本来就浮得起来，去掉投影反而干净。 */
   filter: none;
-  color: #dde0e2;
+  /* ⚠️ 2026-09 第十二轮（A 方案）：删掉原来的硬编码 `color: #dde0e2`（冷灰）。
+     深色档的按钮文字色现在与浅色档一样取 `--chip-text`（深色档 = slate-300 #b3a894），
+     由基础规则统一给出，这里不再覆盖 —— 少一处"两档各写一半"的分叉。 */
   /* 深色档的口径（用户 2026-09：「深色我再看看，浅色优先」）：**静置材质与浅色同源**
      （底 = `--chip-tint`、边 = `--chip-edge`、内高光 = `--bar-sheen-shadow`，都在上面统一定义），
      只有那圈环境光走深色档的 `--bar-rest-shadow`（`0 0 16px -8px` 暖光）——
@@ -1853,7 +1940,7 @@ details[open] .chevron-up-down {
     z-index: 40;
     /* 吸顶后下方内容会从它底下穿过，补一层与页面同色的底，避免文字叠字。
          浅色/深色两套底走变量，组件里不写 dark: 变体。 */
-    background-color: rgb(250 251 251 / 0.92);
+    background-color: rgb(251 248 243 / 0.92); /* ⚠️ 第十二轮：原 rgb(250 251 251) 是冷白 */
   }
   .dark .docs-subbar {
     background-color: rgb(21 18 15 / 0.9);
@@ -1862,7 +1949,7 @@ details[open] .chevron-up-down {
 
 /* ===== 文档区横栏（.docs-subbar）：与全局顶栏同一套玻璃配方 =====
    用户 2026-09 第九轮：「把文档区的单独顶栏也和全局顶栏样式进行对齐」。
-   实测两边原来差三条：横栏是**平涂底**（`rgb(250 251 251 / 0.92)`）、没有内高光、下边线靠 1px border。
+   实测两边原来差三条：横栏是**平涂底**（原 `rgb(250 251 251 / 0.92)`，第十二轮已改暖）、没有内高光、下边线靠 1px border。
    这里换成与 `.site-bar` **同一组数值**（渐变底 + 四条内高光 + 极轻投影 + 折射层）。
 
    ⚠️ 为什么是"同一组数值"而不是抽一个共用类：`.site-bar` 是 `sticky + z-50`，`.docs-subbar` 是
@@ -1944,7 +2031,7 @@ details[open] .chevron-up-down {
   .docs-subbar {
     backdrop-filter: blur(16px) saturate(1.4);
     background-image: linear-gradient(to bottom, rgb(255 255 255 / 0.42), rgb(255 255 255 / 0.26));
-    background-color: rgb(250 251 251 / 0.86);
+    background-color: rgb(251 248 243 / 0.86); /* ⚠️ 第十二轮：原 rgb(250 251 251) 是冷白 */
   }
   .dark .docs-subbar {
     background-image: linear-gradient(to bottom, rgb(21 18 15 / 0.55), rgb(21 18 15 / 0.4));

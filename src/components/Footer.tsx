@@ -30,9 +30,16 @@ export default function Footer() {
         aria-hidden="true"
         className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-[radial-gradient(120%_80%_at_50%_130%,rgb(217_122_6/0.16),transparent_62%)]"
       />
-      {/* ⚠️ 2026-09 第十二轮：这里原本放过一枚"收尾印"。
-          用户把印章改成了**背景右下角常驻**（`App.tsx` 的 `.seal-mark-layer`），
-          所以页脚不再放印章。**不要在这里加回来。 */}
+      {/* 印章（手机/平板，2026-09 第十二轮）：用户要「手机端也加上 PC 的那两个图案」，
+          并定尺寸「印章缩到 52」。
+          ⚠️ 与 PC 那枚（`App.tsx` 的 `.seal-mark-layer`，fixed 在视口右下）是**同一套图形**，
+             只是这里改用**段内绝对定位**（页脚本身已经是 `relative overflow-hidden`）：
+             手机上 fixed 会全程贴着屏幕压正文，页脚内 absolute 只在收尾处出现。
+          ⚠️ 桌面端由 CSS 隐藏（见 `.footer-seal-mark`），继续用那枚 fixed 的。
+          几何依据：390 宽实测页脚高 149、印章 52×52 放右下角，与文字相交数为 0。 */}
+      <span aria-hidden="true" className="footer-seal-mark">
+        <span className="footer-seal-mark-inner" />
+      </span>
       <p className="relative text-sm text-slate-300">
         © {new Date().getFullYear()} {contact.name} · 使用{' '}
         <span lang="en">React + Vite + Tailwind CSS</span> 构建
