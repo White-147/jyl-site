@@ -15,7 +15,12 @@ dist
 scripts/fonts-src/
 # 一次性调试脚本与截图（会话临时产物，不入库）
 scripts/_*.mjs
+# ⚠️ 2026-09 第十二轮：验证脚本会把截图/探针产物写在项目根的隐藏目录里。
+#    之前只忽略了 `.dsh-shots/`，结果 `.dsh-chk/` 里的两张截图被 `git add -A` 顺手提交了
+#    （已在 5601e0f 之后修正）。这里把这三个前缀一起忽略，避免再犯。
 .dsh-shots/
+.dsh-chk/
+.dsh-live/
 .dsh-msg.txt
 # 文档区的构建产物：源在 docs/<分区>/source/，页面与清单由 build-docs.mjs 生成。
 # predev / prebuild 钩子会自动重建，所以不需要提交 —— 提交了反而会「忘了重跑 →
