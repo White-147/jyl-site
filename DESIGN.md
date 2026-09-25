@@ -339,8 +339,28 @@ components:
 - 覆盖面：关于我的 6 张卡片、区块玻璃面板、教育背景四张证书卡、技能区分类按钮与高频标签、项目区筛选按钮与项目行、联系区四颗入口、顶栏四个控件。
 - ⚠️ 加发光时注意**权重**：`.glass-lit:hover` 与 `.glass-lit[aria-pressed="true"]` 都是 (0,2,0)，
   裸类名 (0,1,0) 的 `box-shadow` 会被它们盖掉；而悬停与选中又要给出**同一个**结果，
-  所以固定态统一用 `.glass-lit.glass-lit-on`（(0,2,0)）并把 `:hover` / `[aria-*]` 一起列进选择器，
-  避免"选中项一悬停就变样"（第九轮踩过）。
+  所以固定态统一用 `.glass-lit.glass-lit-on`（(0,2,0)）并把 `:focus-visible` / `[aria-*]` 一起列进选择器，
+  避免"选中项一悬停就变样"（第九轮踩过）。⚠️ 第十四轮把 `:hover` 从这一组拆了出去（见下一条），
+  拆的时候两处的 `box-shadow` 必须保持一字不差。
+
+**The Hover-Capability Rule（触屏交互层，2026-09 第十四轮定稿）.** 自定义 CSS 里**每一条 `:hover` 都必须包在 `@media (hover: hover) and (pointer: fine)` 里**。
+- **为什么**：Tailwind v4 生成的 `hover:` 工具类本来就带这个门，而本站自定义的那几条（`.glass-lit:hover`、`.bar-control:hover`、`.glass-btn:hover`、文档区链接与配图）没有。于是触屏上只有这几处会"粘住"：点一下亮起，**滚动不脱开**，只被后续点击解除。实测（iPhone 模拟 + 真实触摸事件）：点按前 `matches(':hover') = false`，点按后 `true`，再滚开 420px **仍然亮着**。
+- W3C Media Queries 4 的原文也说清了这件事：*"authors should be careful not to assume that the `:hover` pseudo class will never match on a device where `hover:none` is true"*。所以判据是**能力**（能不能悬停），不是**猜测**（`hover: none` 并不保证 `:hover` 不匹配）。
+- ⚠️ **包门时不能连 `:focus-visible` 与 `[aria-*]` 一起包**：前者是键盘可达性的底线，后者是"当前项"语义，两者在任何设备上都必须成立。做法是把 `:hover` 单独拎出来进门，其余留在原位。
+
+**The Touch Interaction Rule（触屏拿到的不是 `:hover`，是另外三级）.** 没有悬停能力的设备上，反馈由三样构成，**任何时刻只有一个**带 `.glass-lit-scrolled`：
+| 级别 | 类 / 状态 | 材质 | 谁加的 |
+| --- | --- | --- | --- |
+| 当前项 | `.glass-lit-on`（配 `[aria-pressed]` / `[aria-selected]` / `[aria-current]`） | 面光 + 1px 琥珀亮边 + 内缘暖光 | 组件（scroll spy / 筛选状态） |
+| **视线所在** | `.glass-lit-scrolled` | 面光 + 弥散内缘光，**不加亮边、不换文字色** | `hooks/useInViewLight.ts` |
+| **手指按下** | `.glass-lit-press` | **只出面光**（0.75） | 同上的 `useTouchPress` |
+- **滚动照亮**：与视口**中线最近**的那一个 `.glass-lit` 亮起，锚点在视口高度的 **42%** 处。
+  - 为什么按"中线最近"而不是"进入视口"：一屏常有 3~4 张卡，后者会同时点亮好几块，读起来是"整页在闪"而不是"视线所在"。
+  - 为什么锚点是 0.42 而不是 0.5：手机上底部压着 Tab Bar（约 90px），几何中线落在它后面，按 0.5 算会稳定地"亮下面那张"。
+  - 实现**不监听滚动**：IntersectionObserver 以整视口为根，只在进 / 出时回调并量几何；滚动过程中零 `getBoundingClientRect`。
+  - 候选集是**活的**（`.glass-lit` 会随筛选重建、文档区正文是运行时 fetch 的）：进出视口由观察器增删，新插入的节点由 MutationObserver 补 `observe`（它不参与几何计算）。
+- ⚠️ **桌面完全不启用**：钩子里与 CSS 里各有一道 `(hover: hover)` 门。桌面鼠标本来就会悬停，再叠一层滚动照亮会出现"卡片追着鼠标亮"的干扰。
+- ⚠️ 三级**不能混用材质**：给"视线所在"加亮边、或给"手指按下"整套点亮，都会被读成"选中了"（第八轮"整块淡黄铺满"就是被否掉的那类做法）。
 
 ## 5. Components
 
@@ -349,7 +369,7 @@ components:
 ### Buttons
 - **Shape:** 轻微圆角（`rounded-lg` 8px）。胶囊形只用于筛选与标签，不用于动作按钮。
 - **Primary:** 琥珀深底 + 白字（`bg-amber-700 text-white`），内边距 10px × 20px，字重 600。
-- **Hover / Focus:** hover 加深到 `brand-800 #804400`（仅颜色过渡，150ms）；键盘焦点用 2px `brand-400/60` 外环，永不隐藏。
+- **Hover / Focus:** hover 加深到 `brand-800 #804400`（仅颜色过渡，150ms）**且只包在 `@media (hover: hover) and (pointer: fine)` 里**；键盘焦点用 2px `brand-400/60` 外环，永不隐藏。
 - **Ghost / Secondary:** 白底 + 琥珀文字 + 琥珀浅边；hover 时底色转 `amber-50` 并把边框提到 `amber-400`。
 
 ### Chips

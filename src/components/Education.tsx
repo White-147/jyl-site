@@ -76,20 +76,24 @@ export default function Education() {
         {/* 教育背景 + 证书/奖项（bento：学校竖卡 + 证明 2x2） */}
         <div className="mt-5 grid gap-5 sm:mt-12 lg:grid-cols-3">
           {/* 学校卡。
-              ⚠️ 2026-09 第十三轮：手机上图标**不再独占一行**（用户实拍反馈「图标独占一行，
-                 这很不美观」）。实测（390 宽）原来卡片是 `flex-col gap-5`：图标盒 48×48 占满
-                 一行，标题被推到下一行，中间还夹着 20px 的 gap —— 卡片总高 180px，光图标
-                 与它那段间距就吃掉 68px，而这一格在手机上只有 358px 宽。
-              改法：**<640px 走横排**（图标 28px 盒 + 16px 图标，与标题同一行、垂直居中），
-                 ≥640px 回到原来的竖排大图标（`sm:flex-col`）—— 桌面端是 lg 三列里的一列竖卡，
-                 大图标在那里是"这一格是学校信息"的识别符，不该缩。
-              ⚠️ 用 `max-sm:` 原生变体而不是自写 media query：`sm` 是 Tailwind v4 的默认断点
-                 （本文件只覆盖了 `--breakpoint-xl3`，`sm/md/lg/xl` 仍是默认值），
-                 `max-sm:` 会生成 `@media (width < 40rem)`，与 `sm:h-12` 正好互补、不会重叠。 */}
+              ⚠️ 2026-09 第十三/十四轮：**图标与校名并排**，三端统一。
+              历史：原来是 `flex-col gap-5` —— 图标盒 48×48 独占一行、标题被推到下一行，
+              中间再夹一个 20px 的 gap。用户在手机上先报了一次（「图标独占一行，这很不美观」），
+              第十三轮只修了 `max-sm:`；第十四轮发现 PC 端是同一个毛病（实测 1440 宽下
+              卡片 214.5px 高，图标底 350.3 → 校名顶 370.3，中间正好空掉那 20px）。
+              所以现在把横排**提成基准**，不再分端：
+                · 图标盒 28px + 图标 16px（原 `max-sm` 那一套），`self-start` 对齐到**校名那一行**
+                  而不是整块文字的垂直中心（`items-center` 会让它掉到第二行的高度上）；
+                · `min-w-0` 留在文字块上，长文案在窄栏里换行而不是撑破卡片。
+              ⚠️ 桌面端卡片只有 lg 三列中的一列（1024 宽下实测 280px、内容宽 214px），
+                再放 48px 大图标 + 20px 间距，文字可用宽度只剩 146px（150px 的学位行会折两行），
+                所以大图标在**任何**宽度下都不成立，不是"手机上省空间"的问题。
+              ⚠️ 用 `max-sm:` 会与 `sm:h-12` 这类既有变体互补；现在既然不写 `sm:` 大图标，
+                直接给基准值即可，少两条变体。 */}
           <Reveal className="lg:col-span-1">
-            <div className="glass-panel glass-lit flex h-full flex-col justify-center gap-5 rounded-2xl p-6 sm:p-8 max-sm:flex-row max-sm:items-center max-sm:gap-3.5">
-              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-700 dark:bg-brand-500/10 dark:text-brand-200 max-sm:h-7 max-sm:w-7 max-sm:self-start max-sm:rounded-lg">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 max-sm:h-4 max-sm:w-4" aria-hidden="true">
+            <div className="glass-panel glass-lit flex h-full flex-row items-start justify-center gap-3.5 rounded-2xl p-6 sm:p-8">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-700 dark:bg-brand-500/10 dark:text-brand-200">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden="true">
                   <path d="M22 10 12 5 2 10l10 5 10-5z" />
                   <path d="M6 12v5c0 1.66 2.69 3 6 3s6-1.34 6-3v-5" />
                 </svg>

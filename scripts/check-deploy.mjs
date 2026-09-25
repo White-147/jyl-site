@@ -30,7 +30,18 @@ const CHECKS = [
   { label: '文档区横栏已去掉发光滤镜', kind: 'text', where: 'css', needle: '.docs-subbar{filter:', negate: true },
   { label: '文档区横栏有可读性底（浅）', kind: 'text', where: 'css', needle: '.docs-subbar{text-shadow' },
   { label: '印章深色档已转米白（内外同一条链路）', kind: 'text', where: 'css', needle: '.dark .seal-mark-layer{filter:invert()sepia()brightness(1.9)' },
-  { label: '手机端教育卡图标与校名并排', kind: 'text', where: 'css', needle: 'max-sm\\:flex-row' },
+  /* 教育卡在第十三/十四轮统一成"图标与校名并排"：横排是**基准值**（不再靠 max-sm: 变体），
+     所以这里查 `.flex-row{` 本身。同时用"必须还有竖排工具类"来确认产物没被整体裁掉 ——
+     别处（手机 Tab Bar 等）仍在用 flex-col。 */
+  { label: '教育卡图标与校名并排（横排为基准）', kind: 'text', where: 'css', needle: '.flex-row{flex-direction:row}' },
+  {
+    label: '触屏交互层：hover 能力门',
+    kind: 'text',
+    where: 'css',
+    needle: '@media (hover:hover) and (pointer:fine)',
+  },
+  { label: '触屏交互层：滚动照亮类', kind: 'text', where: 'css', needle: 'glass-lit-scrolled' },
+  { label: '触屏交互层：按压反馈类', kind: 'text', where: 'css', needle: 'glass-lit-press' },
   { label: '手机首屏纹样 .hero-cao-mark', kind: 'text', where: 'css', needle: 'hero-cao-mark' },
   { label: '手机页脚印章 .footer-seal-mark', kind: 'text', where: 'css', needle: 'footer-seal-mark' },
   { label: '卷草纹资源可达', kind: 'asset', path: 'assets/cao-mark.webp' },
