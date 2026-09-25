@@ -75,16 +75,26 @@ export default function Education() {
 
         {/* 教育背景 + 证书/奖项（bento：学校竖卡 + 证明 2x2） */}
         <div className="mt-5 grid gap-5 sm:mt-12 lg:grid-cols-3">
-          {/* 学校竖卡 */}
+          {/* 学校卡。
+              ⚠️ 2026-09 第十三轮：手机上图标**不再独占一行**（用户实拍反馈「图标独占一行，
+                 这很不美观」）。实测（390 宽）原来卡片是 `flex-col gap-5`：图标盒 48×48 占满
+                 一行，标题被推到下一行，中间还夹着 20px 的 gap —— 卡片总高 180px，光图标
+                 与它那段间距就吃掉 68px，而这一格在手机上只有 358px 宽。
+              改法：**<640px 走横排**（图标 28px 盒 + 16px 图标，与标题同一行、垂直居中），
+                 ≥640px 回到原来的竖排大图标（`sm:flex-col`）—— 桌面端是 lg 三列里的一列竖卡，
+                 大图标在那里是"这一格是学校信息"的识别符，不该缩。
+              ⚠️ 用 `max-sm:` 原生变体而不是自写 media query：`sm` 是 Tailwind v4 的默认断点
+                 （本文件只覆盖了 `--breakpoint-xl3`，`sm/md/lg/xl` 仍是默认值），
+                 `max-sm:` 会生成 `@media (width < 40rem)`，与 `sm:h-12` 正好互补、不会重叠。 */}
           <Reveal className="lg:col-span-1">
-            <div className="glass-panel glass-lit flex h-full flex-col justify-center gap-5 rounded-2xl p-6 sm:p-8">
-              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-700 dark:bg-brand-500/10 dark:text-brand-200">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6" aria-hidden="true">
+            <div className="glass-panel glass-lit flex h-full flex-col justify-center gap-5 rounded-2xl p-6 sm:p-8 max-sm:flex-row max-sm:items-center max-sm:gap-3.5">
+              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-700 dark:bg-brand-500/10 dark:text-brand-200 max-sm:h-7 max-sm:w-7 max-sm:self-start max-sm:rounded-lg">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 max-sm:h-4 max-sm:w-4" aria-hidden="true">
                   <path d="M22 10 12 5 2 10l10 5 10-5z" />
                   <path d="M6 12v5c0 1.66 2.69 3 6 3s6-1.34 6-3v-5" />
                 </svg>
               </span>
-              <div>
+              <div className="min-w-0">
                 <h3 className="text-lg font-bold text-ink dark:text-ink-light">{education.school}</h3>
                 <p className="text-sm font-medium text-brand-700 dark:text-brand-200">{education.degree}</p>
                 <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
