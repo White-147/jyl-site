@@ -22,5 +22,18 @@ scripts/_*.mjs
 # 站点还是旧内容」而构建照样成功（这个坑以前在 docs/联动维护点.md 里记着）。
 public/docs/pages/
 src/data/docs.json
+# ⚠️ 例外：docs/thesis/source/thesis.html **是源不是产物**（Word → pandoc 的一次性转换结果，
+#    平时不动、改论文才重跑 npm run docs:thesis）。上面那条 `src/data/docs.json` 之类的规则
+#    很容易被顺手扩写成 `docs/thesis/source/`，所以这里显式钉一条否定规则。
+!docs/thesis/source/thesis.html
+# 配图原图归档（PNG/JPG）。**不入库**（2026-09 第八轮），且**本机也已清理**（2026-09 第十二轮）：
+#   · 站点真正引用的是 public/docs/<分区>/images/*.webp（那才是资产，进 git）；
+#   · _archive/ 曾存 279 个原图（约 146 MB），只服务 `python scripts/optimize_images.py` ——
+#     一个**一次性**的体积治理脚本（把 223 张 2560×1440 PNG 压成 WebP，124 MB → 34 MB）；
+#     它的输出已全部落在 public/（ue5 223 张 + thesis 41 张），原图因此不再被任何流程需要，
+#     已于第十二轮从本机删除、释放 146 MB。需要原图时从外部备份取回。
+#   · 一份图存两份让仓库从 17 MB 涨到 160 MB，克隆与 CI checkout 都白付这份钱。
+# 这条规则保留：万一将来又临时放回原图，别再被误提交。
+_archive/
 # pandoc 转换论文时的中间目录
 .tmp-thesis/

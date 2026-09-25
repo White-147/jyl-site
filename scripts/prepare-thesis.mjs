@@ -244,10 +244,22 @@ const abstractSection = kept.length
 html = abstractSection + body
 
 /* ---------- 4. 落盘 ---------- */
+//
+// ⚠️ 文件头必须留一行「生成物」标记（2026-09 第八轮补）。
+//    这是全仓库唯一一个「看起来像构建产物、其实是源」的文件：它在 `docs/` 下、
+//    扩展名是 .html、又被 build-docs.mjs 当源读。手改它的人不会收到任何警告 ——
+//    改完能立刻在站点上看到效果，直到下次 `npm run docs:thesis` 把它**静默覆盖**。
+//    标记写进产物而不是只在文档里写一句，是因为读者大概率就是打开这个文件的人。
+//    ⚠️ 用 HTML 注释而不是 <p>：构建只解析 `<h1-4>` 与 `<img>`，注释不参与分页与对账。
+//    论文改版时会被下一次运行原样重写，所以这段文字只维护在本文件里。
+const BANNER = `<!-- 由 scripts/prepare-thesis.mjs（npm run docs:thesis）从 Word 原稿生成，请勿手改。
+     要改内容：改 docx 原稿后重跑 npm run docs:thesis；
+     改完记得重跑图片优化（见终端提示）与 node scripts/build-docs.mjs，否则站点仍是旧内容。 -->
+`
 
 console.log('[4/4] 写出')
 mkdirSync(dirname(OUT), { recursive: true })
-writeFileSync(OUT, `${html.trim()}\n`, 'utf8')
+writeFileSync(OUT, `${BANNER}${html.trim()}\n`, 'utf8')
 
 const headings = (html.match(/<h[1-4][^>]*>/g) ?? []).length
 console.log(`[ok] ${OUT}`)

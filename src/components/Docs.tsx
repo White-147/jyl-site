@@ -342,7 +342,11 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
   // ⚠️ 桌面端要滚的是**正文列容器**（scrollRef），手机端才是页面 —— 两处都归零最省心。
   // ⚠️ 用 'instant'：`behavior:'auto'` 会套用 html 上的 `scroll-behavior: smooth`，
   //    切页时看得到"旧页面自己滚回顶部"的动画。
-  useEffect(() => {
+  // ⚠️ 必须是 **useLayoutEffect**（2026-09 第八轮从 useEffect 改过来）：
+  //    useEffect 跑在浏览器绘制之后，切分区时会先画出一帧"旧滚动位置的新页面"
+  //    （窗口与容器都还停在上一篇的位置），随后才跳回顶部。在 Safari 上那一帧里
+  //    横栏正好压在顶栏下面，看起来就像"横栏被吞了"。改到绘制前调用即可消除这个中间态。
+  useLayoutEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior })
     if (scrollRef.current) scrollRef.current.scrollTop = 0
     setNavOpen(false)
@@ -529,14 +533,17 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
             role="tab"
             aria-selected={active}
             onClick={() => openSection(s.id)}
+            /* 选中态 = 主站筛选胶囊那一套（`glass-lit-on` 出光 + `glass-chip-on` 出底与字色）。
+               2026-09 第九轮用户要求：「文档区不管是顶部分区还是左侧选中，都对齐主站的玻璃样式」。
+               **不要再退回 `bg-brand-700 text-white`** —— 那是实底块，与全站玻璃语言相悖。 */
             className={`flex items-baseline justify-between gap-2 rounded-lg px-2.5 py-1.5 text-left text-sm transition-colors ${
               active
-                ? 'bg-brand-700 font-semibold text-white'
-                : 'text-slate-600 hover:bg-slate-100 hover:text-brand-700 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-brand-200'
+                ? 'glass-lit glass-lit-on glass-chip-on font-semibold'
+                : 'glass-lit text-slate-600 hover:text-brand-700 dark:text-slate-300 dark:hover:text-brand-200'
             }`}
           >
             <span className="min-w-0 truncate">{s.label}</span>
-            <span className={`font-mono text-[10px] tabular-nums ${active ? 'text-white/70' : 'text-slate-400 dark:text-slate-500'}`}>
+            <span className={`font-mono text-[10px] tabular-nums ${active ? 'opacity-70' : 'text-slate-400 dark:text-slate-500'}`}>
               {s.ready || '—'}
             </span>
           </button>
@@ -556,14 +563,19 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
             role="tab"
             aria-selected={active}
             onClick={() => openSection(s.id)}
+            /* 同上：顶部分区 tab 的选中态走主站那套玻璃（见 `sectionList` 的注释）。
+               ⚠️ 未选中**只留 `.glass-lit`**（交互层，悬停才出光），不要挂 `.glass-chip` ——
+                  那是"静置材质"（半透明底 + 发丝边），挂上就等于给每一项默认铺一块玻璃，
+                  用户 2026-09 明确否掉了那种做法（"默认不需要每个都有玻璃样式，只要悬停有就可以了"），
+                  而且那圈 1px 发丝边在左栏里还会与相邻行贴边、看起来像被裁掉。 */
             className={`inline-flex items-baseline gap-1.5 rounded-lg px-3 py-1.5 text-sm transition-colors ${
               active
-                ? 'bg-brand-700 font-semibold text-white'
-                : 'text-slate-600 hover:bg-slate-100 hover:text-brand-700 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-brand-200'
+                ? 'glass-lit glass-lit-on glass-chip-on font-semibold'
+                : 'glass-lit text-slate-600 hover:text-brand-700 dark:text-slate-300 dark:hover:text-brand-200'
             }`}
           >
             {s.label}
-            <span className={`font-mono text-[10px] tabular-nums ${active ? 'text-white/70' : 'text-slate-400 dark:text-slate-500'}`}>
+            <span className={`font-mono text-[10px] tabular-nums ${active ? 'opacity-70' : 'text-slate-400 dark:text-slate-500'}`}>
               {s.ready || '—'}
             </span>
           </button>
@@ -605,7 +617,7 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
               const open = isOpen(n.key)
               return (
                 <>
-                  <div className="flex items-start gap-0.5" style={{ paddingLeft: `${depth * 10 + 2}px` }}>
+                  <div className="flex items-start gap-0.5" style={{ paddingLeft: `${depth * 8 + 2}px` }}>
                     <button
                       type="button"
                       onClick={() => toggle(n.key)}
@@ -639,10 +651,10 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
                 onClick={() => setNavOpen(false)}
                 className={`flex items-baseline rounded-lg py-[5px] pr-2 text-[13.5px] leading-snug transition-colors ${
                   n.page.id === current?.id
-                    ? 'bg-brand-700 font-semibold text-white'
-                    : 'font-medium text-slate-600 hover:bg-slate-100 hover:text-brand-700 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-brand-200'
+                    ? 'glass-lit glass-lit-on glass-chip-on font-semibold'
+                    : 'glass-lit font-medium text-slate-600 hover:text-brand-700 dark:text-slate-300 dark:hover:text-brand-200'
                 }`}
-                style={{ paddingLeft: `${depth * 10 + 24}px` }}
+                style={{ paddingLeft: `${depth * 8 + 24}px` }}
               >
                 <span className="min-w-0 flex-1 truncate">{n.page.title}</span>
               </a>
@@ -650,7 +662,7 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
               <span
                 title="该篇尚未导入本站"
                 className="flex items-baseline gap-2 rounded-lg py-[5px] pr-2 text-[13.5px] text-slate-400 dark:text-slate-500"
-                style={{ paddingLeft: `${depth * 10 + 24}px` }}
+                style={{ paddingLeft: `${depth * 8 + 24}px` }}
               >
                 <span className="min-w-0 flex-1 truncate">{n.page.title}</span>
                 <span className="shrink-0 rounded border border-dashed border-slate-300 px-1.5 py-0.5 text-[10px] dark:border-slate-600">
@@ -679,7 +691,7 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
                           ? 'font-semibold text-brand-700 dark:text-brand-200'
                           : 'text-slate-400 hover:text-brand-700 dark:text-slate-500 dark:hover:text-brand-200'
                       }`}
-                      style={{ paddingLeft: `${depth * 10 + 34 + (t.level - 2) * 9}px` }}
+                      style={{ paddingLeft: `${depth * 8 + 30 + (t.level - 2) * 9}px` }}
                     >
                       <span className="truncate">{t.label}</span>
                     </a>
@@ -776,18 +788,16 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
     //    内容高度，内部滚动不触发（实测过 20481px）；而写死一个与真实可用高度不符的值
     //    正是「左栏最后一行被切掉」的成因（旧值比真实可用高度多算了 64px）。
     <div className="mx-auto flex max-w-[100rem] flex-col px-4 pb-24 pt-6 sm:px-6 md:h-dvh md:pb-0 md:pt-0">
-      <div aria-hidden="true" className="hidden h-16 shrink-0 md:block" />
+      {/* ⚠️ 第十轮：**顶栏占位那条 h-16 已删**。原来它把「横栏 + 三栏」推到 y=64 之下，
+          于是滚动容器的内容永远从 y=112 开始 —— 横栏背后什么都没有，折射也就无事可做
+          （实测开/关 `backdrop-filter` 的可见差异只有 0.08%）。
+          现在改成：滚动容器**从视口顶（y=0）起算**，用 `md:mt-[var(--site-bar-h)]` 把它的
+          可视顶边压到顶栏下沿，横栏在容器内部 sticky 到同一位置。
+          于是正文会从横栏**下面穿过**，文字能透过去、折射也真的在弯内容。 */}
 
-      {/* 文档区横栏（桌面常驻）。
-          放在滚动容器**外面**，所以它永远可见 —— 页面本身不滚，滚的只有下面那条三栏。
-          「返回作品集」放这里而不是左栏：左栏内容会很长，放里面会被滚走（用户反馈过）。 */}
-      <div
-        ref={subBarRef}
-        className="hidden h-[var(--docs-subbar-h)] shrink-0 items-center gap-3 border-b border-slate-200/70 md:flex dark:border-slate-700/70"
-      >
-        {backLink}
-        <span aria-hidden="true" className="h-4 w-px bg-slate-200 dark:bg-slate-700" />
-        {sectionTabs}
+      {/* 横栏已搬进 `#docs-scroll` 内部（见那条注释）；这里只剩它的折射层。 */}
+      <div aria-hidden="true" className="docs-subbar-lens-layer">
+        <span className="docs-subbar-lens" />
       </div>
 
       {/* 手机端：返回入口与篇数（桌面端这两样在横栏里）。品牌名不再可点，所以这里必须给返回入口。 */}
@@ -800,17 +810,22 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
 
       {/* 手机端吸顶条：返回图标 + 目录入口。`sticky top-16` = 正好贴在常驻顶栏下沿。
           ⚠️ 高度直接决定锚点落点（`--docs-anchor-offset` 会量它）。加了返回图标后
-          仍然是「py-2 + h-9 + 1px 边框」= 53px，所以落点不变。 */}
+          仍然是「py-2 + h-9 + 1px 边框」= 53px，所以落点不变。
+          ⚠️ 2026-09 第十二轮：材质由**硬编码旧冷值**（`rgb(250_251_251/0.92)` /
+              `rgb(18_20_21/0.9)`）改为**引用画布变量 + glass-panel 的底**。
+              原来那两个值在暖调转向后成了页面里唯一的冷色块，而且没有跟全局顶栏同一套玻璃语言
+              （用户第 4 条要的就是"手机端和 PC 端一样对齐"）。
+              高度与 `sticky top-16` 都没动 —— 锚点落点的断言盯着这里。 */}
       <div
         ref={stickyBarRef}
         data-docs-stickybar
-        className="sticky top-16 z-30 -mx-4 mb-4 flex items-center gap-2 border-b border-slate-200/70 bg-[rgb(250_251_251/0.92)] px-4 py-2 backdrop-blur-sm sm:-mx-6 sm:px-6 md:hidden dark:border-slate-700/70 dark:bg-[rgb(18_20_21/0.9)]"
+        className="glass-panel sticky top-16 z-30 -mx-4 mb-4 flex items-center gap-2 rounded-none rounded-b-xl border-x-0 border-t-0 px-4 py-2 sm:-mx-6 sm:px-6 md:hidden"
       >
         <a
           href="#top"
           aria-label="返回作品集"
           title="返回作品集"
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-slate-300 bg-white text-slate-600 transition-colors hover:border-brand-400 hover:text-brand-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300"
+          className="glass-chip flex h-9 w-9 shrink-0 items-center justify-center transition-colors"
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden="true">
             <path d="M19 12H5M12 19l-7-7 7-7" />
@@ -821,7 +836,7 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
           onClick={() => setNavOpen((v) => !v)}
           aria-expanded={navOpen}
           aria-controls="docs-drawer"
-          className="inline-flex h-9 flex-1 items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white text-sm font-medium text-slate-700 transition-colors hover:border-brand-400 hover:text-brand-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200"
+          className="glass-chip inline-flex h-9 flex-1 items-center justify-center gap-2 text-sm font-medium transition-colors"
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="h-4 w-4" aria-hidden="true">
             <path d="M4 6h16M4 12h16M4 18h10" />
@@ -844,7 +859,7 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
             role="dialog"
             aria-modal="true"
             aria-label="文档分区、目录与大纲"
-            className="fixed inset-x-0 bottom-0 top-16 z-40 overflow-y-auto overscroll-contain rounded-t-2xl border-t border-slate-200 bg-[#fafbfb] px-4 pb-8 pt-4 shadow-[0_-8px_30px_rgba(0,0,0,0.18)] outline-none md:hidden dark:border-slate-700 dark:bg-[#121415]"
+            className="fixed inset-x-0 bottom-0 top-16 z-40 overflow-y-auto overscroll-contain rounded-t-2xl border-t border-slate-200/70 bg-[var(--color-slate-50)] px-4 pb-8 pt-4 shadow-[0_-8px_30px_rgba(0,0,0,0.18)] outline-none md:hidden dark:border-slate-700/70 dark:bg-[var(--color-slate-900)]"
           >
             <div className="mb-3 flex items-center justify-between">
               <p className="text-xs font-semibold uppercase tracking-widest text-brand-700 dark:text-brand-200">文档分区</p>
@@ -852,7 +867,7 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
                 type="button"
                 onClick={() => setNavOpen(false)}
                 aria-label="关闭目录"
-                className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
+                className="glass-lit flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 transition-colors"
               >
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="h-4 w-4" aria-hidden="true">
                   <path d="M18 6 6 18M6 6l12 12" />
@@ -872,17 +887,84 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
       <div
         ref={scrollRef}
         id="docs-scroll"
-        className="docs-scroll relative md:grid md:min-h-0 md:flex-1 md:grid-cols-[15rem_minmax(0,1fr)] md:gap-6 md:overflow-y-auto md:scroll-pt-4 md:pr-2 xl:grid-cols-[15rem_minmax(0,1fr)_14rem]"
+        className="docs-scroll relative md:mt-[var(--site-bar-h)] md:grid md:h-[calc(100dvh-var(--site-bar-h))] md:min-h-0 md:grid-cols-[var(--docs-rail-w)_minmax(0,1fr)] md:gap-6 md:overflow-y-auto md:scroll-pt-4 md:pr-2 xl:grid-cols-[var(--docs-rail-w)_minmax(0,1fr)_14rem]"
       >
+        {/* 文档区横栏（**在滚动容器内部**，2026-09 第十轮从外面搬进来）。
+
+            ⚠️ 为什么必须搬进来（这是"横栏没有透明 + 折射效果"的真正原因）：
+              原来横栏是滚动容器的**兄弟**，纵向布局是「顶栏占位 64 + 横栏 48 + 滚动容器」——
+              于是滚动容器的内容**永远从 y=112 开始**，物理上不可能从横栏背后经过。
+              实测：横栏背后 `elementFromPoint(700, 70/80/…/130)` 全部返回 `null`，
+              开/关 `backdrop-filter` 的可见差异只有 0.08%（顶栏同法是 80.95%）。
+              搬进来之后正文就会从横栏**下面穿过**，折射才真的有事可做，
+              文字也能像顶栏那样"透过去"。用户的判断是对的。
+
+            ⚠️ 两个配套件，少一个都会破：
+              ① 容器上的 `md:mt-[var(--site-bar-h)]` + `md:h-[calc(100dvh-var(--site-bar-h))]`：
+                 让滚动容器的**可视顶边**落在顶栏下沿（y=64），横栏于是正好停在原来那个视觉位置，
+                 **视觉零位移**；高度显式写死，不再依赖 `flex-1`（踩过：flex 分配会让它多出几十像素，
+                 横栏被顶到 y=80）；
+              ② 紧随其后的 `docs-subbar-spacer`（同高）：给横栏一个"在文档流里位于 sticky 阈值
+                 之下"的自然位置 —— 没有它，sticky 元件一开始就在 `top` 之上，会跟着内容滚走。
+
+            ⚠️ `.docs-subbar`（`position: sticky; top: 0` —— 参照系是**滚动容器顶边**，见 index.css 的注释）
+               同时还是第八轮那道防「iPad 上横栏被顶栏吞掉」的防线，`scripts/check-anchors.mjs` 有断言守着，
+               改这里的类名等于同时撤掉两道保障。
+            ⚠️ 它在 grid 里必须 `md:col-span-full`（跨越三栏），否则只会占第一列的位置。 */}
+        <div
+          ref={subBarRef}
+          className="docs-subbar hidden h-[var(--docs-subbar-h)] shrink-0 items-center gap-3 md:col-span-full md:flex"
+        >
+          {backLink}
+          <span aria-hidden="true" className="h-4 w-px bg-slate-200 dark:bg-slate-700" />
+          {sectionTabs}
+        </div>
+        {/* ⚠️ spacer 放在横栏**之后**，并用同值的负上外边距把自己在文档流里抵消掉。
+            作用有两个，缺一个都会破：
+              ① 给横栏一个"位于 sticky 阈值**之下**"的流内位置 —— 这是 sticky 被钉住的前提。
+                 横栏在流里的自然位置 = 容器顶边 + 48px（被下面这个 spacer 顶开），
+                 所以它一有机会就被钉在容器顶边（y=64），首屏与滚动**零位移**；
+              ② 补上横栏占掉的那 48px，让正文起始位置与"横栏还在容器外面"时逐像素一致（实测 112）。
+            反过来把 spacer 放前面（或干脆不给横栏留流内位置）会退化成
+            「横栏停在 y=88/136，下面露出一条空白，而且不再吸顶」——两条都实测过。 */}
+        <div aria-hidden="true" className="docs-subbar-spacer hidden shrink-0 md:-mt-[var(--docs-subbar-h)] md:col-span-full md:block" />
+
         {/* 左：页树。
             ⚠️ sticky 必须加在 **aside 自身**上，不要外面套一层 div 再 sticky（踩过两次）：
               套一层时 sticky 认的是父级内容盒，而那个盒子没有可粘的行程，直接跟着滚走。
-            ⚠️ 高度用显式 `h-[calc(100dvh-顶栏-横栏)]` + 内层 `overflow-y-auto`。
-              旧写法是 `max-h-[calc(100dvh-4rem)]`，但 sticky top 在滚动容器顶下面 64px，
-              实际底边 = 64+64+836 = 964 > 视口 900 —— **最后 64px 永远在视口外**
-              （用户反馈"左栏最底部文本显示不全"）。现在高度与真实可用高度一致。 */}
-        <aside className="hidden md:sticky md:top-0 md:flex md:h-[calc(100dvh-var(--site-bar-h)-var(--docs-subbar-h))] md:flex-col">
-          <div className="docs-scroll min-h-0 flex-1 overflow-y-auto pb-4 pr-1 pt-6">{pageTree}</div>
+            ⚠️ 高度：第十轮起用 `md:h-[calc(100dvh-var(--site-bar-h))]`，与滚动容器**同一个算式**。
+              原来那条 `calc(100dvh - 顶栏 - 横栏)` 的前提是"横栏在滚动容器**上面**"，
+              而横栏现在已经搬进容器里（见上面那段注释），算式会重复减掉一个栏高
+               —— `docs:anchors` 的"侧栏底部"断言实测抓到 5 处。
+              ⚠️ 也**不能写 `md:h-full`**：grid item 的百分比高度在自动行高里解析不出确定值，
+              aside 会拉伸到整行内容高度（实测 3676px），内部滚动彻底失效。
+            ⚠️ 内层那个滚动盒必须**显式给横向余量**，而且要**给够**：`overflow-x-visible` 单写是无效的
+              （只要另一轴是 auto/scroll，visible 就会被算成 auto，照样裁切），所以只能靠内边距把内容
+              推离裁切边。实测：选中胶囊的亮边 + 外发光（`0 0 30px -4px`，等效可见半径约 13px）
+              在 8px 余量下会被削掉左/上/下的边缘；16px 仍在临界。
+              **第十二轮定稿：横向余量 20px**（`-mx-5 + px-5`，净偏移 0），配合左栏 `--docs-rail-w: 20rem`。
+              ⚠️ 用户在这一轮明确：「不能因为文档区去掉外边框就把原来的设计改掉」——
+                 所以**改的是这个容器的几何，不是 `.glass-lit` 那圈光**（光的配方是全站共用的）。
+              底部再留 `pb-6`（最后一行选中时下边缘同样会被容器底边裁）。
+            ⚠️ 嵌套缩进从 10px/级 收到 **8px/级**（配合左栏加宽），给最深的标题留出文本宽度。
+            ⚠️ `md:top-[var(--docs-subbar-h)]`（第十轮）：横栏现在是滚动容器的**第一个 grid 行**
+              （下面那个 spacer 给它留的位置），它的行高把三栏整体压低了 48px。
+              sticky 的 `top` 相对 scrollport 顶边算，所以这里补回那 48px。
+            ⚠️ 高度必须与"自然位置 → 容器底"这一段**严格相等**：aside 的自然位置在
+              y=160（顶栏 64 + spacer 48 + 横栏 48），只剩 `100dvh - 64 - 48 - 48` 可用。
+              高一点就会溢出视口、低一点就浪费下半屏 —— 这条 5 处断言抓到过两次，改高度前先跑断言。 */}
+        <aside className="hidden md:sticky md:top-[var(--docs-subbar-h)] md:flex md:h-[calc(100dvh-var(--site-bar-h)-var(--docs-subbar-h)-var(--docs-subbar-h))] md:flex-col">
+          {/* ⚠️ 横向余量口径（第十二轮定稿，用户原话：「我的想法是直接把左侧边往右侧缩一些就可以，
+              整个宽度都已经给你让地方了」）：
+              **左 44px / 右 20px 的不对称内边距**（`-mx-5` + `ps-11 pe-5`）。
+              为什么左要 44：选中胶囊那圈外发光的等效可见半径约 13–15px，
+              之前左右都取 20px，实测左侧仍会在某些渲染下被滚动盒（`overflow-y: auto`
+              → 另一轴自动变成 auto）裁到；既然栏宽已经从 15rem 让到 20rem，
+              就把左边一次性给足，彻底不留临界。右侧没有视觉元素贴边，20px 足够。
+              ⚠️ 净偏移仍为 0：`-mx-5`（-20px）与右内边距 20px 抵消，
+                 左内边距的 +24px 由 `--docs-rail-w` 的加宽吸收（文字列因此右移 24px，
+                 这正是用户要的"往右侧缩"）。 */}
+          <div className="docs-scroll -mx-5 min-h-0 flex-1 overflow-y-auto pb-6 pe-5 ps-11 pt-6">{pageTree}</div>
         </aside>
 
         {/* 中：正文。data-copyable = 只读保护白名单，放开这一整块的选择与复制。
@@ -974,7 +1056,7 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
           <nav aria-label="文档导航" className="mt-6 flex flex-wrap items-center gap-3">
             <a
               href={docsHref(section.id)}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-sm font-medium text-slate-700 transition-colors hover:border-brand-400 hover:text-brand-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-brand-500 dark:hover:text-brand-200"
+              className="glass-lit glass-chip inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-sm font-medium transition-colors"
             >
               {section.label}目录
             </a>
@@ -982,7 +1064,10 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
               <a
                 href={docsHref(current.section, current.next.id)}
                 title={current.next.sameDoc ? `下一节：${current.next.title}` : `下一篇：${current.next.title}`}
-                className="group inline-flex items-center gap-2 rounded-lg bg-brand-700 px-3.5 py-2 text-sm font-semibold text-white transition-colors hover:bg-brand-800"
+                /* 动作按钮也对齐主站玻璃（用户 2026-09 第九轮：「下一节按钮也改，整体样式都需要统一」）。
+                   与"当前项"的区别只在**底色浓一档**（`--glass-btn-bg`），光效同一套；
+                   hover 时升到选中态那一档，于是三档关系是：未选中 → hover → 常驻选中。 */
+                className="glass-lit glass-chip glass-btn group inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-sm font-semibold transition-colors"
               >
                 {/* ⚠️ 文案要分开：同一份文档里翻页是「下一节」，跨文档才是「下一篇」。
                     一律写「下一篇」时，在同一份文档里翻页读起来是错的（用户反馈）。 */}
@@ -1006,9 +1091,10 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
             ⚠️ 实际标题 ≤ 2 条时**不渲染面板**（用户 2026-09：一两条的目录太死板）。
                实测 56 页里 33 页属于这种情况。
             ⚠️ 但要**保留第三列的列位**（下面那个空 aside）—— 撤掉列会让正文列涨到 1118px。
-            ⚠️ 与左栏同一口径：sticky 加在 aside 自身、显式高度、内层滚动。 */}
+            ⚠️ 与左栏同一口径：`xl:top-[var(--docs-subbar-h)]` + `xl:h-[calc(100dvh-顶栏-横栏)]`
+               （横栏是三栏之上的一个 grid 行，它占掉的高度必须在 sticky 的 top 与高度里各补回一次）。 */}
         {current && current.toc.length > 3 ? (
-          <aside className="hidden xl:sticky xl:top-0 xl:flex xl:h-[calc(100dvh-var(--site-bar-h)-var(--docs-subbar-h))] xl:flex-col">
+          <aside className="hidden xl:sticky xl:top-[var(--docs-subbar-h)] xl:flex xl:h-[calc(100dvh-var(--site-bar-h)-var(--docs-subbar-h)-var(--docs-subbar-h))] xl:flex-col">
             <div className="docs-scroll min-h-0 flex-1 overflow-y-auto pb-4 pt-6">
               <p className="pl-1.5 text-xs font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500">
                 本篇大纲

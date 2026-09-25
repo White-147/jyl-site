@@ -29,8 +29,9 @@ export type ThemeMode = 'light' | 'dark' | 'auto'
 
 const STORAGE_KEY = 'theme'
 
-/** 画布色：与 src/index.css 的 body 背景、index.html 的 theme-bg-inline 三处必须一致 */
-const CANVAS = { light: '#fafbfb', dark: '#121415' } as const
+/** 画布色：与 src/index.css 的 body 背景、index.html 的 theme-bg-inline 三处必须一致。
+ *  ⚠️ 2026-09 第十一轮暖调转向：由冷白/冷黑改为暖白/暖黑。**改这里必须同步改另外两处**。 */
+const CANVAS = { light: '#fbf8f3', dark: '#15120f' } as const
 
 export const MODES: ThemeMode[] = ['auto', 'light', 'dark']
 

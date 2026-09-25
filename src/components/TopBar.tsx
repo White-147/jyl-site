@@ -35,11 +35,58 @@ export default function TopBar() {
   const [showTop, setShowTop] = useState(false)
   const [scrolled, setScrolled] = useState(false)
 
+  /**
+   * 文档区是否处在「固定外壳」档（md 及以上）。
+   * `useDocsRoute` 把 `docs-shell` 类打在 `<html>` 上（且只在 ≥768px 时打），
+   * 所以读这个类就等于读到"当前是文档区的内部滚动档"。
+   */
+  const isDocsShell = () =>
+    typeof document !== 'undefined' && document.documentElement.classList.contains('docs-shell')
+
   // 文档区在桌面端换了滚动容器（`.docs-shell` + `#docs-scroll`，见 Docs.tsx）：
   // 页面本身不滚，所以「返回顶部」的可用状态与顶栏换档都要读**容器**的滚动量。
   // ⚠️ 这里刻意用 `getElementById` 而不是 context：两者分属不同组件子树，
   //    传 context 会把顶栏与文档区耦合起来，而它们本来只需要共享一个 DOM 契约。
   const scroller = () => document.getElementById('docs-scroll')
+
+  /**
+   * 文档区的**窗口滚动守卫**（2026-09 第八轮）。
+   *
+   * 文档区在 md+ 是「固定外壳 + 内部滚动」：顶栏 `position: fixed`、正文列 `#docs-scroll` 自己滚，
+   * 窗口**不该有任何滚动量**（`html.docs-shell` 的 `overflow: clip` 就是为此）。
+   * 但 iPad Safari 上这条保证会破：
+   *   · `overflow: clip` 是 Safari 16.4 才有的取值，更早的版本会整条丢弃；
+   *   · 横屏地址栏收放会让 `100dvh` 变化，`body` 被撑到比可视区高；
+   *   · 橡皮筋回弹也可能留下残留滚动量。
+   * 窗口一旦被滚下，横栏（顶栏下面那条「返回作品集 + 分区切换」）就滑到顶栏底下，
+   * 用户反馈的「返回作品集被顶栏吞掉、点不到」就是这么来的。
+   *
+   * 三道防线里的第三道：这里在任何窗口滚动后立刻把它压回 0。
+   * 另两道在 `index.css`（`overflow: clip` + `hidden` 回退）与 `Docs.tsx`（横栏自己 `sticky`）。
+   *
+   * ⚠️ 只在 `docs-shell` 档生效：主站与手机端文档区**本来就是页面在滚**，绝不能压。
+   * ⚠️ 用原生监听而不是 React 事件：滚动是高频事件，需要 `passive` 且不参与渲染。
+   */
+  useEffect(() => {
+    const pin = () => {
+      if (!isDocsShell()) return
+      if (window.scrollY === 0 && document.documentElement.scrollTop === 0) return
+      window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior })
+    }
+    window.addEventListener('scroll', pin, { passive: true })
+    window.addEventListener('resize', pin)
+    // Safari 的地址栏收放只反映在 visualViewport 上，不会触发 window 的 scroll
+    const vv = window.visualViewport
+    vv?.addEventListener('resize', pin)
+    vv?.addEventListener('scroll', pin)
+    pin()
+    return () => {
+      window.removeEventListener('scroll', pin)
+      window.removeEventListener('resize', pin)
+      vv?.removeEventListener('resize', pin)
+      vv?.removeEventListener('scroll', pin)
+    }
+  }, [isDocs])
 
   // 两个滚动状态：
   //   showTop  —— 「返回顶部」滚过一屏才出现（贴顶时它没有意义）
@@ -51,7 +98,9 @@ export default function TopBar() {
     const update = () => {
       cancelAnimationFrame(raf)
       raf = requestAnimationFrame(() => {
-        const y = Math.max(window.scrollY, scroller()?.scrollTop ?? 0)
+        // ⚠️ 文档区内部滚动档下**不读 window.scrollY**：它会被上面的守卫按下，
+        //    但两者之间会有几帧的重叠，读进来会让顶栏材质跟着闪一下。
+        const y = isDocsShell() ? (scroller()?.scrollTop ?? 0) : Math.max(window.scrollY, scroller()?.scrollTop ?? 0)
         setShowTop(y > 400)
         setScrolled(y > 8)
       })
@@ -73,6 +122,8 @@ export default function TopBar() {
     const el = scroller()
     if (el && el.scrollHeight > el.clientHeight + 1) {
       el.scrollTo({ top: 0, behavior: 'smooth' })
+      // ⚠️ 顺手把窗口也归零：守卫只处理"自己动的"窗口，这里补上"被别处带动的"那一次。
+      if (isDocsShell()) window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior })
       return
     }
     window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -127,6 +178,11 @@ export default function TopBar() {
             aria-label="笔记与毕业论文"
             className="bar-control"
           >
+            {/* ⚠️ `.bar-sheen` 必须是控件的**第一个子元素**：它承担"玻璃底 + 静置/悬停面光"，
+                且必须是真实元素而不是伪元素 —— `::after` 已被 44px 触控目标占用，
+                而伪元素只能画在元素背景之下，静置面光就会被那层半透明白底滤掉（2026-09 第八轮返工）。
+                详见 index.css 里 `.bar-sheen` 上面那段注释。 */}
+            <span aria-hidden="true" className="bar-sheen" />
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4.5 w-4.5" aria-hidden="true">
               <path d="M4 4h10a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3V4zm3 3h6M7 11h6M7 15h4" />
             </svg>
@@ -143,6 +199,7 @@ export default function TopBar() {
             aria-label="下载简历（PDF）"
             className="bar-control"
           >
+            <span aria-hidden="true" className="bar-sheen" />
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4.5 w-4.5" aria-hidden="true">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />
             </svg>
@@ -160,6 +217,7 @@ export default function TopBar() {
             title="返回顶部"
             className={`bar-control ${showTop ? '' : 'cursor-default opacity-40'}`}
           >
+            <span aria-hidden="true" className="bar-sheen" />
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="h-4.5 w-4.5" aria-hidden="true">
               <path d="M12 19V5M5 12l7-7 7 7" />
             </svg>

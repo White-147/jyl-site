@@ -165,6 +165,9 @@ export function ThemeToggle({
             : 'bar-control'
         }
       >
+        {/* ⚠️ 与笔记/简历/顶部三个控件一致：第一个子元素是 `.bar-sheen`（玻璃底 + 静置/悬停面光）。
+            `dot` 变体不走 `.bar-control`，因此也不渲染它。 */}
+        {variant !== 'dot' && <span aria-hidden="true" className="bar-sheen" />}
         <ModeIcon mode={mode} className={variant === 'dot' ? 'h-4 w-4' : 'h-4.5 w-4.5'} />
         {/* ⚠️ 文字必须包在 `hidden sm:inline` 里：手机上四个控件要同一形态（纯图标 34px），
             否则主题钮因为显示「自动/浅色/深色」而比别人宽一倍（实测 66px vs 34px）。

@@ -26,7 +26,7 @@ export default function MobileTabBar() {
       className="pointer-events-none fixed inset-x-0 bottom-0 z-40 px-3 pb-[max(0.5rem,env(safe-area-inset-bottom))] md:hidden"
       aria-label="移动端导航"
     >
-      <div className="pointer-events-auto mx-auto flex max-w-md items-stretch justify-around overflow-hidden rounded-2xl border border-white/60 bg-white/72 shadow-[0_8px_28px_rgba(157,83,0,0.16)] backdrop-blur-md backdrop-saturate-150 dark:border-white/12 dark:bg-slate-900/66 dark:shadow-[0_8px_28px_rgba(0,0,0,0.45)]">
+      <div className="glass-panel pointer-events-auto mx-auto flex max-w-md items-stretch justify-around overflow-hidden rounded-2xl">
         {tabs.map((tab) => {
           const isActive = active === tab.id
           return (
@@ -35,9 +35,9 @@ export default function MobileTabBar() {
               href={`#${tab.id}`}
               onClick={(e) => onAnchorClick(e, tab.id)}
               aria-current={isActive ? 'page' : undefined}
-              className={`flex min-h-[3.25rem] flex-1 flex-col items-center justify-center gap-0.5 text-[11px] font-medium transition-colors ${
+              className={`glass-lit flex min-h-[3.25rem] flex-1 flex-col items-center justify-center gap-0.5 text-[11px] font-medium transition-colors ${
                 isActive
-                  ? 'text-brand-700 dark:text-brand-200'
+                  ? 'glass-lit-on glass-chip-on font-semibold'
                   : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
               }`}
             >

@@ -51,16 +51,10 @@ export default function Hero() {
             style={{ animationDelay: '-5.5s' }}
           />
         </div>
-        <div
-          className="absolute inset-0 opacity-[0.35] dark:opacity-20"
-          style={{
-            backgroundImage:
-              'linear-gradient(to right, var(--grid-line) 1px, transparent 1px), linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px)',
-            backgroundSize: 'var(--grid-size) var(--grid-size)',
-            maskImage: 'radial-gradient(ellipse 70% 60% at 50% 40%, black, transparent)',
-            WebkitMaskImage: 'radial-gradient(ellipse 70% 60% at 50% 40%, black, transparent)',
-          }}
-        />
+        {/* 首屏原本有一层"局部网格"（`--grid-line` / `--grid-size`）。
+            ⚠️ 2026-09 第十二轮**整层删除**：它与 `body::before` 的全局网格**同尺寸、同对齐**，
+               在首屏正好叠成两层（用户反馈"网格依旧存在，并且和首屏已存在的网格还重叠了"）。
+               现在全站背景只有两层：**暖画布 + 宣纸纤维**（见 `.paper-layer`），网格彻底退场。 */}
         {/* 底部浅渐变光晕：与下一板块柔和过渡，增强首屏层次 */}
         <div
           className="absolute inset-x-0 bottom-0 h-36 bg-gradient-to-t from-brand-500/10 to-transparent sm:h-44"
@@ -90,6 +84,11 @@ export default function Hero() {
             <h1 className="font-handwrite text-6xl font-normal leading-[1.08] tracking-tight text-ink text-balance sm:text-7xl dark:text-ink-light">
               {profile.name}
             </h1>
+            {/* ⚠️ 2026-09 第十二轮：这里原本放过一枚"落款印"（姓名右边）。
+                用户否掉了这个位置 ——「印章位置也不对，不应该在首屏我名字的左下方，
+                我希望是在背景图的右下角一起常驻」。
+                印章现在由 `App.tsx` 的 `.seal-mark-layer` 承担（fixed 右下角，
+                与左下那株卷草纹一起常驻）。**不要在这里再加回来**。 */}
             <button
               type="button"
               onClick={() => setShowAvatar(true)}
