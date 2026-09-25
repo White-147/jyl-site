@@ -106,7 +106,7 @@
   /* 主色板「琥珀」。底座是纯中性石墨（见下方「中性色（石墨）」一段），
      琥珀是唯一强调色，只用于「可交互 / 当前 / 关键数字」。
      每一档都标注了实际用途与实测对比度，改值时按标注重新验算。
-     换算基准：画布 #fafbfb、白 #ffffff、深色画布 #121415、深色卡片 #23282b。 */
+     换算基准：画布 #fbf8f3、白 #ffffff、深色画布 #15120f、深色卡片 #29251f。 */
   --color-brand-50: #fdf8ef;
   --color-brand-100: #fbecd3;
   --color-brand-200: #f3d9ac; /* 深色模式强调文字：深底 13.49:1 */
@@ -121,27 +121,35 @@
 
   /* 深色模式层级：用背景色阶表达浮起，不用阴影（DESIGN.md 的 Tonal-First Rule）。
      全部为纯中性石墨，与浅色模式同一族。 */
-  --color-canvas-dark: #121415;
-  --color-surface-dark-raised: #1b1e20;
-  --color-surface-dark-card: #23282b;
-  --color-line-dark: #2c3234;
-  --color-footer-dark: #0d0f10; /* 比画布再深一档，作为收尾而非用纯黑砸下去 */
+  --color-canvas-dark: #15120f;
+  --color-surface-dark-raised: #201d18;
+  --color-surface-dark-card: #29251f;
+  --color-line-dark: #363029;
+  --color-footer-dark: #100e0b; /* 比画布再深一档，作为收尾而非用纯黑砸下去 */
 
   /* 中性色（石墨）：浅色模式 50→700 逐步变深，深色模式 50→700 反向逐步变浅。
      两个方向的单调性保证组件里的 text-slate-* / border-slate-* 在深浅两套主题下
      都能拿到可读的颜色，不需要逐个加 dark: 变体。每档标注实测对比度。 */
-  /* —— 浅色模式基调 —— */
-  --color-slate-50: #f4f5f5;
-  --color-slate-100: #e8eaeb;
-  --color-slate-200: #dfe2e3; /* 卡边/分隔线 */
-  --color-slate-300: #c6ccce; /* 控件描边（图形级，≥3:1） */
-  --color-slate-400: #52767a; /* 承载日期/单位等小字：画布 5.60:1 */
-  --color-slate-500: #4a6165; /* 次级正文：画布 6.38:1 */
-  --color-slate-600: #333a3d; /* 正文：画布 11.17:1 */
-  --color-slate-700: #2f3a3d;
-  --color-slate-800: #23282b; /* 浅色模式下的深色块 */
-  --color-slate-900: #1b1e20;
-  --color-slate-950: #121415;
+  /* —— 浅色模式基调 ——
+     ⚠️ 2026-09 第十一轮「暖调转向」：中性色由**冷石墨**改为**暖石墨**。
+     起因是命理口径（用神丙丁火第一、甲木第二；忌水、忌土再遇比劫）：
+     原来的冷灰是壬癸水色，整页发寒；暖石墨把"火"从点缀变成底色。
+     做法：色相往暖（橙黄）挪约 30–40°，**彩度仍压在 1–3（近似中性）**，
+     对比度逐档重新验算，全部与原来持平或更高。改值前先按标注复算对比度。 */
+  --color-slate-50: #f7f4ef;
+  --color-slate-100: #ebe6de;
+  --color-slate-200: #e2dbd0; /* 卡边/分隔线 */
+  --color-slate-300: #9e8c72; /* 控件描边：画布 3.07:1（**图形级 3:1 达标**）
+                                 ⚠️ 2026-09 第十一轮顺带修正：旧冷值 #c6ccce 实测只有 **1.53:1**，
+                                    与这里原注释宣称的"≥3:1"不符（属于注释与实现脱节）。
+                                    暖调转向时一并按注释的本意改到达标值。 */
+  --color-slate-400: #7c6f5c; /* 承载日期/单位等小字：画布 5.06:1 */
+  --color-slate-500: #6b5f4e; /* 次级正文：画布 6.21:1 */
+  --color-slate-600: #3d3830; /* 正文：画布 10.83:1 */
+  --color-slate-700: #332f28;
+  --color-slate-800: #29251f; /* 浅色模式下的深色块 */
+  --color-slate-900: #201d18;
+  --color-slate-950: #15120f;
 
   /* 动效 token：指数缓出族，无回弹（原 cubic-bezier(0.34,1.56,0.64,1) 已全部替换） */
   --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
@@ -150,11 +158,40 @@
   --duration-reveal: 320ms;
   --duration-panel: 240ms;
 
-  /* 网格底纹：全站统一一处定义（原 body/Hero/联系区三处各自硬编码，色值与间距不一致）。
-     ⚠️ 2026-09 从 0.13 提到 0.2：玻璃面板的折射**要有东西可弯才看得见**，
-        用户在浅色下"看不清晰"就是因为这层网格太淡，弯了也看不出来。 */
-  --grid-line: rgb(120 140 143 / 0.2);
-  --grid-size: 48px;
+  /* ===== 背景纹样：**网格已全部退场**（2026-09 第十二轮）=====
+     这一处反复改过四轮，把完整结论留在这里，避免日后再来回折腾：
+       ① 最初是 48px 直线网格（`--grid-line` / `--grid-size`），作用是给玻璃折射"有东西可弯"；
+       ② 第十轮换成手搓云纹（几何不成立，被否）；
+       ③ 第十一轮：云纹整层撤掉 —— 云属**水**，本盘「身旺而寒湿」忌水；改回**暖调疏格**；
+       ④ **第十二轮：网格也整层撤掉**。原因是"重复"而不是"不好看"：
+          `body::before` 的全页网格与 Hero 自己那层**同尺寸（56px）、同对齐**，
+          在首屏正好叠成两层（用户反馈"网格依旧存在，并且和首屏已存在的网格还重叠了"）。
+     现在的背景构成（**只有这三层，不要再加第四层**）：
+        · `body`            —— 纯色暖画布 `#fbf8f3` / `#15120f`（无图像）
+        · `.paper-layer`    —— 宣纸纤维，`position: fixed`，**唯一承担"折射可弯之物"**
+        · `body::after`     —— 琥珀光斑，`position: fixed`
+     所以原来的 `--grid-line` / `--grid-size` 两个 token **已删除**（无消费方）。
+     ⚠️ 若将来有人想加回网格：先确认它与现有层不重复，并重跑 `docs:anchors` 的材质断言。 */
+
+  /* ===== 卷草纹章（2026-09 第十一轮）=====
+     资源：`public/assets/cao-mark.webp`（560×472，暖墨单色、透明底）。
+     来源：开源图库《中国传统纹样图鉴 · Wényàng》**006 卷草纹**的墨线稿，
+           经「提取墨线 → 阈值化 → 转透明底着色」而成。**许可 CC BY-NC 4.0（非商业 + 署名）**，
+           署名放页脚。商用需向原作者取授权。
+     为什么选它（命理口径）：卷草＝藤蔓卷叶，**五行属木**；本盘「木仅两辰中各藏一点乙木、
+           无天干透出，最弱」，而官星（事业线）即乙木 —— 2027 丁未年「卯未半合木」正是木被引活之年。
+           寓意「生机、延展」（图库原文：生命力、延展、装饰韵律）也正好对应现在这个阶段。
+     ⚠️ 它是**角落纹章**（单株，不铺满），不是平铺底纹：既符合传统"边饰"用法，
+        又避开了"具象主体铺满会露馅"这个此前反复踩到的坑。 */
+  --cao-mark: url("/assets/cao-mark.webp");
+  /* ⚠️ 分写成两个 token：`width` 不接受 `560px 472px` 这种两值语法（踩过，尺寸会算成 0、纹章整块消失）。
+     ⚠️ 尺寸口径：**别按原始 560px 放**，会直接压到正文左列与代码块（实测踩过）。
+       现在取 320×270 —— 大约只占内容列左侧那条空带，`left: 0` 时右缘 320px，
+       而正文列在 1440 视口下从 x≈176 起、但那是「容器内边距 + 内容列」；
+       纹章是 0.5 不透明度的装饰线，压过去也只是很淡的背景线，不会再"抢字"。 */
+  --cao-mark-w: 320px;
+  --cao-mark-h: 270px;
+  --cao-mark-opacity: 0.42;
 
   /* ===== 玻璃泛光（悬停 / 选中 / 当前）=====
      用户 2026-09 的原话：「不是现在这种周围一圈框个颜色的效果，而是整个玻璃泛光的效果，
@@ -190,11 +227,11 @@ html {
      缺字回退到系统字体时宁可显示真实字重，也不接受合成加粗（DESIGN.md 的 No-Synthesis Rule） */
   font-synthesis: none;
   /* 深色画布在橡皮筋滚动时露出的底色 */
-  background-color: #fafbfb;
+  background-color: #fbf8f3;
 }
 .dark html,
 html.dark {
-  background-color: #121415;
+  background-color: #15120f;
 
   /* 深色模式的中性色阶：与浅色模式**反向**。
      深色底上文字越大越浅才是对的层级，而 Tailwind 的 slate 档位是为浅底设计的，
@@ -204,17 +241,18 @@ html.dark {
 
      注意：这只是「值」的反转，不改变任何组件的用法语义。
      审计方法：随手取一个 slate-N 文本，浅底与深底都应 ≥ 4.5:1。 */
-  --color-slate-50: #f5f6f6;
-  --color-slate-100: #dde0e2; /* 深底 13.93:1 */
-  --color-slate-200: #c6ccce; /* 深底 11.38:1 ｜ 卡片底 9.17:1 */
-  --color-slate-300: #a9b2b5; /* 深底 8.55:1 ｜ 卡片底 6.90:1 */
-  --color-slate-400: #95a0a3; /* 深底 6.89:1 ｜ 卡片底 5.56:1 */
-  --color-slate-500: #9ea9ac; /* 深底 7.68:1 ｜ 卡片底 6.19:1 */
-  --color-slate-600: #a9b2b5;
-  --color-slate-700: #2c3234;
-  --color-slate-800: #23282b; /* 深色模式卡片面 */
-  --color-slate-900: #1b1e20; /* 深色模式抬升面 */
-  --color-slate-950: #121415; /* 深色画布 */
+  /* —— 深色模式基调（暖石墨档，与浅色档同族）—— */
+  --color-slate-50: #f7f4f0;
+  --color-slate-100: #e6e0d6; /* 深底 13.6:1 */
+  --color-slate-200: #cdc2b1; /* 深底 11.1:1 ｜ 卡片底 9.0:1 */
+  --color-slate-300: #b3a894; /* 深底 8.4:1 ｜ 卡片底 6.8:1 */
+  --color-slate-400: #a1968a; /* 深底 6.7:1 ｜ 卡片底 5.5:1 */
+  --color-slate-500: #a89d92; /* 深底 7.5:1 ｜ 卡片底 6.1:1 */
+  --color-slate-600: #b3a894;
+  --color-slate-700: #363029;
+  --color-slate-800: #29251f; /* 深色模式卡片面 */
+  --color-slate-900: #201d18; /* 深色模式抬升面 */
+  --color-slate-950: #15120f; /* 深色画布 */
 }
 
 body {
@@ -373,7 +411,7 @@ body {
   cursor: zoom-in;
 }
 
-/* 全站连续背景：石墨基调 + 琥珀光斑 + 颗粒纹理。
+/* 全站连续背景：暖画布 + 琥珀光斑 + 宣纸纤维（`.paper-layer`）。
    原为 3 个 radial-gradient + 1 张 feTurbulence SVG，逐帧多重栅格化；
    后合并为 2 个椭圆光斑 + 颗粒。
    光斑色 = brand-500 (#d97a06) 与 brand-400 (#f7bd6e)，低透明度以保证正文对比度不被稀释。
@@ -382,12 +420,15 @@ body {
    它在移动端被各浏览器实现为「每次滚动重绘整屏背景」，是公认的卡顿源。现在拆成两层：
      · 光斑（需要固定视口、不随内容滚动）→ body::after，独立 `position: fixed` 元素，
        由合成器承担，滚动时不触发重绘；
-     · 颗粒（本身是无缝小纹理，随内容滚动在视觉上无差别）→ 留在 body 上正常滚动。
+     · ~~颗粒（本身是无缝小纹理，随内容滚动在视觉上无差别）→ 留在 body 上正常滚动~~
+       ⚠️ 2026-09 第十二轮更新：**颗粒已从 body 迁走**，改为独立的 `.paper-layer`
+          （`position: fixed` + 双频 feTurbulence）。两个原因：
+          ① 它现在要承担"玻璃折射的可弯之物"，必须 fixed 才能让折射条件在滚动中恒定；
+          ② 单频 0.9 的老噪点是"电视雪花"感、不是纸感，双频才出得来纤维。
+          于是 body 现在**只有纯色底**，不再叠任何图像。
    改这里时不要图省事把 fixed 写回 background-attachment。 */
 body {
-  background-color: #fafbfb;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
-  background-repeat: repeat;
+  background-color: #fbf8f3;
 }
 
 /* 固定光斑层：`position: fixed` + 负 z-index 落在 body 背景之上、内容之下。
@@ -412,7 +453,10 @@ body::after {
 }
 
 .dark body {
-  background-color: #121415;
+  background-color: var(--color-slate-950); /* 暖石墨画布 #15120f */
+  /* 深色档在暖石墨之上再补一层极淡的暖色，让整屏不发"冷炭灰"。
+     ⚠️ 只作用于 body 自身的背景层，不影响任何内容元素；`background-blend-mode` 在浅色档不需要。 */
+  background-image: linear-gradient(rgb(74 52 22 / 0.16), rgb(74 52 22 / 0.06));
 }
 .dark body::after {
   background-image:
@@ -428,24 +472,168 @@ body::after {
     );
 }
 
-/* 全页淡网格：与首屏同款 48px 网格，从顶部中心向四周淡出（整页铺满感）。
-   单一来源 token --grid-line / --grid-size，Hero 与联系区统一引用，不再各自硬编码。 */
-body::before {
-  content: "";
+/* ===== 宣纸纤维层（`.paper-layer`）=====
+   2026-09 第十二轮：**网格全部退场**，全站背景只剩「暖画布 + 宣纸纤维 + 琥珀光斑」。
+
+   为什么要独立成元素而不是继续挂在 `body` 上：
+     · 玻璃折射（`#lg-refract`）要"有东西可弯"。网格在时那层是 **fixed**，滚动中折射条件恒定、最清晰；
+       纤维若留在 `body` 背景上会**随内容滚动**，折射采样到的纹理一直在漂。
+       所以把它提升为 `position: fixed` 的一层 —— 与当年网格同样的物理位置。
+     · 顺带解决"随内容滚动时噪点像电视雪花"的观感问题。
+
+   纹理做法：**双频 `feTurbulence` 叠加**（不是单频噪点）
+     · 低频 baseFrequency 0.7 / numOctaves 3 → **网络状粗纤维**（宣纸的"帘纹"感来自这一层）
+     · 高频 baseFrequency 2.0 / numOctaves 2 → **细颗粒**（纸面的手感）
+     两层都是 `fractalNoise`，各自 rect 给一个很低的不透明度。
+     ⚠️ 零外部文件、零授权问题；单元素两层 rect，绘制成本远低于当年的多渐变网格。
+
+   ⚠️ 强度口径（用户 2026-09 选的「P2 中档」）：
+      粗纤维 .075 / 细粒 .045 / 平铺 220×220。要调**只动这三个数**。
+      实测参考：把强度从 0 提到 P2，背景的"平整感"明显下降；再往上（P3 .11/.06）正文后面会开始吵。
+   ⚠️ 去掉网格的代价（已实测，记录下来免得日后误判为 bug）：
+      折射可见度由 **19.3%**（背后是 1px 细线）降到 **6.9%**（背后是宣纸纤维）——
+      不是失效，是"没有边可弯"了，只能弯纤维的明暗起伏。这层 fixed 纤维就是它现在唯一的"可弯之物"。 */
+.paper-layer {
   position: fixed;
   inset: 0;
-  pointer-events: none;
   z-index: 0;
-  background-image:
-    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
-  background-size: var(--grid-size) var(--grid-size);
-  mask-image: radial-gradient(ellipse 90% 70% at 50% 15%, black, transparent 75%);
-  -webkit-mask-image: radial-gradient(ellipse 90% 70% at 50% 15%, black, transparent 75%);
+  pointer-events: none;
+  opacity: 1;
+  background-repeat: repeat;
+  background-size: 220px 220px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='a'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' seed='3'/%3E%3C/filter%3E%3Cfilter id='b'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='2.0' numOctaves='2' seed='10'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23a)' opacity='0.075'/%3E%3Crect width='220' height='220' filter='url(%23b)' opacity='0.045'/%3E%3C/svg%3E");
 }
-.dark body::before {
-  /* 深色下网格压暗：直接降不透明度，避免再写一份色值 */
+/* 深色档：同一张纹理，**只换混合方式**。
+   浅色下噪声直接在暖白底上做"纸的明暗"；深色底上同一张图会偏亮、发灰，
+   所以改用 `soft-light` 让它只做明暗调制、不整体提亮（比 invert 更自然，也不多一份资源）。 */
+.dark .paper-layer {
+  opacity: 0.85;
+  mix-blend-mode: soft-light;
+}
+/* 打印：纸纹不上纸 */
+@media print {
+  .paper-layer {
+    display: none;
+  }
+}
+
+/* ===== 卷草纹章（角落单株，不铺满）=====
+   位置：固定在**左下角**，像从纸边生长出来的一株藤蔓。
+   ⚠️ 深色档不换图，用 `filter: invert()` 反色即可（单色暖墨 → 暖米白），
+      省掉第二份资源；同时压一档不透明度（浅色线条在深底上更跳）。 */
+.cao-mark-layer {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  z-index: 0;
+  pointer-events: none;
+  width: var(--cao-mark-w);
+  height: var(--cao-mark-h);
+  background-image: var(--cao-mark);
+  background-repeat: no-repeat;
+  background-position: left bottom;
+  background-size: var(--cao-mark-w) var(--cao-mark-h);
+  opacity: var(--cao-mark-opacity);
+}
+.dark .cao-mark-layer {
+  filter: invert(1) sepia(0.18) saturate(0.9) brightness(1.05);
+  opacity: 0.38;
+}
+/* 窄屏（<1024）：纹章会压到正文，直接不显示；它本来就是"宽屏才成立"的装饰 */
+@media (max-width: 1023px) {
+  .cao-mark-layer {
+    display: none;
+  }
+}
+/* ⚠️ 文档区（`html.docs-shell`）**不显示纹章**：
+   那里左栏紧贴视图左边，纹章会被左栏切成半截、看着像坏了（实测）。
+   文档区是"阅读界面"，装饰一律让位给正文与导航。
+   ⚠️ 选择器要写成 `html.docs-shell .cao-mark-layer`（后代），
+      因为 `.docs-shell` 加在 `<html>` 上、而纹章是 `body` 里的元素。 */
+html.docs-shell .cao-mark-layer {
+  display: none;
+}
+@media print {
+  .cao-mark-layer {
+    display: none;
+  }
+}
+
+/* ===== 印章（2026-09 第十二轮）：右下角常驻的**阳文**印章 =====
+   用户的口径：
+     · 位置：「我希望是在背景图的右下角一起常驻」—— 与左下那株卷草纹配成一对；
+     · 形制：「最好也不要是主色是琥珀，里面是白色，应该反过来，里面是印章琥珀色，
+       外面拿个同色外框就行」→ **阳文**：透明底 + 琥珀线条内文 + 一圈同色细框；
+     · 内文：「做 007 忍冬纹，这样不会和左侧卷草纹重复」。
+
+   实现：外层 `.seal-mark-layer` 负责定位与那圈**同色细框**，内层 `.seal-mark-inner`
+   放 `seal-rendong.webp`（133×160 琥珀线条 + 透明底，4x）。
+   ⚠️ 尺寸口径：外框 96×96、内文高 46px。内文必须是 **4x** 图 ——
+      用 2x 实测会被浏览器降采样磨细到几乎看不见（踩过）。
+   ⚠️ 不透明度压到 0.42：它是"纸上的印"，不是页面上的按钮；再高会与正文抢注意力。 */
+.seal-mark-layer {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
+  /* ⚠️ 必须在**内容与右侧导轨之下**：它是背景装饰，不能盖住任何可读/可点的东西。
+     滚草纹是 z-index: 0（在内容下），印章同理。 */
+  pointer-events: none;
+  width: 88px;
+  height: 88px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgb(157 83 0 / 0.62); /* 那圈"同色外框"：与内文同一个琥珀（brand-700） */
+  border-radius: 8px;
+  /* ⚠️ 用户 2026-09 第十二轮：「印章目前内部只剩线条没有颜色，过于不显眼」。
+     两处一起加实：① 内文线稿重出（阈值降到 0.26/0.60、墨线占比 9.2% → 13.7%，颜色改 brand-700）；
+     ② 这里的不透明度从 0.4 提到 0.62，并且**不再靠 `opacity` 压淡整枚章**，
+        而是把线稿本身画实 —— 否则线条与底一起变淡，永远"不显眼"。 */
   opacity: 0.62;
+  /* ⚠️ 位置口径（第十二轮实测后的结论）：用户要"背景图的右下角一起常驻"，
+      但**右下角那一条已被右侧导轨占用** —— 实测 1440 视口下：
+        内容列右缘 x=1296 ｜ 导轨标签最左 x=1340 ｜ 视口 1440
+      也就是说右边缘只剩约 100px，放不下 88px 的印章而不压到"教育背景 / 联系我"这两个标签。
+      所以这里做**最小让步**：仍贴在底部右下区域，只把 `right` 让出导轨的宽度（120px），
+      这样它不压任何文字、也不进内容列；`bottom: 28px` 保持"右下角"的观感。
+      ⚠️ 若你更想要**严格贴角**、接受与导轨标签同区（印章不透明度低，重叠时是很淡的线），
+         把 `right` 改成 24px 即可 —— 只改这一个数。 */
+  right: 120px;
+  bottom: 28px;
+}
+.seal-mark-inner {
+  display: block;
+  width: 34px;
+  height: 42px;
+  background-image: url("/assets/seal-rendong.webp");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}
+/* 深色档：琥珀在深底上偏暗，提亮一档；外框同步提亮。
+   ⚠️ 不透明度不要再往下压（原来 0.34 太淡）—— 深色档的问题靠 `brightness` 解决，
+      压 opacity 会让线稿整体变灰，反而不显眼。 */
+.dark .seal-mark-layer {
+  border-color: rgb(242 169 59 / 0.55);
+  opacity: 0.5;
+}
+.dark .seal-mark-inner {
+  filter: brightness(1.5) saturate(1.05);
+}
+/* 窄屏与文档区：与卷草纹同口径，一律让位 */
+@media (max-width: 1023px) {
+  .seal-mark-layer {
+    display: none;
+  }
+}
+html.docs-shell .seal-mark-layer {
+  display: none;
+}
+@media print {
+  .seal-mark-layer {
+    display: none;
+  }
 }
 
 /* ===== 面板玻璃（.glass-panel）=====
@@ -459,22 +647,29 @@ body::before {
      · `--panel-rim`      上缘内高光（折射之外唯一解释"这是玻璃"的东西）
      · `--panel-shadow`   外阴影（由琥珀派生 rgb(157 83 0)，与主色同族）
    折射用弱档 `lg-refract-soft`（scale 6）：面板面积大，位移一大就像哈哈镜。
-   ⚠️ 面板**有东西可弯**：`body::before` 是一层 fixed 的 48px 全局网格，
+   ⚠️ 面板**有东西可弯**：`.paper-layer` 是一层 fixed 的宣纸纤维（双频 feTurbulence），
       所以折射出来是"网格被玻璃轻轻扭了一下"，不是白做。
    ⚠️ 折射只给**区块主容器**（用户确认的覆盖面，约 6 个元素），内部小卡仍走色阶：
       这条是 DESIGN.md 的 Blur-Budget Rule 的性能约束，别顺手铺到所有卡片上。 */
 :root {
   --panel-tint: rgb(255 255 255 / 0.5);
   --panel-tint-strong: rgb(255 255 255 / 0.62);
-  /* 浅色下边框必须是**深色发丝线**：白线在浅底上等于没有，那正是"玻璃样式显示不完全"。 */
-  --panel-edge: rgb(15 23 42 / 0.1);
+  /* 浅色下边框必须是**深色发丝线**：白线在浅底上等于没有，那正是"玻璃样式显示不完全"。
+     ⚠️ 2026-09 第十一轮：色值由**冷蓝黑** `rgb(15 23 42)` 改为**暖墨** `rgb(41 26 12)`。
+        它只有 0.10–0.12 的不透明度，但整站每一块玻璃都用它勾边，
+        冷暖差会在"暖底 + 冷边"处显出一圈发青的轮廓 —— 暖调转向最容易漏掉的就是这一层。 */
+  --panel-edge: rgb(41 26 12 / 0.12);
   --panel-rim: rgb(255 255 255 / 0.9);
-  --panel-rim-b: rgb(15 23 42 / 0.07);
+  --panel-rim-b: rgb(41 26 12 / 0.08);
   --panel-shadow: 0 1px 2px rgb(157 83 0 / 0.06);
 }
 .dark {
-  --panel-tint: rgb(27 30 32 / 0.55);
-  --panel-tint-strong: rgb(27 30 32 / 0.68);
+  /* ⚠️ 2026-09 第十二轮：深色档的玻璃底由**冷石墨** `rgb(27 30 32)` 改为**暖石墨** `rgb(41 37 31)`。
+     这两个值在第十一轮暖调转向时被漏掉了 —— 浅色档的 `--panel-edge` 转成了暖墨，
+     但深色档的"底"仍是冷色，于是深色下每一块玻璃都泛青（实测顶栏/底栏/文档吸顶条都能量到）。
+     改这两个值必须同时看 `--panel-edge`（浅色档那支）与 `--panel-rim`。 */
+  --panel-tint: rgb(41 37 31 / 0.55);
+  --panel-tint-strong: rgb(41 37 31 / 0.68);
   --panel-edge: rgb(255 255 255 / 0.1);
   --panel-rim: rgb(255 255 255 / 0.09);
   --panel-rim-b: rgb(0 0 0 / 0.4);
@@ -570,15 +765,22 @@ body::before {
 }
 .glass-lit:hover,
 .glass-lit:focus-visible {
-  /* ⚠️ 外发光**不带垂直偏移**：原来是 `0 10px 30px -8px`，光只落在下方，
-     与面光叠加成"底部聚光灯"。改成 0 0 → 四周均匀散开。
-     第三条 `inset 0 0 22px -14px` 是**内缘**的一圈暖光，与外面的光晕呼应，
-     让"四边散光"发生在玻璃的边界上，而不是把面板中央染黄。 */
+  /* ⚠️ 内发光口径（2026-09 第十二轮定稿，两次返工后的结论）：
+     组成 = 上缘内高光 + 1px 琥珀环 + **一圈弥散的内缘暖光** `inset 0 0 22px -14px`。
+
+     返工记录（两次都错，别再犯）：
+       ① 最初这里是**外发光** `0 0 30px -4px`。它会溢出元素盒子，而左栏页树 / 移动端抽屉
+          这类容器带 `overflow-y: auto`（另一轴会被算成 auto），溢出的光被直接裁掉
+          —— 用户反馈"左侧描边没显示全"。
+       ② 我改成 `inset 0 0 0 3px`（贴边 3px 硬光边）。虽然不可能被裁，但它是一条**实边**，
+          观感"太重太凝"。用户原话：「内部光可以，但是现在这个太重太凝了，
+          之前版本是散在内部的很好看，不能因为文档区去掉外边框就把原来的设计改掉」。
+       ③ 定稿：回到 ① 里那圈**弥散**内缘光。它同样不可能被裁（是 inset），
+          而且"散在内部"——两个诉求同时满足，不需要靠加硬边来补救。 */
   box-shadow:
     inset 0 1px 0 var(--glass-rim-lit),
     0 0 0 1px var(--glass-edge-lit),
-    inset 0 0 22px -14px var(--glass-glow-warm),
-    0 0 30px -4px var(--glass-glow-warm);
+    inset 0 0 22px -14px var(--glass-glow-warm);
   /* 刻意不抬升：用户 2026-09「不需要大范围的向上跳的逻辑，悬停住有效果就行」。 */
 }
 /* 当前 / 选中项：亮边常驻，但不抬升（避免"选中=浮起来"的误读） */
@@ -604,6 +806,44 @@ body::before {
   }
 }
 
+/* ===== 「点亮态」（.glass-lit-on）：把悬停效果**固定住** =====
+   用户 2026-09 第八轮的原话：「悬停和选中效果可以保持一致，等于就是选中是把悬停效果固定住」。
+   所以「选中 / 当前」不再自己发明一套材质，而是**逐字复用**悬停那三样：
+     ① 面光（::after，`.glass-lit` 的共享规则已按 [aria-pressed]/[aria-selected] 点亮）
+     ② 亮边 + 外发光 + 内缘光（下面这条 box-shadow，与 `.glass-lit:hover` 一字不差）
+     ③ 底与文字色（`.glass-chip-on` / 组件里的 `--bar-control-lit-*`）
+
+   ⚠️ 为什么不能只写 `.glass-lit[aria-pressed="true"] { box-shadow: … }`：
+      `.glass-lit:hover` 的权重同为 (0,2,0)，鼠标一悬停到已选中的元素上，
+      两条规则打架（谁在后面谁赢），表现为"选中项一悬停就变样"。
+      带上 hover/focus-visible 一起声明，选中 + 悬停时结果**恒定**。
+
+   ⚠️ 不要再写第三条平行规则去微调选中态 —— 那正是本次返工的原因（第一版给选中单独配了
+      一套琥珀底色 + 外发光，实拍出来是"整块淡黄铺满"，与顶栏悬停的玻璃感对不上）。 */
+.glass-lit.glass-lit-on,
+.glass-lit.glass-lit-on:hover,
+.glass-lit.glass-lit-on:focus-visible,
+.glass-lit.glass-lit-on[aria-pressed="true"],
+.glass-lit.glass-lit-on[aria-selected="true"],
+.glass-lit.glass-lit-on[aria-pressed="true"]:hover,
+.glass-lit.glass-lit-on[aria-selected="true"]:hover {
+  /* ⚠️ 与 `.glass-lit:hover` 必须保持**一字不差**（用户的规则：选中 = 把悬停固定住）。
+     返工记录见 `.glass-lit:hover` 上方那段：外发光会被容器裁、`inset 0 0 0 3px` 硬光边又"太凝"，
+     定稿就是这圈**弥散**内缘光。 */
+  box-shadow:
+    inset 0 1px 0 var(--glass-rim-lit),
+    0 0 0 1px var(--glass-edge-lit),
+    inset 0 0 22px -14px var(--glass-glow-warm);
+}
+
+/* 「点亮态的底」：与 `.bar-control:hover` 同一组值（0.16 白 + 琥珀字）。
+   为什么单独成一个类：`.bar-control` 是顶栏专用（36px 高、44px 触控外扩、折射滤镜），
+   胶囊不能挂它；但**得是同一种观感**，所以色值抽成 --bar-control-lit-* 变量共享。 */
+.glass-chip-on {
+  background-color: var(--bar-control-lit-bg);
+  color: var(--bar-control-lit-fg);
+}
+
 /* ===== 玻璃小件（.glass-chip）：筛选标签 / 分类按钮 / 联系区按钮 =====
    用户 2026-09：「项目区、技能区的筛选标签和联系我的 GitHub 和下载简历在深色模式下还留着
    之前框纯色的逻辑，应该和别的大卡片逻辑保持一致」。
@@ -612,6 +852,11 @@ body::before {
    的手工配对一律删掉（那正是"框纯色"的来源，浅色深色各写一遍，谁也盖不过谁）。 */
 .glass-chip {
   background: var(--chip-tint);
+  /* ⚠️ 2026-09 第十二轮：边框改 **transparent**，边线交给 `.bar-sheen` 画（见下）。
+     原因：`.bar-sheen` 用 `inset: 0` 覆盖整个按钮，而 `background-clip` 默认是 **border-box**，
+     所以它的底色会铺到边框**下面**；边框（半透明）叠在浅底上 = 亮环，
+     与更内侧的填充之间就显出"两条同心环"（深色档最明显，用户反馈的就是这个）。
+     让 sheen 用一条 `inset 0 0 0 1px` 画边，全站只剩一条线。 */
   border: 1px solid var(--chip-edge);
   color: var(--chip-text);
   box-shadow:
@@ -620,13 +865,55 @@ body::before {
 }
 :root {
   --chip-tint: rgb(255 255 255 / 0.5);
-  --chip-edge: rgb(15 23 42 / 0.12);
-  --chip-text: rgb(71 85 105);
+  /* 同 `--panel-edge`：暖调转向时一并由冷蓝黑改为暖墨，否则胶囊会在暖底上泛青边 */
+  --chip-edge: rgb(41 26 12 / 0.14);
+  --chip-text: rgb(82 70 56);
+  /* ===== 「点亮态」的底与文字（顶栏控件悬停 / 筛选胶囊选中**共用同一组值**）=====
+     用户 2026-09 第八轮：「悬停和选中效果可以保持一致，等于就是选中是把悬停效果固定住」。
+     所以这组值只有一处定义，`.bar-control:hover` 与 `.glass-chip-on` 都从这里取 ——
+     任何一边单独改都会立刻打破"悬停 = 选中"的一致性。
+       --bar-control-lit-bg  半透明白底（叠在顶栏/画布上，深浅色通透感一致）
+       --bar-control-lit-fg  文字/图标色。浅色用 brand-800 #804400，深色用 brand-200 #f3d9ac
+     光效（面光 + 亮边 + 外发光 + 内缘光）不在这里，统一由 `.glass-lit` / `.glass-lit-on` 出。 */
+  --bar-control-lit-bg: rgb(255 255 255 / 0.16);
+  --bar-control-lit-fg: #804400;
+  /* ===== 顶栏控件的「静置材质」= 与 `.glass-chip` 同源（2026-09 第九轮，用户定向）=====
+     用户原话：「静态状态下，把顶栏的右侧按钮对齐到现在技能区和项目区的静态」——
+     方向与上一轮**相反**：这两个控件的静置观感以**筛选胶囊为基准**，不是把胶囊往顶栏靠。
+     实测两者只差两项（内高光早就一致）：底差 12 倍、缺一条 1px 发丝边。
+       --bar-rest-shadow    只剩一圈很淡的环境光（材质表达交给 sheen，不再靠外发光）
+       --bar-sheen-shadow   与 `.glass-chip` **逐字相同**的两条内高光（上缘冷白 / 下缘暗边）
+     底与边直接引用 `--chip-tint` / `--chip-edge`，不另写一份值 —— 胶囊改了顶栏跟着改，
+     不会再出现两边各写一遍、慢慢漂移（那正是前几轮反复出问题的地方）。
+     ⚠️ 深色档的 `--bar-rest-shadow` 仍是原来的那一圈暖光（用户「深色我再看看」）。 */
+  --bar-rest-shadow: 0 0 14px -6px rgb(217 122 6 / 0.18);
+  --bar-sheen-shadow:
+    inset 0 1px 0 var(--panel-rim),
+    inset 0 -1px 0 var(--panel-rim-b);
+  /* 动作型玻璃件（`.glass-btn`：文档区的「下一节」）的静置底：比胶囊的 `--chip-tint` 浓一档。
+     目的是让"可点的动作"与"筛选项"在同一套玻璃语言里仍有轻重差别；hover 升到点亮那一档，
+     于是三档关系是「未选中 → hover → 常驻选中」。 */
+  --glass-btn-bg: rgb(255 255 255 / 0.72);
 }
 .dark {
   --chip-tint: rgb(255 255 255 / 0.06);
   --chip-edge: rgb(255 255 255 / 0.1);
   --chip-text: rgb(203 213 225);
+  --bar-control-lit-bg: rgb(255 255 255 / 0.13);
+  --bar-control-lit-fg: #f3d9ac;
+  --bar-rest-shadow: 0 0 16px -8px var(--glass-glow-warm);
+  --glass-btn-bg: rgb(255 255 255 / 0.1);
+}
+
+/* 动作型玻璃件（`.glass-btn`）：与 `.glass-chip` 共用边、字色与光效，只把**静置底**浓一档。
+   ⚠️ 与 `.glass-chip-on` 的分工不能混：那个是"当前项"的常驻点亮态，这个是"可点的动作"。 */
+.glass-btn {
+  background-color: var(--glass-btn-bg);
+}
+.glass-btn:hover,
+.glass-btn:focus-visible {
+  background-color: var(--bar-control-lit-bg);
+  color: var(--bar-control-lit-fg);
 }
 
 /* 玻璃管阅读液柱：粒子缓慢上浮 + 呼吸闪烁（液体微粒感）。
@@ -759,6 +1046,18 @@ details[open] .chevron-up-down {
      改这里要同时改 Docs.tsx 里横栏的 `h-[var(--docs-subbar-h)]` —— 其实只有这一处引用，
      所以改一个值就够。 */
   --docs-subbar-h: 3rem;
+  /* 文档区左栏宽度。2026-09 第十轮从写死的 15rem 改成变量；第十二轮调到 20rem。
+     历次口径：
+       · 最初 15rem：最深标题（`5.2.2.3 大数据工具可视化平台`，18 字 ≈ 191px，depth=3）
+         只剩 5px 余量，字体度量一有出入就出省略号；
+       · 第十一轮 → 18rem（用户拍板"加宽取 18rem"），解决省略号；
+       · **第十二轮 → 20rem**：左栏内层滚动盒的左右内边距要给到 20px，
+         才能容下"点亮态"那圈**外发光**（`0 0 30px -4px` 等效半径约 13px，
+         容器 `overflow-y: auto` 会把溢出的部分裁掉 —— 用户两次反馈"左侧描边没显示全"）。
+         内边距从 16px 提到 20px 后，栏宽同步 +1rem 才能保住文本可用宽度、不出省略号。
+     ⚠️ 为什么不改光、只改容器：用户第十二轮明确「不能因为文档区去掉外边框就把原来的设计改掉」
+        —— 光的配方是全站共用的，该让路的是这个滚动容器的几何。 */
+  --docs-rail-w: 20rem;
 }
 
 /* ===== 顶栏玻璃（2026-09 由"毛玻璃"升级为 iOS 26 风格玻璃）=====
@@ -845,7 +1144,7 @@ details[open] .chevron-up-down {
     0 6px 22px rgb(157 83 0 / 0.1);
 }
 .dark .site-bar {
-  background-image: linear-gradient(to bottom, rgb(18 20 21 / 0.34), rgb(18 20 21 / 0.18));
+  background-image: linear-gradient(to bottom, rgb(21 18 15 / 0.34), rgb(21 18 15 / 0.18));
   /* 深色模式的高光是"内暗边 + 顶部微亮"：与 DESIGN.md 的 Tonal-First Rule 一致，
      刻意比浅色档弱一档（.07 而不是 .85）。 */
   box-shadow:
@@ -872,7 +1171,7 @@ details[open] .chevron-up-down {
   }
   .dark .site-bar {
     backdrop-filter: blur(16px) saturate(1.4);
-    background-image: linear-gradient(to bottom, rgb(18 20 21 / 0.62), rgb(18 20 21 / 0.44));
+    background-image: linear-gradient(to bottom, rgb(21 18 15 / 0.62), rgb(21 18 15 / 0.44));
   }
   .site-bar-lens {
     backdrop-filter: none;
@@ -892,7 +1191,7 @@ details[open] .chevron-up-down {
   }
   .dark .site-bar,
   .dark .site-bar.is-scrolled {
-    background-color: rgb(18 20 21 / 0.96);
+    background-color: rgb(21 18 15 / 0.96);
   }
 }
 
@@ -933,19 +1232,44 @@ details[open] .chevron-up-down {
      ⚠️ 对比度：填充是**半透明白**，底下仍是顶栏玻璃，明度变化很小；
         文字色 #333a3d（11.17:1）在加入填充后只会更安全，不会跌破 4.5:1。
         改填充透明度后请重测对比度（见 docs/联动维护点.md 第 3 条）。 */
-  /* 底色几乎去掉（0.1 → 0.04）：控件的"底"应当来自折射本身。
-     平涂底色会把它读成"一块浅灰方块"而不是玻璃（用户：「底还是纯色」）。 */
-  background-color: rgb(255 255 255 / 0.04);
-  /* 静置就带一圈**四周均匀**的边缘光（用户确认：静置态只给顶栏这几个图标加）。
-     这是全站唯一一处静置发光的面板类元素，其余一律只在悬停时亮。 */
-  box-shadow:
-    inset 0 1px 0 var(--glass-rim-lit),
-    inset 0 -1px 0 var(--panel-rim-b),
-    0 0 16px -8px var(--glass-glow-warm);
+  /* ===== 静置材质：**与 `.glass-chip` 同源**（2026-09 第九轮，用户定向）=====
+     用户原话：「静态状态下，把顶栏的右侧按钮对齐到现在技能区和项目区的静态」。
+     实测两者原来只差两项 —— 底（0.04 vs 0.5）与边框（无 vs 1px 发丝边），内高光早就一致。
+     所以下面三行就是全部差异：
+       · 底 = `--chip-tint`（浅色 0.5 白 / 深色 0.06 白），画在 `.bar-sheen` 上
+       · 边 = `--chip-edge`（浅色 41 26 12 / 0.14、深色 255 255 255 / 0.1）
+       · 内高光 = `--bar-sheen-shadow`（与 `.glass-chip` 逐字相同的两条）
+     ⚠️ 底从「元素自己的 background-color」搬到 `.bar-sheen`（第八轮）：定位子元素画在元素背景
+        之上，底留在元素自己身上时，sheen 里的面光会被它滤掉（详见 `.bar-sheen` 那段注释）。
+     ⚠️ 对比度：0.5 白底比原来的 0.04 厚得多，#333a3d 在其上 ≈11:1，比改前更安全。 */
+  /* ⚠️ 2026-09 第十二轮：边框改 **transparent**，那条线交给 `.bar-sheen` 的
+     `inset 0 0 0 1px var(--chip-edge)` 画。原因：sheen 以 `inset: 0` 覆盖整个按钮，
+     而 `background-clip` 默认是 **border-box**，它的底色会铺到边框**下面**；
+     半透明边框叠在浅底上就成了一个亮环，与更内侧的填充之间显出"两条同心环"
+     （深色档最明显）。保留 1px 透明边框是为了不改变盒模型尺寸 → 布局零位移。 */
+  border: 1px solid transparent;
+  background-color: transparent;
+  box-shadow: var(--bar-rest-shadow);
+  /* 静置光：**内发光**（第八轮定稿，用户："和悬停一样，光效显示在按钮内部四周"）。
+     机制与悬停**完全同源**：同一套双层径向渐变（上方冷白环境光 + 下方琥珀暖光），
+     悬停由 `:hover` 点亮、静置**常驻**。差别只有暖光锚点（125% → 135%）与强度（100% → 72%）：
+     36px 高的按钮上，光要落在**按钮内部四周**，不能从下沿溢出去。
+
+     ⚠️⚠️ 绘制顺序是这里最容易踩的坑，动之前把 `.bar-control` / `.bar-sheen` 几条规则连起来读：
+       · `.bar-sheen`      = 底 + 静置面光 + 悬停面光（**同一个盒子**，所以底永远在光之下）
+       · `.bar-control::after` = 44px 触控目标外扩（视觉不放大）
+       · `position:absolute; z-index:auto` 的定位子元素画在**元素背景之上、内容（图标/文字）之下**
+       第一版把光画在元素的 `background-color` **之下**（`z-index:-1`），实拍就是
+       "光散在按钮外侧、底部更重"，正是用户否掉的那种观感。 */
   /* 顶栏既然透明（白叠层 12%→5%），深色截图从下面滚过时深色文字会掉对比度。
      补一层**浅色晕**保住可读性，而不是把玻璃加厚 —— 加厚就把"透明"这件事又抵消了。
-     `drop-shadow` 作用在整个控件（填充 + 图标 + 文字）上，形成一圈很淡的光晕。 */
-  filter: drop-shadow(0 1px 2px rgb(255 255 255 / 0.55));
+     ⚠️ 第九轮起底变成 0.5 白，这层晕的负担轻了很多，但**不要删**：
+        斜向滚过时仍有深色截图从控件边缘穿过，留着它更稳。 */
+  /* ⚠️ 2026-09 第十二轮收窄（`0 0 1px` / .4，原 `0 1px 2px` / .55）：
+     现在按钮已有 0.5 白的实底，这层晕的补偿作用小了很多；而它落在按钮**外面**，
+     与边框之间会留一条暗缝，被用户读成"上下两条边"。收窄后仍保住斜向滚过时的对比度，
+     但不再形成可见暗缝。深色档改用暗晕（见 `.dark .bar-control`）。 */
+  filter: drop-shadow(0 0 1px rgb(255 255 255 / 0.4));
   /* 「玻璃叠玻璃」：控件自己做一次折射。顶栏的折射层（z-49）画在顶栏（z-50）之下，
      所以控件的底景里**已经包含折射结果**，这里再折一次就是字面意义的玻璃叠玻璃。
      ⚠️ 实测可行（ON/OFF 对照：控件加 url() 折射后截图逐点变化）。
@@ -961,79 +1285,124 @@ details[open] .chevron-up-down {
   /* 44px 触控目标：视觉不放大，只把可点区域撑开 */
   content: "";
   position: absolute;
-  inset: -0.25rem -0.125rem;
+  inset: 0;
+  /* ⚠️ 2026-09 第十二轮：原为 `-0.25rem -0.125rem`（外扩 4px，见 .bar-sheen 那段说明） */
 }
 /* 悬停：**整面玻璃泛光**（用户明确否掉了"周围一圈框个颜色"）。
-   `::after` 已经被 44px 触控目标占用，所以光走 `::before`。 */
-.bar-control::before {
+   ⚠️ 底与光都不再走伪元素，而是**元素内的第一个 span**（`.bar-sheen`），原因只有一个：
+     `position: absolute; z-index: auto` 的伪元素画在**元素的 background-color 之上**，
+     而 `::after` 已经被 44px 触控目标占用。要让「底在光之下」，
+     就得有第三个盒子 —— 真实 span 的 `inset: -0.25rem -0.125rem` 与 `::after` 的触控外扩一致，
+     负 inset 也顺带补上了原来靠 `inset: -0.25rem` 撑出的那 4px 外扩区。
+   ⚠️ 静置与悬停用的是**同一条** sheen 渐变（同一套径向渐变），只是调参不同：
+       悬停 = 暖光锚在 125%、满强度；静置 = 锚在 135%、72% 强度（光落在按钮内部四周）。
+     这就是用户要的"选中/静置是把悬停效果固定住"的同源关系。 */
+.bar-sheen {
+  position: absolute;
+  /* ⚠️ 2026-09 第十二轮修正：inset 由 `-0.25rem -0.125rem`（外扩 4px）**收回 0**。
+     那 4px 原是想顺带补触控区，但触控区已由 `.bar-control::after` 单独撑好，
+     于是它只剩副作用：sheen 的底色（`--chip-tint`，近白）铺到按钮 border **之外**，
+     与按钮自己的 1px border 拼成**两条同心描边** —— 用户反馈"顶栏右侧按钮上下边
+     仔细看似乎有两条边"。收回后底与光都只落在玻璃内部、与 border 同一条线。 */
+  inset: 0;
+  z-index: 0;
+  border-radius: 0.75rem; /* = 控件圆角，与 border 同线 */
+  pointer-events: none;
+  overflow: hidden;
+  /* 底取**胶囊那一套**（`--chip-tint`）；`.bar-control` 自己的边框取 `--chip-edge` —— 两处同源，改胶囊即改顶栏。
+  /* 边线就在这里画：与按钮同 inset、同圆角，是全站唯一那条线。
+     ⚠️ 与按钮自己的 `border` **不能同时画**（那就是两条环，见 `.bar-control` 那段说明）。 */
+  box-shadow: inset 0 0 0 1px var(--chip-edge);
+  background-color: var(--chip-tint);
+  /* ⚠️ 这里也**不画内高光**：sheen 与按钮同框，`--bar-sheen-shadow` 的上下内高光
+     交给 `.bar-sheen::before`（它现在与 sheen 同框，画出来正好落在玻璃内侧）。 */
+  transition: background-color var(--duration-micro) var(--ease-out-soft);
+}
+.bar-sheen::before {
   content: "";
   position: absolute;
-  inset: 0;
-  z-index: -1;
-  border-radius: inherit;
-  pointer-events: none;
+  inset: 0; /* 与 sheen 同框：负 inset 已收回，这里不再需要"收回视觉框" */
+  border-radius: 0.75rem;
+  /* 静置面光：**常驻点亮**（不是悬停）。 */
+  background:
+    radial-gradient(130% 110% at 50% -30%, var(--glass-sheen), transparent 62%),
+    radial-gradient(100% 90% at 50% 135%, color-mix(in srgb, var(--glass-glow-warm) 72%, transparent), transparent 68%);
+  /* 底 + 内高光取**胶囊那一套**：这个盒子的 inset 正好等于视觉框，画出来与按钮 border 同线。 */
+  box-shadow: var(--bar-sheen-shadow);
+}
+.bar-control:hover .bar-sheen {
+  background-color: var(--bar-control-lit-bg);
+}
+.bar-control:hover .bar-sheen::before {
+  /* 悬停面光：与静置同一条渐变，暖光锚点回到 125%、满强度 */
   background:
     radial-gradient(130% 110% at 50% -30%, var(--glass-sheen), transparent 62%),
     radial-gradient(100% 90% at 50% 125%, var(--glass-glow-warm), transparent 72%);
-  opacity: 0;
-  transition: opacity var(--duration-micro) var(--ease-out-soft);
 }
 .bar-control:hover {
-  color: var(--color-brand-800, #804400);
-  background-color: rgb(255 255 255 / 0.16);
+  color: var(--bar-control-lit-fg);
   backdrop-filter: url(#lg-refract) saturate(1.15);
+  /* ⚠️ 第九轮起**不再重复写内高光**：上缘冷白 / 下缘暗边由 `.bar-sheen` 的
+     `--bar-sheen-shadow` 常驻承担（与胶囊同源）。这里只加悬停独有的三样：
+     1px 琥珀亮边、内缘暖光、**一圈柔和的下投光**。
+     ⚠️ 2026-09 第十二轮回退说明：中途我曾把第三条改成 `inset 0 0 0 3px`（贴边硬光边），
+        那是因为文档区滚动盒会裁掉外发光而做的"补丁"。用户明确否掉：
+        「不能因为文档区去掉外边框就把原来的设计改掉」—— 顶栏在**自己的栏体里**
+        有足够空间放这圈光（实测栏高 64px、按钮 h-9，光不会被裁），
+        所以恢复原设计 `0 8px 22px -6px`。要修的是文档区那个容器，不是这里。 */
   box-shadow:
-    inset 0 1px 0 var(--glass-rim-lit),
     0 0 0 1px var(--glass-edge-lit),
+    inset 0 0 22px -14px var(--glass-glow-warm),
     0 8px 22px -6px var(--glass-glow-warm);
-}
-.bar-control:hover::before {
-  opacity: 1;
 }
 .bar-control:disabled {
   /* 「返回顶部」贴顶时的禁用态：只降文字与图标的不透明度，**不动材质** ——
-     否则禁用时按钮会"瘪下去"，与旁边三个按钮不齐（实测 40% 不透明度来自组件类）。 */
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.5),
-    0 1px 2px rgb(15 23 42 / 0.03);
+     否则禁用时按钮会"瘪下去"，与旁边三个按钮不齐（实测 40% 不透明度来自组件类）。
+     ⚠️ 第九轮起底与内高光都在 `.bar-sheen` 上（元素自己的 `background` 已清空，
+        `--bar-sheen-shadow` 常驻），所以禁用态**不需要**再写一套 box-shadow；
+        照旧写在这里会与 sheen 的那两条叠成"双内高光"，按钮边缘会发白一圈。 */
+}
+.bar-control:disabled .bar-sheen {
   background-color: rgb(255 255 255 / 0.28);
 }
 .bar-control:focus-visible {
   outline: none;
   color: var(--color-brand-700);
+  box-shadow: 0 0 0 2px rgb(242 169 59 / 0.6);
+}
+.bar-control:focus-visible .bar-sheen {
   background-color: rgb(255 255 255 / 0.8);
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.95),
-    0 0 0 2px rgb(242 169 59 / 0.6);
 }
 .dark .bar-control {
+  /* ⚠️ 2026-09 第十二轮：深色档**不要任何 `filter: drop-shadow`**。
+     实测加了一圈暗晕之后，它会漏进「按钮边框与玻璃填充之间」那条缝里，
+     观感又变成"两条边"（与浅色档加白晕是同一个毛病的镜像）。
+     深底上按钮本来就浮得起来，去掉投影反而干净。 */
+  filter: none;
   color: #dde0e2;
-  /* ⚠️ 这里原来是 0.07 的**平涂白** —— 正是用户说的"深色下看起来还是老样子的纯色底子"。
-     压到 0.05，把"底"交给折射本身，只留下缘暖光（--glass-edge-lit）+ 上缘冷光。 */
-  background-color: rgb(255 255 255 / 0.05);
-  /* 与浅色档同口径：静置就带一圈**四周均匀**的边缘光
-     （全站唯一一处静置发光的面板类元素，其余一律只在悬停时亮） */
-  box-shadow:
-    inset 0 1px 0 var(--glass-rim-lit),
-    inset 0 -1px 0 var(--panel-rim-b),
-    0 0 16px -8px var(--glass-glow-warm);
+  /* 深色档的口径（用户 2026-09：「深色我再看看，浅色优先」）：**静置材质与浅色同源**
+     （底 = `--chip-tint`、边 = `--chip-edge`、内高光 = `--bar-sheen-shadow`，都在上面统一定义），
+     只有那圈环境光走深色档的 `--bar-rest-shadow`（`0 0 16px -8px` 暖光）——
+     深底上这圈光本来就明显，不必跟着浅色再调。 */
 }
 .dark .bar-control:hover {
   color: var(--color-brand-200);
-  background-color: rgb(255 255 255 / 0.13);
   box-shadow:
     inset 0 1px 0 rgb(255 255 255 / 0.18),
     0 2px 6px rgb(0 0 0 / 0.35);
 }
-.dark .bar-control:disabled {
+.dark .bar-control:hover .bar-sheen {
+  /* `--bar-control-lit-bg` 的深色档就是 0.13，与历史值一致 */
+  background-color: var(--bar-control-lit-bg);
+}
+.dark .bar-control:disabled .bar-sheen {
   background-color: rgb(255 255 255 / 0.04);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.07);
 }
 .dark .bar-control:focus-visible {
+  box-shadow: 0 0 0 2px rgb(242 169 59 / 0.55);
+}
+.dark .bar-control:focus-visible .bar-sheen {
   background-color: rgb(255 255 255 / 0.11);
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.1),
-    0 0 0 2px rgb(242 169 59 / 0.55);
 }
 @media (prefers-reduced-motion: reduce) {
   .site-bar,
@@ -1056,7 +1425,7 @@ details[open] .chevron-up-down {
   }
   .dark .site-bar,
   .dark .site-bar.is-scrolled {
-    background-color: rgb(18 20 21 / 0.98);
+    background-color: rgb(21 18 15 / 0.98);
   }
   .bar-control:hover {
     background-color: rgb(157 83 0 / 0.08);
@@ -1329,7 +1698,7 @@ details[open] .chevron-up-down {
   border-radius: 0.75rem;
   border: 1px solid rgb(0 0 0 / 0.35);
   /* UE 编辑器截图是深色底：给它一块中性深底，浅色模式下不会"白底贴深图"显得割裂 */
-  background: #1b1e20;
+  background: #201d18;
   transition: border-color var(--duration-micro) var(--ease-out-soft);
 }
 .doc-content .doc-figure img:hover {
@@ -1438,12 +1807,25 @@ details[open] .chevron-up-down {
    根滚动位置会被保留并被"夹住"（切到文档区时可能停在中途）；`clip` 只是裁剪，
    不建立滚动容器，`window.scrollY` 归零，顶栏的 `position: sticky` 语义也保持不变。
 
+   ⚠️⚠️ 2026-09 第八轮：**`clip` 后面必须保留 `hidden` 作为回退**，顺序不能反。
+     `overflow: clip` 是 Safari 16.4 才支持的取值，之前的 iOS Safari 会把整条声明丢弃 ——
+     于是文档区退回"普通可滚页面"，而顶栏是 `fixed`、横栏是不吸顶的普通元素，
+     用户一滚横栏就滑到顶栏底下：**「返回作品集被顶栏吞掉、点不到」**（iPad 横屏实测反馈）。
+     现在三道防线一起上，任何一道单独生效都不会再出现那个现象：
+       1. 这里补 `hidden` 回退（Safari 拿 hidden，现代浏览器仍命中 clip）；
+       2. `Docs.tsx` 的横栏自己 `sticky top-[--site-bar-h]`（即使页面真滚了也只会停在顶栏下沿）；
+       3. `TopBar.tsx` 的滚动守卫：文档区 md+ 下把窗口滚动量强制归零。
+     ⚠️ 两道 `overflow` 都给 `html` 与 `body`，不要只给 body：只给 body 会让 body
+        变成一个内容溢出的滚动容器（实测 scrollHeight 比 clientHeight 多 124px），
+        多出一个谁也没预期的滚动源。
+
    ⚠️ 只在 md 及以上生效：手机端没有侧栏，仍是普通页面滚动（配 Docs.tsx 里的吸顶目录抽屉）。
    断点必须与 Docs.tsx 的 `md:` 前缀、TopBar 的 `md:fixed` 三处一致。 */
 @media (min-width: 768px) {
   html.docs-shell,
   html.docs-shell body {
     overflow: clip;
+    overflow: hidden; /* Safari < 16.4 的 `clip` 回退，见上面那段 */
     /* 页面不滚了，避免为不存在的滚动条留位导致内容整体左移 */
     scrollbar-gutter: auto;
   }
@@ -1452,6 +1834,124 @@ details[open] .chevron-up-down {
     position: fixed;
     inset-inline: 0;
     top: 0;
+  }
+  /* 文档区横栏吸顶（第八轮）：让它像顶栏一样钉住，页面被滚下时也只停在顶栏下沿。
+     ⚠️ `top` 必须用 `--site-bar-h` 而不是写 4rem —— 顶栏高度是全站单一来源（见第 6 条联动点）。
+     ⚠️ z-index 取 40：压在正文之上、顶栏（50）与它的折射层（49）之下。
+     ⚠️ **不要给它加 `backdrop-filter`**：一是全站 Blur-Budget 断言（`npm run docs:anchors`）
+        按真实 DOM 个数计数，多一个就逼近上限；二是它只在"页面真被滚下去"这个异常态下
+        才需要遮住下方内容，用 92% 的实色底已经够，不值得为异常态常驻一层模糊。
+        遮挡靠底色的不透明度，见下。 */
+  .docs-subbar {
+    position: sticky;
+    /* ⚠️ 第十轮：横栏搬进了 `#docs-scroll`（否则正文无法从它背后穿过，折射无事可做）。
+       sticky 的 `top` 是相对**滚动容器（scrollport）的内边距盒**算的，而 `#docs-scroll`
+       自己就贴在顶栏下沿（`md:mt-[var(--site-bar-h)]`），所以这里必须是 `top: 0`
+       —— 写 `var(--site-bar-h)` 会把它钉到 y=128（横栏下面露出一条正文）。
+       第八轮那条"横栏自己吸顶"的防线仍然成立：它依旧 sticky，只是参照系从页面变成了容器。 */
+    top: 0;
+    z-index: 40;
+    /* 吸顶后下方内容会从它底下穿过，补一层与页面同色的底，避免文字叠字。
+         浅色/深色两套底走变量，组件里不写 dark: 变体。 */
+    background-color: rgb(250 251 251 / 0.92);
+  }
+  .dark .docs-subbar {
+    background-color: rgb(21 18 15 / 0.9);
+  }
+}
+
+/* ===== 文档区横栏（.docs-subbar）：与全局顶栏同一套玻璃配方 =====
+   用户 2026-09 第九轮：「把文档区的单独顶栏也和全局顶栏样式进行对齐」。
+   实测两边原来差三条：横栏是**平涂底**（`rgb(250 251 251 / 0.92)`）、没有内高光、下边线靠 1px border。
+   这里换成与 `.site-bar` **同一组数值**（渐变底 + 四条内高光 + 极轻投影 + 折射层）。
+
+   ⚠️ 为什么是"同一组数值"而不是抽一个共用类：`.site-bar` 是 `sticky + z-50`，`.docs-subbar` 是
+      `sticky top-16 + z-40`，而且顶栏在文档区还会切成 `position: fixed`（`.is-fixed`）。
+      合并成一条选择器会牵动定位与层叠，风险大于收益。所以采用**复制 + 断言**：
+      `scripts/check-anchors.mjs` 里有一条断言逐项比对两者的 `background-image` / `box-shadow`，
+      漂移了会红。改其中一边时先看那条断言。
+
+   ⚠️ 第十轮定稿：**底降到与顶栏同一档（纯渐变 + 全透明）**。
+      这是"文字能透过去 + 折射看得见"的前提 —— 原来那层 72% 的实底会把折射结果盖掉。
+      实测依据：0.72 时开/关 `backdrop-filter` 的可见差异只有 0.08%，0.2 时 0.27%，
+      而且当时的横栏**背后根本没有内容**（正文从 y=112 才开始）。
+      现在横栏已搬进 `#docs-scroll` 做 sticky，正文真的从它下面穿过（见 Docs.tsx 那段注释），
+      所以这里与顶栏完全同源、不再需要自己那层底。 */
+.docs-subbar {
+  /* 玻璃配方（与 .site-bar 逐项一致） */
+  background-image: linear-gradient(to bottom, rgb(255 255 255 / 0.12), rgb(255 255 255 / 0.05));
+  background-color: transparent;
+  /* ⚠️ 这条 `drop-shadow` 是**透明化的必需配套**（与 `.bar-control` 同一个道理）：
+     横栏现在是全透明的，正文从它下面滚过时会出现"两层文字叠在一起"（实测滚到 430 时
+     "1. 版本说明" 会从「UE 理论」这个 tab 里透出来）。补一层浅色晕把下层压淡 ——
+     这正是用户要的"文字可以透过去"，但得透得**读得清**。
+     ⚠️ 强度按实拍取：0.6 时叠字仍明显，0.85 才够；**不要再往上加**（满了就变成一圈白描边）。 */
+  filter: drop-shadow(0 1px 3px rgb(255 255 255 / 0.85));
+  box-shadow:
+    inset 0 1.5px 0 rgb(255 255 255 / 0.85),
+    inset 0 -1px 0 rgb(255 255 255 / 0.14),
+    inset 1px 0 0 rgb(255 255 255 / 0.12),
+    inset -1px 0 0 rgb(255 255 255 / 0.12),
+    0 2px 10px rgb(0 0 0 / 0.04);
+  /* ⚠️ 组件里那条 `border-b` 已删：下边线改由上面 `inset 0 -1px 0` 承担，与顶栏口径一致
+     （顶栏也没有通栏 1px 实线）。两条都留会变成"双下边线"。 */
+}
+.dark .docs-subbar {
+  background-image: linear-gradient(to bottom, rgb(21 18 15 / 0.34), rgb(21 18 15 / 0.18));
+  background-color: transparent;
+  box-shadow:
+    inset 0 1.5px 0 rgb(255 255 255 / 0.07),
+    inset 0 -1px 0 rgb(255 255 255 / 0.04),
+    inset 1px 0 0 rgb(255 255 255 / 0.05),
+    inset -1px 0 0 rgb(255 255 255 / 0.05),
+    0 2px 10px rgb(0 0 0 / 0.2);
+}
+/* 横栏的"占位 spacer"：给 sticky 元件一个位于阈值**之下**的自然位置。
+   高度 = 横栏高度，再配一条同值的**负上外边距**（组件里写 `md:-mt-[var(--docs-subbar-h)]`）——
+   于是它在文档流里等于零高度：横栏恰好落在"刚被钉住"的位置，正文起始位置与搬动之前
+   **逐像素一致**（实测：不配负边距时横栏会掉到 y=136，横栏下面露出一条 72px 的空白）。 */
+.docs-subbar-spacer {
+  height: var(--docs-subbar-h);
+}
+/* 横栏的折射层宿主：与 `.site-bar-lens-layer` 同一套路（**必须挂在固定定位的兄弟层**，
+   放进栏内不生效 —— 实测证据见 TopBar.tsx 那段注释）。
+   ⚠️ `top: var(--site-bar-h)` = 正好压在横栏位置；`z-index: 39` < 横栏的 40，
+      于是折射结果画在横栏之下，横栏那层 12% 白再叠上去：既透又弯。 */
+.docs-subbar-lens-layer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: var(--site-bar-h);
+  height: var(--docs-subbar-h);
+  z-index: 39;
+  pointer-events: none;
+  display: none;
+}
+@media (min-width: 768px) {
+  .docs-subbar-lens-layer {
+    display: block;
+  }
+}
+.docs-subbar-lens {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  backdrop-filter: url(#lg-refract) saturate(1.15);
+}
+/* 与顶栏同口径的能力回退：没有 `url()` 折射的浏览器（Safari / Firefox）退回一层轻模糊。
+   ⚠️ 这一档同时把横栏的底加厚（0.72 → 0.86），否则正文从下面穿过时读不清。 */
+@supports not (backdrop-filter: url(#lg-refract)) {
+  .docs-subbar {
+    backdrop-filter: blur(16px) saturate(1.4);
+    background-image: linear-gradient(to bottom, rgb(255 255 255 / 0.42), rgb(255 255 255 / 0.26));
+    background-color: rgb(250 251 251 / 0.86);
+  }
+  .dark .docs-subbar {
+    background-image: linear-gradient(to bottom, rgb(21 18 15 / 0.55), rgb(21 18 15 / 0.4));
+    background-color: rgb(21 18 15 / 0.8);
+  }
+  .docs-subbar-lens {
+    display: none;
   }
 }
 

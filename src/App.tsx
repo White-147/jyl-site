@@ -57,6 +57,29 @@ export default function App() {
             · 底部 Tab Bar 仍只在主页面渲染（文档区没有可滚动的章节），
               视觉改成与顶栏同材质的浮动胶囊。 */}
       <div className="app-root min-h-screen font-sans text-slate-900 dark:text-slate-100">
+        {/* 宣纸纤维层（2026-09 第十二轮）：
+            全站背景由"暖画布 + 宣纸纤维 + 琥珀光斑"三层构成，**网格已全部退场**。
+            ⚠️ 它必须 `position: fixed`：① 滚动时纤维不漂移；② **玻璃折射要有东西可弯** ——
+               `#lg-refract` 现在唯一能弯的就是这层纤维（网格在时弯的是网格）。
+            ⚠️ 它同时是 `.cao-mark-layer` 的"底"：纹章 z-index 也是 0，但它在 DOM 里靠后，
+               所以纹章压在纸纹**之上**（想让纹章陷进纸里就把这两行顺序对调）。 */}
+        <div aria-hidden="true" className="paper-layer" />
+        {/* 卷草纹章（2026-09 第十一轮）：**左下角**常驻，单株不铺满。
+            五行属木（补本盘最弱且最要紧的那一项 —— 官星即乙木），寓意「生机、延展」。
+            来源与许可见 index.css 的 `--cao-mark` 注释 / 页脚署名。
+            ⚠️ `<1024px`、文档区、打印三种情况由 CSS 直接隐藏。
+            ⚠️ 它不承载信息，所以 `aria-hidden` 让读屏跳过。 */}
+        <div aria-hidden="true" className="cao-mark-layer" />
+        {/* 印章（2026-09 第十二轮）：**右下角**常驻，与左下的卷草纹配成一对。
+            用户定的形制是**阳文**：「里面是印章琥珀色，外面拿个同色外框就行」
+            —— 所以是透明底 + 琥珀线条的忍冬纹，外面一圈同色细框，**不是**实底白字。
+            内文取 **007 忍冬纹**（不是卷草纹）：「这样不会和左侧卷草纹重复」。
+            资源：`public/assets/seal-rendong.webp`（133×160 琥珀线条 + 透明底，4x）。
+            ⚠️ 位置口径与卷草纹完全对称：左下一株纹样、右下这枚印章，都 `fixed` 常驻。
+            ⚠️ `<1024px`、文档区、打印同样隐藏（见 index.css 的 `.seal-mark-layer`）。 */}
+        <div aria-hidden="true" className="seal-mark-layer">
+          <span className="seal-mark-inner" />
+        </div>
         <TopBar />
         {route.isDocs ? (
           <main>

@@ -495,6 +495,172 @@ const linkProblems = []
   console.log(`跨文档互链断言：${withLinks.reduce((a, x) => a + x.count, 0)} 条，点了 ${clicked} 条，${linkProblems.length ? `✗ ${linkProblems.length} 条失效` : '✓ 全部真的换了页'}`)
 }
 
+/* ---------- 文档区横栏不被顶栏吞 ----------
+ *
+ * 用户反馈（iPad 横屏 Safari）：「进毕业论文 → 跳 book → 再跳回毕业区，
+ * 顶部『返回作品集』那一栏被顶栏吞掉，点不到」。
+ *
+ * 几何上本来是对的（横栏在顶栏占位之下、内容列之上），会出这一条只有一种可能：
+ * **文档区的窗口被滚下去了**。`html.docs-shell { overflow: clip }` 是"页面不滚"的唯一保证，
+ * 而 `clip` 是 Safari 16.4 才支持的取值，更早的 iOS 会整条丢弃；地址栏收放、橡皮筋回弹
+ * 也会留下残留滚动量。窗口一滚，横栏（当时还不吸顶）就滑到 `position: fixed` 的顶栏底下。
+ *
+ * 现在三道防线：`overflow: clip` + `hidden` 回退（index.css）、横栏自己 sticky（Docs.tsx）、
+ * 窗口滚动守卫（TopBar.tsx）。这一条断言**直接复现那个故障动作**（把窗口强行滚下去）并验证：
+ *   1. 横栏与「返回作品集」始终在顶栏底边之下（几何）；
+ *   2. 该位置 `elementFromPoint` 命中它自己（真的点得到，不是被别的层盖住）；
+ *   3. 强行滚动之后窗口被压回 0（守卫真的在跑）；
+ *   4. 切分区来回之后仍然成立（用户报的正是这个来回路径）。
+ */
+const subbarProblems = []
+{
+  for (const vp of VIEWPORTS.filter((v) => v.width >= 768)) {
+    await call('Emulation.setDeviceMetricsOverride', {
+      width: vp.width,
+      height: vp.height,
+      deviceScaleFactor: vp.scale,
+      mobile: vp.mobile,
+    })
+    for (const hash of ['#/docs/thesis', '#/docs/theory', '#/docs/thesis']) {
+      await go(hash)
+      // 故意把窗口滚下去：正常实现下这里应该被压回 0
+      await evaluate(`(() => { window.scrollTo(0, 220); return true })()`)
+      await new Promise((r) => setTimeout(r, 250))
+      const r = await evaluate(`(() => {
+        const bar = document.querySelector('header.site-bar');
+        const barBottom = bar ? bar.getBoundingClientRect().bottom : 0;
+        const back = [...document.querySelectorAll('a')]
+          .filter((a) => a.textContent.trim() === '返回作品集')
+          .find((a) => a.getBoundingClientRect().width > 0);
+        if (!back) return { error: '找不到可见的「返回作品集」' };
+        const bb = back.getBoundingClientRect();
+        const hit = document.elementFromPoint(Math.round(bb.left + 30), Math.round(bb.top + bb.height / 2));
+        return {
+          winY: Math.round(window.scrollY),
+          barBottom: Math.round(barBottom),
+          backTop: Math.round(bb.top),
+          backBottom: Math.round(bb.bottom),
+          hitSelf: hit === back || back.contains(hit),
+          hitWhat: hit ? hit.tagName + '.' + String(hit.className || '').slice(0, 40) : null,
+          sticky: (() => {
+            const el = document.querySelector('.docs-subbar');
+            return el ? getComputedStyle(el).position : null;
+          })(),
+        };
+      })()`)
+      const tag = `[${vp.name}] ${hash}`
+      if (r.error) {
+        subbarProblems.push(`${tag}：${r.error}`)
+        continue
+      }
+      if (r.winY !== 0) {
+        subbarProblems.push(`${tag}：窗口滚动守卫失效，window.scrollY=${r.winY}（应为 0）`)
+      }
+      if (r.backTop < r.barBottom - 0.5) {
+        subbarProblems.push(
+          `${tag}：横栏被顶栏吞掉（返回作品集 top=${r.backTop} < 顶栏底边 ${r.barBottom}）`,
+        )
+      }
+      if (!r.hitSelf) {
+        subbarProblems.push(`${tag}：返回作品集点不到，该位置命中的是 ${r.hitWhat}`)
+      }
+      if (r.sticky !== 'sticky') {
+        subbarProblems.push(`${tag}：.docs-subbar 的 position 是 ${r.sticky}（应为 sticky，这是防吞的那道防线）`)
+      }
+    }
+    console.log(`  · ${vp.name}：横栏贴顶 / 可点 / 窗口守卫 三项均已验`)
+  }
+  for (const p of subbarProblems) problems.push(`横栏被吞：${p}`)
+  console.log('')
+  console.log(
+    `文档区横栏断言：${subbarProblems.length ? `✗ ${subbarProblems.length} 处` : '✓ 强行滚动窗口也不会被顶栏吞掉，且始终可点'}`,
+  )
+
+  /* ---------- 横栏材质与全局顶栏不漂移 ----------
+   *
+   * 用户 2026-09 第九轮：「把文档区的单独顶栏也和全局顶栏样式进行对齐」。
+   * 做法是**复制同一组数值**（不是抽共用类 —— 两者定位/层叠差异太大，见 index.css 的注释），
+   * 所以必须有一条断言盯着：`.docs-subbar` 与 `.site-bar` 的 `background-image` 与 `box-shadow`
+   * 逐项相同（`background-color` 例外：横栏是 sticky，要多一层 72% 的底挡住下方正文）。
+   * 漂移了会红，不要靠肉眼。 */
+  const materialProblems = []
+  {
+    const text = (s) => String(s ?? '').replace(/\s+/g, ' ').trim()
+    /* ⚠️ 数值要**量化**再比：顶栏的 box-shadow 有 320ms 过渡，读到的常是 `0.847` 这种
+       还差最后一丝的插值（结束值是 `0.85`），逐字符比会报假失败。
+       量化到 2 位小数即可 —— 真出现材质漂移时，差的一定是整档（0.85 vs 0.07 那种量级）。 */
+    const q = (s) => text(s).replace(/\d+\.\d+/g, (m) => Number(m).toFixed(2))
+    for (const theme of ['light', 'dark']) {
+      await call('Emulation.setDeviceMetricsOverride', { width: 1440, height: 900, deviceScaleFactor: 1, mobile: false })
+      await go(`#/docs/theory?s=${encodeURIComponent('版本说明')}`)
+      const r = await evaluate(`(async () => {
+        document.documentElement.classList.toggle('dark', ${theme === 'dark'});
+        /* ⚠️ 这一条踩过两个坑，都记下来：
+           ① class 刚改完就 getComputedStyle，拿到的还是**上一套主题**的值
+              （现象：浅色跑量出深色数值、深色跑出浅色数值）。所以要等两帧让样式重算落定。
+           ② 顶栏有 .is-scrolled 状态（滚过一屏换成更重的内高光/投影），而横栏没有这个状态 ——
+              比对的是**静置档**，所以先把滚动归零让那个状态自然退掉。
+              ⚠️ 但归零之后顶栏还在跑 box-shadow 的 transition（320ms），
+              中途量到的是插值（实测量到 rgba(255,255,255,0.518) 这种半路值）——
+              所以还要**轮询到数值不再变化**再读。 */
+        const sc = document.getElementById('docs-scroll');
+        if (sc) sc.scrollTop = 0;
+        window.scrollTo(0, 0);
+        await new Promise((res) => requestAnimationFrame(() => requestAnimationFrame(res)));
+        const barEl = document.querySelector('header.site-bar');
+        const subEl = document.querySelector('.docs-subbar');
+        const read = () => {
+          const b = getComputedStyle(barEl);
+          const s = getComputedStyle(subEl);
+          return { barImg: b.backgroundImage, subImg: s.backgroundImage, barShadow: b.boxShadow, subShadow: s.boxShadow };
+        };
+        let prev = read();
+        for (let i = 0; i < 40; i++) {
+          await new Promise((res) => requestAnimationFrame(res));
+          const now = read();
+          if (now.barShadow === prev.barShadow && now.subShadow === prev.subShadow) break;
+          prev = now;
+        }
+        const lens = document.querySelector('.docs-subbar-lens');
+        return {
+          ...prev,
+          lensFilter: lens ? getComputedStyle(lens).backdropFilter : null,
+          subBg: getComputedStyle(subEl).backgroundColor,
+          htmlDark: document.documentElement.classList.contains('dark'),
+          barClass: barEl.className,
+        };
+      })()`)
+      const tag = `[${theme}]`
+      if (q(r.barImg) !== q(r.subImg)) {
+        materialProblems.push(`${tag} 横栏的渐变底与顶栏不一致\n      顶栏 ${q(r.barImg)}\n      横栏 ${q(r.subImg)}`)
+      }
+      if (q(r.barShadow) !== q(r.subShadow)) {
+        const a = q(r.barShadow).split(/,(?![^(]*\))/).map((x) => x.trim())
+        const b = q(r.subShadow).split(/,(?![^(]*\))/).map((x) => x.trim())
+        const diff = []
+        for (let i = 0; i < Math.max(a.length, b.length); i++) {
+          if ((a[i] ?? '') !== (b[i] ?? '')) diff.push(`第 ${i + 1} 条：顶栏 ${a[i] ?? '（无）'} ／ 横栏 ${b[i] ?? '（无）'}`)
+        }
+        materialProblems.push(`${tag} 横栏的内高光/投影与顶栏不一致（${diff.length} 条不同）\n      ${diff.join('\n      ')}`)
+      }
+      if (!String(r.lensFilter ?? '').includes('lg-refract')) {
+        materialProblems.push(`${tag} 横栏折射层没生效（backdrop-filter = ${r.lensFilter}）`)
+      }
+      if (q(r.subBg) !== 'rgba(0, 0, 0, 0)') {
+        materialProblems.push(
+          `${tag} 横栏的底不是全透明（background-color = ${r.subBg}）—— 第十轮起它与顶栏同源，` +
+            `正文要从它下面穿过，任何实底都会把折射盖掉`,
+        )
+      }
+    }
+    for (const p of materialProblems) problems.push(`横栏材质：${p}`)
+    console.log('')
+    console.log(
+      `横栏材质断言：${materialProblems.length ? `✗ ${materialProblems.length} 处` : '✓ 与全局顶栏的渐变底 / 内高光 / 折射层逐项一致（深浅色各验一遍）'}`,
+    )
+  }
+}
+
 /* ---------- 侧栏底部不被切 ----------
  *
  * 用户反馈过「左侧栏最底部文本显示不全」。根因是硬编码高度与 sticky 偏移对不上：

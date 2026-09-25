@@ -22,7 +22,7 @@ A personal job-hunting portfolio single-page app. Positioned as an "IT comprehen
 
 Live at [https://white-147.github.io/jyl-site/](https://white-147.github.io/jyl-site/). Content is driven by a SQLite database (`database/portfolio.db`) as the single source of truth; builds export it to JSON automatically, and pushing to `main` triggers GitHub Actions to build and deploy to GitHub Pages.
 
-> Note: site content and the resume stay aligned (real projects and real company names). Raw assets (avatars, certificates, project screenshots) are archived in `_archive/` (committed for backup and later use).
+> Note: site content and the resume stay aligned (real projects and real company names). Only compressed WebP files live in `public/`; raw originals are **not** kept in the repo (the old `_archive/` was cleaned up in 2026-09).
 
 ## Features
 
@@ -68,7 +68,6 @@ flowchart LR
 
 ```text
 jyl-site/
-├── _archive/                 # ★ Raw asset archive (avatars / certs / screenshots / resume originals)
 ├── database/
 │   └── portfolio.db          # ★ SQLite content database (source of truth)
 ├── docs/\r?\n│   ├── thesis/source/        # ★ Thesis source (pandoc HTML from .docx, produced by prepare-thesis.mjs)\r?\n│   ├── theory/source/        # ★ UE theory source (unreal5-notes / ue5-window-* / blueprint-*.md)\r?\n│   ├── combat/source/        # ★ UE practice source (title line only; imported later)\r?\n│   ├── 联动维护点.md          # ★ Coupled-edit checklist (read before changing anything)\r?\n│   └── assets/screenshots/   # Site screenshot used by the README\r?\n├── public/
@@ -131,7 +130,7 @@ Under the hood:
 
 ```bash
 npm run contact:encode     # after editing the email / GitHub in profile.json
-npm run resume:watermark   # after a resume update: put the new file in _archive/resumes/ first
+npm run resume:watermark -- --in <original.pdf>   # after a resume update (originals are not kept in the repo)
 npm run previews:polish    # after rebuilds of public/preview/
 npm run icons:gen          # after changing the icon glyph or palette
 npm run fonts:subset       # after any copy change (subset + re-inline first-screen fonts)
@@ -161,14 +160,14 @@ Two ways to edit content:
 1. **Edit JSON → seed**: edit `src/data/*.json` (or the database directly), then run `npm run db:seed`.
 2. **Edit database → export**: edit `database/portfolio.db` with a SQLite tool, then run `npm run db:export`.
 
-To update the resume: put the new file into `_archive/resumes/`, then run `npm run resume:watermark`
+To update the resume: run `npm run resume:watermark -- --in <original.pdf>`
 to regenerate `public/resume.pdf` (the script self-checks the text layer and page count).
 
 ## Image & Naming Conventions
 
 - Site images live under `public/` grouped by type: `projects/`, `certificates/`, `images/` (avatar and navbar icon), `favicons/` (site icons)
 - **Naming**: lowercase kebab-case; product names stay compact (`milustudio`, `xiaolouai`), generic words use hyphens (`milu-assistant-web`, `book-recommendation`, `cet-4`, `sanchuang-medal`)
-- `_archive/` files mirror `public/` files one-to-one with the same names (except the resume PDF, which keeps its original name for recognition)
+- `public/` holds compressed WebP only; raw originals are never committed
 - Site icons are **generated**, not archived: the source is `scripts/gen_icons.py` plus the Liu Jian Mao Cao typeface — rerun `npm run icons:gen` to change the palette or glyph
 - The SQLite database stores image paths that must exactly match the real filenames under `public/`; run `npm run db:seed` after adding/renaming images
 

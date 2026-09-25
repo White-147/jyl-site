@@ -22,7 +22,7 @@
 
 当前站点已部署上线：[https://white-147.github.io/jyl-site/](https://white-147.github.io/jyl-site/)。内容以 SQLite 数据库（`database/portfolio.db`）为唯一内容源，构建时自动导出为 JSON 并打包，推送到 `main` 分支即通过 GitHub Actions 自动构建部署到 GitHub Pages。
 
-> 说明：站点内容与简历保持同一口径（真实项目与真实公司名）。头像、证书、项目截图原图保存在 `_archive/`（已随仓库上传，供备份与后续补充使用）。
+> 说明：站点内容与简历保持同一口径（真实项目与真实公司名）。头像、证书、项目截图、UE 笔记原图**只保留压缩后的 WebP**（在 `public/` 里），原图归档已于 2026-09 清理、不再随仓库与本机保存 —— 需要原图时从外部备份取回，并按下方「新增图片」的流程重新压缩。
 
 ## 项目功能
 
@@ -75,7 +75,6 @@ flowchart LR
 
 ```text
 jyl-site/
-├── _archive/                 # ★ 原始素材归档（头像 / 证书 / 项目截图 / 简历原件）
 ├── database/
 │   └── portfolio.db          # ★ SQLite 内容库（内容源）
 ├── docs/
@@ -93,6 +92,7 @@ jyl-site/
 │   ├── preview/              # ★ 内嵌项目预览（各项目前端静态产物 + 演示注入）
 │   ├── docs/pages/           # 文档区页面产物（build-docs.mjs 生成，已 gitignore）
 │   ├── favicons/             # 站点图标（由 scripts/gen_icons.py 生成）
+│   ├── assets/               # ★ 传统纹样装饰件（见下方「纹样素材」）
 │   ├── projects/*.webp       # 项目截图（构建资源）
 │   └── images/ certificates/ # 头像、导航图标、证书缩略图
 ├── scripts/
@@ -157,7 +157,7 @@ jyl-site/
 | --- | --- | --- |
 | L1 | `robots.txt` 放行搜索引擎、拒绝 AI 语料采集与批量抓取 UA；`sitemap.xml` 提供结构；外链统一 `rel="noopener noreferrer nofollow"` | `public/robots.txt`、`public/sitemap.xml` |
 | L2 | 邮箱与 GitHub 地址以字符码表存储、渲染时才解码；页面内埋入读屏与视觉均不可见的诱饵邮箱 | `src/data/contact.ts`、`scripts/encode-contact.mjs` |
-| L3 | 简历 PDF 全页对角平铺水印，**不破坏文本层**（ATS 仍可解析）；原件保留在 `_archive/resumes/` | `scripts/watermark_resume.py` |
+| L3 | 简历 PDF 全页对角平铺水印，**不破坏文本层**（ATS 仍可解析）；**无原始文本层的简历原件不进仓库** | `scripts/watermark_resume.py` |
 | L4 | 预览页 iframe 防护（CSP + frame-busting 兜底） | `scripts/polish-previews.mjs` |
 
 内容只读（前端层）：全站默认禁止选中/复制（`useReadOnlyGuard` + `body { user-select: none }`），
@@ -167,7 +167,7 @@ jyl-site/
 
 ```bash
 npm run contact:encode     # 改过 profile.json 的邮箱 / GitHub 后运行
-npm run resume:watermark   # 换简历后：先把新版放进 _archive/resumes/，再运行
+npm run resume:watermark -- --in <无文本层的原件.pdf>   # 换简历后运行（不传 --in 时用默认路径）
 npm run previews:polish    # 预览页重新构建复制进 public/preview/ 后运行
 npm run icons:gen          # 换图标字或配色后重新生成 favicon 全尺寸
 ```
@@ -199,8 +199,8 @@ npm run build      # = db:export + 类型检查 + 构建
 1. **改 JSON → 入库**：编辑 `src/data/*.json`，执行 `npm run db:seed` 同步到库；
 2. **改数据库 → 出 JSON**：直接用 SQLite 工具改 `database/portfolio.db`，执行 `npm run db:export` 重新生成 JSON。
 
-换简历：把新版放进 `_archive/resumes/`，再跑 `npm run resume:watermark` 生成带水印的 `public/resume.pdf`（脚本会自检文本层与页数）。
-新增证书/头像：压缩后的 WebP 放 `public/` 对应目录，原图放入 `_archive/` 对应目录，再改 `education.json` 或相关数据。
+换简历：跑 `npm run resume:watermark -- --in <原件路径>` 生成带水印的 `public/resume.pdf`（脚本会自检文本层与页数）。原件不留在仓库里。
+新增证书/头像：先用 `python scripts/optimize_images.py <原图目录> public/<目标目录>` 压成 WebP 放进 `public/`，再改 `education.json` 或相关数据。原图不入库、不留在本机。
 
 > 新增或修改站点文案后，请重新运行 `npm run fonts:subset` 生成最新字体子集（新用字不在子集内会回退到系统字体）。
 > 该命令会先子集化 `src/fonts/*.woff2`，再把首屏两个展示字体重新 base64 内联进 `index.html`，两步必须成对执行。
@@ -209,8 +209,8 @@ npm run build      # = db:export + 类型检查 + 构建
 
 - 站点图片统一放 `public/` 下，按类型分目录：`projects/`、`certificates/`、`images/`（头像）、`favicons/`（站点图标，含导航栏引用的 `favicon-192.png`）
 - **命名规则**：小写 kebab-case（连字符分隔）；产品名保持紧凑（`milustudio`、`xiaolouai`），通用词用连字符（`milu-assistant-web`、`book-recommendation`、`cet-4`、`sanchuang-medal`）
-- `_archive/` 归档文件与 `public/` 站点文件一一对应、命名一致（简历 PDF 除外，保留原名便于识别）
-- 站点图标不入 `_archive/`：它是**生成物**，源是 `scripts/gen_icons.py` + 柳建毛草字体，改配色或换字只需重跑 `npm run icons:gen`
+- `public/` 只放压缩后的 WebP；原图一律不入库（历史上的 `_archive/` 归档已于 2026-09 清理）
+- 站点图标是**生成物**，源是 `scripts/gen_icons.py` + 柳建毛草字体，改配色或换字只需重跑 `npm run icons:gen`
 - 数据源为 SQLite（`database/portfolio.db`），其中存储的图片路径与 `public/` 实际文件名严格一致；新增/改名图片后执行 `npm run db:seed` 同步
 
 ## 部署到 GitHub Pages
@@ -240,13 +240,13 @@ npm run build      # = db:export + 类型检查 + 构建
   实测平均 2.9 屏/篇）。原来的「一篇源 = 一页」在手机上要滚 56 屏，根本翻不到底。
 - 毕业论文：Word 原稿经 pandoc 转出（33 个代码块、41 张插图、4 张数据表），拆成 19 页
 - UE 理论与实战：Typora 维护的 markdown，共 37 页；实战两篇目前是占位（原文只有标题）
-- 图片：UE 笔记 223 张 + 论文 41 张，原图归档在 `_archive/`，`public/docs/**/images/` 只放 WebP
+- 图片：UE 笔记 223 张 + 论文 41 张，`public/docs/**/images/` 只放 WebP（长边 1600 / 质量 82）
 
 内容流水线与拆分规则见 [`docs/联动维护点.md`](docs/联动维护点.md) 第 13 条：
 
 ```bash
 # UE 笔记更新
-python scripts/optimize_images.py _archive/ue5-notes/images public/docs/ue5/images --only-from-md docs/theory/source/<name>.md
+python scripts/optimize_images.py <原图目录> public/docs/ue5/images --only-from-md docs/theory/source/<name>.md
 npm run fonts:subset                # 新汉字要进字体子集
 npm run build                       # prebuild 会自动跑 docs:build
 npm run docs:check                  # 产物自检（配图缺失 / 大纲悬空 / 互链死链 / 预算突破）

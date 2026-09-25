@@ -102,11 +102,24 @@ export default function Skills() {
             )}
           </label>
 
-          {/* 岗位模板切换：胶囊分段控件（与项目筛选同风格），移动端横向滑动 */}
+          {/* 岗位模板切换：胶囊分段控件（与项目筛选同风格），移动端横向滑动。
+
+              ⚠️ `overflow-x-auto` 会把**视觉溢出**一起裁掉（它是滚动容器，滚不到的地方就是剪掉），
+                 而 `.glass-lit` / `.glass-lit-on` 的面光与外发光正是画在盒外的 ——
+                 实测症状有两轮：先是选中胶囊的**顶部**被切平（只给了 `pb-1`），
+                 补了上下余量之后**左侧**又被切（`padding-left` 实测为 0，第一个胶囊左边缘
+                 与容器左边缘完全重合，光晕一出界就被剪）。
+                 口径：**滚动容器必须给光留出余量，四条边都要**：`px-2` + `py-1.5`，
+                 并配 `scroll-py-1.5`（滚动到某个胶囊时不要贴边，否则光又被贴边裁掉）。
+                 ⚠️ 别用负外边距（`-mx-2` / `-my-1.5`）去抵消这份内边距 —— 负外边距会缩小
+                 滚动容器的可滚动区域（overflow 规范里滚动区含 padding 但不含负外边距），
+                 两端的胶囊会重新粘住裁切边，等于没修。用户 2026-09 明确选了"不补偿"：
+                 代价只是胶囊行比上面的搜索框多缩进 8px（半个字宽），肉眼几乎看不出。
+                 ⚠️ 也别改成 `overflow-x: visible`：移动端的横向滑动会直接失效。 */}
           <div
             role="tablist"
             aria-label="岗位技能画像"
-            className="mt-4 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="mt-4 flex gap-2 overflow-x-auto px-2 py-1.5 scroll-py-1.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
             {skillProfiles.map((p) => {
               const isActive = p.id === active?.id
@@ -117,9 +130,11 @@ export default function Skills() {
                   role="tab"
                   aria-selected={isActive}
                   onClick={() => setActiveId(p.id)}
+                  /* 选中态 = 悬停态固定住（`.glass-lit-on` 出光 + `.glass-chip-on` 出底与字色），
+                     与项目区筛选、顶栏控件悬停同一套材质。不要退回 `bg-brand-700 text-white`。 */
                   className={`glass-lit shrink-0 rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
                     isActive
-                      ? 'bg-brand-700 text-white shadow-sm dark:bg-brand-700'
+                      ? 'glass-lit-on glass-chip-on'
                       : 'glass-chip hover:text-brand-700 dark:hover:text-brand-200'
                   }`}
                 >
@@ -146,9 +161,10 @@ export default function Skills() {
                     type="button"
                     onClick={() => setQuery(tagActive ? '' : tag)}
                     aria-pressed={tagActive}
+                    /* 同上：高频标签的选中态与项目区筛选保持一致（`.glass-lit-on` + `.glass-chip-on`） */
                     className={`glass-lit rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors ${
                       tagActive
-                        ? 'bg-brand-700 text-white shadow-sm dark:bg-brand-700'
+                        ? 'glass-lit-on glass-chip-on'
                         : 'glass-chip hover:text-brand-700 dark:hover:text-brand-200'
                     }`}
                   >

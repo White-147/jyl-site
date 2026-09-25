@@ -306,9 +306,13 @@ export default function Projects() {
               type="button"
               onClick={() => setActive(tag)}
               aria-pressed={active === tag}
+              /* 选中态 = 悬停态**固定住**：`.glass-lit-on` 出光（与 `.glass-lit:hover` 一字不差），
+                 `.glass-chip-on` 出底与文字色（与 `.bar-control:hover` 同一组变量）。
+                 **不要再写 `bg-brand-700 text-white`** —— 那是实底，读成"一块实心圆角块"，
+                 与全站玻璃语言相悖（用户 2026-09 两次要求对齐顶栏）。 */
               className={`glass-lit rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
                 active === tag
-                  ? 'bg-brand-700 text-white shadow-sm dark:bg-brand-700'
+                  ? 'glass-lit-on glass-chip-on'
                   : 'glass-chip hover:text-brand-700 dark:hover:text-brand-200'
               }`}
             >

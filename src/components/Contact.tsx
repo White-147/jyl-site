@@ -35,15 +35,9 @@ export default function Contact() {
                 （用户 2026-09：「外面那个大框不需要玻璃特效，太浮夸，一起动起来不好看」）。
                 玻璃材质本身照旧由 `.glass-panel` 提供。 */}
             <div className="glass-panel relative overflow-hidden rounded-3xl p-8 text-center sm:p-12">
-            <div
-              className="pointer-events-none absolute inset-0 opacity-[0.35] dark:opacity-15"
-              aria-hidden="true"
-              style={{
-                backgroundImage:
-                  'linear-gradient(to right, var(--grid-line) 1px, transparent 1px), linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px)',
-                backgroundSize: 'var(--grid-size) var(--grid-size)',
-              }}
-            />
+            {/* 联系区原本有一层"局部网格"。⚠️ 2026-09 第十二轮**整层删除**，
+                理由同 Hero：与 `body::before` 的全局网格叠成两层。
+                现在全站背景只有"暖画布 + 宣纸纤维"（`.paper-layer`）。 */}
             <div className="relative">
               <p className="text-lg leading-relaxed break-words text-slate-600 dark:text-slate-300">
                 欢迎通过邮件或 GitHub 联系我，也可直接下载简历。

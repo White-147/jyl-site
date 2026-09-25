@@ -16,7 +16,7 @@
          历史问题：曾是两个带 media="(prefers-color-scheme: …)" 的 meta + JS 覆写两者，
          手动选深色而系统是浅色时，媒体查询会挑走另一份，状态栏与页面脱色。
          这里保留初值，内联脚本在首屏前就会纠正它。 -->
-    <meta name="theme-color" content="#fafbfb" />
+    <meta name="theme-color" content="#fbf8f3" />
     <meta
       name="description"
       content="蒋宇龙 — 信息技术综合岗位。数据科学与大数据技术本科，兼具数据工程、业务系统交付与 Windows 原生桌面端工程化经验，覆盖应用开发、数据质检、ERP实施、团队协作四条线，擅长在技术与业务之间搭桥。"
@@ -29,7 +29,7 @@
       // ⚠️ 联动维护点（详见 docs/联动维护点.md 第 3 条）
       // 这里的判定逻辑必须与 src/hooks/useTheme.tsx 的一致：
       //   localStorage 键名固定 'theme'，取值集合固定 auto | light | dark；
-      //   画布色 #fafbfb / #121415 与 index.css 的 body 背景、useTheme 的 CANVAS 三处一致。
+      //   画布色 #fbf8f3 / #15120f 与 index.css 的 body 背景、useTheme 的 CANVAS 三处一致。
       // 除了切 .dark，还要同步那唯一的 theme-color meta，否则首屏地址栏会闪一下浅色。
       ;(function () {
         try {
@@ -39,7 +39,7 @@
             (t === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches)
           if (dark) document.documentElement.classList.add('dark')
           var meta = document.querySelector('meta[name="theme-color"]')
-          if (meta) meta.setAttribute('content', dark ? '#121415' : '#fafbfb')
+          if (meta) meta.setAttribute('content', dark ? '#15120f' : '#fbf8f3')
         } catch (e) {}
       })()
     </script>
@@ -85,8 +85,8 @@
     <!-- firstscreen-fonts-inline:end -->
     <!-- 首屏 body 底色：内联兜底（与外部 CSS 一致），CSS 加载前不再白底、深浅随主题脚本同步 -->
     <style id="theme-bg-inline">
-      body { background-color: #fafbfb; }
-      .dark body { background-color: #121415; }
+      body { background-color: #fbf8f3; }
+      .dark body { background-color: #15120f; }
       /* 打印拦截提示的屏幕隐藏必须**内联**：它的规则原本只在外链 CSS 里，
          外链到达之前那行字会直接显形（用户 2026-09 的截图里就拍到了）。
          这里用同一个类名、同一优先级，`@media print` 里的 `!important` 照样压得住。 */
@@ -140,11 +140,11 @@
         align-items: center;
         justify-content: center;
         gap: clamp(1.5rem, 4vh, 2.75rem);
-        background-color: #fafbfb;
+        background-color: #fbf8f3;
         transition: opacity 0.42s cubic-bezier(0.22, 1, 0.36, 1);
       }
       .dark #boot {
-        background-color: #121415;
+        background-color: #15120f;
       }
       #boot.is-out {
         opacity: 0;

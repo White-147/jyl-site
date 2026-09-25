@@ -1,3 +1,6 @@
+<!-- 由 scripts/prepare-thesis.mjs（npm run docs:thesis）从 Word 原稿生成，请勿手改。
+     要改内容：改 docx 原稿后重跑 npm run docs:thesis；
+     改完记得重跑图片优化（见终端提示）与 node scripts/build-docs.mjs，否则站点仍是旧内容。 -->
 <h1 id="摘要">摘 要 / Abstract</h1>
 <p><strong>摘 要:</strong> 为了提高图书馆系统的用户体验，本文对基于用户行为的推荐算法进行研究，实现了基于Spark计算框架的实时图书推荐系统，在使用给予物品的协同过滤推荐时应用皮尔逊相关系数来衡量两者的相似度。在系统实现上，MySQL被用于部署特征库，Hive被用于存储大数据推荐信息，Spark Steaming批处理引擎被用于实现定期的推荐数据更新。前端采用Vue.js和Element框架搭建，后端通过Spring Boot读取和处理MySQL保存的数据，采用Spring Security设置拦截器，确保数据的安全性，使用Axios实现前后端的数据传输，使用Selenium完成网络爬虫获取数据缺失部分。</p>
 <p><strong>关键词:</strong>图书推荐，Spark，Spring Boot，Vue.js</p>
