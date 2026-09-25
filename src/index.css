@@ -1026,7 +1026,7 @@ html.docs-shell .footer-seal-mark {
       兜底把它的光压掉，观感是"一按就灭"。
       真正解决问题的还是能力门（`@media (hover: hover) and (pointer: fine)`），
       这条钩子留着只作**将来的入口**：真出现某条漏门且压不住的规则时，在这里点名处理。
-      判定方法见 `docs/联动维护点.md` 第 16 条。 */
+      判定方法见 `docs/联动维护点.md` 第 17 条。 */
 
 
 /* 「点亮态的底」：与 `.bar-control:hover` 同一组值（0.16 白 + 琥珀字）。
