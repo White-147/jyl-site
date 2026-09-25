@@ -32,6 +32,14 @@ import { useEffect, type RefObject } from 'react'
  * ⚠️ 与「选中态」的分工：本钩子加的 `.glass-lit-scrolled` 只出面光与那圈弥散内缘光，
  *   **不加底、不换文字色**（`--bar-control-lit-*` 那层只属于真正的选中项）。
  *   三级关系：`.glass-lit-on`（当前项）｜`.glass-lit-scrolled`（视线所在）｜`.glass-lit-press`（手指按下）。
+ *
+ * ⚠️ 例外：带 **`data-scroll-lit="off"`** 的 `.glass-lit` 不参与照亮（2026-09 第十五轮，用户定向）。
+ *   "凡带 `.glass-lit` 就都接"这条规则有两个例外族，理由是**照亮材质与"已选中"分辨不出来**：
+ *     · 筛选胶囊（项目区岗位方向、技能区岗位模板与高频标签）—— 照亮时带出琥珀描边 +
+ *       淡琥珀底，与 `glass-chip-on` 的选中态几乎一样，而琥珀在本站代表"可用 / 当前 / 关键"；
+ *     · 文档区左栏目录与顶部分区 tab —— 它们躺在自己的滚动容器里（视口中线判定在那里
+ *       等于"永远亮最上面那项"），而且当前项的选中态本来就常驻点亮。
+ *   卡片、项目行、证书卡、联系入口**不排除**：它们被照亮没有第二重语义可混淆。
  */
 export function useInViewLight(root: RefObject<HTMLElement | null>) {
   useEffect(() => {
@@ -103,14 +111,17 @@ export function useInViewLight(root: RefObject<HTMLElement | null>) {
       { root: null, rootMargin: '0px', threshold: 0 },
     )
 
-    for (const el of host.querySelectorAll('.glass-lit')) io.observe(el)
+    /** 参与照亮的候选选择器：排除带 `data-scroll-lit="off"` 的那些（筛选胶囊 / 文档区目录） */
+    const SELECTOR = '.glass-lit:not([data-scroll-lit="off"])'
+
+    for (const el of host.querySelectorAll(SELECTOR)) io.observe(el)
 
     /**
      * 视图切换（主站 ↔ 文档区）与筛选重建之后，DOM 会换一批 `.glass-lit`。
      * DOM 变化不触发 scroll / resize，所以这里补 observe —— 只补观察，不做几何计算。
      */
     const mo = new MutationObserver(() => {
-      for (const el of host.querySelectorAll('.glass-lit')) {
+      for (const el of host.querySelectorAll(SELECTOR)) {
         if (!live.has(el)) io.observe(el)
       }
       schedule()

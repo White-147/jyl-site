@@ -130,6 +130,10 @@ export default function Skills() {
                   role="tab"
                   aria-selected={isActive}
                   onClick={() => setActiveId(p.id)}
+                  /* ⚠️ `data-scroll-lit="off"`：筛选胶囊排除在触屏的「滚动照亮」之外
+                     （2026-09 第十五轮，理由见 Projects.tsx 同名字段与
+                      `docs/联动维护点.md` 第 17 条：照亮材质与"已选中"无法分辨）。 */
+                  data-scroll-lit="off"
                   /* 选中态 = 悬停态固定住（`.glass-lit-on` 出光 + `.glass-chip-on` 出底与字色），
                      与项目区筛选、顶栏控件悬停同一套材质。不要退回 `bg-brand-700 text-white`。 */
                   className={`glass-lit shrink-0 rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
@@ -162,6 +166,7 @@ export default function Skills() {
                     onClick={() => setQuery(tagActive ? '' : tag)}
                     aria-pressed={tagActive}
                     /* 同上：高频标签的选中态与项目区筛选保持一致（`.glass-lit-on` + `.glass-chip-on`） */
+                    data-scroll-lit="off"
                     className={`glass-lit rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors ${
                       tagActive
                         ? 'glass-lit-on glass-chip-on'

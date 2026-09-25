@@ -306,6 +306,12 @@ export default function Projects() {
               type="button"
               onClick={() => setActive(tag)}
               aria-pressed={active === tag}
+              /* ⚠️ `data-scroll-lit="off"`：把筛选胶囊排除在触屏的「滚动照亮」之外（2026-09 第十五轮）。
+                 理由：胶囊被照亮时会带出琥珀描边 + 淡琥珀底，与"已选中"几乎一模一样
+                 （实拍过），而琥珀在本站代表"可用 / 当前 / 关键"，不能被滚动误触发。
+                 卡片与项目行不排除 —— 它们被照亮没有第二重语义可混淆。
+                 机制见 `hooks/useInViewLight.ts` 与 `docs/联动维护点.md` 第 17 条。 */
+              data-scroll-lit="off"
               /* 选中态 = 悬停态**固定住**：`.glass-lit-on` 出光（与 `.glass-lit:hover` 一字不差），
                  `.glass-chip-on` 出底与文字色（与 `.bar-control:hover` 同一组变量）。
                  **不要再写 `bg-brand-700 text-white`** —— 那是实底，读成"一块实心圆角块"，

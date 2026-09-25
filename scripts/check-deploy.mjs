@@ -30,10 +30,12 @@ const CHECKS = [
   { label: '文档区横栏已去掉发光滤镜', kind: 'text', where: 'css', needle: '.docs-subbar{filter:', negate: true },
   { label: '文档区横栏有可读性底（浅）', kind: 'text', where: 'css', needle: '.docs-subbar{text-shadow' },
   { label: '印章深色档已转米白（内外同一条链路）', kind: 'text', where: 'css', needle: '.dark .seal-mark-layer{filter:invert()sepia()brightness(1.9)' },
-  /* 教育卡在第十三/十四轮统一成"图标与校名并排"：横排是**基准值**（不再靠 max-sm: 变体），
-     所以这里查 `.flex-row{` 本身。同时用"必须还有竖排工具类"来确认产物没被整体裁掉 ——
-     别处（手机 Tab Bar 等）仍在用 flex-col。 */
-  { label: '教育卡图标与校名并排（横排为基准）', kind: 'text', where: 'css', needle: '.flex-row{flex-direction:row}' },
+  /* 教育背景区块在第十五轮改成「学校横条 + 证书 2×2」：横条靠 `sm:col-span-2` / `lg:col-span-3`
+     跨满当档全部列（外层容器是 `sm:grid-cols-2` / `lg:grid-cols-3`）。
+     这两条是那次改版唯一的产物特征，所以查它们；`.flex-row{` 一并留着确认产物没被整体裁掉。 */
+  { label: '教育区块：横条跨满两列（sm）', kind: 'text', where: 'css', needle: '.sm\\:col-span-2{grid-column:span 2/span 2}' },
+  { label: '教育区块：横条跨满三列（lg）', kind: 'text', where: 'css', needle: '.lg\\:col-span-3{grid-column:span 3/span 3}' },
+  { label: '教育区块：图标与校名并排（横排为基准）', kind: 'text', where: 'css', needle: '.flex-row{flex-direction:row}' },
   {
     label: '触屏交互层：hover 能力门',
     kind: 'text',

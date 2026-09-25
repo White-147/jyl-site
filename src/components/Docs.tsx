@@ -533,6 +533,9 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
             role="tab"
             aria-selected={active}
             onClick={() => openSection(s.id)}
+            /* ⚠️ `data-scroll-lit="off"`：左栏分区列表排除在触屏的「滚动照亮」之外
+               （2026-09 第十五轮，理由见下面页树那条：同一栏、同一个滚动容器、同一套选中语义）。 */
+            data-scroll-lit="off"
             /* 选中态 = 主站筛选胶囊那一套（`glass-lit-on` 出光 + `glass-chip-on` 出底与字色）。
                2026-09 第九轮用户要求：「文档区不管是顶部分区还是左侧选中，都对齐主站的玻璃样式」。
                **不要再退回 `bg-brand-700 text-white`** —— 那是实底块，与全站玻璃语言相悖。 */
@@ -563,6 +566,10 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
             role="tab"
             aria-selected={active}
             onClick={() => openSection(s.id)}
+            /* ⚠️ `data-scroll-lit="off"`：顶部分区 tab 排除在触屏的「滚动照亮」之外
+               （2026-09 第十五轮）。它是"当前分区"的指示器，与左栏那两处同一套语义；
+               被照亮时带出的琥珀描边会被读成"切到这个分区了"。 */
+            data-scroll-lit="off"
             /* 同上：顶部分区 tab 的选中态走主站那套玻璃（见 `sectionList` 的注释）。
                ⚠️ 未选中**只留 `.glass-lit`**（交互层，悬停才出光），不要挂 `.glass-chip` ——
                   那是"静置材质"（半透明底 + 发丝边），挂上就等于给每一项默认铺一块玻璃，
@@ -649,6 +656,13 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
                 aria-current={n.page.id === current?.id ? 'page' : undefined}
                 title={pageTip(n.page)}
                 onClick={() => setNavOpen(false)}
+                /* ⚠️ `data-scroll-lit="off"`：左栏页树排除在触屏的「滚动照亮」之外
+                   （2026-09 第十五轮）。两条理由：
+                     ① 它躺在**自己的滚动容器**里（`overflow-y-auto`），照亮由视口中线判定，
+                        在该容器里等于"永远亮着最上面那一项"，没有意义；
+                     ② 当前页的选中态本来就常驻点亮（`glass-lit-on`），再叠一层照亮会分不清
+                        "我读到这里"和"我停在这一页"。 */
+                data-scroll-lit="off"
                 className={`flex items-baseline rounded-lg py-[5px] pr-2 text-[13.5px] leading-snug transition-colors ${
                   n.page.id === current?.id
                     ? 'glass-lit glass-lit-on glass-chip-on font-semibold'
