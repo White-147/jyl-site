@@ -1,8 +1,9 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { ThemeProvider } from './hooks/useTheme'
 import useReadOnlyGuard from './hooks/useReadOnlyGuard'
 import { useDeepLinkCorrection } from './hooks/useAnchorScroll'
 import { useDocsRoute } from './hooks/useDocsRoute'
+import { useInViewLight, useTouchPress } from './hooks/useInViewLight'
 import TopBar from './components/TopBar'
 import Hero from './components/Hero'
 import About from './components/About'
@@ -24,6 +25,20 @@ export default function App() {
   useDeepLinkCorrection()
   // hash 路由：`#/docs/<分区>/<页>` 切到文档区，其余情况是主页面
   const route = useDocsRoute()
+
+  /**
+   * 触屏的「滚动照亮」与「按压反馈」（2026-09 第十四轮，见 hooks/useInViewLight.ts）。
+   *
+   * ⚠️ 挂点选在 `.app-root` 而不是某个区块：
+   *   · 主站与文档区是**互斥渲染**的两个子树，挂在根上只需一处，视图切换时钩子重跑即可；
+   *   · `.glass-lit` 分布在 8 个组件里，逐个接会漏；挂在根上做全局 querySelectorAll，
+   *     将来新增带 `.glass-lit` 的组件**自动生效**（用户口径：「凡带 .glass-lit 就都接」）。
+   * ⚠️ 两个钩子内部都自带 `(hover: hover)` 门与 `prefers-reduced-motion` 之外的零副作用路径：
+   *   鼠标环境下它们直接 return，不挂任何监听。
+   */
+  const rootRef = useRef<HTMLDivElement>(null)
+  useInViewLight(rootRef)
+  useTouchPress(rootRef)
 
   /**
    * 通知首屏加载页（`index.html` 的 `#boot`）可以撤了。
@@ -56,7 +71,7 @@ export default function App() {
               职责全部并入 TopBar；右侧玻璃管只保留「章节节点 + 液柱」。
             · 底部 Tab Bar 仍只在主页面渲染（文档区没有可滚动的章节），
               视觉改成与顶栏同材质的浮动胶囊。 */}
-      <div className="app-root min-h-screen font-sans text-slate-900 dark:text-slate-100">
+      <div ref={rootRef} className="app-root min-h-screen font-sans text-slate-900 dark:text-slate-100">
         {/* 宣纸纤维层（2026-09 第十二轮）：
             全站背景由"暖画布 + 宣纸纤维 + 琥珀光斑"三层构成，**网格已全部退场**。
             ⚠️ 它必须 `position: fixed`：① 滚动时纤维不漂移；② **玻璃折射要有东西可弯** ——

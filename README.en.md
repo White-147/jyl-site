@@ -38,6 +38,7 @@ Live at [https://white-147.github.io/jyl-site/](https://white-147.github.io/jyl-
 - **Education and certificates**: school card plus a 2x2 certificate/award grid, click to enlarge the proof image
 - **Contact**: click-to-copy email, GitHub link, and a one-click watermarked resume PDF
 - Mobile: persistent glass top bar, floating bottom tab bar, safe-area handling, single-column layout
+- **Touch interaction**: on phones and tablets the highlight follows the **scroll position** (the card you are looking at lights up, one at a time) with a separate press feedback on tap; desktop keeps its mouse hover unchanged
 - Content-driven: SQLite -> JSON at build time -> bundle and deploy, so content edits never touch components
 - **Content protection**: obfuscated contact rendering with decoy addresses, iframe guards on preview pages, `robots.txt` rejecting AI-corpus crawlers, full-page diagonal watermark on the resume PDF (text layer preserved, ATS-friendly)
 - **Read-only content**: selection and copying are disabled site-wide; only the contact emails and the docs body text are whitelisted via `data-copyable`

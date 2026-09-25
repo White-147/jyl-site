@@ -856,6 +856,17 @@ html.docs-shell .footer-seal-mark {
   opacity: 0;
   transition: opacity var(--duration-base, 280ms) var(--ease-out-soft);
 }
+/* 首次出现：忽略在触屏上"粘住"的 :hover
+   本文件里的装饰性悬停（面光 / 内缘光 / 琥珀亮边）从第一版起就没包能力门，
+   而 Tailwind v4 生成的 `hover:` 工具类是包的 —— 于是触屏上只有这几处会粘住：
+   点一下亮起，滚动不会脱开，只被后续点击解除。实测（iPhone 模拟 + 真实触摸事件）：
+     · 点按前  `matches(':hover') = false`，面光 opacity 0
+     · 点按后  `true`，面光 1、box-shadow 换成点亮态
+     · 再滚开 420px  **仍然亮着**
+   W3C Media Queries 4 原文也点了这件事：
+     "authors should be careful not to assume that the :hover pseudo class will never match
+      on a device where hover:none is true"。
+   所以下面所有悬停规则统一收进 `@media (hover: hover) and (pointer: fine)`。 */
 .glass-lit:hover::after,
 .glass-lit:focus-visible::after,
 .glass-lit[aria-current="true"]::after,
@@ -863,25 +874,47 @@ html.docs-shell .footer-seal-mark {
 .glass-lit[aria-selected="true"]::after {
   opacity: 1;
 }
-.glass-lit:hover,
-.glass-lit:focus-visible {
-  /* ⚠️ 内发光口径（2026-09 第十二轮定稿，两次返工后的结论）：
-     组成 = 上缘内高光 + 1px 琥珀环 + **一圈弥散的内缘暖光** `inset 0 0 22px -14px`。
+/* ⚠️ 这里刻意把 `:hover` 与 `:focus-visible` **拆成两条**：
+   包能力门时不能连 `focus-visible` 一起包进去，否则键盘用户会失去焦点反馈。
+   而"选中态"（aria-*）本来就必须在两档下都成立，更不能被门掉。 */
+@media (hover: hover) and (pointer: fine) {
+  .glass-lit:hover {
+    /* ⚠️ 内发光口径（2026-09 第十二轮定稿，两次返工后的结论）：
+       组成 = 上缘内高光 + 1px 琥珀环 + **一圈弥散的内缘暖光** `inset 0 0 22px -14px`。
 
-     返工记录（两次都错，别再犯）：
-       ① 最初这里是**外发光** `0 0 30px -4px`。它会溢出元素盒子，而左栏页树 / 移动端抽屉
-          这类容器带 `overflow-y: auto`（另一轴会被算成 auto），溢出的光被直接裁掉
-          —— 用户反馈"左侧描边没显示全"。
-       ② 我改成 `inset 0 0 0 3px`（贴边 3px 硬光边）。虽然不可能被裁，但它是一条**实边**，
-          观感"太重太凝"。用户原话：「内部光可以，但是现在这个太重太凝了，
-          之前版本是散在内部的很好看，不能因为文档区去掉外边框就把原来的设计改掉」。
-       ③ 定稿：回到 ① 里那圈**弥散**内缘光。它同样不可能被裁（是 inset），
-          而且"散在内部"——两个诉求同时满足，不需要靠加硬边来补救。 */
+       返工记录（两次都错，别再犯）：
+         ① 最初这里是**外发光** `0 0 30px -4px`。它会溢出元素盒子，而左栏页树 / 移动端抽屉
+            这类容器带 `overflow-y: auto`（另一轴会被算成 auto），溢出的光被直接裁掉
+            —— 用户反馈"左侧描边没显示全"。
+         ② 我改成 `inset 0 0 0 3px`（贴边 3px 硬光边）。虽然不可能被裁，但它是一条**实边**，
+            观感"太重太凝"。用户原话：「内部光可以，但是现在这个太重太凝了，
+            之前版本是散在内部的很好看，不能因为文档区去掉外边框就把原来的设计改掉」。
+         ③ 定稿：回到 ① 里那圈**弥散**内缘光。它同样不可能被裁（是 inset），
+            而且"散在内部"——两个诉求同时满足，不需要靠加硬边来补救。 */
+    box-shadow:
+      inset 0 1px 0 var(--glass-rim-lit),
+      0 0 0 1px var(--glass-edge-lit),
+      inset 0 0 22px -14px var(--glass-glow-warm);
+    /* 刻意不抬升：用户 2026-09「不需要大范围的向上跳的逻辑，悬停住有效果就行」。 */
+  }
+  /* 「选中项 + 悬停」时结果必须**恒定**（用户第八轮的规则：选中 = 把悬停固定住）：
+     这四条从下面 `.glass-lit.glass-lit-on` 那一组拆过来，拆的原因见那条注释。
+     两边 box-shadow 一字不差，所以选中项悬停时不会变样。 */
+  .glass-lit.glass-lit-on:hover,
+  .glass-lit.glass-lit-on[aria-pressed="true"]:hover,
+  .glass-lit.glass-lit-on[aria-selected="true"]:hover {
+    box-shadow:
+      inset 0 1px 0 var(--glass-rim-lit),
+      0 0 0 1px var(--glass-edge-lit),
+      inset 0 0 22px -14px var(--glass-glow-warm);
+  }
+}
+/* 键盘聚焦：与悬停同一套材质，但**不进门**（键盘用户在任何设备上都要看得到焦点） */
+.glass-lit:focus-visible {
   box-shadow:
     inset 0 1px 0 var(--glass-rim-lit),
     0 0 0 1px var(--glass-edge-lit),
     inset 0 0 22px -14px var(--glass-glow-warm);
-  /* 刻意不抬升：用户 2026-09「不需要大范围的向上跳的逻辑，悬停住有效果就行」。 */
 }
 /* 当前 / 选中项：亮边常驻，但不抬升（避免"选中=浮起来"的误读） */
 .glass-lit[aria-current="true"],
@@ -921,20 +954,80 @@ html.docs-shell .footer-seal-mark {
    ⚠️ 不要再写第三条平行规则去微调选中态 —— 那正是本次返工的原因（第一版给选中单独配了
       一套琥珀底色 + 外发光，实拍出来是"整块淡黄铺满"，与顶栏悬停的玻璃感对不上）。 */
 .glass-lit.glass-lit-on,
-.glass-lit.glass-lit-on:hover,
 .glass-lit.glass-lit-on:focus-visible,
 .glass-lit.glass-lit-on[aria-pressed="true"],
-.glass-lit.glass-lit-on[aria-selected="true"],
-.glass-lit.glass-lit-on[aria-pressed="true"]:hover,
-.glass-lit.glass-lit-on[aria-selected="true"]:hover {
+.glass-lit.glass-lit-on[aria-selected="true"] {
   /* ⚠️ 与 `.glass-lit:hover` 必须保持**一字不差**（用户的规则：选中 = 把悬停固定住）。
-     返工记录见 `.glass-lit:hover` 上方那段：外发光会被容器裁、`inset 0 0 0 3px` 硬光边又"太凝"，
-     定稿就是这圈**弥散**内缘光。 */
+     返工记录见上方 `@media (hover: hover)` 里那段：外发光会被容器裁、`inset 0 0 0 3px` 硬光边又"太凝"，
+     定稿就是这圈**弥散**内缘光。
+     ⚠️ 2026-09 第十四轮：原来这里还列着 `:hover` 与 `[aria-*]:hover` 四条。
+     现在"悬停"整体进了能力门，而本组必须**在任何设备上都成立**（选中就是选中），
+     所以把四条 `:hover` 拆出去、与悬停规则放在同一个门里，本组只留 `:focus-visible` 与 `[aria-*]`。
+     拆完两处的 box-shadow 仍然一字不差 —— 门内那条负责悬停时恒定，本条负责选中时常驻。 */
   box-shadow:
     inset 0 1px 0 var(--glass-rim-lit),
     0 0 0 1px var(--glass-edge-lit),
     inset 0 0 22px -14px var(--glass-glow-warm);
 }
+
+/* ===== 触屏上的两级反馈（2026-09 第十四轮）=====
+   用户口径：「现在手机端和平板端采用的也是 PC 端的鼠标悬停逻辑，就是你点击才会亮，
+   但是和操作直觉不一致，我希望是屏幕划到哪，或者说用户手机焦点在哪，哪里就有悬停或者选中的效果」。
+   所以触屏（没有悬停能力的设备）拿到的不是 `:hover`，而是下面这两级：
+
+     ① `.glass-lit-scrolled` —— **滚动照亮**：与视口中线最近的那一个 `.glass-lit` 亮起，
+        由 `src/hooks/useInViewLight.ts` 加类。材质与「选中」逐字相同（用户第八轮的规则：
+        选中 = 把悬停效果固定住），所以这里也复用同一圈弥散内缘光 + 面光。
+     ② `.glass-lit-press` —— **按压反馈**：面光压到 0.75、材质**不变**。
+        为什么不直接复用点亮态：点了会跳转的元素（项目行、证书卡、联系区入口）
+        如果按下去就整块点亮，会和"当前项"的琥珀亮边混淆；按压只给"我收到了"的信号。
+
+   ⚠️ 三级不能混：`.glass-lit-on` = 当前项（常驻亮边）｜`.glass-lit-scrolled` = 视线所在（无亮边）
+      ｜`.glass-lit-press` = 手指按下（无亮边、无外发光）。
+   ⚠️ 锚点用「与视口**中线**最近」而不是"进入视口"：一屏里常有 3~4 张卡，
+      按"进入"会同时亮好几块；按中线则**任何时刻只有一块**亮，读起来是"视线所在"。
+   ⚠️ 高度用视口百分比算锚点（0.42），不是 0.5 —— 手机上底部压着 Tab Bar（约 90px），
+      几何中线落在它后面，按 0.5 算会出现"亮的是下面那张"。 */
+@media not all and (hover: hover) {
+  /* 中级：滚动照亮（钩子加类） */
+  .glass-lit.glass-lit-scrolled:not(.glass-lit-press) {
+    box-shadow:
+      inset 0 1px 0 var(--glass-rim-lit),
+      0 0 0 1px var(--glass-edge-lit),
+      inset 0 0 22px -14px var(--glass-glow-warm);
+  }
+  .glass-lit.glass-lit-scrolled::after {
+    opacity: 1;
+  }
+  /* 低级：按压反馈（钩子加类，抬起即摘）——只出面光，不动材质 */
+  .glass-lit.glass-lit-press::after {
+    opacity: 0.75;
+  }
+  /* ⚠️ 触摸设备的 `:hover` 一律无效：这一条是"兜底"，
+     真正的门在每条悬停规则自己身上（`@media (hover: hover) and (pointer: fine)`）。
+     之所以两条都留：能力门管的是"什么时候允许悬停"，这条管的是"万一某条漏了门"，
+     避免又出现"点一下焊死"的观感。 */
+  .glass-lit:hover:not(.glass-lit-on):not([aria-pressed="true"]):not([aria-selected="true"]):not(.glass-lit-scrolled):not(.glass-lit-press) {
+    box-shadow: none;
+  }
+}
+
+/* ===== 「点一下别焊死」：触屏残留的 :hover（2026-09 第十四轮）=====
+   触屏的 `:hover` 只被**后续点击**解除（实测点完卡片滚动 420px 仍然亮着）。
+   本站自己的悬停规则已经全部收进能力门，所以剩下可能"焊住"的只有两处：
+     · Tailwind 工具类里少数没带 `hover:` 前缀的交互样式；
+     · 浏览器自己给 `:hover` 加的默认反馈。
+   `useTouchPress` 会在 `pointerdown` 时给 `.app-root` 挂一个只活 60ms 的 `.touch-tap`，
+   需要压制时把规则写在这里 —— 而不是去改那些已经进门的悬停规则。
+
+   ⚠️⚠️ 这里**故意是空的**。第十四轮试过一版"把 box-shadow / color 压回静置值"的兜底，
+      发现两件事：① 它压不住"哪些规则会粘住"这个问题的根源，只能事后打补丁；
+      ② 它会和 `.glass-lit-scrolled`（滚动照亮）打架 —— 手指落在正亮着的那张卡上时，
+      兜底把它的光压掉，观感是"一按就灭"。
+      真正解决问题的还是能力门（`@media (hover: hover) and (pointer: fine)`），
+      这条钩子留着只作**将来的入口**：真出现某条漏门且压不住的规则时，在这里点名处理。
+      判定方法见 `docs/联动维护点.md` 第 16 条。 */
+
 
 /* 「点亮态的底」：与 `.bar-control:hover` 同一组值（0.16 白 + 琥珀字）。
    为什么单独成一个类：`.bar-control` 是顶栏专用（36px 高、44px 触控外扩、折射滤镜），
@@ -1042,10 +1135,17 @@ html.docs-shell .footer-seal-mark {
 .glass-btn {
   background-color: var(--glass-btn-bg);
 }
-.glass-btn:hover,
 .glass-btn:focus-visible {
   background-color: var(--bar-control-lit-bg);
   color: var(--bar-control-lit-fg);
+}
+/* ⚠️ 悬停单独进门（见 `.glass-lit` 上方那段"触屏粘住"的说明）：
+   触屏点一下 `.glass-btn` 同样会把这两个色值焊住，而它是"可点的动作"、没有当前态语义。 */
+@media (hover: hover) and (pointer: fine) {
+  .glass-btn:hover {
+    background-color: var(--bar-control-lit-bg);
+    color: var(--bar-control-lit-fg);
+  }
 }
 
 /* 玻璃管阅读液柱：粒子缓慢上浮 + 呼吸闪烁（液体微粒感）。
@@ -1498,30 +1598,56 @@ details[open] .chevron-up-down {
   /* 底 + 内高光取**胶囊那一套**：这个盒子的 inset 正好等于视觉框，画出来与按钮 border 同线。 */
   box-shadow: var(--bar-sheen-shadow);
 }
-.bar-control:hover .bar-sheen {
-  background-color: var(--bar-control-lit-bg);
+/* ⚠️ 顶栏四控件的悬停整组进了能力门（2026-09 第十四轮）：触屏点一下会把
+   `--bar-control-lit-fg`（琥珀字）+ 0.16 白底 + 琥珀亮边**焊住**，实测滚动 420px 不脱开。
+   它们没有"当前态"语义（当前项是 `.bar-control:disabled` 与导航），所以触屏不给悬停是对的。
+   触屏要的反馈由 `.bar-control:active` 那一档承担（见门后面）。 */
+@media (hover: hover) and (pointer: fine) {
+  .bar-control:hover .bar-sheen {
+    background-color: var(--bar-control-lit-bg);
+  }
+  .bar-control:hover .bar-sheen::before {
+    /* 悬停面光：与静置同一条渐变，暖光锚点回到 125%、满强度 */
+    background:
+      radial-gradient(130% 110% at 50% -30%, var(--glass-sheen), transparent 62%),
+      radial-gradient(100% 90% at 50% 125%, var(--glass-glow-warm), transparent 72%);
+  }
+  .bar-control:hover {
+    color: var(--bar-control-lit-fg);
+    backdrop-filter: url(#lg-refract) saturate(1.15);
+    /* ⚠️ 第九轮起**不再重复写内高光**：上缘冷白 / 下缘暗边由 `.bar-sheen` 的
+       `--bar-sheen-shadow` 常驻承担（与胶囊同源）。这里只加悬停独有的三样：
+       1px 琥珀亮边、内缘暖光、**一圈柔和的下投光**。
+       ⚠️ 2026-09 第十二轮回退说明：中途我曾把第三条改成 `inset 0 0 0 3px`（贴边硬光边），
+          那是因为文档区滚动盒会裁掉外发光而做的"补丁"。用户明确否掉：
+          「不能因为文档区去掉外边框就把原来的设计改掉」—— 顶栏在**自己的栏体里**
+          有足够空间放这圈光（实测栏高 64px、按钮 h-9，光不会被裁），
+          所以恢复原设计 `0 8px 22px -6px`。要修的是文档区那个容器，不是这里。 */
+    box-shadow:
+      0 0 0 1px var(--glass-edge-lit),
+      inset 0 0 22px -14px var(--glass-glow-warm),
+      0 8px 22px -6px var(--glass-glow-warm);
+  }
+  .dark .bar-control:hover {
+    color: var(--color-brand-200);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.18),
+      0 2px 6px rgb(0 0 0 / 0.35);
+  }
+  .dark .bar-control:hover .bar-sheen {
+    /* `--bar-control-lit-bg` 的深色档就是 0.13，与历史值一致 */
+    background-color: var(--bar-control-lit-bg);
+  }
 }
-.bar-control:hover .bar-sheen::before {
-  /* 悬停面光：与静置同一条渐变，暖光锚点回到 125%、满强度 */
-  background:
-    radial-gradient(130% 110% at 50% -30%, var(--glass-sheen), transparent 62%),
-    radial-gradient(100% 90% at 50% 125%, var(--glass-glow-warm), transparent 72%);
-}
-.bar-control:hover {
-  color: var(--bar-control-lit-fg);
-  backdrop-filter: url(#lg-refract) saturate(1.15);
-  /* ⚠️ 第九轮起**不再重复写内高光**：上缘冷白 / 下缘暗边由 `.bar-sheen` 的
-     `--bar-sheen-shadow` 常驻承担（与胶囊同源）。这里只加悬停独有的三样：
-     1px 琥珀亮边、内缘暖光、**一圈柔和的下投光**。
-     ⚠️ 2026-09 第十二轮回退说明：中途我曾把第三条改成 `inset 0 0 0 3px`（贴边硬光边），
-        那是因为文档区滚动盒会裁掉外发光而做的"补丁"。用户明确否掉：
-        「不能因为文档区去掉外边框就把原来的设计改掉」—— 顶栏在**自己的栏体里**
-        有足够空间放这圈光（实测栏高 64px、按钮 h-9，光不会被裁），
-        所以恢复原设计 `0 8px 22px -6px`。要修的是文档区那个容器，不是这里。 */
-  box-shadow:
-    0 0 0 1px var(--glass-edge-lit),
-    inset 0 0 22px -14px var(--glass-glow-warm),
-    0 8px 22px -6px var(--glass-glow-warm);
+/* 触屏上顶栏控件的反馈（2026-09 第十四轮）：悬停被门掉了，按下去得有个回应，
+   否则手机上点「笔记 / 主题 / 简历 / 顶部」四个钮完全没有触感。
+   ⚠️ 只出面光、不动材质：这里不加琥珀亮边，免得和"当前项"混淆。 */
+@media not all and (hover: hover) {
+  .bar-control:active .bar-sheen::before {
+    background:
+      radial-gradient(130% 110% at 50% -30%, var(--glass-sheen), transparent 62%),
+      radial-gradient(100% 90% at 50% 125%, var(--glass-glow-warm), transparent 72%);
+  }
 }
 .bar-control:disabled {
   /* 「返回顶部」贴顶时的禁用态：只降文字与图标的不透明度，**不动材质** ——
@@ -1557,16 +1683,6 @@ details[open] .chevron-up-down {
      （底 = `--chip-tint`、边 = `--chip-edge`、内高光 = `--bar-sheen-shadow`，都在上面统一定义），
      只有那圈环境光走深色档的 `--bar-rest-shadow`（`0 0 16px -8px` 暖光）——
      深底上这圈光本来就明显，不必跟着浅色再调。 */
-}
-.dark .bar-control:hover {
-  color: var(--color-brand-200);
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.18),
-    0 2px 6px rgb(0 0 0 / 0.35);
-}
-.dark .bar-control:hover .bar-sheen {
-  /* `--bar-control-lit-bg` 的深色档就是 0.13，与历史值一致 */
-  background-color: var(--bar-control-lit-bg);
 }
 .dark .bar-control:disabled .bar-sheen {
   background-color: rgb(255 255 255 / 0.04);
@@ -1793,8 +1909,12 @@ details[open] .chevron-up-down {
   text-decoration-color: var(--color-brand-300);
   text-underline-offset: 3px;
 }
-.doc-content .doc-link:hover {
-  color: var(--color-brand-800);
+/* ⚠️ 悬停进门（2026-09 第十四轮）：触屏点一个正文链接之后，它会一直保持"已访问+悬停"的深色，
+   读者会以为链接被选中了。触屏改由 UA 自身的 :active 反馈承担。 */
+@media (hover: hover) and (pointer: fine) {
+  .doc-content .doc-link:hover {
+    color: var(--color-brand-800);
+  }
 }
 .dark .doc-content .doc-link {
   color: var(--color-brand-200);
@@ -1874,8 +1994,11 @@ details[open] .chevron-up-down {
   background: #201d18;
   transition: border-color var(--duration-micro) var(--ease-out-soft);
 }
-.doc-content .doc-figure img:hover {
-  border-color: var(--color-brand-500);
+/* ⚠️ 悬停进门（同前）：触屏上"点过的图"会一直带琥珀边，看起来像被选中了。 */
+@media (hover: hover) and (pointer: fine) {
+  .doc-content .doc-figure img:hover {
+    border-color: var(--color-brand-500);
+  }
 }
 .doc-content .doc-figure figcaption {
   margin-top: 0.5rem;
