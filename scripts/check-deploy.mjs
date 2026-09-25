@@ -20,9 +20,11 @@ const SLEEP_MS = 20_000
 const CHECKS = [
   { label: '暖 ink（全站标题色）', kind: 'text', where: 'css', needle: '#221f1a' },
   { label: '暖 ink-light（深色正文）', kind: 'text', where: 'css', needle: '#ece7df' },
-  { label: '顶栏按钮取 --chip-text（slate-600）', kind: 'text', where: 'css', needle: '#3d3830' },
+  { label: '顶栏按钮取 --chip-text（浅 slate-800）', kind: 'text', where: 'css', needle: '#29251f' },
+  { label: '顶栏按钮取 --chip-text（深 slate-200）', kind: 'text', where: 'css', needle: '#cdc2b1' },
   { label: '顶栏按钮已改走变量', kind: 'text', where: 'css', needle: 'color:var(--chip-text)' },
   { label: '旧冷灰 #333a3d 已清除', kind: 'text', where: 'css', needle: 'color:#333a3d', negate: true },
+  { label: '旧的中间值 #3d3830 已清除', kind: 'text', where: 'css', needle: '--chip-text:#3d3830', negate: true },
   { label: '手机首屏纹样 .hero-cao-mark', kind: 'text', where: 'css', needle: 'hero-cao-mark' },
   { label: '手机页脚印章 .footer-seal-mark', kind: 'text', where: 'css', needle: 'footer-seal-mark' },
   { label: '卷草纹资源可达', kind: 'asset', path: 'assets/cao-mark.webp' },
