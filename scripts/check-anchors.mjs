@@ -581,7 +581,8 @@ const subbarProblems = []
    * 用户 2026-09 第九轮：「把文档区的单独顶栏也和全局顶栏样式进行对齐」。
    * 做法是**复制同一组数值**（不是抽共用类 —— 两者定位/层叠差异太大，见 index.css 的注释），
    * 所以必须有一条断言盯着：`.docs-subbar` 与 `.site-bar` 的 `background-image` 与 `box-shadow`
-   * 逐项相同（`background-color` 例外：横栏是 sticky，要多一层 72% 的底挡住下方正文）。
+   * 逐项相同（`background-color` 例外：横栏是 sticky，正文会从它下面穿过，需要自己那层
+   * 可读性底 —— 第十三轮起这层底是**画布色 72% / 深色 62%**，不再是白色 drop-shadow）。
    * 漂移了会红，不要靠肉眼。 */
   const materialProblems = []
   {
@@ -626,6 +627,7 @@ const subbarProblems = []
           ...prev,
           lensFilter: lens ? getComputedStyle(lens).backdropFilter : null,
           subBg: getComputedStyle(subEl).backgroundColor,
+          subFilter: getComputedStyle(subEl).filter,
           htmlDark: document.documentElement.classList.contains('dark'),
           barClass: barEl.className,
         };
@@ -646,10 +648,24 @@ const subbarProblems = []
       if (!String(r.lensFilter ?? '').includes('lg-refract')) {
         materialProblems.push(`${tag} 横栏折射层没生效（backdrop-filter = ${r.lensFilter}）`)
       }
-      if (q(r.subBg) !== 'rgba(0, 0, 0, 0)') {
+      if (q(r.subBg) === 'rgba(0, 0, 0, 0)') {
         materialProblems.push(
-          `${tag} 横栏的底不是全透明（background-color = ${r.subBg}）—— 第十轮起它与顶栏同源，` +
-            `正文要从它下面穿过，任何实底都会把折射盖掉`,
+          `${tag} 横栏的可读性底不见了（background-color = ${r.subBg}）—— ` +
+            `第十三轮起它用一层 72%（深色 62%）的画布色替代了原来那句白色 drop-shadow，` +
+            `正文从它下面穿过时全靠这层底保读；底一旦没了，"两层字叠在一起"会立刻回来`,
+        )
+      }
+      /* ⚠️ 2026-09 第十三轮新增：**横栏不许有任何 `filter`**。
+         用户口径：「不需要光晕，就和顶栏保持一致的效果就行，不需要发光」。
+         原来这里挂的是 `drop-shadow(0 1px 3px rgb(255 255 255 / 0.85))` —— 浅色档的
+         "补读得清"手段，但**深色档漏了覆盖**，整条横栏在深画布上被一圈奶白包住
+         （实测同一像素开/关亮度差 1.67×，向下溢出约 12px）。
+         材质断言原先只比 `background-image` / `box-shadow`，`filter` 不在范围内，所以没抓到。
+         这一条就是补那个缺口：`.docs-subbar` 的 `filter` 必须是 `none`。 */
+      if (q(r.subFilter) !== 'none') {
+        materialProblems.push(
+          `${tag} 横栏上挂了 filter（${r.subFilter}）—— 第十三轮起横栏与顶栏同口径：` +
+            `读数靠底，不靠发光。发光滤镜在深色档没有对应覆盖时会整条发光`,
         )
       }
     }
