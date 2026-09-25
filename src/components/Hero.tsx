@@ -63,6 +63,15 @@ export default function Hero() {
       </div>
 
       <div className="hero-viewport relative mx-auto flex max-w-6xl flex-col justify-start px-4 pb-12 pt-10 sm:justify-center sm:px-6 sm:pb-24 sm:pt-14">
+        {/* 卷草纹（手机/平板，2026-09 第十二轮）：用户要「手机端也加上 PC 的那两个图案」。
+            ⚠️ 它**必须挂在首屏容器内、用 absolute**，不能用 PC 那套 `position: fixed`：
+               手机上 fixed 会跟着滚动一直贴在屏幕上，而手机内容占满宽度，
+               全站一万多像素的滚动过程中图案会一直压在正文上 —— 这正是当初隐藏它的原因。
+               改成"段内绝对定位"后，它只在首屏出现，滚过去就没了，与正文零冲突。
+            ⚠️ 桌面端由 CSS 隐藏（见 `.hero-cao-mark`），继续用左下角那株 fixed 的。
+            几何依据：390×844 实测首屏容器 64→844（高 780），而正文最低只到 424 ——
+            下半部有 356px 全空，这株纹样正好落在那片空白里，不与任何文字相交。 */}
+        <span aria-hidden="true" className="hero-cao-mark" />
         <div className="max-w-4xl">
           {/* 求职状态徽标。
               配色：石墨为底 + 琥珀只落在状态圆点上（见 DESIGN.md 的 One Meaning Rule）。
