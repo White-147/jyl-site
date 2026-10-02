@@ -738,15 +738,40 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
     </div>
   )
 
+  /**
+   * 横栏左端的返回入口（桌面横栏 + 手机顶部共用）。
+   *
+   * 用户 2026-09 定稿：「二级目录的时候，把横栏的返回作品集换成返回 UE 理论或者 UE 实战，
+   * 这样更符合逻辑，因为现在这一版的（左栏）返回 UE 理论不好看也不好改，
+   * 直接改横栏的方便又快捷」。
+   *
+   *   · **一级（文档列表）**：`返回作品集` → `#top`（作品集首页）
+   *   · **二级（某篇目录）**：`返回 UE 理论 / UE 实战` → `#/docs/<分区>`（分区封面页，
+   *     同时左栏退回一级 —— 因为清掉页 id 后 `current` 为 undefined，`navDepth` 回到 1）
+   *
+   * ⚠️ 左栏里那条「返回 UE 理论」已随之删除（用户：「不好看也不好改」）。
+   */
+  const subLevel = navForest.length > 1 && navDepth === 2
   const backLink = (
     <a
-      href="#top"
+      href={subLevel ? docsHref(section.id) : '#top'}
+      onClick={
+        subLevel
+          ? () => {
+              /* 连路由一起清页 id：`#/docs/<分区>` → 中间显示分区封面、左栏退回一级 */
+              window.location.hash = docsHref(section.id)
+              setNavDepth(1)
+            }
+          : undefined
+      }
+      title={subLevel ? `返回${section.label}` : '返回作品集'}
+      aria-label={subLevel ? `返回${section.label}` : '返回作品集'}
       className="inline-flex shrink-0 items-center gap-1.5 text-sm font-medium text-slate-500 transition-colors hover:text-brand-700 dark:text-slate-400 dark:hover:text-brand-200"
     >
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden="true">
         <path d="M19 12H5M12 19l-7-7 7-7" />
       </svg>
-      返回作品集
+      {subLevel ? `返回${section.label}` : '返回作品集'}
     </a>
   )
 
@@ -940,43 +965,10 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
     ) : (
       /* ---------- 二级：这一篇的目录 ---------- */
       <div>
-        {/* ⚠️ **返回行吸顶**（用户 2026-09：「左栏很长时返回按钮会被拉下去，希望固定在左栏顶部」）。
-            它仍在滚动容器内，但用 `sticky top-0` + 不透明底 + 下边框：
-            文档列表往下滚时它钉在左栏顶部，随时可点。
-            ⚠️ 背景不能用半透明 —— 滚过去的文字会从下面透出来。*/}
-        <div className="sticky top-0 z-10 -mx-5 mb-1 bg-white/95 px-5 pb-1.5 pt-0.5 backdrop-blur dark:bg-slate-900/95">
-        <button
-          type="button"
-          onClick={() => {
-            /* 方案①（用户 2026-09 确认）：点返回 = **连 URL 一起清掉页 id**，回到 `#/docs/<分区>`。
-               这样"左栏一级 + 中间分区封面"一步到位 —— 只切 navDepth 的话 URL 还停在某一页、
-               中间那列仍然显示那篇文章（实测过：左栏回一级了，正文却还是文章）。
-               ⚠️ 这里**没有多出任何页面**：清掉页 id 之后 `current === undefined`，
-                  中间那列落到"空状态"分支，而那个分支现在渲染的是分区封面 + 文本。 */
-            window.location.hash = docsHref(section.id)
-            setNavDepth(1)
-          }}
-          aria-label={`返回${section.label}`}
-          className="glass-lit mb-2 flex w-full items-baseline gap-2 rounded-lg px-2.5 py-2 text-left transition-colors"
-        >
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="h-3.5 w-3.5 shrink-0 self-center text-slate-400 dark:text-slate-500"
-            aria-hidden="true"
-          >
-            <path d="m15 18-6-6 6-6" />
-          </svg>
-          {/* 返回行的目标按用户口径是**分区**（"返回 UE 理论 / UE 实战"），不是文档列表本身 */}
-          <span className="min-w-0 flex-1 truncate text-[13px] font-semibold text-slate-700 dark:text-slate-100">
-            返回{section.label}
-          </span>
-        </button>
-        </div>
+        {/* ⚠️ 左栏里那条「返回 UE 理论」已**移除**（用户 2026-09 定稿）：
+            「现在这一版的返回 UE 理论不好看也不好改，直接改横栏的方便又快捷」——
+            返回入口统一放到**横栏左端**（`backLink`，二级时自动显示「返回 UE 理论 / UE 实战」），
+            那里位置固定、不用滚、视觉上也更统一。 */}
         {navForest
           .filter((f) => f.key === activeDocKey)
           .map((f) => (
