@@ -438,6 +438,26 @@ components:
 这是用户明确选择的实验："可以先走 2，我看看效果，如果不好看，再走 1"。**选项 1（退回发丝线行 + 玻璃边缘高光）仍然有效**，回退方式：把 `<article>` 的 `glass-card glass-lit ... rounded-2xl p-5` 换回 `border-b border-slate-200/70 py-6 hover:bg-slate-50/70`，并把悬停反馈改成上下发丝线点亮。
 每行的 `id={'project-' + project.id}` 是**跨区深链的落点**（论文页头的「配套项目」→ `#project-book-recommendation`），不要删。
 
+### Scrollbars（全站滚动条）
+
+**统一口径（2026-09 定稿）**：全站**同一套暖色 + 同一套形状**，只有宽度不同 ——
+主站（根滚动条）**10px**，文档区栏内（`.docs-scroll`）**6px**。
+
+| 项 | 值 | 说明 |
+| --- | --- | --- |
+| 宽度令牌 | `--scrollbar-w: 10px` | **单一来源**：自定义滚动条宽度与折射层右内缩量都用它 |
+| 滑块色 | 浅色 `rgb(158 140 114 / .45)` / 深色 `rgb(179 168 148 / .4)` | 暖色系（`--scrollbar-thumb`）。⚠️ 原来是**冷蓝灰** `rgb(148 163 184)` / `rgb(100 116 139)` |
+| hover | `… / .7`（浅色）· `… / .68`（深色） | `--scrollbar-thumb-hover` |
+| 轨道 | `transparent` | 需要滚时看得见，不需要时几乎不可见 |
+| 两端方向按钮 | **必须显式 `display: none`** | 只在 `::-webkit-scrollbar` 里设 width 时，Chromium 仍会画出那对原生箭头（深色档是**冷蓝灰**小方块，抓图确认过）。Firefox 走 `scrollbar-width: thin` 本来就没有 |
+
+⚠️⚠️ **顶栏折射层的右边界必须让开滚动条**：`position: fixed` 的 `right: 0` 算的是**布局视口右缘**
+（= 滚动条左缘），而 `100vw` 包含滚动条槽（实测 1440 视口：`innerWidth` = 1440、
+`html.clientWidth` = 1430、滚动条 10px）。所以折射层写成
+`right: calc(100vw - 100% - var(--scrollbar-w))` —— 实测 `lensInsetPx = vwMinusClient = 10`，
+与滚动条左缘**正好齐平**。⚠️ **顶栏本体不用跟着缩**（它是块级元素，宽度天然止于滚动条左缘；
+加 `margin-right` 反而多留一条缝）。
+
 ## 6. Do's and Don'ts
 
 ### Do:

@@ -242,3 +242,4 @@ GitHub Actions is already configured (`.github/workflows/deploy.yml`), so pushin
 - [DESIGN.md](./DESIGN.md) - design system: colour, typography, elevation, components, prohibitions
 - [PRODUCT.md](./PRODUCT.md) - product brief: target users, anti-references, design principles, accessibility
 - [docs/联动维护点.md](./docs/联动维护点.md) - coupled-edit checklist (read before changing code)
+- Scrollbars (site-wide spec: warm palette, 10px at the root / 6px inside the docs rail, with the top-bar lens inset to clear it) - see **Scrollbars** in [DESIGN.md](./DESIGN.md)

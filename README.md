@@ -237,3 +237,4 @@ node scripts/check-anchors.mjs      # 真浏览器断言（锚点落点 / 互链
 - [DESIGN.md](./DESIGN.md)：设计系统，颜色 / 字体 / 层级 / 组件 / 禁忌
 - [PRODUCT.md](./PRODUCT.md)：产品口径，目标用户 / 反参考 / 设计原则 / 可访问性要求
 - [docs/联动维护点.md](./docs/联动维护点.md)：同一事实写在多处的联动点清单（改代码前必读）
+- 滚动条（全站规范：暖色 + 10px / 栏内 6px + 顶栏折射层让位）见 [DESIGN.md](./DESIGN.md) 的 **Scrollbars** 段

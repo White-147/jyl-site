@@ -117,10 +117,19 @@
   --color-code-bg: #fdf3e0;
   --color-code-edge: #f0dcb4;
   --color-code-fg: #8a4b00;
-  /* 文档区细滚动条的滑块色（暖色系；⚠️ 原来是**冷蓝灰** rgb(148 163 184 / 100 116 139)，
-     和整站暖纸/暖石墨不是一套，深色档尤其明显）。 */
-  --docs-scrollbar-thumb: rgb(158 140 114 / 0.45);
-  --docs-scrollbar-thumb-hover: rgb(158 140 114 / 0.7);
+  /**
+   * **滚动条是"全站规范"，不是文档区专有**（用户 2026-09：「主站和文档区的滚动条看起来不一样」）。
+   * 主站原来是**浏览器默认**（15px、操作系统调色板、带两端箭头按钮），文档区是自绘的 6px 暖色 ——
+   * 两者必然不像。现在统一成：**同一套暖色 + 同一套形状**，主站 10px / 文档区 6px（栏内更秀气）。
+   *
+   * ⚠️ 原来是**冷蓝灰** `rgb(148 163 184)` / `rgb(100 116 139)`，和整站暖纸/暖石墨不是一套。
+   * ⚠️ `--scrollbar-w` 是**单一来源**：自定义滚动条的宽度与折射层的右内缩量都用它，
+   *    两者必须一致（`::-webkit-scrollbar { width: var(--scrollbar-w) }` 实测会**占布局**同样宽度）。
+   *    改宽度时改这一处；折射层的算式见 `.site-bar-lens-layer` 那段注释。
+   */
+  --scrollbar-thumb: rgb(158 140 114 / 0.45);
+  --scrollbar-thumb-hover: rgb(158 140 114 / 0.7);
+  --scrollbar-w: 10px;
   --color-brand-300: #f2a93b; /* 深色模式光晕/强调：深底 9.25:1。浅色模式仅用于图形（底上 1.98:1） */
   --color-brand-400: #f7bd6e; /* 深色模式提亮：深底 10.96:1 */
   --color-brand-500: #d97a06; /* 图形、进度条、光斑。**禁止承载文字**（底上 3.03:1） */
@@ -267,8 +276,8 @@ html.dark {
   --color-code-bg: #2e2318;
   --color-code-edge: #4a3a24;
   --color-code-fg: #f0b866;
-  --docs-scrollbar-thumb: rgb(179 168 148 / 0.4);
-  --docs-scrollbar-thumb-hover: rgb(179 168 148 / 0.68);
+  --scrollbar-thumb: rgb(179 168 148 / 0.4);
+  --scrollbar-thumb-hover: rgb(179 168 148 / 0.68);
   --color-slate-950: #15120f; /* 深色画布 */
 }
 
@@ -1338,6 +1347,11 @@ details[open] .chevron-up-down {
 }
 
 .site-bar {
+  /* ⚠️ 这里**故意不写** `margin-right: var(--scrollbar-w)`（试过，会多留一条 10px 缝）。
+     实测：`::-webkit-scrollbar { width: var(--scrollbar-w) }` 生效时滚动条**仍占布局 10px**，
+     顶栏作为普通块级元素的宽度已经止于滚动条左缘（1440 视口下 = 1430，与折射层右端齐平）。
+     而折射层是 `position: fixed`，它的 `right: 0` 算的是布局视口、会延伸到滚动条底下 ——
+     所以**只有折射层需要内缩**（见 `.site-bar-lens-layer` 那段注释的实测数据）。 */
   /* ===== Liquid Glass：透明 + 边缘折射（2026-09 第四轮，用户定稿）=====     ⚠️ 这一轮换的是**机制**，不是参数：从「毛玻璃雾化」换成「透明玻璃 + 边缘折射」。
         实测（本机 Chrome 153，scripts/_glassprobe.mjs / _lensprobe.mjs）：
           · `backdrop-filter: url(#f)` + feTurbulence + feDisplacementMap → **可用**，
@@ -1365,10 +1379,32 @@ details[open] .chevron-up-down {
 /* 折射带的宿主层：固定在视口顶部、与顶栏同高，z-index 压到顶栏之下（49 < 50）。
    ⚠️ 这一层必须存在且必须是 `position: fixed` —— 折射带放在 `.site-bar` **内部**时不生效，
       原因与实测证据见 TopBar.tsx 里那段注释。 */
+/**
+ * ⚠️⚠️ **右边界必须让开滚动条**（用户 2026-09 预见：「主站改成文档区滚动条之后也会出现顶栏扭曲」）。
+ *
+ * 为什么：`position: fixed` 的 `right: 0` 算的是**布局视口的右缘**（= `html.clientWidth`），
+ *   而**自绘**滚动条（`::-webkit-scrollbar`）在 Chromium 上是画在**滚动条槽**里的、
+ *   槽在布局视口**之外**（`100vw` 仍等于 `window.innerWidth`，见下）——
+ *   于是折射层铺到 `right: 0` 就等于铺到"滚动条左缘"，再往右那一条被它压住。
+ *   `100vw` **包含**滚动条槽（实测 1440 视口下 `innerWidth` = `100vw` = 1440、
+ *   `html.clientWidth` = 1430、滚动条 10px），所以"真正的视口右缘" = `100% + --scrollbar-w`。
+ *
+ * 实测（1440 视口，改前 → 改后）：
+ *   改前：折射层 0~1430（= 布局视口右缘），滚动条 1430~1440 → **滚动条落在折射层外、被压住一角**
+ *   改后：折射层 0~`100vw − --scrollbar-w`，与滚动条左缘**正好齐平**，不再弯它
+ *
+ * ⚠️ 写法用 `right: calc(100vw - 100% - var(--scrollbar-w))`：`100%` 在这里解析成
+ *    **包含块（初始包含块 = 布局视口）的宽度**，所以 `100vw - 100%` 恰好等于滚动条宽度 ——
+ *    实测 `lensInsetPx = 10 = vwMinusClient`，两边严格相等，不需要 JS 量。
+ * ⚠️ **顶栏本体不用跟着缩**：它是普通块级元素，宽度天然止于布局视口右缘（= 滚动条左缘），
+ *    加 `margin-right` 反而会多留一条 10px 的缝（试过，已撤）。
+ * ⚠️ `scrollbar-gutter: stable` 会在右侧再留一条槽，那时 `100vw - 100%` 是"滚动条 + 槽"的合计宽度，
+ *    算式依然成立（多让一点不影响观感）。
+ */
 .site-bar-lens-layer {
   position: fixed;
   left: 0;
-  right: 0;
+  right: calc(100vw - 100% - var(--scrollbar-w));
   top: 0;
   height: 4rem;
   z-index: 49;
@@ -2363,9 +2399,53 @@ details[open] .chevron-up-down {
   }
 }
 
+/* ===== 滚动条（全站规范）=====
+ *
+ * 用户 2026-09：「主站（作品集）和文档区的滚动条目前看来不一样」——确实：
+ *   主站：**浏览器默认**（15px、操作系统调色板、带两端方向按钮）
+ *   文档区：自绘 6px 暖色
+ * 现在统一为**同一套暖色 + 同一套形状**，只差宽度（主站 10px / 文档区 6px）。
+ *
+ * ⚠️ 用标准属性 `scrollbar-width/color`（Firefox、Chrome 121+）+
+ *    `::-webkit-scrollbar`（更旧的 WebKit/Blink）两条腿，缺一条就会有浏览器露出原生样式。
+ * ⚠️⚠️ **必须显式写 `::-webkit-scrollbar-button { display: none }`**：
+ *    只在 `::-webkit-scrollbar` 里设 width 时，Chromium 仍会渲染那对**原生箭头按钮** ——
+ *    它们在深色档是**冷蓝灰**的小方块，和整站暖石墨不是一套（抓 2x 特写确认过）。
+ *    Firefox 走 `scrollbar-width: thin`，本来就没有按钮，不受影响。
+ * ⚠️⚠️ **自绘滚动条是覆盖式的**（不再占布局）→ 顶栏本体与折射层必须按 `--scrollbar-w` 右缩，
+ *    否则滚动条会跑到折射层的**外侧**被弯（详见 `.site-bar-lens-layer` 那段注释）。
+ */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) transparent;
+}
+html::-webkit-scrollbar {
+  width: var(--scrollbar-w);
+  height: var(--scrollbar-w);
+}
+html::-webkit-scrollbar-track {
+  background: transparent;
+}
+html::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+html::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-thumb);
+  border-radius: 9999px;
+}
+html::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scrollbar-thumb-hover);
+}
+html::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* 栏内滚动条（文档区正文 / 左栏 / 手机抽屉）：同一套色与形状，只是更细 */
 .docs-scroll {
   scrollbar-width: thin;
-  scrollbar-color: var(--docs-scrollbar-thumb) transparent;
+  scrollbar-color: var(--scrollbar-thumb) transparent;
 }
 .docs-scroll::-webkit-scrollbar {
   width: 6px;
@@ -2374,25 +2454,17 @@ details[open] .chevron-up-down {
 .docs-scroll::-webkit-scrollbar-track {
   background: transparent;
 }
-/**
- * ⚠️⚠️ **必须显式隐藏两端的方向按钮**（用户 2026-09：「文档区右侧上下滑动块那里…」的后续发现）。
- *
- * 只在 `::-webkit-scrollbar` 里设 width 时，Chromium 仍会渲染那对**原生箭头按钮**
- * （`::-webkit-scrollbar-button`）—— 它们在深色档是**冷蓝灰**的小方块，
- * 和整站的暖石墨画布明显不是一套（本人抓 2x 特写确认过）。
- * Firefox 走标准属性 `scrollbar-width: thin`，本来就没有按钮，不受影响。
- */
 .docs-scroll::-webkit-scrollbar-button {
   display: none;
   width: 0;
   height: 0;
 }
 .docs-scroll::-webkit-scrollbar-thumb {
-  background-color: var(--docs-scrollbar-thumb);
+  background-color: var(--scrollbar-thumb);
   border-radius: 9999px;
 }
 .docs-scroll::-webkit-scrollbar-thumb:hover {
-  background-color: var(--docs-scrollbar-thumb-hover);
+  background-color: var(--scrollbar-thumb-hover);
 }
 /* ⚠️ 两端的 corner（横竖滚动条交角）也一并清掉：正文列通常只有纵向滚动条，
    但宽度计算/子像素下偶尔会冒出一个 6×6 的小方块。 */
