@@ -208,6 +208,9 @@ const escapeHtml = (s) =>
 const escapeAttr = (s) => escapeHtml(s).replace(/'/g, '&#39;')
 
 /** 标题 → 锚点 id。中文不音译，直接保留（与 GitHub 风格一致，也便于人工写深链）。 */
+/** 去掉标题开头的序号前缀（`2. 自助答疑方法` → `自助答疑方法`），用于锚点的宽松匹配 */
+const NO_NUM = (s) => String(s).replace(/^[0-9]+(?:[.．][0-9]+)*[.．、,，:：]?\s*/, '')
+
 function slugify(text) {
   const s = String(text)
     .toLowerCase()
@@ -580,7 +583,9 @@ function splitByNumberedHeading(tree, budget) {
       const splits =
         node.level === 1
           ? multiH1
-          : node.level === 3 || (node.level === 2 && isNumberedHeading(node.title))
+          : node.level === 3 ||
+            node.level === 4 ||
+            (node.level === 2 && isNumberedHeading(node.title))
       seq.push({ node, chain, splits })
       /* ⚠️ 无论是不是分页边界都要递归：早先"边界不展开"，导致 h3 边界永远访问不到 */
       if (node.children.length) walk(node.children, [...chain, stripInline(node.title)])
@@ -1093,11 +1098,41 @@ for (const p of pages) {
   // 被去掉的标题仍要能被 `./x.md#锚点` 定位到本页（运行时找不到就回落到页首）
   p.droppedIds = toc.slice(0, dropCount).map((t) => t.id)
 }
+/**
+ * **源内锚点 → 它所在的那一页**，两种来源都要收：
+ *   ① `p.allIds`：这一页**包含**的标题 id（页内小节）；
+ *   ② `p.title` 的 slug：这个标题**自己就是一页**（切页把它切出去了）。
+ *
+ * ⚠️ 少了 ② 的后果（用户实测）：`界面基础操作` 里指向 `#2. 自助答疑方法`、
+ *    `#4. 变换工具快捷键`、`#Fab插件的安装` 的互链**只能到文档第一页** ——
+ *    因为那些标题已经是独立页、页内根本没有同名锚点，查不到就退回兜底了。
+ *    按用户口径「跳转到对应页或者对应页的内部位置」，这种情况**该直接跳那一页**。
+ */
 /** 源内锚点 → 落在哪一页（供 `./x.md#锚点` 精确定位） */
 const anchorPage = new Map()
+/** 宽松匹配（去序号前缀）；值为 `null` 表示多个标题撞了同一个键，宁可不猜 */
+const anchorLoose = new Map()
 for (const p of pages) {
   if (!p.allIds) continue
   for (const id of p.allIds) anchorPage.set(`${p.source}#${id}`, p)
+  /* ② 这个标题自己就是一页（切页切出去了）→ 锚点直接命中这一页 */
+  anchorPage.set(`${p.source}#${slugify(p.title)}`, p)
+  /**
+   * 宽松匹配用的第二张表：**去掉标题里的序号前缀**再建一次键。
+   *
+   * ⚠️ 为什么需要（用户实测）：源笔记里写的锚点是 `#自助答疑方法`（**不带序号**），
+   *    而标题实际是 `### 2. 自助答疑方法` → 页 id 是 `2-自助答疑方法` —— 两者不相等，
+   *    链接于是落到兜底页（只能到文档、到不了标题）。用户用的是 Typora，它按**标题文字**
+   *    生成锚点，序号本来就不该出现在锚点里，所以这是"锚点风格差异"，不是写错。
+   * 规则：把锚点与键都去掉开头的序号（`2.` / `4.` / `3.1.1`）再比一次。
+   */
+  const noNum = NO_NUM
+  for (const id of p.allIds ?? []) {
+    const k = `${p.source}#${noNum(id)}`
+    anchorLoose.set(k, anchorLoose.has(k) ? null : p) // 撞键就置 null（多义，不猜）
+  }
+  const k2 = `${p.source}#${noNum(slugify(p.title))}`
+  anchorLoose.set(k2, anchorLoose.has(k2) ? null : p)
   if (p.droppedIds?.length) for (const id of p.droppedIds) anchorPage.set(`${p.source}#${id}`, p)
 }
 
@@ -1203,6 +1238,12 @@ for (const src of SOURCES) {
      *    就是为了这个，页内定位必须补上。
      */
     const anchor = hash ? decodeURIComponent(hash) : null
+    if (process.env.TRACE_A === '1' && anchor && src.id === 'ue5-window-base') {
+      const key = `${target}#${slugify(anchor)}`
+      console.log('A target=%s rawAnchor=%j slug=%j keyHit=%s keys=%j',
+        target, anchor, slugify(anchor), anchorPage.has(key) ? anchorPage.get(key).id : 'NO',
+        [...anchorPage.keys()].filter((k) => k.startsWith(target + '#')).slice(0, 6))
+    }
     /**
      * ⚠️⚠️ **兜底不能再落到 `list[0]`**（2026-09 用户实测报出死链）。
      *
@@ -1222,7 +1263,13 @@ for (const src of SOURCES) {
       console.log('LINK src=%s target=%s anchor=%j list=%d readyList=%d firstId=%j',
         src.id, target, anchor, list.length, readyList.length, readyList[0] ? readyList[0].id : '-')
     }
-    const page = (anchor && anchorPage.get(`${target}#${anchor}`)) || readyList[0] || null
+    const page =
+      (anchor &&
+        (anchorPage.get(`${target}#${anchor}`) ||
+          /* 宽松兜底：去掉序号前缀再找（`自助答疑方法` → `2-自助答疑方法`）；撞键时值为 null，视为找不到 */
+          anchorLoose.get(`${target}#${NO_NUM(anchor)}`))) ||
+      readyList[0] ||
+      null
     if (!page) {
       /* 目标源在本站一页都不剩（理论上不会发生，留个安全出口）→ 指向分区首页 */
       return `<a class="doc-link" href="#/docs/${list[0].section}">${label}</a>`
