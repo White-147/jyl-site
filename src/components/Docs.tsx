@@ -19,8 +19,8 @@ const ANCHOR_GAP = 16
 /* ============================ 左栏导航树 ============================ */
 
 type NavNode =
-  | { kind: 'page'; key: string; page: DocPage }
-  | { kind: 'group'; key: string; title: string; firstPage: DocPage; children: NavNode[] }
+  | { kind: 'page'; key: string; page: DocPage; linkable?: boolean }
+  | { kind: 'group'; key: string; title: string; firstPage: DocPage; children: NavNode[]; linkable?: boolean }
 
 /**
  * 把平铺的页列表还原成「源 → 分组 → 页」的树。
@@ -33,7 +33,17 @@ type NavNode =
  *      （「2.创建蓝图」这种只挂一节的分组，多一层缩进只会让左栏更长更碎）。
  *   2. 分组本身可点，指向它的第一页 —— 分组的引言段就在那一页的正文里。
  */
+/** 数一棵导航树里有多少个"页"（一级目录列表的页数用它） */
+function countPages(nodes: NavNode[]): number {
+  return nodes.reduce(
+    (n, x) => n + (x.kind === 'page' ? 1 : countPages((x as Extract<NavNode, { kind: 'group' }>).children)),
+    0,
+  )
+}
+
 function buildNav(pages: DocPage[], chapter: string): NavNode[] {
+  /** 所有页的祖先标题集合：某个页标题出现在这里 → 它是"分节头"（下面挂着子节），左栏里当可展开的分组 */
+  const parentTitles = new Set(pages.flatMap((p) => p.ancestors))
   const root: NavNode[] = []
   const stack: { title: string; node: Extract<NavNode, { kind: 'group' }> }[] = []
 
@@ -56,8 +66,39 @@ function buildNav(pages: DocPage[], chapter: string): NavNode[] {
       stack.push({ title: page.ancestors[k], node: g })
       bucket = g.children
     }
-    bucket.push({ kind: 'page', key: `${page.section}/${page.id}`, page })
+    bucket.push({
+      kind: 'page',
+      key: `${page.section}/${page.id}`,
+      page,
+      linkable: !parentTitles.has(page.title),
+    })
   }
+
+  /**
+   * ⚠️ **把"分节头页"降级成可展开的分组头**（2026-09 用户定向）。
+   *
+   * 背景：`一、概况说明` / `二、学习记录` 这类 H2 的 `ancestors` 是**空数组**（它们就是源里的
+   * 第一级标题），所以上面的循环**不会为它们建分组**，它们一直是"可点的页"。
+   * 用户口径：「点击的时候不是指向它下面的第一个 H3 页，而是**展开收缩**，实际正文都在 H3」。
+   *
+   * 判据用 `parentTitles`（它的标题出现在别的页的 `ancestors` 里 → 下面挂着子节）：
+   * 命中就把它包成 `linkable: false` 的**分组**，子页挂在它下面 → 左栏渲染成"可展开的分节头"。
+   * ⚠️ 必须保留它原来那个页节点作为唯一子节点，否则**丢内容**（它的正文要跟着它）。
+   */
+  const liftHeadingPages = (nodes: NavNode[]): NavNode[] =>
+    nodes.flatMap((n) => {
+      if (n.kind !== 'page' || !parentTitles.has(n.page.title)) return [n]
+      return [
+        {
+          kind: 'group',
+          key: `head:${chapter} / ${n.page.title}`,
+          title: n.page.title,
+          firstPage: n.page,
+          children: [n],
+          linkable: false,
+        } satisfies NavNode,
+      ]
+    })
 
   const flatten = (nodes: NavNode[]): NavNode[] => {
     const out: NavNode[] = []
@@ -67,12 +108,18 @@ function buildNav(pages: DocPage[], chapter: string): NavNode[] {
         continue
       }
       n.children = flatten(n.children)
-      if (n.children.length === 1 && n.children[0].kind === 'page') out.push(n.children[0])
-      else out.push(n)
+      /* 单子页分组拍平：只有一个页、且没有子分组时，把这一页提上来单独成行
+         （「2.创建蓝图」这种只挂一节的分组，多一层缩进只会让左栏更长更碎）。
+         ⚠️ 但**分节头分组**（`linkable: false`，自己就是一个标题）不能拍平 —— 它要留着当展开头。 */
+      if (n.linkable !== false && n.children.length === 1 && n.children[0].kind === 'page') {
+        out.push(n.children[0])
+        continue
+      }
+      out.push(n)
     }
     return out
   }
-  return flatten(root)
+  return flatten(liftHeadingPages(root))
 }
 
 /** 折叠状态存 localStorage：刷新后还保持收起的样子 */
@@ -148,7 +195,6 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
       nodes: buildNav(s.items, s.chapter),
     }))
   }, [pages])
-  const showSourceHeaders = navForest.length > 1
 
   const current = pages.find((p) => p.id === pageId) ?? pages[0]
 
@@ -162,6 +208,8 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
    *    改由下面那个 effect 解决：**路由切进被收起的分组时自动把它展开**。
    *    这样点击必定生效，切页也一定能看到自己在哪。
    */
+  /** 左栏当前停在哪一级（1 = 文档列表，2 = 某篇的目录）。单篇分区恒为 2（不建一级） */
+  const [navDepth, setNavDepth] = useState<1 | 2>(1)
   const [collapsed, setCollapsed] = useState<Set<string>>(loadCollapsed)
   const toggle = useCallback((key: string) => {
     setCollapsed((prev) => {
@@ -634,14 +682,19 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
                     >
                       <Chevron open={open} />
                     </button>
-                    <a
-                      href={docsHref(section.id, n.firstPage.id)}
-                      title={`${n.title}（${n.firstPage.title}）`}
-                      onClick={() => setNavOpen(false)}
-                      className="flex min-w-0 flex-1 items-baseline rounded-md py-[3px] pr-2 text-[13.5px] font-semibold leading-snug text-slate-500 transition-colors hover:text-brand-700 dark:text-slate-400 dark:hover:text-brand-200"
+                    {/*
+                      ⚠️ 二级里的分节头（H2，如「二、学习记录」）**可点 = 展开/收缩，但不跳转** ——
+                      用户口径：「点击的时候不是指向它下面的第一个 H3 页，而是展开收缩，
+                      实际正文的都在 H3」。样式沿用"分组标题"（13px semibold 深色）。
+                      所以这里用 `<button>` 而不是 `<a>`：它没有可跳转的目标页。
+                    */}
+                    <button
+                      type="button"
+                      onClick={() => toggle(n.key)}
+                      className="flex min-w-0 flex-1 items-baseline rounded-md py-[3px] pr-2 text-left text-[13px] font-semibold leading-snug text-slate-700 transition-colors hover:text-brand-700 dark:text-slate-200 dark:hover:text-brand-200"
                     >
                       <span className="min-w-0 truncate">{n.title}</span>
-                    </a>
+                    </button>
                   </div>
                   {open && renderNodes(n.children, depth + 1)}
                 </>
@@ -719,37 +772,86 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
     </ul>
   )
 
-  const pageTree = (
-    <div>
-      {navForest.map((f, fi) => {
-        const open = isOpen(f.key)
-        return (
-          <div key={f.key} className={fi > 0 ? 'mt-1' : ''}>
-            {showSourceHeaders && (
-              <div
-                className={`flex items-start gap-0.5 pb-0.5 ${
-                  fi > 0 ? 'mt-3 border-t border-slate-200 pt-3 dark:border-slate-700' : ''
+  /**
+   * 左栏导航（**两级下钻**，2026-09 用户定向）。
+   *
+   * 一级 = **文档列表**（只列文档，不让左栏被几十页挤满）；
+   * 二级 = 点进某篇之后，显示**这一篇的目录**（H2 分节头 + H3 页），顶部一行是**返回行**。
+   *
+   * ⚠️ 三级样式是**刻意分开**的（用户逐条确认）：
+   *   · 一级目录项（文档名）：`13.5px medium` + 选中胶囊 —— 与"可点的页"同款；
+   *   · 二级里的 H2 分节头：`13px semibold` 深色 + 上分隔线 —— 与原来的"源分组标题"同款，
+   *     且**可点 = 展开/收缩**（不跳转：正文都在 H3 页里）；
+   *   · 二级里的 H3 页：页样式（`13.5px medium`）+ 选中胶囊。
+   *
+   * ⚠️ 单篇分区（毕业论文）**不建一级**：那种分区只有一篇，"一级"这一层是多余的。
+   */
+  const docList = navForest.length > 1
+  const activeDocKey = `src:${current?.chapter ?? ''}`
+  const pageTree = docList ? (
+    navDepth === 1 ? (
+      /* ---------- 一级：文档列表 ---------- */
+      <ul className="space-y-0.5">
+        {navForest.map((f) => {
+          const active = f.key === activeDocKey
+          return (
+            <li key={f.key}>
+              <button
+                type="button"
+                onClick={() => setNavDepth(2)}
+                aria-current={active ? 'true' : undefined}
+                data-scroll-lit="off"
+                className={`flex w-full items-baseline gap-2 rounded-lg px-2.5 py-2 text-left text-[13.5px] leading-snug transition-colors ${
+                  active
+                    ? 'glass-lit glass-lit-on glass-chip-on font-semibold'
+                    : 'glass-lit font-medium text-slate-600 hover:text-brand-700 dark:text-slate-300 dark:hover:text-brand-200'
                 }`}
               >
-                <button
-                  type="button"
-                  onClick={() => toggle(f.key)}
-                  aria-expanded={open}
-                  aria-label={`${open ? '收起' : '展开'} ${f.chapter}`}
-                  className="flex h-[22px] w-5 shrink-0 items-center justify-center rounded text-slate-400 transition-colors hover:text-brand-700 dark:text-slate-500 dark:hover:text-brand-200"
-                >
-                  <Chevron open={open} />
-                </button>
-                <p className="min-w-0 flex-1 truncate pr-2 pt-[2px] text-[13px] font-semibold leading-snug text-slate-700 dark:text-slate-200">
-                  {f.chapter}
-                </p>
-              </div>
-            )}
-            {open && renderNodes(f.nodes, 0)}
-          </div>
-        )
-      })}
-    </div>
+                <span className="min-w-0 flex-1 truncate">{f.chapter}</span>
+                <span className="dot-num shrink-0 text-[11px]">{countPages(f.nodes)} 页</span>
+              </button>
+            </li>
+          )
+        })}
+      </ul>
+    ) : (
+      /* ---------- 二级：这一篇的目录 ---------- */
+      <div>
+        <button
+          type="button"
+          onClick={() => setNavDepth(1)}
+          aria-label={`返回文档列表（当前：${current?.chapter ?? ''}）`}
+          className="glass-lit mb-2 flex w-full items-baseline gap-2 rounded-lg px-2.5 py-2 text-left transition-colors"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="h-3.5 w-3.5 shrink-0 self-center text-slate-400 dark:text-slate-500"
+            aria-hidden="true"
+          >
+            <path d="m15 18-6-6 6-6" />
+          </svg>
+          <span className="min-w-0 flex-1 truncate text-[13px] font-semibold text-slate-700 dark:text-slate-100">
+            {current?.chapter ?? ''}
+          </span>
+          <span className="dot-num shrink-0 text-[11px]">
+            {countPages(navForest.find((f) => f.key === activeDocKey)?.nodes ?? [])} 页
+          </span>
+        </button>
+        {navForest
+          .filter((f) => f.key === activeDocKey)
+          .map((f) => (
+            <div key={f.key}>{renderNodes(f.nodes, 0)}</div>
+          ))}
+      </div>
+    )
+  ) : (
+    /* 单篇分区：直接显示目录，不建一级、不显示返回行 */
+    <div>{navForest.map((f) => <div key={f.key}>{renderNodes(f.nodes, 0)}</div>)}</div>
   )
 
   /** 当前篇大纲（桌面右栏 + 手机抽屉共用） */
