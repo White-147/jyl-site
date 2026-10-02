@@ -158,6 +158,27 @@ function buildNav(pages: DocPage[], chapter: string): NavNode[] {
   return flatten(root)
 }
 
+/**
+ * 分区首页的封面与补充文案（用户 2026-09 定向提供的素材）。
+ *
+ * ⚠️ 只在"**URL 没有页 id**"时显示（刚点分区 / 点了返回行），**不进左栏**：
+ *    用户口径「默认页不用在左栏体现…不需要单独的导航点」。
+ * 封面文件在 `public/docs/covers/`，由桌面素材裁切转 webp 得到：
+ *   · `ue-theory.webp`  ← header-image.png（1920×335 官方横幅，转 webp 1600 宽，11KB）
+ *   · `ue-combat.webp`  ← 闯关游戏封面.png（1334×877，裁成 16:9 横幅，104KB）
+ */
+const SECTION_LANDING: Record<string, { cover: string; extra?: string }> = {
+  theory: {
+    cover: 'docs/covers/ue-theory.webp',
+    extra:
+      '环境准备、菜单与视口、蓝图类与父类体系、增强输入与角色移动 …… 按顺序读下来，就能把引擎最常用的那部分走一遍。',
+  },
+  combat: {
+    cover: 'docs/covers/ue-combat.webp',
+    extra: '从新建项目、导入素材，到角色移动、跳跃与动画 —— 一个能跑起来的闯关小游戏。',
+  },
+}
+
 /** 折叠状态存 localStorage：刷新后还保持收起的样子 */
 const COLLAPSE_KEY = 'docs.nav.collapsed'
 function loadCollapsed(): Set<string> {
@@ -879,8 +900,13 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
       <div>
         <button
           type="button"
-          onClick={() => setNavDepth(1)}
-          aria-label={`返回${section.label}`}
+          onClick={() => {
+            /* 用户口径：点「返回 UE 理论」应回到**分区首页**（那张封面页），不只是把左栏退回一级。
+               所以这里连路由一起改：`#/docs/theory`（没有页 id）→ 中间那列显示分区首页。 */
+            window.location.hash = docsHref(section.id)
+            setNavDepth(1)
+          }}
+          aria-label={`返回${section.label}首页`}
           className="glass-lit mb-2 flex w-full items-baseline gap-2 rounded-lg px-2.5 py-2 text-left transition-colors"
         >
           <svg
@@ -947,6 +973,61 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
   )
 
   const emptySection = !current || current.status !== 'ready'
+
+  /**
+   * **分区首页**（用户 2026-09 定向）。
+   *
+   * 用户口径：「默认页不用在左栏体现，只是填补目前一级目录没有点击的时候，以及返回一级目录的
+   * 时候，展示页的空缺，硬要说就是点击 UE 理论以及点击返回 UE 理论的时候进行展示，
+   * 不需要单独的导航点」。
+   *
+   * 所以命中条件只有一条：**URL 里没有页 id**（`#/docs/theory`，即刚点分区或点了返回行）。
+   * 它**不进左栏导航树、不算一篇文档**，只占中间那一列。
+   * ⚠️ 单篇分区（毕业论文）不适用：那种分区点进去本来就该是第一篇。
+   */
+  const showLanding = !pageId && navForest.length > 1
+  const landing = SECTION_LANDING[section.id]
+
+  if (showLanding && landing) {
+    const docCount = pages.filter((p) => p.status === 'ready').length
+    return (
+      <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-5 py-8">
+        <figure className="overflow-hidden rounded-2xl border border-slate-200/70 shadow-sm dark:border-slate-700/60">
+          <img
+            src={`${import.meta.env.BASE_URL}${landing.cover}`}
+            alt={`${section.label} 封面`}
+            className="block h-auto w-full"
+            loading="eager"
+          />
+        </figure>
+        <div>
+          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">{section.label}</h1>
+          <p className="mt-2 text-[15px] leading-relaxed text-slate-600 dark:text-slate-300">{section.blurb}</p>
+          {landing.extra && (
+            <p className="mt-2 text-sm leading-relaxed text-slate-500 dark:text-slate-400">{landing.extra}</p>
+          )}
+        </div>
+        <div className="rounded-xl border border-slate-200/70 p-4 dark:border-slate-700/60">
+          <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500">
+            本篇文档（{docCount} 页）
+          </p>
+          <ul className="mt-2.5 space-y-1">
+            {navForest.map((f) => (
+              <li key={f.key}>
+                <a
+                  href={docsHref(section.id, firstPageOf(f.nodes)?.id)}
+                  className="glass-lit flex items-baseline gap-2 rounded-lg px-2.5 py-1.5 text-[13.5px] font-medium text-slate-600 transition-colors hover:text-brand-700 dark:text-slate-300 dark:hover:text-brand-200"
+                >
+                  <span className="min-w-0 flex-1 truncate">{f.chapter}</span>
+                  <span className="dot-num shrink-0 text-[11px]">{countPages(f.nodes)} 页</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    )
+  }
 
   return (
     // ⚠️ 宽度口径（2026-09 第三轮，改之前先看 docs/联动维护点.md 的硬约束表）
@@ -1228,12 +1309,6 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
 
           {/* 篇尾导航：读完一篇给"下一篇"（分区内按顺序串） */}
           <nav aria-label="文档导航" className="mt-6 flex flex-wrap items-center gap-3">
-            <a
-              href={docsHref(section.id)}
-              className="glass-lit glass-chip inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-sm font-medium transition-colors"
-            >
-              {section.label}目录
-            </a>
             {current?.next && (
               <a
                 href={docsHref(current.section, current.next.id)}
