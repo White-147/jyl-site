@@ -940,6 +940,11 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
     ) : (
       /* ---------- 二级：这一篇的目录 ---------- */
       <div>
+        {/* ⚠️ **返回行吸顶**（用户 2026-09：「左栏很长时返回按钮会被拉下去，希望固定在左栏顶部」）。
+            它仍在滚动容器内，但用 `sticky top-0` + 不透明底 + 下边框：
+            文档列表往下滚时它钉在左栏顶部，随时可点。
+            ⚠️ 背景不能用半透明 —— 滚过去的文字会从下面透出来。*/}
+        <div className="sticky top-0 z-10 -mx-5 mb-1 bg-white/95 px-5 pb-1.5 pt-0.5 backdrop-blur dark:bg-slate-900/95">
         <button
           type="button"
           onClick={() => {
@@ -971,6 +976,7 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
             返回{section.label}
           </span>
         </button>
+        </div>
         {navForest
           .filter((f) => f.key === activeDocKey)
           .map((f) => (
@@ -983,39 +989,8 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
     <div>{navForest.map((f) => <div key={f.key}>{renderNodes(f.nodes, 0)}</div>)}</div>
   )
 
-  /** 当前篇大纲（桌面右栏 + 手机抽屉共用） */
-  const outline = current && current.toc.length > 0 && (
-    <ul className="list-none space-y-0.5">
-      {current.toc.map((t) => {
-        const level = t.level
-        return (
-          <li key={t.id}>
-            <a
-              href={docsHref(current.section, current.id, t.id)}
-              onClick={(e) => {
-                e.preventDefault()
-                if (navOpen) goToAnchorFromDrawer(t.id)
-                else goToAnchor(t.id)
-              }}
-              title={t.label}
-              className={`flex items-baseline py-1 leading-tight transition-colors ${
-                level === 1 ? 'text-[12px] font-semibold' : level === 2 ? 'text-[12px]' : 'text-[11px]'
-              } ${
-                activeAnchor === t.id
-                  ? 'font-semibold text-brand-700 dark:text-brand-200'
-                  : level === 3
-                    ? 'text-slate-400 hover:text-brand-700 dark:text-slate-500 dark:hover:text-brand-200'
-                    : 'text-slate-500 hover:text-brand-700 dark:text-slate-400 dark:hover:text-brand-200'
-              }`}
-              style={{ paddingLeft: `${(level - 1) * 12}px` }}
-            >
-              <span className="truncate">{t.label}</span>
-            </a>
-          </li>
-        )
-      })}
-    </ul>
-  )
+  /* 右栏已删（用户 2026-09）：这份 outline 不再被任何地方使用，连同整段一起移除 */
+  /* ⚠️ 原「本篇大纲」列表（`outline`）已随右栏一起删除（用户 2026-09 定稿）。 */
 
   const emptySection = !current || current.status !== 'ready'
 
@@ -1032,7 +1007,7 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
     //    **两栏的高度必须显式写**（`h-[calc(100dvh-顶栏-横栏)]`）：只写 flex-1 时它们会撑到
     //    内容高度，内部滚动不触发（实测过 20481px）；而写死一个与真实可用高度不符的值
     //    正是「左栏最后一行被切掉」的成因（旧值比真实可用高度多算了 64px）。
-    <div className="mx-auto flex max-w-[100rem] flex-col px-4 pb-24 pt-6 sm:px-6 md:h-dvh md:pb-0 md:pt-0">
+    <div className="mx-auto flex max-w-[104rem] flex-col px-4 pb-24 pt-6 sm:px-6 md:h-dvh md:pb-0 md:pt-0">
       {/* ⚠️ 第十轮：**顶栏占位那条 h-16 已删**。原来它把「横栏 + 三栏」推到 y=64 之下，
           于是滚动容器的内容永远从 y=112 开始 —— 横栏背后什么都没有，折射也就无事可做
           （实测开/关 `backdrop-filter` 的可见差异只有 0.08%）。
@@ -1132,7 +1107,7 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
       <div
         ref={scrollRef}
         id="docs-scroll"
-        className="docs-scroll relative md:mt-[var(--site-bar-h)] md:grid md:h-[calc(100dvh-var(--site-bar-h))] md:min-h-0 md:grid-cols-[var(--docs-rail-w)_minmax(0,1fr)] md:gap-6 md:overflow-y-auto md:scroll-pt-4 md:pr-2 xl:grid-cols-[var(--docs-rail-w)_minmax(0,1fr)_14rem]"
+        className="docs-scroll relative md:mt-[var(--site-bar-h)] md:grid md:h-[calc(100dvh-var(--site-bar-h))] md:min-h-0 md:grid-cols-[var(--docs-rail-w)_minmax(0,1fr)] md:gap-6 md:overflow-y-auto md:scroll-pt-4 md:pr-2"
       >
         {/* 文档区横栏（**在滚动容器内部**，2026-09 第十轮从外面搬进来）。
 
@@ -1221,7 +1196,9 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
               撤掉它会把这 224px 让给正文列，正文一下子涨到 1118px（70 字/行），而且每页宽度还不一样。
             ⚠️ `md:pt-6` 与左右两栏的内层 `pt-6` 一致，三栏首行齐平。
             ⚠️ 底部留白不能省（`md:pb-24`）：滚动容器的 padding-bottom 在内容末尾不可靠。 */}
-        <main className="relative min-w-0 md:max-w-[52rem] md:pb-24 md:pt-6">
+                {/* ⚠️ 正文上限 940px（≈58 字/行）+ 居中：删掉右栏后"中+右"的宽度全给这一列，
+            若占满会到 1088px（≈68 字/行，偏长）。所以限宽并居中，**字号保持 16px 不动**。 */}
+        <main className="relative mx-auto w-full min-w-0 md:max-w-[58.75rem] md:pb-24 md:pt-6">
           <header className="mb-6 border-b border-slate-200 pb-5 dark:border-slate-700">
             {/* ⚠️ 页头**不再显示页面大标题**（2026-09 用户提案）。
                 标题已经回到正文里、保持源文件里的原始层级 —— 否则「被抽出来当页头的那一个标题」
@@ -1426,30 +1403,12 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
           {current && <div aria-hidden="true" className="hidden md:block md:min-h-[70vh]" />}
         </main>
 
-        {/* 右：本篇大纲（宽屏常驻；xl 以下由左栏里"当前页的小节"承担）。
-            ⚠️ 实际标题 ≤ 2 条时**不渲染面板**（用户 2026-09：一两条的目录太死板）。
-               实测 56 页里 33 页属于这种情况。
-            ⚠️ 但要**保留第三列的列位**（下面那个空 aside）—— 撤掉列会让正文列涨到 1118px。
-            ⚠️ 与左栏同一口径：`xl:top-[var(--docs-subbar-h)]` + `xl:h-[calc(100dvh-顶栏-横栏)]`
-               （横栏是三栏之上的一个 grid 行，它占掉的高度必须在 sticky 的 top 与高度里各补回一次）。 */}
-        {/*
-          ⚠️ 条件里必须带 `current` —— 否则**展示页**（没有当前页）也会渲染这个 aside：
-             它带 `xl:h-[calc(100dvh-…)]` 的固定高度（实测 665px），把整页撑高，
-             于是"只有一张封面 + 三行字"的展示页竟然**可以上下滚 330px**（用户反馈过这个"很奇怪"）。
-             没有当前页时走下面的占位分支（`hidden xl:block`，不撑高）。
-        */}
-        {current && current.toc.length > 3 ? (
-          <aside className="hidden xl:sticky xl:top-[var(--docs-subbar-h)] xl:flex xl:h-[calc(100dvh-var(--site-bar-h)-var(--docs-subbar-h)-var(--docs-subbar-h))] xl:flex-col">
-            <div className="docs-scroll min-h-0 flex-1 overflow-y-auto pb-4 pt-6">
-              <p className="pl-1.5 text-xs font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500">
-                本篇大纲
-              </p>
-              <div className="mt-2.5">{outline}</div>
-            </div>
-          </aside>
-        ) : current ? (
-          <aside className="hidden xl:block" aria-hidden="true" />
-        ) : null}
+        {/* 右栏「本篇大纲」已删除（用户 2026-09 定稿）。
+            ⚠️ 为什么能删：实测 157 页里**只有 5 页（3%）**会用上它 ——
+               页内小节数分布是 `1:142 页 / 2:4 / 3:6 / 4:1 / 5:3 / 6:1`，
+               而显示阈值是 `toc.length > 3`；90% 的页只有页首一个条目。
+            腾出来的宽度给了正文（见下面 `main` 的 `max-w-[58.75rem]`），
+            ⚠️ 但**没有占满**：正文居中、限宽 940px（≈58 字/行），字号一点没动。 */}
       </div>
 
       {lightbox && (
