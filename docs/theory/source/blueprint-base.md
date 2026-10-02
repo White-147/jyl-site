@@ -17,13 +17,13 @@
 1. 在内容侧滑菜单的内容目录下右键新增文件夹，重命名为Code，存放后续蓝图
 2. 在新建的Code目录下选择右键菜单中的蓝图类，选择需要的父类
 
-<img src="images\蓝图基础\新建文件夹.png" style="zoom:67%;" />
+<img src="..\images\蓝图基础\新建文件夹.png" style="zoom:67%;" />
 
-<img src="images\蓝图基础\新建蓝图类.png" style="zoom:67%;" />
+<img src="..\images\蓝图基础\新建蓝图类.png" style="zoom:67%;" />
 
 ### 各父类讲解
 
-<img src="images\蓝图基础\蓝图类父类.png" style="zoom:67%;" />
+<img src="..\images\蓝图基础\蓝图类父类.png" style="zoom:67%;" />
 
 #### Actor
 
@@ -85,13 +85,13 @@
 - 函数：类比于C++或C#中的函数或方法
 - 变量：类比于C++或C#中的变量
 
-<img src="images\蓝图基础\Actor视口.png" style="zoom:67%;" />
+<img src="..\images\蓝图基础\Actor视口.png" style="zoom:67%;" />
 
 ### 构造脚本
 
 蓝图类拖拽到场景内之后，构造脚本立即执行；事件图表在点击运行后开始执行
 
-<img src="images\蓝图基础\Actor构建脚本.png" style="zoom:67%;" />
+<img src="..\images\蓝图基础\Actor构建脚本.png" style="zoom:67%;" />
 
 ### 事件图表
 
@@ -103,13 +103,13 @@
 - 事件Actor开始重叠：当物体和Actor物体重叠时，此节点后续节点会开始运行（触发器）
 - 事件Tick：当Actor生成后，每一帧都会执行此节点后续节点
 
-<img src="images\蓝图基础\Actor事件图表.png" style="zoom:67%;" />
+<img src="..\images\蓝图基础\Actor事件图表.png" style="zoom:67%;" />
 
 #### 节点和引脚的中文化
 
 如果事件图表的节点显示为英文，可以选择编辑中的**编辑器偏好设置**，勾选区域和语言中的**使用本地化图标编辑器节点和引脚命名**
 
-<img src="images\蓝图基础\Actor事件图表中文.png" style="zoom:67%;" />
+<img src="..\images\蓝图基础\Actor事件图表中文.png" style="zoom:67%;" />
 
 
 
@@ -120,7 +120,7 @@
 - 在Actor事件图表界面，左键长按事件开始运行节点右下角的**执行**，向其他位置拖出
 - 松开鼠标左键后，弹出如图所示界面，在搜索框中输入print，寻找输出函数
 
-<img src="images\蓝图基础\创建函数.png" style="zoom:67%;" />
+<img src="..\images\蓝图基础\创建函数.png" style="zoom:67%;" />
 
 #### 编写
 
@@ -129,22 +129,22 @@
 - 在运行和保存之前，需要先点击左上角的**编译**，之后点击保存或Ctrl S，界面内星号标记消失
 - **仅限开发**是指此节点仅在开发过程中可见，在游戏打包后，外部人员无法获取、观察到此节点效果
 
-<img src="images\蓝图基础\代码编译和保存.png" style="zoom:67%;" />
+<img src="..\images\蓝图基础\代码编译和保存.png" style="zoom:67%;" />
 
 #### 运行
 
 - 事件图表中将代码写好，点击**编译**和保存后
 - 返回关卡界面，呼出内容侧滑菜单，长按左键，将Actor物体拖拽到关卡内
 
-<img src="images\蓝图基础\运行Actor代码-拖拽物体到关卡内.png" style="zoom:67%;" />
+<img src="..\images\蓝图基础\运行Actor代码-拖拽物体到关卡内.png" style="zoom:67%;" />
 
 拖拽到关卡内效果如图，点击开始运行关卡或Ctrl P
 
-<img src="images\蓝图基础\运行Actor代码-开始运行.png" style="zoom:67%;" />
+<img src="..\images\蓝图基础\运行Actor代码-开始运行.png" style="zoom:67%;" />
 
 运行效果如图，代表运行成功，可按**esc退出**
 
-<img src="images\蓝图基础\运行Actor代码-运行效果.png" style="zoom:67%;" />
+<img src="..\images\蓝图基础\运行Actor代码-运行效果.png" style="zoom:67%;" />
 
 #### 执行引脚和运行顺序
 
@@ -152,43 +152,43 @@
 - 修改原有节点的输出内容，更改为**1**，并在原节点处执行引脚新增新节点，输出内容设置为**2**
 - 修改完成后点击编译，保存可以暂时不点，**未编译代码无法在关卡内正常运行**
 
-<img src="images\蓝图基础\执行顺序-编写代码.png" style="zoom:67%;" />
+<img src="..\images\蓝图基础\执行顺序-编写代码.png" style="zoom:67%;" />
 
 运行效果如图所示，**输出的2在上，1在下**
 
 顺序为出栈顺序，**先执行的在下方，后执行的在上方**
 
-<img src="images\蓝图基础\执行顺序-运行效果.png" style="zoom:67%;" />
+<img src="..\images\蓝图基础\执行顺序-运行效果.png" style="zoom:67%;" />
 
 #### 输入引脚
 
 在事件图表界面的左下角**变量栏**，点击**新增变量**，修改命名为String
 
-<img src="images\蓝图基础\输入引脚-新增变量.png" style="zoom:67%;" />
+<img src="..\images\蓝图基础\输入引脚-新增变量.png" style="zoom:67%;" />
 
 - 如果最开始没有修改命名，可以**右键选择重命名**或者按**F2**进行
 - 点击变量右侧默认布尔的变量类型，修改变量类型
 
-<img src="images\蓝图基础\输入引脚-修改变量类型.png" style="zoom:67%;" />
+<img src="..\images\蓝图基础\输入引脚-修改变量类型.png" style="zoom:67%;" />
 
 - 左键单击新增的变量，右侧出现该变量**细节**界面
 - 可在细节界面修改变量名、变量类型、变量值，以及**添加变量描述**
 - 修改变量参数需要**先完成编译**
 
-<img src="images\蓝图基础\输入引脚-修改变量值.png" style="zoom:67%;" />
+<img src="..\images\蓝图基础\输入引脚-修改变量值.png" style="zoom:67%;" />
 
 **左键长按**新增变量，拖拽到事件图表界面内，选择出现的窗口中的**获取String**
 
-<img src="images\蓝图基础\输入引脚-获取变量.png" style="zoom:67%;" />
+<img src="..\images\蓝图基础\输入引脚-获取变量.png" style="zoom:67%;" />
 
 - 点击获取String之后出现新节点，**左键长按**新节点的右侧，拖拽到需要连接的节点左侧，完成连接
 - 连接之后可以观察到，原有的in String后续的可填写内容消失
 
-<img src="images\蓝图基础\输入引脚-拖拽连接.png" style="zoom:67%;" />
+<img src="..\images\蓝图基础\输入引脚-拖拽连接.png" style="zoom:67%;" />
 
 **点击编译后**，在关卡内执行运行，效果如图，显示内容为变量值
 
-<img src="images\蓝图基础\输入引脚-执行效果.png" style="zoom:67%;" />
+<img src="..\images\蓝图基础\输入引脚-执行效果.png" style="zoom:67%;" />
 
 #### 取消后续节点操作
 
@@ -196,6 +196,6 @@
 
 取消节点连接：**先按alt键**，再**左键**节点的执行引脚
 
-<img src="images\蓝图基础\删除节点.png" style="zoom:67%;" />
+<img src="..\images\蓝图基础\删除节点.png" style="zoom:67%;" />
 
-<img src="images\蓝图基础\删除连接.png" style="zoom:67%;" />
+<img src="..\images\蓝图基础\删除连接.png" style="zoom:67%;" />

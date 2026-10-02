@@ -15,9 +15,9 @@
 
 选项本身并不重要，因为内容都可以后续添加
 
-<img src="images\菜单栏\文件新建关卡.png" style="zoom:67%;" />
+<img src="..\images\菜单栏\文件新建关卡.png" style="zoom:67%;" />
 
-<img src="images\菜单栏\新建关卡窗口.png" style="zoom:67%;" />
+<img src="..\images\菜单栏\新建关卡窗口.png" style="zoom:67%;" />
 
 ### 编辑
 
@@ -26,7 +26,7 @@
 - **拷贝**，快捷键`Ctrl+C`，和正常复制逻辑一致
 - **复制**，快捷键`Ctrl+D`，逻辑=正常逻辑复制+粘贴，在复制的同时生成拷贝副本，**建议使用这个快捷键**
 
-<img src="images\菜单栏\编辑.png" style="zoom:67%;" />
+<img src="..\images\菜单栏\编辑.png" style="zoom:67%;" />
 
 #### 插件
 
@@ -34,7 +34,7 @@
 
 - **更换插件后引擎功能会产生变化，正常情况下尽量不要动**
 
-<img src="images\菜单栏\插件.png" style="zoom:67%;" />
+<img src="..\images\菜单栏\插件.png" style="zoom:67%;" />
 
 #### 项目设置
 
@@ -50,27 +50,27 @@
   - Direct Lighting与Nanite有关，在大量使用高精度几何体，如Nanite的情况下可开启虚拟阴影贴图，可以节省性能
 - 其他设置一般情况下不会去更改，默认就是最优配置
 
-<img src="images\菜单栏\项目设置.png" style="zoom:67%;" />
+<img src="..\images\菜单栏\项目设置.png" style="zoom:67%;" />
 
 #### 编辑器偏好设置
 
 偏向于个人喜好设置，譬如外观、区域、语言等
 
-<img src="images\菜单栏\编辑器偏好设置.png" style="zoom:67%;" />
+<img src="..\images\菜单栏\编辑器偏好设置.png" style="zoom:67%;" />
 
 **可修改设置**：资产编辑器打开路径，在所有设置中输入open，将资产编辑器打开路径更改为Main Window（主窗口）
 
 修改后效果：打开新窗口后自动添加到原有窗口的标签页中，不会再单独开启新窗口
 
-<img src="images\菜单栏\资产编辑器打开路径设置.png" style="zoom:67%;" />
+<img src="..\images\菜单栏\资产编辑器打开路径设置.png" style="zoom:67%;" />
 
 ### 窗口
 
 在窗口选项中可以加载UE4的布局，以及将自己修改过的布局进行保存
 
-<img src="images\菜单栏\窗口布局.png" style="zoom:67%;" />
+<img src="..\images\菜单栏\窗口布局.png" style="zoom:67%;" />
 
-<img src="images\菜单栏\UE4布局.png" style="zoom:67%;" />
+<img src="..\images\菜单栏\UE4布局.png" style="zoom:67%;" />
 
 ### Actor
 
@@ -85,25 +85,25 @@
 - 世界坐标=全局坐标，如图二，基于世界原点的恒定坐标
 - 本地坐标=局部坐标，如图三，基于物体本身的可变坐标
 
-<img src="images\视口工具栏\空间坐标.png" style="zoom:67%;" />
+<img src="..\images\视口工具栏\空间坐标.png" style="zoom:67%;" />
 
-<img src="images\视口工具栏\世界空间坐标.png" style="zoom:67%;" />
+<img src="..\images\视口工具栏\世界空间坐标.png" style="zoom:67%;" />
 
-<img src="images\视口工具栏\本地空间坐标.png" style="zoom:67%;" />
+<img src="..\images\视口工具栏\本地空间坐标.png" style="zoom:67%;" />
 
 ### 对齐表面
 
 点击按钮开启后，在三维坐标中选中两个坐标线组成的平面时，物体会自动贴合所选平面
 
-<img src="images\视口工具栏\对齐表面.png" style="zoom:67%;" />
+<img src="..\images\视口工具栏\对齐表面.png" style="zoom:67%;" />
 
 举例：如果同时点击选中xy轴，物品会立即贴合地面；选中xz轴，物品会贴合到xy轴对应的墙面
 
-<img src="images\视口工具栏\对齐表面操作方法.png" style="zoom:67%;" />
+<img src="..\images\视口工具栏\对齐表面操作方法.png" style="zoom:67%;" />
 
 如果遇到吸附到斜面物体穿模的情况，可以勾选对齐表面右侧数值按钮中的**旋转到表面法线**，物体会自动旋转到和斜面对齐的角度
 
-<img src="images\视口工具栏\旋转到表面.png" style="zoom:67%;" />
+<img src="..\images\视口工具栏\旋转到表面.png" style="zoom:67%;" />
 
 ### 摄像机选择
 
@@ -111,17 +111,17 @@
 
 选择对应视图，视角会切换到对应模式
 
-<img src="images\视口工具栏\摄像机选择.png" style="zoom:67%;" />
+<img src="..\images\视口工具栏\摄像机选择.png" style="zoom:67%;" />
 
 如图为顶部图模式
 
-<img src="images\视口工具栏\顶部图.png" style="zoom:67%;" />
+<img src="..\images\视口工具栏\顶部图.png" style="zoom:67%;" />
 
 #### 移动
 
-[**在界面基础操作的大纲视图-元素在场景中的快速定位**](./ue5-window-base)中已说明，可以快速定位选中元素的位置
+[**在界面基础操作的大纲视图-元素在场景中的快速定位**](./ue5-window-base#元素在场景中的快速定位)中已说明，可以快速定位选中元素的位置
 
-<img src="images\视口工具栏\聚焦选中项.png" style="zoom:67%;" />
+<img src="..\images\视口工具栏\聚焦选中项.png" style="zoom:67%;" />
 
 #### 视图
 
@@ -134,13 +134,13 @@
 - 取消勾选曝光下的游戏设置后，可以调整曝光数值
 - 默认曝光数值为1.0，整体偏暗，可以略微调小
 
-<img src="images\视口工具栏\曝光1.0画面.png" style="zoom:67%;" />
+<img src="..\images\视口工具栏\曝光1.0画面.png" style="zoom:67%;" />
 
-<img src="images\视口工具栏\曝光-1.0画面.png" style="zoom:67%;" />
+<img src="..\images\视口工具栏\曝光-1.0画面.png" style="zoom:67%;" />
 
 勾选游戏设置的曝光度设置位置：
 
-<img src="images\视口工具栏\游戏设置曝光位置.png" style="zoom:67%;" />
+<img src="..\images\视口工具栏\游戏设置曝光位置.png" style="zoom:67%;" />
 
 - **勾选自动曝光**后，游戏设置的曝光应用自动曝光逻辑
 - 取消勾选自动曝光后，游戏设置的曝光应用自动曝光偏差的数值
@@ -151,7 +151,7 @@
 - **书签≈固定机位**
 - 在某一位置设置书签后，点击对应书签即可跳转到设置书签时的位置和视角
 
-<img src="images\视口工具栏\书签.png" style="zoom:67%;" />
+<img src="..\images\视口工具栏\书签.png" style="zoom:67%;" />
 
 #### 高分辨率截图
 
@@ -159,9 +159,9 @@
 - 截图设置界面内，**尺寸乘数代表xK**，即1.0代表1K，4.0代表4K
 - 按`G键`可以将场景内**图标隐藏**
 
-<img src="images\视口工具栏\高分辨率截图.png" style="zoom:67%;" />
+<img src="..\images\视口工具栏\高分辨率截图.png" style="zoom:67%;" />
 
-<img src="images\视口工具栏\高分辨率截图界面.png" style="zoom:67%;" />
+<img src="..\images\视口工具栏\高分辨率截图界面.png" style="zoom:67%;" />
 
 ### 光照模式
 
@@ -177,14 +177,14 @@
   - 功能：可以检查场景内各个模型的物体碰撞情况，包括地形和地面的碰撞体积
   - 使用场景：当玩家出现视觉和实际效果不一致，譬如地面有坑但是掉不下去，空隙钻不过去的时候，可以通过这个模式进行检查
 
-<img src="images\视口工具栏\光照.png" style="zoom:67%;" />
+<img src="..\images\视口工具栏\光照.png" style="zoom:67%;" />
 
 ### 显示
 
 - 手动选择场景内显示的物体类别，取消勾选后不再显示
 - 取消勾选静态网格体后场景内所有模型不再显示
 
-<img src="images\视口工具栏\显示内容.png" style="zoom:67%;" />
+<img src="..\images\视口工具栏\显示内容.png" style="zoom:67%;" />
 
 ### 性能
 
@@ -196,18 +196,18 @@
 
 屏幕百分比：其中包含项目设置和编辑器偏好设置，与编辑内的两个选项一样，一般不做更改
 
-<img src="images\视口工具栏\性能.png" style="zoom:67%;" />
+<img src="..\images\视口工具栏\性能.png" style="zoom:67%;" />
 
-<img src="images\视口工具栏\性能-预览平台.png" style="zoom:67%;" />
+<img src="..\images\视口工具栏\性能-预览平台.png" style="zoom:67%;" />
 
-<img src="images\视口工具栏\性能-视口可延展性.png" style="zoom:67%;" />
+<img src="..\images\视口工具栏\性能-视口可延展性.png" style="zoom:67%;" />
 
 ### 视口设置
 
 - 调节鼠标灵敏度和鼠标滚动缩放速度
 - 快捷键：`右键+鼠标滚轮`
 
-<img src="images\视口工具栏\视口设置.png" style="zoom:67%;" />
+<img src="..\images\视口工具栏\视口设置.png" style="zoom:67%;" />
 
 ### 四视图模式
 
@@ -215,9 +215,9 @@
 - 各个窗口的实际显示效果可以在各个窗口顶部进行单独的调整，包括上文提到的光照、曝光等
 - 各个窗口内进行的物体操作会实时同步更新
 
-<img src="images\视口工具栏\四视图按钮.png" style="zoom:67%;" />
+<img src="..\images\视口工具栏\四视图按钮.png" style="zoom:67%;" />
 
-<img src="images\视口工具栏\四视图界面.png" style="zoom:67%;" />
+<img src="..\images\视口工具栏\四视图界面.png" style="zoom:67%;" />
 
 ------
 
@@ -228,13 +228,13 @@
 - 手动勾选对应的类型之后，大纲视图中仅显示勾选的类别，**逻辑≈execl中的筛选逻辑**
 - 注意：在勾选多个类别之后，采用的是并集逻辑，即同时显示勾选的所有类别下所属物体
 
-<img src="images\大纲视图\过滤器.png" style="zoom:67%;" />
+<img src="..\images\大纲视图\过滤器.png" style="zoom:67%;" />
 
 ### 新建文件夹
 
 如图是新建文件夹所在按钮位置
 
-<img src="images\大纲视图\新建文件夹按钮.png" style="zoom:67%;" />
+<img src="..\images\大纲视图\新建文件夹按钮.png" style="zoom:67%;" />
 
 ------
 
@@ -246,7 +246,7 @@
 
 左侧展示的是项目所在目录的结构，可在左侧界面进行目录的快速预览和切换
 
-<img src="images\底边栏\内容侧滑菜单.png" style="zoom:67%;" />
+<img src="..\images\底边栏\内容侧滑菜单.png" style="zoom:67%;" />
 
 ### 收藏夹
 
@@ -254,25 +254,25 @@
 
 注意：仅可收藏文件夹，文件本身无法进行收藏操作
 
-<img src="images\底边栏\收藏夹.png" style="zoom:67%;" />
+<img src="..\images\底边栏\收藏夹.png" style="zoom:67%;" />
 
 ### 文件夹设置颜色
 
 右键文件夹，选择设置颜色，可以更改文件夹显示的颜色
 
-<img src="images\底边栏\设置颜色按钮.png" style="zoom:67%;" />
+<img src="..\images\底边栏\设置颜色按钮.png" style="zoom:67%;" />
 
-<img src="images\底边栏\取色器.png" style="zoom:67%;" />
+<img src="..\images\底边栏\取色器.png" style="zoom:67%;" />
 
-<img src="images\底边栏\设置颜色结果.png" style="zoom:67%;" />
+<img src="..\images\底边栏\设置颜色结果.png" style="zoom:67%;" />
 
 ### 添加
 
 一般情况下，内容侧滑菜单中空白区域右键效果与添加按钮一样
 
-<img src="images\底边栏\添加.png" style="zoom:67%;" />
+<img src="..\images\底边栏\添加.png" style="zoom:67%;" />
 
-<img src="images\底边栏\内容侧滑菜单右键菜单.png" style="zoom:67%;" />
+<img src="..\images\底边栏\内容侧滑菜单右键菜单.png" style="zoom:67%;" />
 
 ### 滤波器
 
@@ -282,4 +282,4 @@
 - 已选择过的分类词条会在滤波器中显示，点击滤波器显示的词条进行快速的取消和选中
 - 注意：滤波器初始不会显示在内容侧滑菜单中，初次进行过滤后才会显示
 
-<img src="images\底边栏\滤波器.png" style="zoom:67%;" />
+<img src="..\images\底边栏\滤波器.png" style="zoom:67%;" />
