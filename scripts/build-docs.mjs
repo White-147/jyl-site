@@ -593,24 +593,25 @@ function splitByNumberedHeading(tree, budget) {
   let curChain = []
   const flush = () => {
     /**
-     * ⚠️ 最后一道兜底：**页里没有任何"实际内容块"就不成页**。
+     * ⚠️ `hasContent`：**只问"这一页有没有任何正文"，不拿 `TINY` 当门槛**。
      *
-     * 专治一种自相矛盾：某个分页节自己只有标题（够不上 `TINY`），而它的**非边界子节**
-     * 各自成页之后，这一页里**只剩下它自己的标题** → 用户看到的"空白可点击页"。
-     * 内容块 = 非 `isSelf` 的块，或自带正文（≥TINY 字 / 有图）的块。
+     * 早先写成 `!b.isSelf || b.chars >= TINY`，后果是**丢内容**（用户实测：几乎所有文档的实际
+     * 内容都比原文少）：分页头块（`isSelf: true`）的 `chars` 只是它**自身**的正文（不含子孙），
+     * 一个 H3 节自己有 20 字（< TINY=40）时它的块被算成"非内容块"；若那一页只有它 →
+     * `hasContent=false` → **整页被丢**，那 20 字就没了。再加上 `solidPage` 用同一个阈值，
+     * 成了**双重过滤**，小节被吃掉一大片。
+     * 现在：阈值**只用来判断"要不要单独成页"，绝不用来丢内容**。
      */
-    const hasContent = cur.some((b) => !b.isSelf || (b.chars ?? 0) >= TINY || (b.images ?? 0) > 0)
+    const hasContent = cur.some((b) => (b.chars ?? 0) > 0 || (b.images ?? 0) > 0 || b.level >= 3)
     /**
      * 「标题页」：整页**只有文档名那一行、没有任何三级及以下的正文**（用户：「先把标题收掉」）。
      *
-     * ⚠️ 两个坑都实测踩过：
-     *   ① 文档名那个 H1 是走"**非边界**"路径进来的，块是 `L1-`（**不是** `isSelf`）——
-     *      判据里要求 `isSelf === true` 就永远命不中（早先那版就是这样没收掉）；
-     *   ② 它可能**并进了下一页**（文档名 + 第一个 h3）—— 那种页里有 L3 正文、**不能收**。
-     *      所以判据是"**没有任何 L3+ 的内容块**"，而不是"块数 == 1"。
+     * ⚠️ 必须同时要求"**没有任何正文**"（`chars` 全为 0 / 无图）：只判 `level <= 2` 会误伤
+     *    "H2 自己有正文"的页 —— 如 `蓝图基础` 的 `1.定义`（1748 字，整页就是一个 H2 块），
+     *    它被当成标题页丢掉，正文就没了（实测保留率 90.9% → 85.5% 的元凶之一）。
      */
-    const hasBodyBlock = cur.some((b) => b.level >= 3 && ((b.chars ?? 0) >= TINY || (b.images ?? 0) > 0))
-    const isTitleOnly = !hasBodyBlock && cur.every((b) => b.level <= 2)
+    const noProse = cur.every((b) => (b.chars ?? 0) === 0 && (b.images ?? 0) === 0)
+    const isTitleOnly = noProse && cur.every((b) => b.level <= 2)
     if (cur.length && hasContent && !isTitleOnly) groups.push({ blocks: cur, chain: curChain })
     cur = []
     curChain = []
@@ -618,7 +619,15 @@ function splitByNumberedHeading(tree, budget) {
   let lastWasBoundary = false
   for (const { node, chain, splits } of seq) {
     if (splits) {
-      /* 自己撑不起一页的边界 → 整条不收（它只作为祖先出现在子节的链里） */
+      /**
+       * ⚠️ `flush()` **只在自己有正文、真的要建页时才做**（实测调过两版）：
+       *    · 早先"没正文就先 continue（不 flush）" → `2.创建蓝图` / `3.Actor界面` 这类
+       *      自己几乎没正文、内容全在**不带序号 H3** 里的 H2 会被整条跳过，
+       *      而它的 H3 又并进了上一页 → 整节内容挂到别的页上、左栏里消失；
+       *    · 改成"每个边界都 flush" → 容器也打断上一页，蓝图编程基础掉到 93.3%；
+       *    · **现在**：有正文才 flush（这个 H2/H3 就是这一页的标题），没正文就只当分组头、
+       *      **不打断**上一页（它的子孙会各自成页）。
+       */
       if (!solidPage(node)) continue
       if (cur.length) flush()
       cur.push(toLeaf(node, { isSelf: true }))
@@ -635,6 +644,7 @@ function splitByNumberedHeading(tree, budget) {
   flush()
 
   /* 超预算的页才继续按 h3/h4 下钻（与 pack 同口径） */
+
   const out = []
   for (const g of groups) {
     const chars = g.blocks.reduce((a, b) => a + (b.chars ?? 0), 0)
