@@ -600,7 +600,18 @@ function splitByNumberedHeading(tree, budget) {
      * 内容块 = 非 `isSelf` 的块，或自带正文（≥TINY 字 / 有图）的块。
      */
     const hasContent = cur.some((b) => !b.isSelf || (b.chars ?? 0) >= TINY || (b.images ?? 0) > 0)
-    if (cur.length && hasContent) groups.push({ blocks: cur, chain: curChain })
+    /**
+     * 「标题页」：整页**只有文档名那一行、没有任何三级及以下的正文**（用户：「先把标题收掉」）。
+     *
+     * ⚠️ 两个坑都实测踩过：
+     *   ① 文档名那个 H1 是走"**非边界**"路径进来的，块是 `L1-`（**不是** `isSelf`）——
+     *      判据里要求 `isSelf === true` 就永远命不中（早先那版就是这样没收掉）；
+     *   ② 它可能**并进了下一页**（文档名 + 第一个 h3）—— 那种页里有 L3 正文、**不能收**。
+     *      所以判据是"**没有任何 L3+ 的内容块**"，而不是"块数 == 1"。
+     */
+    const hasBodyBlock = cur.some((b) => b.level >= 3 && ((b.chars ?? 0) >= TINY || (b.images ?? 0) > 0))
+    const isTitleOnly = !hasBodyBlock && cur.every((b) => b.level <= 2)
+    if (cur.length && hasContent && !isTitleOnly) groups.push({ blocks: cur, chain: curChain })
     cur = []
     curChain = []
   }
