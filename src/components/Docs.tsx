@@ -118,10 +118,25 @@ function buildNav(pages: DocPage[], chapter: string): NavNode[] {
         continue
       }
       n.children = flatten(n.children)
-      /* 单子页分组拍平：只有一个页、且没有子分组时，把这一页提上来单独成行
-         （「2.创建蓝图」这种只挂一节的分组，多一层缩进只会让左栏更长更碎）。
-         ⚠️ 但**分节头分组**（`linkable: false`，自己就是一个标题）不能拍平 —— 它要留着当展开头。 */
-      if (n.linkable !== false && n.children.length === 1 && n.children[0].kind === 'page') {
+      /**
+       * 单子页分组**是否拍平**——两条都不能拍平，其它才拍：
+       *
+       *  ① `linkable === false`：**分节头分组**（自己就是一个标题，如 `一、概况说明`），要留着当展开头；
+       *  ② `parentTitles.has(n.title)`：**这个标题在源里是有下级的中间层**（如 `2.创建蓝图`、`1. 菜单栏`）。
+       *     虽然它自己不建页（内容全在 H3 里），但它**必须作为一个层级显示出来**。
+       *
+       * ⚠️ ② 是用户实测报出来的 bug（2026-09）：「2.创建蓝图丢了，显示的是 H3 的步骤」、
+       *    「界面基础操作的 H2 `1. 菜单栏` 没了，取而代之的是 H3 的文件」。
+       *    原因：`2.创建蓝图` 自己不建页 → 它的分组里只有一个子页（`步骤`）→
+       *    被"单子页分组拍平"提上来，**中间这一层就消失了**，而且左栏看起来像"步骤"直接挂在篇下面。
+       *    论文那种"只有一个页的分组"仍然照旧拍平（`parentTitles` 里没有它）。
+       */
+      if (
+        n.linkable !== false &&
+        !parentTitles.has(n.title) &&
+        n.children.length === 1 &&
+        n.children[0].kind === 'page'
+      ) {
         out.push(n.children[0])
         continue
       }
@@ -219,7 +234,14 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
    *    这样点击必定生效，切页也一定能看到自己在哪。
    */
   /** 左栏当前停在哪一级（1 = 文档列表，2 = 某篇的目录）。单篇分区恒为 2（不建一级） */
-  const [navDepth, setNavDepth] = useState<1 | 2>(1)
+  /**
+   * 左栏层级：1 = 文档列表，2 = 该篇目录。
+   *
+   * ⚠️ 初值按**当前是否在某一页上**决定：直接打开某个页的链接（深链、刷新、从别处跳进来）时
+   *    应该直接显示**该篇目录**，而不是挡在"文档列表"上（否则用户看到 URL 是某一页、
+   *    左栏却是一级列表，还得再点一次才知道自己在哪）。
+   */
+  const [navDepth, setNavDepth] = useState<1 | 2>(pageId ? 2 : 1)
   const [collapsed, setCollapsed] = useState<Set<string>>(loadCollapsed)
   const toggle = useCallback((key: string) => {
     setCollapsed((prev) => {
