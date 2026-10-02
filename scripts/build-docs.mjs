@@ -563,6 +563,35 @@ function splitByNumberedHeading(tree, budget) {
    *     它是 H2，按用户口径本来就不该有独立页（正文都在 H3）；
    *     建页会得到一堆"只有一行标题"的空壳。
    */
+  /**
+   * 「这一节该不该占一个页」—— 用户口径：**空白的可点击页要收干净**。
+   *
+   * 判据（实测三类都要收）：
+   *   · **只有标题、没有正文**的（`虚幻5引擎学习笔记`、`蓝图基础知识`：1 个标题、0 字）→ 整条不收；
+   *   · **正文 < 40 字且没有子孙承载内容**的（`1.虚幻引擎和Fab`：0 字 0 标题；
+   *     `3.运行配置`：28 字 0 标题）→ 整条不收 / 并进上一页；
+   *   · **有正文、或子孙承载内容**的 → 是页。
+   * ⚠️ 判据必须**自底向上**算（`carries`）：`1.虚幻引擎和Fab` 自己 0 字，
+   *    但它的 H4「引擎的下载和安装」有正文 —— 那种情况它**不该自己成页**（内容在子节里），
+   *    所以 `carries` 用来判断"它上面还有没有内容"，而不是判断"它自己是不是页"。
+   */
+  const TINY = 40
+  const carries = new Map()
+  const computeCarries = (n) => {
+    const hasBody = (n.ownChars ?? 0) >= TINY || (n.ownImages ?? 0) > 0
+    const kids = (n.children ?? []).map(computeCarries).some(Boolean)
+    const v = hasBody || kids
+    carries.set(n, v)
+    return v
+  }
+  tree.forEach(computeCarries)
+  /** 这一节自己能不能撑起一页：有正文，或下面挂着**不带序号**的子节（那些会并进它这一页） */
+  const solida = (n) => {
+    const hasBody = (n.ownChars ?? 0) >= TINY || (n.ownImages ?? 0) > 0
+    const hasPlainKid = (n.children ?? []).some((k) => !isNumberedHeading(k.title) && (k.ownChars ?? 0) > 0)
+    return hasBody || hasPlainKid
+  }
+
   const groups = []
   let cur = []
   let curChain = []
@@ -574,10 +603,8 @@ function splitByNumberedHeading(tree, budget) {
   let lastWasBoundary = false
   for (const { node, chain, splits } of seq) {
     if (splits) {
-      /* H2/H3 自己不产出正文（正文在子节里）→ 不建页，只作为祖先出现在子节的链里 */
-      const hasOwnBody = (node.ownChars ?? 0) >= 20 || (node.ownImages ?? 0) > 0
-      const isH3 = node.level >= 3
-      if (!hasOwnBody && !isH3) continue
+      /* 自己撑不起一页的边界 → 整条不收（它只作为祖先出现在子节的链里） */
+      if (!solida(node)) continue
       if (cur.length) flush()
       cur.push(toLeaf(node, { isSelf: true }))
       curChain = chain
