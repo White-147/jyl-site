@@ -1179,8 +1179,31 @@ for (const src of SOURCES) {
     if (list.every((p) => p.status !== 'ready')) {
       return `<span class="doc-link-pending" title="该篇尚未导入本站">${label}<span class="doc-pending-badge">待导入</span></span>`
     }
-    const page = (hash && anchorPage.get(`${target}#${decodeURIComponent(hash)}`)) || list.find((p) => p.status === 'ready')
-    return `<a class="doc-link" href="#/docs/${page.section}/${encodeURIComponent(page.id)}">${label}</a>`
+    /**
+     * ⚠️ **互链落点**（2026-09 用户定向：「跳转到对应页或者对应页的内部位置」）。
+     *
+     * 两种落点：
+     *   ① 目标标题**自己就是一页**（切页切到了它）→ 直接跳那一页，没有页内锚点；
+     *   ② 目标标题**落在某一页内部**（如页内的 H4「输入引脚」）→ 跳那一页 **+ `?s=<锚点 id>`**，
+     *      运行时据此滚到那个标题。
+     *
+     * ⚠️ 早先这里**只跳页、从不带 `?s=`**，于是所有"页内落点"的互链都停在文章顶部
+     *    （实测 26 条互链里带锚点的是 **0** 条）—— 用户最初要求"把每个带序号的标题单独分出来"
+     *    就是为了这个，页内定位必须补上。
+     */
+    const anchor = hash ? decodeURIComponent(hash) : null
+    if (process.env.TRACE_LINK === '1' && anchor) {
+      const hit = anchorPage.get(`${target}#${anchor}`)
+      console.log(
+        'LINK target=%s anchor=%j hit=%s allIdsHas=%s title=%j needAnchor=%s',
+        target, anchor, hit ? hit.id : 'NO', hit ? hit.allIds?.has(anchor) : '-', hit ? hit.title : '-',
+        hit && hit.allIds?.has(anchor) && slugify(hit.title) !== anchor ? 'YES' : 'no',
+      )
+    }
+    const page = (anchor && anchorPage.get(`${target}#${anchor}`)) || list.find((p) => p.status === 'ready')
+    /* 目标锚点就是这一页的主题 → 不必再带页内锚点（`doc-top` 与主题标题是同一位置） */
+    const needAnchor = anchor && page.allIds?.has(anchor) && slugify(page.title) !== anchor
+    return `<a class="doc-link" href="#/docs/${page.section}/${encodeURIComponent(page.id)}${needAnchor ? `?s=${encodeURIComponent(anchor)}` : ''}">${label}</a>`
   })
   for (const p of pages) {
     if (p.source !== src.id || !p.content) continue
