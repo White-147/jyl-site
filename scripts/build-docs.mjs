@@ -560,6 +560,21 @@ function isNumberedHeading(title) {
  *    页构造处据此算 `ancestors`。早先用 `pack` 的 `trail` 兜底，
  *    而 `pack` 传给它的 trail 是**空的** → 所有页 `ancestors=[]`、左栏层级全塌。
  */
+/**
+ * **按序号标题切页**（文档区的主力拆分模式，`split.mode === 'per-heading'` 的源走这里）。
+ *
+ * 与 `pack`（4 屏贪心装箱）的分工：
+ *   · `pack` 只服务**论文**（外部 Word 稿，标题不带序号、层级也不规整）；
+ *   · 本站自己的 UE 笔记全部走**按序号切页** —— 每个标题各自成页，页标题就是标题原文。
+ *
+ * ⚠️⚠️ **`ancestors` 只能由这里产出**：左栏的层级（`一、` → `1.` → `1.1`）完全依赖
+ *    每页记下的祖先标题链 `chain`；`pack` 传进来的 trail 是**空的** →
+ *    所有页 `ancestors=[]`、左栏层级全塌（实测过）。
+ *    所以任何"让论文也走这条路径"的改动，都要先把 `chain` 一起补上。
+ *
+ * ⚠️ 页的 `id` 由 `slugify(标题原文)` 生成，标题改了 id 就变 —— 锚点与互链会一起失效，
+ *    见 `docs/联动维护点.md` 的 13.9-B。
+ */
 function splitByNumberedHeading(tree, budget) {
   /**
    * ⚠️ h1 的待遇分两种情况（早先写漏了 `multiH1`，构建直接 ReferenceError）：

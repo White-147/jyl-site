@@ -913,12 +913,12 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
                 onClick={() => toggle(n.key)}
                 aria-expanded={open}
                 aria-label={`${open ? '收起' : '展开'} ${n.title}`}
-                className="flex h-[22px] w-5 shrink-0 items-center justify-center rounded text-slate-300 transition-colors hover:text-brand-700 dark:text-slate-600 dark:hover:text-brand-200"
+                className="mt-1 flex h-[22px] w-5 shrink-0 self-start items-center justify-center rounded text-slate-300 transition-colors hover:text-brand-700 dark:text-slate-600 dark:hover:text-brand-200"
               >
                 <Chevron open={open} />
               </button>
             ) : (
-              <span className="h-[22px] w-5 shrink-0" aria-hidden="true" />
+              <span className="mt-1 h-[22px] w-5 shrink-0 self-start" aria-hidden="true" />
             )}
             {ready ? (
               <a
