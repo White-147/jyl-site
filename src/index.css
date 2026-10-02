@@ -112,6 +112,11 @@
   --color-brand-50: #fdf8ef;
   --color-brand-100: #fbecd3;
   --color-brand-200: #f3d9ac; /* 深色模式强调文字：深底 13.49:1 */
+  /* 行内代码（`` `xxx` ``）的专属色号：**与加粗区分**（代码靠块 + 600 字重，加粗靠 700 字重）。
+     ⚠️ 用暖琥珀而不是蓝灰：整站是暖纸色系（画布 #fbf8f3），蓝灰会像另一套设计。 */
+  --color-code-bg: #fdf3e0;
+  --color-code-edge: #f0dcb4;
+  --color-code-fg: #8a4b00;
   --color-brand-300: #f2a93b; /* 深色模式光晕/强调：深底 9.25:1。浅色模式仅用于图形（底上 1.98:1） */
   --color-brand-400: #f7bd6e; /* 深色模式提亮：深底 10.96:1 */
   --color-brand-500: #d97a06; /* 图形、进度条、光斑。**禁止承载文字**（底上 3.03:1） */
@@ -254,6 +259,10 @@ html.dark {
   --color-slate-700: #363029;
   --color-slate-800: #29251f; /* 深色模式卡片面 */
   --color-slate-900: #201d18; /* 深色模式抬升面 */
+  /* 行内代码（深色档）：底比页面底(#15120f)更亮，文字用亮琥珀 */
+  --color-code-bg: #2e2318;
+  --color-code-edge: #4a3a24;
+  --color-code-fg: #f0b866;
   --color-slate-950: #15120f; /* 深色画布 */
 }
 
@@ -1927,25 +1936,32 @@ details[open] .chevron-up-down {
  *   `code`    = 0.9em（比正文还小 10%）+ 继承正文色 + 底色 `slate-100`
  *               （#ebe6de 对纸白 #fbf8f3，几乎看不出）+ 无边框    → 视觉上被**削弱**
  *
- * 改法（用户选"乙"）：把"代码"和"加粗"做成**两种不同维度的强调** ——
- *   代码靠**块**（更亮的底 + 细边框 + 墨色文字），加粗靠**字重**，两者各自成立、互不抢戏。
- *   · 浅色：底改成 `#fff`（比纸面**更亮**，于是"凸出来"）+ `slate-200` 细边框 + `--color-ink` 文字
- *   · 深色：底改成"抬升面" `--color-surface-dark-raised`（比页面底更亮）+ 边框 + 近白文字
- *   · **字号不动**（保持 0.9em，避免行内换行变乱）
+ * 改法（用户口径：「和 Typora 差不多，深浅色都单独做色号 + 加粗 + 块状强调」）：
+ *   行内代码 = **块**（有色号的底 + 边框）+ **字重 600** + **自成一套的文字色** ——
+ *   与"加粗"（只有 700 字重 + 墨色）区分开：两者都醒目，但方式不同（块 vs 字重）。
+ *
+ *   新增两个语义 token（两个模式各自成对）：
+ *     浅色：`--color-code-bg` 暖琥珀淡底（和纸面同族、但明显有色）｜`--color-code-fg` 深琥珀褐
+ *     深色：`--color-code-bg` 提亮的暖色块（比页面底亮）｜`--color-code-fg` 亮琥珀
+ *   ⚠️ 选暖色而不是蓝灰：整站是暖纸色系（画布 `#fbf8f3`），蓝灰的代码块会显得是另一套设计。
+ *   ⚠️ 字重取 **600** 而不是 700：700 留给"真加粗"，代码用 600 + 块感强调已经足够靠前，
+ *      同屏出现时两者仍能分辨（用户对比 Typora 的诉求是"代码不能比加粗弱"）。
+ *   ⚠️ 字号不动（0.9em），避免行内换行变乱。
  */
 .doc-content code {
   padding: 0.1em 0.35em;
   border-radius: 0.35rem;
-  background: #fff;
-  border: 1px solid var(--color-slate-200);
-  color: var(--color-ink);
+  background: var(--color-code-bg);
+  border: 1px solid var(--color-code-edge);
+  color: var(--color-code-fg);
   font-family: var(--font-mono);
   font-size: 0.9em;
+  font-weight: 600;
 }
 .dark .doc-content code {
-  background: var(--color-surface-dark-raised);
-  border-color: var(--color-slate-700);
-  color: var(--color-ink-light);
+  background: var(--color-code-bg);
+  border-color: var(--color-code-edge);
+  color: var(--color-code-fg);
 }
 /* 尚未导入本站的文档互链：保持原文位置但明确不可点，避免死链 */
 .doc-content .doc-link-pending {
