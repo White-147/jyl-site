@@ -2228,10 +2228,39 @@ details[open] .chevron-up-down {
    放进栏内不生效 —— 实测证据见 TopBar.tsx 那段注释）。
    ⚠️ `top: var(--site-bar-h)` = 正好压在横栏位置；`z-index: 39` < 横栏的 40，
       于是折射结果画在横栏之下，横栏那层 12% 白再叠上去：既透又弯。 */
+/* ⚠️⚠️ **左右内缩、与横栏本体对齐**（用户 2026-09：「横栏四周露出一圈被折射的深色边，
+   中间被 0.72 可读性底盖住反而是透的」——修法：左右对齐横栏 + 四边各羽化 4px）。
+   实测几何：横栏本体 x=24 / 宽 1384（1440 视口），而折射层原先是 `left:0; right:0` 满宽、
+   四角直角 → **四周各露出一圈被折射的深色边**。
+   为什么顶栏没这个问题：顶栏是全出血（撑满视口），而横栏在带内边距的包装层里。
+
+   ⚠️⚠️ **不能写死 `1.5rem`** —— 那样只在窄屏对。横栏所在包装层是
+   `mx-auto max-w-[104rem]`，**视口超过 104rem(1664px) 后它会居中并留出外边距**：
+   实测 1920 视口下横栏在 x=152（=(1920-1664)/2 + 24），写死 24px 就差 128px。
+   所以位置要用**同一个上限与内边距**算出来（`--docs-wrap-max` 与 `--docs-wrap-pad`
+   就是 Docs.tsx 里 `max-w-[104rem]` / `px-4 sm:px-6` 的对应值，改一处要同时改另一处）。 */
+:root {
+  --docs-wrap-max: 104rem;
+  --docs-wrap-pad: 1rem;
+}
+@media (min-width: 640px) {
+  :root {
+    --docs-wrap-pad: 1.5rem;
+  }
+}
 .docs-subbar-lens-layer {
   position: fixed;
-  left: 0;
-  right: 0;
+  /* 位置 = 包装层的外边距 + 包装层自己的内边距。
+     ⚠️ 漏掉末尾的 `+ var(--docs-wrap-pad)` 就会在宽屏差 24px
+        （实测 1920：横栏在 152，只算外边距得 128 → 左侧又多露一条）。 */
+  left: max(
+    var(--docs-wrap-pad),
+    calc((100vw - var(--docs-wrap-max)) / 2 + var(--docs-wrap-pad))
+  );
+  right: max(
+    var(--docs-wrap-pad),
+    calc((100vw - var(--docs-wrap-max)) / 2 + var(--docs-wrap-pad))
+  );
   top: var(--site-bar-h);
   height: var(--docs-subbar-h);
   z-index: 39;
@@ -2243,11 +2272,24 @@ details[open] .chevron-up-down {
     display: block;
   }
 }
+/* ⚠️ **四边各羽化 4px**：折射层原来是硬边，加上 `saturate` 之后边界一眼可见
+   （用户要求"四边各羽化 4px"）。用两条 `mask-image` 线性渐变在四条边做 4px 渐隐。
+   ⚠️ 用 `mask-*-image`（不是 `mask-*`）：Chrome 里渐变 mask 走 webkit 前缀最稳；
+   这里只需"相交"，直接用逗号分隔的多层 mask（默认语义就是相交），不要用 mask-composite。
+   ⚠️⚠️ **块注释里绝不要写出注释起止符本身**（曾经在这条注释里写了一次，
+       结果注释提前闭合 —— 后面的 `.docs-subbar-lens` 规则与整个 @media 块全部失效，
+       实测表现是 `computed left` 还是旧值、`mask-image` 读出 none）。 */
 .docs-subbar-lens {
   position: absolute;
   inset: 0;
   pointer-events: none;
   backdrop-filter: url(#lg-refract) saturate(1.15);
+  -webkit-mask-image:
+    linear-gradient(to right, transparent 0, #000 4px, #000 calc(100% - 4px), transparent 100%),
+    linear-gradient(to bottom, transparent 0, #000 4px, #000 calc(100% - 4px), transparent 100%);
+  mask-image:
+    linear-gradient(to right, transparent 0, #000 4px, #000 calc(100% - 4px), transparent 100%),
+    linear-gradient(to bottom, transparent 0, #000 4px, #000 calc(100% - 4px), transparent 100%);
 }
 /* 与顶栏同口径的能力回退：没有 `url()` 折射的浏览器（Safari / Firefox）退回一层轻模糊。
    ⚠️ 这一档同时把横栏的底加厚（0.72 → 0.86），否则正文从下面穿过时读不清。 */

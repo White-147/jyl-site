@@ -176,8 +176,9 @@ const SOURCES = [
     section: 'combat',
     file: 'combat/source/challenge-game-notes.md',
     format: 'md',
-    title: '挑战游戏实战',
-    subtitle: '玩法挑战与关卡设计记录',
+    /* 用户 2026-09：这一篇是「闯关游戏实战」，不是「挑战游戏实战」（源里的 H1 就是「闯关游戏实战」） */
+    title: '闯关游戏实战',
+    subtitle: '从零搭一个可玩的闯关关卡：项目准备、角色移动与跳跃、动画蓝图',
     order: 2,
     group: '实战案例',
     prereq: 'fps-game-notes',
