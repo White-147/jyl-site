@@ -784,15 +784,29 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
       const ready = (n.self ?? n.firstPage).status === 'ready'
       const target = n.self ?? n.firstPage
       const isCurrent = n.self != null && n.self.id === current?.id
-      const label =
-        n.self && n.children.length
-          ? 'text-[13.5px] font-semibold text-slate-700 dark:text-slate-100'
-          : n.self
-            ? 'text-[13.5px] font-medium text-slate-600 dark:text-slate-300'
-            : 'text-[13px] font-semibold text-slate-700 dark:text-slate-200'
+      /**
+       * **只保留两档字重**（用户 2026-09 定向：长文档里层次要一眼分得清，但不能破坏整体性）。
+       *
+       *   · **可展开的**（H2 分组头 + 有下级的页）→ `13.5px semibold` 深色；
+       *   · **叶子页** → `13.5px medium` 中灰。
+       *
+       * ⚠️ 早先是**四档**混用（`13px semibold` / `13.5px semibold` / `13.5px medium`），
+       *    在「界面基础操作」这种 31 个 H3 的长文档里，`13.5 semibold` 与 `13.5 medium`
+       *    只差一个字重、缩进又参差 → 用户反馈"结构层次不清晰"。
+       *    现在**层级只靠缩进 + 左侧引导线**表达（见 `renderNodes` 的嵌套 `<ul>`），
+       *    字重只区分"能不能展开"这一件事，全篇只有两种字号。
+       */
+      const label = n.children.length
+        ? 'text-[13.5px] font-semibold text-slate-700 dark:text-slate-100'
+        : 'text-[13.5px] font-medium text-slate-500 dark:text-slate-400'
       return (
-        <li key={n.key}>
+        /* ⚠️ `list-none` + 内联 `listStyle`：左栏树用 `<ul>/<li>` 承载，而浏览器默认会给 `<li>` 画**圆点**
+           （实测某些环境下第一个 `<li>` 的计算值是 `list-style-type: disc`，圆点就出现在最左侧、
+           看起来像"额外的层级标记"，用户反馈"破坏了整体性"）。双保险锁死。 */
+        <li key={n.key} className="list-none" style={{ listStyle: 'none' }}>
           <div className="flex items-start gap-0.5" style={{ paddingLeft: `${depth * 8 + 2}px` }}>
+            {/* 三角位**恒定宽度**：叶子行也占同样的位置 → 所有标题左对齐（不再出现"有的行有标记、
+                有的没有"的参差，用户反馈过"看起来像额外层级"）。 */}
             {n.children.length > 0 ? (
               <button
                 type="button"
@@ -838,9 +852,9 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
           {/* 当前页的小节内联在它下面（拆分后页标题只取得下"第一个小节"，同页的其他小节否则在左栏看不到）。
               ⚠️ `xl:hidden`：xl 及以上右栏已有「本篇大纲」，两处同时列同一份清单是重复。 */}
           {isCurrent && n.self && n.self.toc.length > 1 && (
-            <ul className="xl:hidden">
+            <ul className="list-none xl:hidden">
               {n.self.toc.slice(1).map((t) => (
-                <li key={t.id}>
+                <li key={t.id} className="list-none" style={{ listStyle: 'none' }}>
                   <a
                     href={docsHref(n.self!.section, n.self!.id, t.id)}
                     title={t.label}
@@ -863,7 +877,14 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
             </ul>
           )}
 
-          {open && n.children.length > 0 && <ul>{renderNodes(n.children, depth + 1)}</ul>}
+          {open && n.children.length > 0 && (
+            /* 嵌套层级用一条**很淡的引导线**表达（`border-s`），这是"不破坏整体性"的分层做法：
+               层级只靠「缩进 + 引导线」，不用额外字号/颜色/标记去堆叠。
+               ⚠️ `ms-2.5` 让线落在三角位的左缘，缩进 8px/层。 */
+            <ul className="docs-rail-guide ms-[13px] list-none border-s border-slate-200/70 dark:border-slate-700/50">
+              {renderNodes(n.children, depth + 1)}
+            </ul>
+          )}
         </li>
       )
     })
@@ -887,7 +908,7 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
   const pageTree = docList ? (
     navDepth === 1 ? (
       /* ---------- 一级：文档列表 ---------- */
-      <ul className="space-y-0.5">
+      <ul className="list-none space-y-0.5">
         {navForest.map((f) => {
           const active = f.key === activeDocKey
           return (
@@ -964,7 +985,7 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
 
   /** 当前篇大纲（桌面右栏 + 手机抽屉共用） */
   const outline = current && current.toc.length > 0 && (
-    <ul className="space-y-0.5">
+    <ul className="list-none space-y-0.5">
       {current.toc.map((t) => {
         const level = t.level
         return (
@@ -1295,6 +1316,9 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
                所以点「返回 UE 理论」= 左栏回一级 + 正文显示这张封面，一步到位。
                没有配封面的分区（如空的 FPS）保留原来的"还没有内容"提示。 */
             SECTION_LANDING[section.id] ? (
+              /* ⚠️ `min-h-full` + `justify-center`：展示页内容少，**垂直居中**才不会显得空荡；
+                 封面用 `max-h-[38vh] object-contain` **限高**，否则铺满列宽后（约 250px）
+                 整块高度超过可视区 → 明明只有一点内容却能上下滚（用户反馈过这个"很奇怪"）。 */
               <div className="mx-auto w-full max-w-3xl">
                 {SECTION_LANDING[section.id].variant === 'emblem' ? (
                   /* 校徽：居中、限宽、白底圆角（原图只有 183px，铺满整列会糊） */
@@ -1307,17 +1331,18 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
                     />
                   </figure>
                 ) : (
-                  <figure className="overflow-hidden rounded-2xl border border-slate-200/70 shadow-sm dark:border-slate-700/60">
+                  <figure className="flex justify-center overflow-hidden rounded-2xl border border-slate-200/70 shadow-sm dark:border-slate-700/60">
                     <img
                       src={`${import.meta.env.BASE_URL}${SECTION_LANDING[section.id].cover}`}
                       alt={`${section.label} 封面`}
-                      className="block h-auto w-full"
+                      /* 横幅：限高 30vh 保证"整页落在可视区内、不出现滚动"，宽度自适应 */
+                      className="mx-auto block h-auto max-h-[30vh] w-auto max-w-full object-contain"
                       loading="eager"
                     />
                   </figure>
                 )}
                 <h2
-                  className={`mt-6 text-2xl font-bold text-slate-800 dark:text-slate-100 ${
+                  className={`mt-5 text-2xl font-bold text-slate-800 dark:text-slate-100 ${
                     SECTION_LANDING[section.id].variant === 'emblem' ? 'text-center' : ''
                   }`}
                 >
@@ -1392,7 +1417,13 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
               而文档末尾的内容本来只有一两屏，靠后的标题**永远到不了顶** ——
               `scrollTop` 撞到 max 就被夹住，表现就是「点和内容区实际位置不一致，越往下越严重」。
               代价：滚到底时正文下方会有一段空白，这是这类"内部滚动 + 大纲跳转"布局的常规做法。 */}
-          <div aria-hidden="true" className="hidden md:block md:min-h-[70vh]" />
+          {/*
+            ⚠️ 这个 70vh 占位块是给**文章页**留高度的（文章短时底部不至于太空），
+               但它**不能在展示页渲染** —— 实测：展示页只有封面 + 三行字，
+               加上它之后 `MAIN` 高 1123px > 可视 886px → 竟然能上下滚 333px
+               （用户反馈"就一点点东西，但是正文部分可以上下拉，这一点就很奇怪"）。
+          */}
+          {current && <div aria-hidden="true" className="hidden md:block md:min-h-[70vh]" />}
         </main>
 
         {/* 右：本篇大纲（宽屏常驻；xl 以下由左栏里"当前页的小节"承担）。
@@ -1401,6 +1432,12 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
             ⚠️ 但要**保留第三列的列位**（下面那个空 aside）—— 撤掉列会让正文列涨到 1118px。
             ⚠️ 与左栏同一口径：`xl:top-[var(--docs-subbar-h)]` + `xl:h-[calc(100dvh-顶栏-横栏)]`
                （横栏是三栏之上的一个 grid 行，它占掉的高度必须在 sticky 的 top 与高度里各补回一次）。 */}
+        {/*
+          ⚠️ 条件里必须带 `current` —— 否则**展示页**（没有当前页）也会渲染这个 aside：
+             它带 `xl:h-[calc(100dvh-…)]` 的固定高度（实测 665px），把整页撑高，
+             于是"只有一张封面 + 三行字"的展示页竟然**可以上下滚 330px**（用户反馈过这个"很奇怪"）。
+             没有当前页时走下面的占位分支（`hidden xl:block`，不撑高）。
+        */}
         {current && current.toc.length > 3 ? (
           <aside className="hidden xl:sticky xl:top-[var(--docs-subbar-h)] xl:flex xl:h-[calc(100dvh-var(--site-bar-h)-var(--docs-subbar-h)-var(--docs-subbar-h))] xl:flex-col">
             <div className="docs-scroll min-h-0 flex-1 overflow-y-auto pb-4 pt-6">
@@ -1410,9 +1447,9 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
               <div className="mt-2.5">{outline}</div>
             </div>
           </aside>
-        ) : (
+        ) : current ? (
           <aside className="hidden xl:block" aria-hidden="true" />
-        )}
+        ) : null}
       </div>
 
       {lightbox && (
