@@ -33,6 +33,9 @@ src/data/docs.json
 !docs/thesis/source/thesis.html
 # 配图原图归档（PNG/JPG）。**不入库**（2026-09 第八轮），且**本机也已清理**（2026-09 第十二轮）：
 #   · 站点真正引用的是 public/docs/<分区>/images/*.webp（那才是资产，进 git）；
+#   · _archive/ 现存 14 个原件（5.6 MB，从旧副本 D:\code\Portfolio 统合而来），只服务 `optimize_images.py`；
+#     笔记配图的**原图**在项目外：UE 笔记见 C:\Users\10045\Desktop\ue5-notes\images（149 MB / 251 个），
+#     论文见 D:\work\毕业答辩；历史里那 147 MB 的 _archive 已于 2026-09 从 git 移除。
 #   · _archive/ 曾存 279 个原图（约 146 MB），只服务 `python scripts/optimize_images.py` ——
 #     一个**一次性**的体积治理脚本（把 223 张 2560×1440 PNG 压成 WebP，124 MB → 34 MB）；
 #     它的输出已全部落在 public/（ue5 223 张 + thesis 41 张），原图因此不再被任何流程需要，
