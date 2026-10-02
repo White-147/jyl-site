@@ -757,8 +757,18 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
       href={subLevel ? docsHref(section.id) : '#top'}
       onClick={
         subLevel
-          ? () => {
-              /* 连路由一起清页 id：`#/docs/<分区>` → 中间显示分区封面、左栏退回一级 */
+          ? (e) => {
+              /**
+               * ⚠️⚠️ **必须 `preventDefault()`**（用户实测：「点一次返回UE理论，直接连续执行了
+               * 返回UE理论和返回作品集，每次一点就回到主站了」）。
+               *
+               * 原因：这个 `<a>` 同时有 `href="#top"` 和下面的 onClick，两者目标不同 ——
+               * 一次点击会跑**两个导航**：onClick 先把 hash 设成 `#/docs/<分区>`，
+               * 而**同一个位置的元素随即变成一级的「返回作品集」链接**（`href="#top"`），
+               * 浏览器接着又按 `#top` 跳了一次 → 直接回主站。
+               * 拦掉默认跳转、只走 onClick，导航就只发生一次（与左栏文档项同一做法）。
+               */
+              e.preventDefault()
               window.location.hash = docsHref(section.id)
               setNavDepth(1)
             }
