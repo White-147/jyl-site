@@ -4,7 +4,7 @@
 
 ## 一、概况说明
 
-### 1. 版本说明
+### 1.1 版本说明
 
 下载安装的版本为 5.8.2，教学视频为 [【最新版】UE5零基础入门教程 | 新手必刷 — 虚幻5完整系列教程](https://www.bilibili.com/video/BV1qYSvBHELW/)，其中使用的版本为 5.7.0
 
@@ -12,13 +12,13 @@
 
 UE结合C++进行游戏开发教学视频为[【UE5 C++ 游戏开发 | 游戏逻辑 / C++编程 / UE5框架 / 核心开发】](https://www.bilibili.com/video/BV1uGEt6CECx?p=2&vd_source=3e1769133b1eb2a1523bbe2dffad92c6),其中使用的版本为5.6
 
-### 2. 自助答疑方法
+### 1.2 自助答疑方法
 
 - 虚幻引擎论坛：[https://forums.unrealengine.com/tags/c/general/feedback-requests/50/unreal-engine/](https://forums.unrealengine.com/tags/c/general/feedback-requests/50/unreal-engine/)
 - 虚幻引擎开发助手（AI解答）：[https://dev.epicgames.com/community/assistant/unreal-engine](https://dev.epicgames.com/community/assistant/unreal-engine/)
 - 虚幻引擎5.8开发文档：[https://dev.epicgames.com/documentation/unreal-engine/unreal-engine-5-8-documentation](https://dev.epicgames.com/documentation/unreal-engine/unreal-engine-5-8-documentation)
 
-### 3. 虚幻引擎5.8运行配置
+### 1.3 虚幻引擎5.8运行配置
 
 - 官方推荐硬件配置
 
@@ -36,9 +36,9 @@ UE结合C++进行游戏开发教学视频为[【UE5 C++ 游戏开发 | 游戏逻
 
 ## 二、学习记录
 
-### 1. 获取引擎与Fab
+### 2.1 获取引擎与Fab
 
-#### 1.1 引擎的下载和安装
+#### 引擎的下载和安装
 
 - 打开[Unreal Engine官网](https://www.unrealengine.com/)，点击获取虚幻引擎
   - 注意：如果电脑上已经有`Epic Games Laugher`的可以直接打开Epic
@@ -51,14 +51,14 @@ UE结合C++进行游戏开发教学视频为[【UE5 C++ 游戏开发 | 游戏逻
 
 <img src="images\UE下载和Fab\Epic内UE下载界面.png" style="zoom:67%;" />
 
-#### 1.2 Fab的介绍和使用
+#### Fab的介绍和使用
 
 - Fab商城中可以购买包括角色、植物、建筑等几乎所有游戏开发需要的资产
 - Epic会在Fab商城中不定时赠送部分商品
 
 <img src="images\UE下载和Fab\Fab界面.png" style="zoom:67%;" />
 
-#### 1.3 Fab插件的安装
+#### Fab插件的安装
 
 - 如果在下载引擎过程中没有安装Fab插件，可以在虚拟引擎-库的底部找到`Fab UE Plugin`
 - 点击安装到引擎之后，选择使用的**对应引擎版本**
@@ -72,7 +72,7 @@ UE结合C++进行游戏开发教学视频为[【UE5 C++ 游戏开发 | 游戏逻
 
 <img src="images\UE下载和Fab\Fab​插件安装验证.png" style="zoom:67%;" />
 
-### 2. 新建项目和项目模板
+### 2.2 新建项目和项目模板
 
 下载好引擎并点击启动后，界面如图所示，点击新建项目，其中无网络连接不影响项目的后续编写
 
@@ -122,37 +122,37 @@ UE结合C++进行游戏开发教学视频为[【UE5 C++ 游戏开发 | 游戏逻
 
 <img src="images\新建项目和项目模板\项目类别-载具.png" style="zoom:67%;" />
 
-### 3. 编辑模式下的视角移动方式
+### 2.3 编辑模式下的视角移动方式
 
 - `右键 + WASD`：视角移动
 - `QE`：上下平移
 
-### 4. 变换工具快捷键
+### 2.4 变换工具快捷键
 
 - `W键`：物体移动模式（默认）
 - `E键`：物体旋转模式
 - `R键`：物体缩放模式
 - `Ctrl+Z`：撤销上一步操作
 
-### 5. 项目启动快捷键
+### 2.5 项目启动快捷键
 
 - `Alt+P`：启动项目
 - 点击**运行按钮**
 
 <img src="images\菜单栏\运行按键位置.png" style="zoom:67%;" />
 
-### 6. 界面基础操作
+### 2.6 界面基础操作
 
 详见[**虚幻引擎界面基础操作文件**](.\theory\ue5-window-base.md)
 
-### 7. 界面进阶操作
+### 2.7 界面进阶操作
 
 详见[**虚幻引擎界面进阶操作文件**](.\theory\ue5-window-advanced.md)
 
-### 8. 蓝图基础
+### 2.8 蓝图基础
 
 详见[**蓝图基础知识文件**](.\theory\blueprint-base.md)和[**蓝图编程基础**](.\theory\blueprint-program-base)
 
-### 9. 蓝图实战
+### 2.9 蓝图实战
 
 详见[**闯关游戏实战**](.\combat\challenge-game-notes.md)和[**FPS游戏实战**](.\combat\fps-game-notes.md)
