@@ -18,9 +18,33 @@ const ANCHOR_GAP = 16
 
 /* ============================ 左栏导航树 ============================ */
 
-type NavNode =
-  | { kind: 'page'; key: string; page: DocPage; linkable?: boolean }
-  | { kind: 'group'; key: string; title: string; firstPage: DocPage; children: NavNode[]; linkable?: boolean }
+/**
+ * 左栏导航节点。
+ *
+ * ⚠️ **两种节点都能有 `children`、也都能"有内容"**（2026-09 用户定向的统一交互）：
+ *   · `group`：本身**不是页**（源里的中间层标题，如 `2.创建蓝图`）；
+ *   · `page`：本身**是一个页**（如 `各父类讲解`、`3. 主工具栏`）。
+ *
+ * 而"**既是页、下面又挂着子节**"的标题（`各父类讲解` 下面挂着 `Actor`）统一成
+ * **一个带 `self` 的 `group` 节点** —— 左栏里只出现一次（早先是页/分组各建一个 → 重复条目）。
+ *
+ * 交互（用户口径）：
+ *   · 点左边三角 → 展开 / 收起；
+ *   · 点标题文字 → 有内容（`self`）进自己那一页，没有就进**最近的有内容的下属页**（`firstPage`）。
+ */
+type NavNode = {
+  kind: 'page' | 'group'
+  key: string
+  title: string
+  /** 标题文字点进去的目标页（分组没内容时 = 最近的有内容的下属页） */
+  firstPage: DocPage
+  children: NavNode[]
+  /** 这一节**自己**也是一个页时放这里（带 `self` 的 group = 既是页又是分组） */
+  self?: DocPage
+  /** 兼容旧字段：等价于 `Boolean(self)` 或 `kind === 'page'` */
+  linkable?: boolean
+  page?: DocPage
+}
 
 /**
  * 把平铺的页列表还原成「源 → 分组 → 页」的树。
@@ -33,118 +57,105 @@ type NavNode =
  *      （「2.创建蓝图」这种只挂一节的分组，多一层缩进只会让左栏更长更碎）。
  *   2. 分组本身可点，指向它的第一页 —— 分组的引言段就在那一页的正文里。
  */
-/** 取一棵导航树里的**第一个页**（一级目录项点击时跳它） */
-function firstPageOf(nodes: NavNode[]): DocPage | null {
+/** 取一棵导航树里的**第一个有内容的页**（一级目录项点击时跳它） */
+function firstPageOf(nodes: NavNode[]): DocPage | undefined {
   for (const n of nodes) {
-    if (n.kind === 'page') return n.page
+    if (n.self) return n.self
     const hit = firstPageOf(n.children)
     if (hit) return hit
   }
-  return null
+  return undefined
 }
 
 /** 数一棵导航树里有多少个"页"（一级目录列表的页数用它） */
 function countPages(nodes: NavNode[]): number {
-  return nodes.reduce(
-    (n, x) => n + (x.kind === 'page' ? 1 : countPages((x as Extract<NavNode, { kind: 'group' }>).children)),
-    0,
-  )
+  return nodes.reduce((n, x) => n + (x.self ? 1 : 0) + countPages(x.children), 0)
 }
 
 function buildNav(pages: DocPage[], chapter: string): NavNode[] {
-  /** 所有页的祖先标题集合：某个页标题出现在这里 → 它是"分节头"（下面挂着子节），左栏里当可展开的分组 */
-  const parentTitles = new Set(pages.flatMap((p) => p.ancestors))
   const root: NavNode[] = []
-  const stack: { title: string; node: Extract<NavNode, { kind: 'group' }> }[] = []
-
-  for (const page of pages) {
-    let i = 0
-    while (i < stack.length && i < page.ancestors.length && stack[i].title === page.ancestors[i]) i++
-    stack.length = i
-    let bucket = i > 0 ? stack[i - 1].node.children : root
-    for (let k = i; k < page.ancestors.length; k++) {
-      // key 要**全局唯一**（折叠状态存在一个 Set 里），所以带上源名
-      const key = `${chapter} / ${page.ancestors.slice(0, k + 1).join(' / ')}`
-      const g: Extract<NavNode, { kind: 'group' }> = {
-        kind: 'group',
-        key,
-        title: page.ancestors[k],
-        firstPage: page,
-        children: [],
-      }
-      bucket.push(g)
-      stack.push({ title: page.ancestors[k], node: g })
-      bucket = g.children
-    }
-    bucket.push({
-      kind: 'page',
-      key: `${page.section}/${page.id}`,
-      page,
-      linkable: !parentTitles.has(page.title),
-    })
-  }
 
   /**
-   * ⚠️ **把"分节头页"降级成可展开的分组头**（2026-09 用户定向）。
+   * ⚠️⚠️ **一个标题只能有一个节点**（用户实测报出的"重复条目"根因）。
    *
-   * 背景：`一、概况说明` / `二、学习记录` 这类 H2 的 `ancestors` 是**空数组**（它们就是源里的
-   * 第一级标题），所以上面的循环**不会为它们建分组**，它们一直是"可点的页"。
-   * 用户口径：「点击的时候不是指向它下面的第一个 H3 页，而是**展开收缩**，实际正文都在 H3」。
+   * 早先的写法有两条路各建一个节点：
+   *   · 轮到某页自己 → push 一个 `page` 节点；
+   *   · 别的页的 `ancestors` 里出现它 → 又建一个 `group` 节点。
+   * 于是 `各父类讲解`、`3. 主工具栏`、`5.大纲视图`、`内容侧滑菜单` 这些
+   * **既是页、又是别的页的祖先**的标题，在左栏里**出现两遍**
+   * （一遍 `<a>` 13.5px medium，一遍 `<button>` 13px semibold）—— 用户直接贴了两段 DOM 佐证。
    *
-   * 判据用 `parentTitles`（它的标题出现在别的页的 `ancestors` 里 → 下面挂着子节）：
-   * 命中就把它包成 `linkable: false` 的**分组**，子页挂在它下面 → 左栏渲染成"可展开的分节头"。
-   * ⚠️ 必须保留它原来那个页节点作为唯一子节点，否则**丢内容**（它的正文要跟着它）。
+   * 现在改成"**查找或创建**，并在创建页节点时**把已有的同名分组认领过来**"：
+   * `各父类讲解` 先（由 `Actor` 的 ancestors）建成 group，等它自己那一页轮到时就
+   * 把 page 放进**同一个** group 节点里 → 只剩一个条目。
    */
-  const liftHeadingPages = (nodes: NavNode[]): NavNode[] =>
-    nodes.flatMap((n) => {
-      if (n.kind !== 'page' || !parentTitles.has(n.page.title)) return [n]
-      return [
-        {
-          kind: 'group',
-          key: `head:${chapter} / ${n.page.title}`,
-          title: n.page.title,
-          firstPage: n.page,
-          children: [n],
-          linkable: false,
-        } satisfies NavNode,
-      ]
-    })
+  const findChild = (bucket: NavNode[], title: string): NavNode | undefined =>
+    bucket.find((n) => n.title === title)
+
+  /** 把 group 节点升级为"页节点"（它自己也有内容）：补上 page / linkable / self */
+  const attachPage = (g: NavNode, page: DocPage) => {
+    g.firstPage = page
+    g.self = page
+  }
+
+  /** 取"最近的有内容的下属页"：分组本身没内容时，点标题跳这里 */
+  const firstPageIn = (nodes: NavNode[]): DocPage | undefined => {
+    for (const n of nodes) {
+      if (n.self) return n.self
+      if (n.kind === 'page') return n.page
+      const hit = firstPageIn(n.children)
+      if (hit) return hit
+    }
+    return undefined
+  }
+
+  for (const page of pages) {
+    let bucket = root
+    for (const anc of page.ancestors) {
+      let n = findChild(bucket, anc)
+      if (!n) {
+        n = { kind: 'group', key: `g:${chapter} / ${anc}`, title: anc, firstPage: page, children: [] }
+        bucket.push(n)
+      }
+      bucket = n.children
+    }
+    /** 自己也是一个页：若这一层已因"当祖先用"建了分组，就把它**升级**成页节点（只留一个条目） */
+    const mine = findChild(bucket, page.title)
+    if (mine && mine.kind === 'group') {
+      attachPage(mine, page)
+    } else if (!mine) {
+      bucket.push({
+        kind: 'page',
+        key: `${page.section}/${page.id}`,
+        title: page.title,
+        firstPage: page,
+        page,
+        self: page,
+        children: [],
+      })
+    }
+  }
+
+  /* 兜底：给所有"节点自己没内容"的分组补一个跳转目标（最近的有内容的下属页） */
+  const fillTargets = (nodes: NavNode[]) => {
+    for (const n of nodes) {
+      fillTargets(n.children)
+      if (n.kind === 'group' && !n.self) {
+        n.firstPage = firstPageIn(n.children) ?? n.firstPage
+      }
+    }
+  }
+  fillTargets(root)
 
   const flatten = (nodes: NavNode[]): NavNode[] => {
     const out: NavNode[] = []
     for (const n of nodes) {
-      if (n.kind !== 'group') {
-        out.push(n)
-        continue
-      }
       n.children = flatten(n.children)
-      /**
-       * 单子页分组**是否拍平**——两条都不能拍平，其它才拍：
-       *
-       *  ① `linkable === false`：**分节头分组**（自己就是一个标题，如 `一、概况说明`），要留着当展开头；
-       *  ② `parentTitles.has(n.title)`：**这个标题在源里是有下级的中间层**（如 `2.创建蓝图`、`1. 菜单栏`）。
-       *     虽然它自己不建页（内容全在 H3 里），但它**必须作为一个层级显示出来**。
-       *
-       * ⚠️ ② 是用户实测报出来的 bug（2026-09）：「2.创建蓝图丢了，显示的是 H3 的步骤」、
-       *    「界面基础操作的 H2 `1. 菜单栏` 没了，取而代之的是 H3 的文件」。
-       *    原因：`2.创建蓝图` 自己不建页 → 它的分组里只有一个子页（`步骤`）→
-       *    被"单子页分组拍平"提上来，**中间这一层就消失了**，而且左栏看起来像"步骤"直接挂在篇下面。
-       *    论文那种"只有一个页的分组"仍然照旧拍平（`parentTitles` 里没有它）。
-       */
-      if (
-        n.linkable !== false &&
-        !parentTitles.has(n.title) &&
-        n.children.length === 1 &&
-        n.children[0].kind === 'page'
-      ) {
-        out.push(n.children[0])
-        continue
-      }
       out.push(n)
     }
     return out
   }
-  return flatten(liftHeadingPages(root))
+  return flatten(root)
 }
 
 /** 折叠状态存 localStorage：刷新后还保持收起的样子 */
@@ -242,6 +253,20 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
    *    左栏却是一级列表，还得再点一次才知道自己在哪）。
    */
   const [navDepth, setNavDepth] = useState<1 | 2>(pageId ? 2 : 1)
+
+  /**
+   * ⚠️ **切分区时把左栏退回一级**（2026-09 修，用户截图暴露的问题）。
+   *
+   * `navDepth` 早先只在挂载时算一次初值，之后一直保持 —— 于是从一篇点进二级后，
+   * 再点左上角的分区（UE 理论 / UE 实战 / 毕业论文），左栏**仍然显示上一篇的目录**，
+   * 与实际分区对不上（看起来像"内容串了/重复了"）。
+   */
+  const sectionRef = useRef(section.id)
+  useEffect(() => {
+    if (sectionRef.current === section.id) return
+    sectionRef.current = section.id
+    setNavDepth(pageId ? 2 : 1)
+  }, [section.id, pageId])
   const [collapsed, setCollapsed] = useState<Set<string>>(loadCollapsed)
   const toggle = useCallback((key: string) => {
     setCollapsed((prev) => {
@@ -695,114 +720,111 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
    * ⚠️ 页不再带 `01 / 02` 序号：那是「页在源内的序号」，和标题自带的章节号
    *    （`03 2.新建项目和项目模板`）是两套编号，叠在一起很乱。顺序由分组和上下位置表达。
    */
-  const renderNodes = (nodes: NavNode[], depth: number) => (
-    <ul>
-      {nodes.map((n) =>
-        n.kind === 'group' ? (
-          <li key={n.key}>
-            {(() => {
-              const open = isOpen(n.key)
-              return (
-                <>
-                  <div className="flex items-start gap-0.5" style={{ paddingLeft: `${depth * 8 + 2}px` }}>
-                    <button
-                      type="button"
-                      onClick={() => toggle(n.key)}
-                      aria-expanded={open}
-                      aria-label={`${open ? '收起' : '展开'} ${n.title}`}
-                      className="flex h-[22px] w-5 shrink-0 items-center justify-center rounded text-slate-300 transition-colors hover:text-brand-700 dark:text-slate-600 dark:hover:text-brand-200"
-                    >
-                      <Chevron open={open} />
-                    </button>
-                    {/*
-                      ⚠️ 二级里的分节头（H2，如「二、学习记录」）**可点 = 展开/收缩，但不跳转** ——
-                      用户口径：「点击的时候不是指向它下面的第一个 H3 页，而是展开收缩，
-                      实际正文的都在 H3」。样式沿用"分组标题"（13px semibold 深色）。
-                      所以这里用 `<button>` 而不是 `<a>`：它没有可跳转的目标页。
-                    */}
-                    <button
-                      type="button"
-                      onClick={() => toggle(n.key)}
-                      className="flex min-w-0 flex-1 items-baseline rounded-md py-[3px] pr-2 text-left text-[13px] font-semibold leading-snug text-slate-700 transition-colors hover:text-brand-700 dark:text-slate-200 dark:hover:text-brand-200"
-                    >
-                      <span className="min-w-0 truncate">{n.title}</span>
-                    </button>
-                  </div>
-                  {open && renderNodes(n.children, depth + 1)}
-                </>
-              )
-            })()}
-          </li>
-        ) : (
-          <li key={n.key}>
-            {n.page.status === 'ready' ? (
-              <a
-                href={docsHref(n.page.section, n.page.id)}
-                aria-current={n.page.id === current?.id ? 'page' : undefined}
-                title={pageTip(n.page)}
-                onClick={() => setNavOpen(false)}
-                /* ⚠️ `data-scroll-lit="off"`：左栏页树排除在触屏的「滚动照亮」之外
-                   （2026-09 第十五轮）。两条理由：
-                     ① 它躺在**自己的滚动容器**里（`overflow-y-auto`），照亮由视口中线判定，
-                        在该容器里等于"永远亮着最上面那一项"，没有意义；
-                     ② 当前页的选中态本来就常驻点亮（`glass-lit-on`），再叠一层照亮会分不清
-                        "我读到这里"和"我停在这一页"。 */
-                data-scroll-lit="off"
-                className={`flex items-baseline rounded-lg py-[5px] pr-2 text-[13.5px] leading-snug transition-colors ${
-                  n.page.id === current?.id
-                    ? 'glass-lit glass-lit-on glass-chip-on font-semibold'
-                    : 'glass-lit font-medium text-slate-600 hover:text-brand-700 dark:text-slate-300 dark:hover:text-brand-200'
-                }`}
-                style={{ paddingLeft: `${depth * 8 + 24}px` }}
+  /**
+   * 左栏树渲染（**统一交互**，2026-09 用户定向）。
+   *
+   * 每个节点都是同一套结构：`[三角?] 标题文字`。
+   *   · **三角**（只有带子节点的才有）→ 点击 = **展开 / 收起**；
+   *   · **标题文字** → 有内容（`n.self`）进**自己那一页**，没有就进**最近的有内容的下属页**
+   *     （`n.firstPage`，构建期已经兜底填好）。
+   *
+   * 样式分成三档（用户要求"一眼能分清是哪一层"）：
+   *   · 分组头（本身不是页，如 `2.创建蓝图`）：`13px semibold` 深色 —— 最重，它是**分隔符**；
+   *   · 既是页又有下级的（如 `各父类讲解`、`3. 主工具栏`）：`13.5px semibold` + 三角 —— 中间档；
+   *   · 普通页：`13.5px medium` + 选中胶囊 —— 可点的主体。
+   *
+   * ⚠️ 早先"分组头"和"有正文的页"都渲染成 `13px semibold`，用户反馈
+   *    「没有 H3 下属文本的 H2 标签，走的和 H3 同类文本，不容易区分」—— 所以拆成三档。
+   */
+  const renderNodes = (nodes: NavNode[], depth: number) =>
+    nodes.map((n) => {
+      const open = isOpen(n.key)
+      const ready = (n.self ?? n.firstPage).status === 'ready'
+      const target = n.self ?? n.firstPage
+      const isCurrent = n.self != null && n.self.id === current?.id
+      const label =
+        n.self && n.children.length
+          ? 'text-[13.5px] font-semibold text-slate-700 dark:text-slate-100'
+          : n.self
+            ? 'text-[13.5px] font-medium text-slate-600 dark:text-slate-300'
+            : 'text-[13px] font-semibold text-slate-700 dark:text-slate-200'
+      return (
+        <li key={n.key}>
+          <div className="flex items-start gap-0.5" style={{ paddingLeft: `${depth * 8 + 2}px` }}>
+            {n.children.length > 0 ? (
+              <button
+                type="button"
+                onClick={() => toggle(n.key)}
+                aria-expanded={open}
+                aria-label={`${open ? '收起' : '展开'} ${n.title}`}
+                className="flex h-[22px] w-5 shrink-0 items-center justify-center rounded text-slate-300 transition-colors hover:text-brand-700 dark:text-slate-600 dark:hover:text-brand-200"
               >
-                <span className="min-w-0 flex-1 truncate">{n.page.title}</span>
+                <Chevron open={open} />
+              </button>
+            ) : (
+              <span className="h-[22px] w-5 shrink-0" aria-hidden="true" />
+            )}
+            {ready ? (
+              <a
+                href={docsHref(target.section, target.id)}
+                aria-current={isCurrent ? 'page' : undefined}
+                title={pageTip(target)}
+                onClick={() => setNavOpen(false)}
+                /* ⚠️ `data-scroll-lit="off"`：左栏页树排除在触屏的「滚动照亮」之外（2026-09 第十五轮）：
+                   ① 它躺在自己的滚动容器里，照亮由视口中线判定 → 在该容器里等于"永远亮着最上面那一项"；
+                   ② 当前页的选中态本来就常驻点亮，再叠一层照亮会分不清"我读到这里"和"我停在这一页"。 */
+                data-scroll-lit="off"
+                className={`flex min-w-0 flex-1 items-baseline rounded-lg py-[5px] pr-2 leading-snug transition-colors ${label} ${
+                  isCurrent ? 'glass-lit glass-lit-on glass-chip-on' : 'glass-lit hover:text-brand-700 dark:hover:text-brand-200'
+                }`}
+              >
+                <span className="min-w-0 flex-1 truncate">{n.title}</span>
               </a>
             ) : (
               <span
                 title="该篇尚未导入本站"
-                className="flex items-baseline gap-2 rounded-lg py-[5px] pr-2 text-[13.5px] text-slate-400 dark:text-slate-500"
-                style={{ paddingLeft: `${depth * 8 + 24}px` }}
+                className={`flex min-w-0 flex-1 items-baseline gap-2 rounded-lg py-[5px] pr-2 text-slate-400 dark:text-slate-500`}
               >
-                <span className="min-w-0 flex-1 truncate">{n.page.title}</span>
+                <span className="min-w-0 flex-1 truncate">{n.title}</span>
                 <span className="shrink-0 rounded border border-dashed border-slate-300 px-1.5 py-0.5 text-[10px] dark:border-slate-600">
                   待导入
                 </span>
               </span>
             )}
+          </div>
 
-            {/* 当前页的小节内联在它下面 —— 拆分后的页标题只取得下"第一个小节"，
-                同页的其他小节（如 5.1.2）否则在左栏完全看不到。
-                ⚠️ `xl:hidden`：xl 及以上右栏已经有「本篇大纲」，两处同时列同一份清单是重复。 */}
-            {n.page.id === current?.id && n.page.toc.length > 1 && (
-              <ul className="xl:hidden">
-                {n.page.toc.slice(1).map((t) => (
-                  <li key={t.id}>
-                    <a
-                      href={docsHref(n.page.section, n.page.id, t.id)}
-                      title={t.label}
-                      onClick={(e) => {
-                        e.preventDefault()
-                        if (navOpen) goToAnchorFromDrawer(t.id)
-                        else goToAnchor(t.id)
-                      }}
-                      className={`flex items-baseline rounded-md py-[3px] pr-2 text-[11.5px] leading-snug transition-colors ${
-                        activeAnchor === t.id
-                          ? 'font-semibold text-brand-700 dark:text-brand-200'
-                          : 'text-slate-400 hover:text-brand-700 dark:text-slate-500 dark:hover:text-brand-200'
-                      }`}
-                      style={{ paddingLeft: `${depth * 8 + 30 + (t.level - 2) * 9}px` }}
-                    >
-                      <span className="truncate">{t.label}</span>
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </li>
-        ),
-      )}
-    </ul>
-  )
+          {/* 当前页的小节内联在它下面（拆分后页标题只取得下"第一个小节"，同页的其他小节否则在左栏看不到）。
+              ⚠️ `xl:hidden`：xl 及以上右栏已有「本篇大纲」，两处同时列同一份清单是重复。 */}
+          {isCurrent && n.self && n.self.toc.length > 1 && (
+            <ul className="xl:hidden">
+              {n.self.toc.slice(1).map((t) => (
+                <li key={t.id}>
+                  <a
+                    href={docsHref(n.self!.section, n.self!.id, t.id)}
+                    title={t.label}
+                    onClick={(e) => {
+                      e.preventDefault()
+                      if (navOpen) goToAnchorFromDrawer(t.id)
+                      else goToAnchor(t.id)
+                    }}
+                    className={`flex items-baseline rounded-md py-[3px] pr-2 text-[11.5px] leading-snug transition-colors ${
+                      activeAnchor === t.id
+                        ? 'font-semibold text-brand-700 dark:text-brand-200'
+                        : 'text-slate-400 hover:text-brand-700 dark:text-slate-500 dark:hover:text-brand-200'
+                    }`}
+                    style={{ paddingLeft: `${depth * 8 + 30 + (t.level - 2) * 9}px` }}
+                  >
+                    <span className="truncate">{t.label}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {open && n.children.length > 0 && <ul>{renderNodes(n.children, depth + 1)}</ul>}
+        </li>
+      )
+    })
 
   /**
    * 左栏导航（**两级下钻**，2026-09 用户定向）。
