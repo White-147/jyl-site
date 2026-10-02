@@ -253,7 +253,17 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
     }))
   }, [pages])
 
-  const current = pages.find((p) => p.id === pageId) ?? pages[0]
+  /**
+   * 当前页。⚠️ **没有页 id 时就是"没有当前页"**（`undefined`），**不再回落到第一页**。
+   *
+   * 用户 2026-09 定向：「去掉 current 逻辑，仅在中间正文区去显示图片和文本」。
+   * 早先是 `?? pages[0]` —— 没选文档时**偷偷选中第一篇**，于是：
+   *   · 刚点分区 / 点了「返回 UE 理论」时，中间那列直接显示某篇文章，而不是分区封面；
+   *   · 左栏也没法停在"一级文档列表"（因为总有 current）。
+   * 去掉回落之后，"没有当前页"成为一个**真实状态**：
+   *   左栏自然退回一级（`navDepth` 初值本就是 `pageId ? 2 : 1`），正文区显示分区封面 + 文本。
+   */
+  const current = pages.find((p) => p.id === pageId)
 
   /**
    * 折叠状态。**默认全部展开**（用户明确要求），折叠只是一个可选动作。
@@ -901,12 +911,15 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
         <button
           type="button"
           onClick={() => {
-            /* 用户口径：点「返回 UE 理论」应回到**分区首页**（那张封面页），不只是把左栏退回一级。
-               所以这里连路由一起改：`#/docs/theory`（没有页 id）→ 中间那列显示分区首页。 */
+            /* 方案①（用户 2026-09 确认）：点返回 = **连 URL 一起清掉页 id**，回到 `#/docs/<分区>`。
+               这样"左栏一级 + 中间分区封面"一步到位 —— 只切 navDepth 的话 URL 还停在某一页、
+               中间那列仍然显示那篇文章（实测过：左栏回一级了，正文却还是文章）。
+               ⚠️ 这里**没有多出任何页面**：清掉页 id 之后 `current === undefined`，
+                  中间那列落到"空状态"分支，而那个分支现在渲染的是分区封面 + 文本。 */
             window.location.hash = docsHref(section.id)
             setNavDepth(1)
           }}
-          aria-label={`返回${section.label}首页`}
+          aria-label={`返回${section.label}`}
           className="glass-lit mb-2 flex w-full items-baseline gap-2 rounded-lg px-2.5 py-2 text-left transition-colors"
         >
           <svg
@@ -973,61 +986,6 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
   )
 
   const emptySection = !current || current.status !== 'ready'
-
-  /**
-   * **分区首页**（用户 2026-09 定向）。
-   *
-   * 用户口径：「默认页不用在左栏体现，只是填补目前一级目录没有点击的时候，以及返回一级目录的
-   * 时候，展示页的空缺，硬要说就是点击 UE 理论以及点击返回 UE 理论的时候进行展示，
-   * 不需要单独的导航点」。
-   *
-   * 所以命中条件只有一条：**URL 里没有页 id**（`#/docs/theory`，即刚点分区或点了返回行）。
-   * 它**不进左栏导航树、不算一篇文档**，只占中间那一列。
-   * ⚠️ 单篇分区（毕业论文）不适用：那种分区点进去本来就该是第一篇。
-   */
-  const showLanding = !pageId && navForest.length > 1
-  const landing = SECTION_LANDING[section.id]
-
-  if (showLanding && landing) {
-    const docCount = pages.filter((p) => p.status === 'ready').length
-    return (
-      <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-5 py-8">
-        <figure className="overflow-hidden rounded-2xl border border-slate-200/70 shadow-sm dark:border-slate-700/60">
-          <img
-            src={`${import.meta.env.BASE_URL}${landing.cover}`}
-            alt={`${section.label} 封面`}
-            className="block h-auto w-full"
-            loading="eager"
-          />
-        </figure>
-        <div>
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">{section.label}</h1>
-          <p className="mt-2 text-[15px] leading-relaxed text-slate-600 dark:text-slate-300">{section.blurb}</p>
-          {landing.extra && (
-            <p className="mt-2 text-sm leading-relaxed text-slate-500 dark:text-slate-400">{landing.extra}</p>
-          )}
-        </div>
-        <div className="rounded-xl border border-slate-200/70 p-4 dark:border-slate-700/60">
-          <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500">
-            本篇文档（{docCount} 页）
-          </p>
-          <ul className="mt-2.5 space-y-1">
-            {navForest.map((f) => (
-              <li key={f.key}>
-                <a
-                  href={docsHref(section.id, firstPageOf(f.nodes)?.id)}
-                  className="glass-lit flex items-baseline gap-2 rounded-lg px-2.5 py-1.5 text-[13.5px] font-medium text-slate-600 transition-colors hover:text-brand-700 dark:text-slate-300 dark:hover:text-brand-200"
-                >
-                  <span className="min-w-0 flex-1 truncate">{f.chapter}</span>
-                  <span className="dot-num shrink-0 text-[11px]">{countPages(f.nodes)} 页</span>
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-    )
-  }
 
   return (
     // ⚠️ 宽度口径（2026-09 第三轮，改之前先看 docs/联动维护点.md 的硬约束表）
@@ -1279,15 +1237,43 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
           </header>
 
           {emptySection ? (
-            <div className="glass-card-strong rounded-2xl px-5 py-10 text-center sm:px-8">
-              <p className="text-base font-medium text-slate-600 dark:text-slate-300">
-                {section.label}还没有可以阅读的内容
-              </p>
-              <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-slate-500 dark:text-slate-400">
-                {section.blurb}。笔记写好后放进 <code className="rounded bg-slate-100 px-1 dark:bg-slate-800">docs/{section.id}/source/</code>
-                ，跑一次 <code className="rounded bg-slate-100 px-1 dark:bg-slate-800">npm run docs:build</code> 就会出现在这里。
-              </p>
-            </div>
+            /* ⚠️ **分区封面页**（用户 2026-09 定向）。
+               它不是一页、不进左栏、不改路由 —— 只是"没有当前页"时**占中间那一列**的内容：
+               用户原话「去掉 current 逻辑，仅在中间正文区去显示图片和文本」。
+               左栏此时自然停在**一级文档列表**（`navDepth` 初值 = `pageId ? 2 : 1`），
+               所以点「返回 UE 理论」= 左栏回一级 + 正文显示这张封面，一步到位。
+               没有配封面的分区（如空的 FPS）保留原来的"还没有内容"提示。 */
+            SECTION_LANDING[section.id] ? (
+              <div className="mx-auto w-full max-w-3xl">
+                <figure className="overflow-hidden rounded-2xl border border-slate-200/70 shadow-sm dark:border-slate-700/60">
+                  <img
+                    src={`${import.meta.env.BASE_URL}${SECTION_LANDING[section.id].cover}`}
+                    alt={`${section.label} 封面`}
+                    className="block h-auto w-full"
+                    loading="eager"
+                  />
+                </figure>
+                <h2 className="mt-6 text-2xl font-bold text-slate-800 dark:text-slate-100">{section.label}</h2>
+                <p className="mt-2 text-[15px] leading-relaxed text-slate-600 dark:text-slate-300">
+                  {section.blurb}
+                </p>
+                {SECTION_LANDING[section.id].extra && (
+                  <p className="mt-2 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
+                    {SECTION_LANDING[section.id].extra}
+                  </p>
+                )}
+              </div>
+            ) : (
+              <div className="glass-card-strong rounded-2xl px-5 py-10 text-center sm:px-8">
+                <p className="text-base font-medium text-slate-600 dark:text-slate-300">
+                  {section.label}还没有可以阅读的内容
+                </p>
+                <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-slate-500 dark:text-slate-400">
+                  {section.blurb}。笔记写好后放进 <code className="rounded bg-slate-100 px-1 dark:bg-slate-800">docs/{section.id}/source/</code>
+                  ，跑一次 <code className="rounded bg-slate-100 px-1 dark:bg-slate-800">npm run docs:build</code> 就会出现在这里。
+                </p>
+              </div>
+            )
           ) : (
             <div
               className="doc-content glass-card-strong rounded-2xl px-5 py-6 sm:px-8 sm:py-8"
