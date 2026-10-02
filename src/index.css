@@ -1920,15 +1920,32 @@ details[open] .chevron-up-down {
   color: var(--color-brand-200);
   text-decoration-color: rgb(242 169 59 / 0.5);
 }
+/* ⚠️ 行内代码（`\`xxx\``）：用户 2026-09 反馈「在 Typora 里它比加粗还显眼，网页里却完全相反」。
+ *
+ * 实测原因（计算样式对比）：
+ *   `strong`  = 700 字重 + `--color-ink`（暖墨黑，最高对比）      → **两层强调**
+ *   `code`    = 0.9em（比正文还小 10%）+ 继承正文色 + 底色 `slate-100`
+ *               （#ebe6de 对纸白 #fbf8f3，几乎看不出）+ 无边框    → 视觉上被**削弱**
+ *
+ * 改法（用户选"乙"）：把"代码"和"加粗"做成**两种不同维度的强调** ——
+ *   代码靠**块**（更亮的底 + 细边框 + 墨色文字），加粗靠**字重**，两者各自成立、互不抢戏。
+ *   · 浅色：底改成 `#fff`（比纸面**更亮**，于是"凸出来"）+ `slate-200` 细边框 + `--color-ink` 文字
+ *   · 深色：底改成"抬升面" `--color-surface-dark-raised`（比页面底更亮）+ 边框 + 近白文字
+ *   · **字号不动**（保持 0.9em，避免行内换行变乱）
+ */
 .doc-content code {
   padding: 0.1em 0.35em;
   border-radius: 0.35rem;
-  background: var(--color-slate-100);
+  background: #fff;
+  border: 1px solid var(--color-slate-200);
+  color: var(--color-ink);
   font-family: var(--font-mono);
   font-size: 0.9em;
 }
 .dark .doc-content code {
-  background: var(--color-slate-900);
+  background: var(--color-surface-dark-raised);
+  border-color: var(--color-slate-700);
+  color: var(--color-ink-light);
 }
 /* 尚未导入本站的文档互链：保持原文位置但明确不可点，避免死链 */
 .doc-content .doc-link-pending {
@@ -2039,6 +2056,10 @@ details[open] .chevron-up-down {
 .doc-content .doc-code code {
   padding: 0;
   background: none;
+  /* ⚠️ 行内 code 现在带 1px 边框（2026-09），代码块里的 ① 也要把它清掉，
+     否则每个代码块会套一圈多余的边框。 */
+  border: 0;
+  color: inherit;
   font-size: inherit;
   white-space: pre;
 }

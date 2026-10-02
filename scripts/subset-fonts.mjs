@@ -7,7 +7,7 @@
 // 用法：node scripts/subset-fonts.mjs
 // 内容更新（新增文字）后重新运行本脚本即可；随后由 inline-firstscreen-fonts.mjs 内联首屏字体
 // （npm run fonts:subset 会把这两步串起来执行）。
-import { readFileSync, writeFileSync, mkdirSync, readdirSync, statSync, copyFileSync } from 'node:fs'
+import { readFileSync, writeFileSync, mkdirSync, readdirSync, statSync, copyFileSync, existsSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import subsetFont from 'subset-font'
@@ -31,16 +31,37 @@ function listFiles(dir) {
 // 1. 收集站点字符集
 const set = new Set()
 const add = (s) => { for (const ch of s) set.add(ch) }
+/**
+ * ⚠️⚠️ **文档正文也必须收进来**（2026-09 用户实测：正文里出现「闯」等字显示不正常）。
+ *
+ * 早先只扫 `src` / `src/data` / `index.html`，而**文档区的正文不在这些文件里** ——
+ * 它们在 `public/docs/pages/` 下的 HTML（由 `npm run docs:build` 生成，且不进 git）。
+ * 于是"只出现在笔记正文里"的字没有子集、**回退到系统字体**，和正文其它字不是同一套字形。
+ *
+ * 实测代价（157 页）：不重复汉字 1242 → **1466**（多 224 个），
+ * 每个字重约 153/156/157 KB → **181/184/185 KB**（+28KB/字重，gzip 后更少）。
+ *
+ * ⚠️ 依赖顺序：先 `npm run docs:build`（生成 `public/docs/pages/`），再跑本脚本。
+ *    `npm run fonts:subset` 已经把两步串起来了（见 package.json）。
+ * ⚠️ 读的是**渲染后的 HTML**，所以要先去标签再收字，否则会把属性名（`class`/`src`…）也收进去。
+ */
 const TARGETS = [
   { re: /\.(tsx|ts)$/, dirs: ['src'] },
   { re: /\.json$/, dirs: ['src/data'] },
   { re: /^index\.html$/, dirs: ['.'] },
+  { re: /\.html$/, dirs: ['public/docs/pages'], stripTags: true },
 ]
-for (const { re, dirs } of TARGETS) {
+for (const { re, dirs, stripTags } of TARGETS) {
   for (const d of dirs) {
-    for (const f of listFiles(join(root, d))) {
+    const abs = join(root, d)
+    if (!existsSync(abs)) {
+      if (stripTags) console.warn(`⚠️ 跳过 ${d}（不存在）—— 先跑 npm run docs:build 再跑字体子集`)
+      continue
+    }
+    for (const f of listFiles(abs)) {
       if (!re.test(f)) continue
-      add(readFileSync(f, 'utf8'))
+      const raw = readFileSync(f, 'utf8')
+      add(stripTags ? raw.replace(/<[^>]+>/g, ' ') : raw)
     }
   }
 }
