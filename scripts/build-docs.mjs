@@ -109,7 +109,7 @@ const SOURCES = [
     subtitle: '环境准备、Fab、项目模板、界面与快捷键',
     order: 1,
     group: '入门',
-    split: { levels: [2, 3] },
+    split: { mode: 'per-heading' },
   },
   {
     id: 'blueprint-base',
@@ -121,7 +121,7 @@ const SOURCES = [
     order: 2,
     group: '蓝图',
     prereq: 'unreal5-notes',
-    split: { levels: [2, 3, 4] },
+    split: { mode: 'per-heading' },
   },
   {
     id: 'ue5-window-base',
@@ -133,7 +133,7 @@ const SOURCES = [
     order: 3,
     group: '界面',
     prereq: 'unreal5-notes',
-    split: { levels: [2, 3] },
+    split: { mode: 'per-heading' },
   },
   {
     id: 'ue5-window-advanced',
@@ -145,7 +145,7 @@ const SOURCES = [
     order: 4,
     group: '界面',
     prereq: 'ue5-window-base',
-    split: { levels: [2, 3, 4] },
+    split: { mode: 'per-heading' },
   },
   {
     id: 'blueprint-program-base',
@@ -157,7 +157,7 @@ const SOURCES = [
     order: 5,
     group: '蓝图',
     prereq: 'blueprint-base',
-    split: { levels: [2, 3, 4] },
+    split: { mode: 'per-heading' },
   },
 
   {
@@ -169,7 +169,7 @@ const SOURCES = [
     subtitle: '从零做一个可玩的第一人称射击关卡',
     order: 1,
     group: '实战案例',
-    split: { levels: [2, 3, 4] },
+    split: { mode: 'per-heading' },
   },
   {
     id: 'challenge-game-notes',
@@ -181,7 +181,7 @@ const SOURCES = [
     order: 2,
     group: '实战案例',
     prereq: 'fps-game-notes',
-    split: { levels: [2, 3, 4] },
+    split: { mode: 'per-heading' },
   },
 ]
 
@@ -500,6 +500,121 @@ function accumulate(nodes) {
 const fullHtml = (n) => (n.children?.length ? `${n.ownHtml}\n${n.children.map(fullHtml).join('\n')}` : n.ownHtml)
 
 /**
+ * 树节点 → **只含自身**的块（`children` 恒为空）。
+ *
+ * ⚠️ 页面正文用 `fullHtml`（**含子孙**）渲染，而"块"有时直接就是**树节点本身** ——
+ *    它的 `children` 还挂着整棵子树，于是那一页会把整篇文档渲染一遍
+ *    （实测「虚幻5引擎学习笔记」第 1 页装下 15 个标题、9280 字节）。
+ *    字段**显式取**，绝不 `{ ...node }`。
+ */
+function toLeaf(n, extra = {}) {
+  const b = makeBlock(n.level, n.title, n.ownHtml, n.id)
+  b.chars = n.ownChars
+  b.imgPx = n.ownImgPx
+  b.images = n.ownImages
+  return Object.assign(b, extra)
+}
+
+/** 「这个标题带序号吗」—— 按序号切页时决定分不分页（用户口径：不带序号的并进上一页） */
+function isNumberedHeading(title) {
+  const t = stripInline(String(title)).trim()
+  return (
+    /^[0-9]+(\.[0-9]+)*\s*[.、,，:：]?\s*/.test(t) ||
+    /^[一二三四五六七八九十百]+\s*[、.．,，:：]/.test(t) ||
+    /^第\s*[0-9一二三四五六七八九十百]+\s*[章节篇部]/.test(t)
+  )
+}
+
+/**
+ * 按序号节切页（`split.mode === 'per-heading'`，2026-09 用户定向）。
+ *
+ * 用户口径（逐条确认过）：
+ *   · **H3 是实际内容**，带序号的 H3 **各自成页**；
+ *   · **H2 不单独成页** —— 「h2 的正文就是 h3 的正文」，它在左栏里只是"可展开/收缩的条目"
+ *     （点它不跳转，正文在各 H3 页里）；
+ *   · H1 是文档名，不参与分页（`docTitle` 会把它从祖先链首过滤掉）；
+ *   · 不带序号的标题（`### 步骤`、`#### 功能`）并进上一页当分隔。
+ *
+ * ⚠️⚠️ **祖先链必须在这里显式累积**（上一版最大的坑）：
+ *    返回的页里带 `crumbs: string[]`（不含文档名的完整祖先链），
+ *    页构造处据此算 `ancestors`。早先用 `pack` 的 `trail` 兜底，
+ *    而 `pack` 传给它的 trail 是**空的** → 所有页 `ancestors=[]`、左栏层级全塌。
+ */
+function splitByNumberedHeading(tree, budget) {
+  /** 展平成线性序列，同时把祖先链累积到每一项上 */
+  const seq = []
+  const walk = (nodes, chain) => {
+    for (const node of nodes) {
+      const splits = node.level === 1 ? false : node.level >= 2 && isNumberedHeading(node.title)
+      seq.push({ node, chain, splits })
+      /* ⚠️ 无论是不是分页边界都要递归：早先"边界不展开"，导致 h3 边界永远访问不到 */
+      if (node.children.length) walk(node.children, [...chain, stripInline(node.title)])
+    }
+  }
+  walk(tree, [])
+
+  /**
+   * 分组：一个边界节点 = 一页；它到下一个边界之前的正文并进这一页。
+   *
+   * ⚠️ 两处细节都是踩出来的：
+   *   · 边界块用 `toLeaf`（不带子树）。否则 `fullHtml` 会把子树整个渲染出来，
+   *     而子树里的 h3 又各自成页 → **同一节出现两遍**；
+   *   · **只有标题、没有直属正文**的边界（如「一、概况说明」）**整条不建页** ——
+   *     它是 H2，按用户口径本来就不该有独立页（正文都在 H3）；
+   *     建页会得到一堆"只有一行标题"的空壳。
+   */
+  const groups = []
+  let cur = []
+  let curChain = []
+  const flush = () => {
+    if (cur.length) groups.push({ blocks: cur, chain: curChain })
+    cur = []
+    curChain = []
+  }
+  let lastWasBoundary = false
+  for (const { node, chain, splits } of seq) {
+    if (splits) {
+      /* H2/H3 自己不产出正文（正文在子节里）→ 不建页，只作为祖先出现在子节的链里 */
+      const hasOwnBody = (node.ownChars ?? 0) >= 20 || (node.ownImages ?? 0) > 0
+      const isH3 = node.level >= 3
+      if (!hasOwnBody && !isH3) continue
+      if (cur.length) flush()
+      cur.push(toLeaf(node, { isSelf: true }))
+      curChain = chain
+      lastWasBoundary = true
+      continue
+    }
+    /* 非边界（不带序号的标题）：并进当前页；若上一个块是边界，先收尾一次防重复渲染 */
+    if (lastWasBoundary && cur.length) flush()
+    cur.push(toLeaf(node))
+    if (!curChain.length) curChain = chain
+    lastWasBoundary = false
+  }
+  flush()
+
+  /* 超预算的页才继续按 h3/h4 下钻（与 pack 同口径） */
+  const out = []
+  for (const g of groups) {
+    const chars = g.blocks.reduce((a, b) => a + (b.chars ?? 0), 0)
+    const imgPx = g.blocks.reduce((a, b) => a + (b.imgPx ?? 0), 0)
+    if (screens(chars, imgPx) <= budget) {
+      out.push({ blocks: g.blocks, chars, imgPx, cost: screens(chars, imgPx), crumbs: g.chain })
+      continue
+    }
+    const head = g.blocks[0]
+    const body = g.blocks.slice(1)
+    const sub = body.length ? pack(body, [3, 4], budget, 0, g.chain) : []
+    if (sub.length <= 1) {
+      out.push({ blocks: g.blocks, chars, imgPx, cost: screens(chars, imgPx), crumbs: g.chain })
+      continue
+    }
+    sub[0] = { ...sub[0], blocks: [head, ...sub[0].blocks] }
+    for (const s of sub) out.push({ ...s, crumbs: s.crumbs?.length ? s.crumbs : g.chain })
+  }
+  return out
+}
+
+/**
  * 贪心装箱：整块塞得下就与后面的块继续凑；塞不下且还有更深的层级可下钻，就先收尾当前页、
  * 再对子块递归。下钻时**父块自己的标题与正文**会并进第一个子页（而不是自己单开一页），
  * 所以既不会丢掉章节标题，也不会多出一堆"0 屏"的空页。
@@ -749,7 +864,10 @@ for (const src of SOURCES) {
     continue
   }
   const budget = src.split?.budget ?? DEFAULT_BUDGET
-  const packed = mergeSmall(pack(tree, src.split?.levels ?? [2, 3], budget, 0, []), budget)
+  const packed =
+    src.split?.mode === 'per-heading'
+      ? splitByNumberedHeading(tree, budget)
+      : mergeSmall(pack(tree, src.split?.levels ?? [2, 3], budget, 0, []), budget)
   /**
    * 「文档标题」那一层不进左栏。
    *
