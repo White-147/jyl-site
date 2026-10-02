@@ -33,6 +33,16 @@ type NavNode =
  *      （「2.创建蓝图」这种只挂一节的分组，多一层缩进只会让左栏更长更碎）。
  *   2. 分组本身可点，指向它的第一页 —— 分组的引言段就在那一页的正文里。
  */
+/** 取一棵导航树里的**第一个页**（一级目录项点击时跳它） */
+function firstPageOf(nodes: NavNode[]): DocPage | null {
+  for (const n of nodes) {
+    if (n.kind === 'page') return n.page
+    const hit = firstPageOf(n.children)
+    if (hit) return hit
+  }
+  return null
+}
+
 /** 数一棵导航树里有多少个"页"（一级目录列表的页数用它） */
 function countPages(nodes: NavNode[]): number {
   return nodes.reduce(
@@ -798,7 +808,13 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
             <li key={f.key}>
               <button
                 type="button"
-                onClick={() => setNavDepth(2)}
+                onClick={() => {
+                  /* ⚠️ 必须**跳路由**，不能只切层级：早先只写 setNavDepth(2)，
+                     `current` 一直停在上一篇的第一页 → 点哪篇都显示「虚幻引擎总览」（实测 bug）。 */
+                  const first = firstPageOf(f.nodes)
+                  if (first) window.location.hash = docsHref(section.id, first.id)
+                  setNavDepth(2)
+                }}
                 aria-current={active ? 'true' : undefined}
                 data-scroll-lit="off"
                 className={`flex w-full items-baseline gap-2 rounded-lg px-2.5 py-2 text-left text-[13.5px] leading-snug transition-colors ${
@@ -820,7 +836,7 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
         <button
           type="button"
           onClick={() => setNavDepth(1)}
-          aria-label={`返回文档列表（当前：${current?.chapter ?? ''}）`}
+          aria-label={`返回${section.label}`}
           className="glass-lit mb-2 flex w-full items-baseline gap-2 rounded-lg px-2.5 py-2 text-left transition-colors"
         >
           <svg
@@ -835,11 +851,9 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
           >
             <path d="m15 18-6-6 6-6" />
           </svg>
+          {/* 返回行的目标按用户口径是**分区**（"返回 UE 理论 / UE 实战"），不是文档列表本身 */}
           <span className="min-w-0 flex-1 truncate text-[13px] font-semibold text-slate-700 dark:text-slate-100">
-            {current?.chapter ?? ''}
-          </span>
-          <span className="dot-num shrink-0 text-[11px]">
-            {countPages(navForest.find((f) => f.key === activeDocKey)?.nodes ?? [])} 页
+            返回{section.label}
           </span>
         </button>
         {navForest
