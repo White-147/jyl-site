@@ -117,6 +117,10 @@
   --color-code-bg: #fdf3e0;
   --color-code-edge: #f0dcb4;
   --color-code-fg: #8a4b00;
+  /* 文档区细滚动条的滑块色（暖色系；⚠️ 原来是**冷蓝灰** rgb(148 163 184 / 100 116 139)，
+     和整站暖纸/暖石墨不是一套，深色档尤其明显）。 */
+  --docs-scrollbar-thumb: rgb(158 140 114 / 0.45);
+  --docs-scrollbar-thumb-hover: rgb(158 140 114 / 0.7);
   --color-brand-300: #f2a93b; /* 深色模式光晕/强调：深底 9.25:1。浅色模式仅用于图形（底上 1.98:1） */
   --color-brand-400: #f7bd6e; /* 深色模式提亮：深底 10.96:1 */
   --color-brand-500: #d97a06; /* 图形、进度条、光斑。**禁止承载文字**（底上 3.03:1） */
@@ -263,6 +267,8 @@ html.dark {
   --color-code-bg: #2e2318;
   --color-code-edge: #4a3a24;
   --color-code-fg: #f0b866;
+  --docs-scrollbar-thumb: rgb(179 168 148 / 0.4);
+  --docs-scrollbar-thumb-hover: rgb(179 168 148 / 0.68);
   --color-slate-950: #15120f; /* 深色画布 */
 }
 
@@ -2270,85 +2276,31 @@ details[open] .chevron-up-down {
    放进栏内不生效 —— 实测证据见 TopBar.tsx 那段注释）。
    ⚠️ `top: var(--site-bar-h)` = 正好压在横栏位置；`z-index: 39` < 横栏的 40，
       于是折射结果画在横栏之下，横栏那层 12% 白再叠上去：既透又弯。 */
-/* ⚠️⚠️ **左右内缩、与横栏本体对齐**（用户 2026-09：「横栏四周露出一圈被折射的深色边，
-   中间被 0.72 可读性底盖住反而是透的」——修法：左右对齐横栏 + 四边各羽化 4px）。
-   实测几何：横栏本体 x=24 / 宽 1384（1440 视口），而折射层原先是 `left:0; right:0` 满宽、
-   四角直角 → **四周各露出一圈被折射的深色边**。
-   为什么顶栏没这个问题：顶栏是全出血（撑满视口），而横栏在带内边距的包装层里。
+/**
+ * ⚠️⚠️ **横栏的折射层已整体删除**（用户 2026-09 定稿：「把横栏去掉折射效果，统一采用中间的不透明
+ * 的效果」——方案二）。
+ *
+ * 为什么删（实测证据）：折射层是 `position: fixed` 的满宽层（`z-index: 39`，画在横栏 40 之下），
+ * 而右侧的**滚动滑块**属于滚动容器 `#docs-scroll`（右边缘 x 1416 / 宽 15px）→
+ * 滑块有 15px 压在折射层范围内，于是**滑块顶部被折射扭曲**（顶部还是原生方向按钮那个冷蓝灰小方块）。
+ * 横栏本体只到 x 1408，所以右侧 8px 窄条里折射是**露出来**的，正好落在滑块上。
+ *
+ * 试过的另一条路（用户提的方案一：「把滑动块改到横栏下面」）：
+ *   滑块是滚动容器的右边缘，要让它不被盖住只能把折射层右边界从 1416 收到 1401（内缩 15px）——
+ *   而 15px 是**平台相关**的（Windows 15px / macOS 覆盖式 0px / Firefox 不同），且滚动条
+ *   只在内容溢出时出现 → 要么"有时缩有时不缩"，要么永远缩、横栏右端多出一条无折射的竖缝。
+ *   **结论：不值得，改用方案二。**
+ *
+ * 现在横栏的层次只靠 `background-color: rgb(251 248 243 / 0.72)`（深色 `rgb(21 18 15 / 0.62)`）
+ * 这层可读性底 + 与顶栏一致的渐变底/内高光。⚠️ 主体**没有** `backdrop-filter`
+ * （原先也没有 —— 折射全来自刚才删掉的那个独立层），所以这里不需要任何"去模糊"的补偿。
+ *
+ * ⚠️ 随之删除的还有原先的 `@supports not (backdrop-filter: url(#lg-refract))` 回退块 ——
+ *    它给横栏加 `blur(16px)` 并把底加厚到 0.86/0.8。既然不带折射了，那层模糊就是多余的第二套外观，
+ *    留着会让 Safari/Firefox 与 Chrome 的横栏**不一样**。
+ */
 
-   ⚠️⚠️ **不能写死 `1.5rem`** —— 那样只在窄屏对。横栏所在包装层是
-   `mx-auto max-w-[104rem]`，**视口超过 104rem(1664px) 后它会居中并留出外边距**：
-   实测 1920 视口下横栏在 x=152（=(1920-1664)/2 + 24），写死 24px 就差 128px。
-   所以位置要用**同一个上限与内边距**算出来（`--docs-wrap-max` 与 `--docs-wrap-pad`
-   就是 Docs.tsx 里 `max-w-[104rem]` / `px-4 sm:px-6` 的对应值，改一处要同时改另一处）。 */
-:root {
-  --docs-wrap-max: 104rem;
-  --docs-wrap-pad: 1rem;
-}
-@media (min-width: 640px) {
-  :root {
-    --docs-wrap-pad: 1.5rem;
-  }
-}
-.docs-subbar-lens-layer {
-  position: fixed;
-  /* 位置 = 包装层的外边距 + 包装层自己的内边距。
-     ⚠️ 漏掉末尾的 `+ var(--docs-wrap-pad)` 就会在宽屏差 24px
-        （实测 1920：横栏在 152，只算外边距得 128 → 左侧又多露一条）。 */
-  left: max(
-    var(--docs-wrap-pad),
-    calc((100vw - var(--docs-wrap-max)) / 2 + var(--docs-wrap-pad))
-  );
-  right: max(
-    var(--docs-wrap-pad),
-    calc((100vw - var(--docs-wrap-max)) / 2 + var(--docs-wrap-pad))
-  );
-  top: var(--site-bar-h);
-  height: var(--docs-subbar-h);
-  z-index: 39;
-  pointer-events: none;
-  display: none;
-}
-@media (min-width: 768px) {
-  .docs-subbar-lens-layer {
-    display: block;
-  }
-}
-/* ⚠️ **四边各羽化 4px**：折射层原来是硬边，加上 `saturate` 之后边界一眼可见
-   （用户要求"四边各羽化 4px"）。用两条 `mask-image` 线性渐变在四条边做 4px 渐隐。
-   ⚠️ 用 `mask-*-image`（不是 `mask-*`）：Chrome 里渐变 mask 走 webkit 前缀最稳；
-   这里只需"相交"，直接用逗号分隔的多层 mask（默认语义就是相交），不要用 mask-composite。
-   ⚠️⚠️ **块注释里绝不要写出注释起止符本身**（曾经在这条注释里写了一次，
-       结果注释提前闭合 —— 后面的 `.docs-subbar-lens` 规则与整个 @media 块全部失效，
-       实测表现是 `computed left` 还是旧值、`mask-image` 读出 none）。 */
-.docs-subbar-lens {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  backdrop-filter: url(#lg-refract) saturate(1.15);
-  -webkit-mask-image:
-    linear-gradient(to right, transparent 0, #000 4px, #000 calc(100% - 4px), transparent 100%),
-    linear-gradient(to bottom, transparent 0, #000 4px, #000 calc(100% - 4px), transparent 100%);
-  mask-image:
-    linear-gradient(to right, transparent 0, #000 4px, #000 calc(100% - 4px), transparent 100%),
-    linear-gradient(to bottom, transparent 0, #000 4px, #000 calc(100% - 4px), transparent 100%);
-}
-/* 与顶栏同口径的能力回退：没有 `url()` 折射的浏览器（Safari / Firefox）退回一层轻模糊。
-   ⚠️ 这一档同时把横栏的底加厚（0.72 → 0.86），否则正文从下面穿过时读不清。 */
-@supports not (backdrop-filter: url(#lg-refract)) {
-  .docs-subbar {
-    backdrop-filter: blur(16px) saturate(1.4);
-    background-image: linear-gradient(to bottom, rgb(255 255 255 / 0.42), rgb(255 255 255 / 0.26));
-    background-color: rgb(251 248 243 / 0.86); /* ⚠️ 第十二轮：原 rgb(250 251 251) 是冷白 */
-  }
-  .dark .docs-subbar {
-    background-image: linear-gradient(to bottom, rgb(21 18 15 / 0.55), rgb(21 18 15 / 0.4));
-    background-color: rgb(21 18 15 / 0.8);
-  }
-  .docs-subbar-lens {
-    display: none;
-  }
-}
+
 
 /* ===== 文档区的细滚动条（.docs-scroll）=====
    用在三处：正文滚动容器、左侧文档树、右侧大纲。
@@ -2413,7 +2365,7 @@ details[open] .chevron-up-down {
 
 .docs-scroll {
   scrollbar-width: thin;
-  scrollbar-color: rgb(148 163 184 / 0.45) transparent;
+  scrollbar-color: var(--docs-scrollbar-thumb) transparent;
 }
 .docs-scroll::-webkit-scrollbar {
   width: 6px;
@@ -2422,18 +2374,30 @@ details[open] .chevron-up-down {
 .docs-scroll::-webkit-scrollbar-track {
   background: transparent;
 }
+/**
+ * ⚠️⚠️ **必须显式隐藏两端的方向按钮**（用户 2026-09：「文档区右侧上下滑动块那里…」的后续发现）。
+ *
+ * 只在 `::-webkit-scrollbar` 里设 width 时，Chromium 仍会渲染那对**原生箭头按钮**
+ * （`::-webkit-scrollbar-button`）—— 它们在深色档是**冷蓝灰**的小方块，
+ * 和整站的暖石墨画布明显不是一套（本人抓 2x 特写确认过）。
+ * Firefox 走标准属性 `scrollbar-width: thin`，本来就没有按钮，不受影响。
+ */
+.docs-scroll::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
 .docs-scroll::-webkit-scrollbar-thumb {
-  background-color: rgb(148 163 184 / 0.4);
+  background-color: var(--docs-scrollbar-thumb);
   border-radius: 9999px;
 }
 .docs-scroll::-webkit-scrollbar-thumb:hover {
-  background-color: rgb(148 163 184 / 0.65);
+  background-color: var(--docs-scrollbar-thumb-hover);
 }
-.dark .docs-scroll {
-  scrollbar-color: rgb(100 116 139 / 0.5) transparent;
-}
-.dark .docs-scroll::-webkit-scrollbar-thumb {
-  background-color: rgb(100 116 139 / 0.5);
+/* ⚠️ 两端的 corner（横竖滚动条交角）也一并清掉：正文列通常只有纵向滚动条，
+   但宽度计算/子像素下偶尔会冒出一个 6×6 的小方块。 */
+.docs-scroll::-webkit-scrollbar-corner {
+  background: transparent;
 }
 
 /* 打印一律拦截：站点不提供打印版式（固定网格、玻璃层、导航栏打印出来是半成品），

@@ -920,6 +920,28 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
             ) : (
               <span className="mt-1 h-[22px] w-5 shrink-0 self-start" aria-hidden="true" />
             )}
+            {/**
+              * ⚠️⚠️ **二级胶囊要有内衬，但不能用负外边距去"补"**（用户 2026-09 两轮反馈的最终口径）。
+              *
+              * 起因：一级文档按钮是 `rounded-lg px-2.5 py-2`（**左内边距 10px**），
+              * 而这两行原来只有 `py-[5px] pr-2`（**没有 pl**）→ 二级文字**紧贴胶囊左边缘**
+              * （胶囊左缘 = 文字左缘 = 72），选中时那圈胶囊紧箍着第一个字，观感与一级不是一套。
+              *
+              * ⚠️⚠️ **试过 `-ml-2.5`（负外边距把胶囊左移、想让文字不动）—— 观感更差，已回退**：
+              *    负边距让胶囊背景**伸进箭头的格子**（箭头 50~70、胶囊变成 50~334，重叠 8px），
+              *    用户反馈"左侧展开箭头产生了拥挤"。箭头本来坐在干净的栏底上，胶囊的玻璃底一垫过去就显挤。
+              *    再试过连箭头一起左移（`-ms-2.5`）→ 箭头跑到 x=38、逼近栏边，更糟。
+              *
+              * **最终：只加 `pl-1.5`（6px 内衬），不加任何负外边距。**
+              *    硬约束（这组数就是设计本身，改之前先看懂）：
+              *      `文字 x = 胶囊左缘 + 内衬`，而胶囊左缘**最小只能是 72**
+              *      （再往左就压到箭头 50~70 那一格）→ 内衬要多少，文字就必然右移多少。
+              *    所以 6px 是个折中：文字 72 → **78**（只右移 6px），箭头↔胶囊仍是原来的 **2px**（不拥挤）。
+              *    若改成 `pl-2.5`（10px，与一级完全同内衬）：文字会到 82；若要文字回到 72，内衬只能是 0。
+              *
+              * ⚠️ 二级的缩进量（行容器的 `depth * 8 + 2`）**用户明确要求不动**。
+              * ⚠️ "待导入"占位行（下一个分支）**同步改**，否则以后导入内容时那一行会突然平移。
+              */}
             {ready ? (
               <a
                 href={docsHref(target.section, target.id)}
@@ -930,7 +952,7 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
                    ① 它躺在自己的滚动容器里，照亮由视口中线判定 → 在该容器里等于"永远亮着最上面那一项"；
                    ② 当前页的选中态本来就常驻点亮，再叠一层照亮会分不清"我读到这里"和"我停在这一页"。 */
                 data-scroll-lit="off"
-                className={`flex min-w-0 flex-1 items-baseline rounded-lg py-[5px] pr-2 leading-snug transition-colors ${label} ${
+                className={`flex min-w-0 flex-1 items-baseline rounded-lg py-[5px] pl-1.5 pr-2 leading-snug transition-colors ${label} ${
                   isCurrent ? 'glass-lit glass-lit-on glass-chip-on' : 'glass-lit hover:text-brand-700 dark:hover:text-brand-200'
                 }`}
               >
@@ -939,7 +961,7 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
             ) : (
               <span
                 title="该篇尚未导入本站"
-                className={`flex min-w-0 flex-1 items-baseline gap-2 rounded-lg py-[5px] pr-2 text-slate-400 dark:text-slate-500`}
+                className={`flex min-w-0 flex-1 items-baseline gap-2 rounded-lg py-[5px] pl-1.5 pr-2 text-slate-400 dark:text-slate-500`}
               >
                 <span className="min-w-0 flex-1 truncate">{n.title}</span>
                 <span className="shrink-0 rounded border border-dashed border-slate-300 px-1.5 py-0.5 text-[10px] dark:border-slate-600">
@@ -1082,10 +1104,11 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
           可视顶边压到顶栏下沿，横栏在容器内部 sticky 到同一位置。
           于是正文会从横栏**下面穿过**，文字能透过去、折射也真的在弯内容。 */}
 
-      {/* 横栏已搬进 `#docs-scroll` 内部（见那条注释）；这里只剩它的折射层。 */}
-      <div aria-hidden="true" className="docs-subbar-lens-layer">
-        <span className="docs-subbar-lens" />
-      </div>
+      {/**
+        * ⚠️ **横栏的折射层已删除**（用户 2026-09 定稿：让横栏"统一采用中间那种不透明/饱和底"）。
+        *    原因见 `index.css` 里那段长注释 —— 简言之：折射层是满宽 fixed 层，
+        *    而右侧滚动滑块有 15px 压在它范围内，导致**滑块顶部被扭曲**（还带着原生冷蓝灰的箭头按钮）。
+        */}
 
       {/* 手机端：返回入口与篇数（桌面端这两样在横栏里）。品牌名不再可点，所以这里必须给返回入口。 */}
       <div className="mb-5 flex flex-wrap items-center gap-3 md:hidden">

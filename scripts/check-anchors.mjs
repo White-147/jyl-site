@@ -661,6 +661,7 @@ const subbarProblems = []
         return {
           ...prev,
           lensFilter: lens ? getComputedStyle(lens).backdropFilter : null,
+          subBackdrop: getComputedStyle(subEl).backdropFilter,
           subBg: getComputedStyle(subEl).backgroundColor,
           subFilter: getComputedStyle(subEl).filter,
           htmlDark: document.documentElement.classList.contains('dark'),
@@ -680,8 +681,20 @@ const subbarProblems = []
         }
         materialProblems.push(`${tag} 横栏的内高光/投影与顶栏不一致（${diff.length} 条不同）\n      ${diff.join('\n      ')}`)
       }
-      if (!String(r.lensFilter ?? '').includes('lg-refract')) {
-        materialProblems.push(`${tag} 横栏折射层没生效（backdrop-filter = ${r.lensFilter}）`)
+      /**
+       * ⚠️⚠️ 判据在 2026-09 反过来了：**横栏不应再有折射层**。
+       *
+       * 用户定稿：「把横栏去掉折射效果，统一采用中间的不透明/饱和底」。
+       * 原判据是"必须有 `lg-refract`"，现在改成"必须没有" ——
+       * 顺带把"横栏本体自己挂了 backdrop-filter"也一并拦掉（那也是折射，只是换了写法）。
+       * 背景：折射层是满宽 fixed 层，右侧滚动滑块有 15px 压在它范围内被扭曲；
+       *      见 `index.css` 里删掉那块时留下的长注释。
+       */
+      if (String(r.lensFilter ?? '').includes('lg-refract') || r.subBackdrop !== 'none') {
+        materialProblems.push(
+          `${tag} 横栏又出现折射了（折射层 backdrop-filter = ${r.lensFilter}，横栏本体 = ${r.subBackdrop}）—— ` +
+            `2026-09 起横栏不带折射（它会扭曲右侧滚动滑块），见 index.css 那段注释`,
+        )
       }
       if (q(r.subBg) === 'rgba(0, 0, 0, 0)') {
         materialProblems.push(
@@ -707,7 +720,7 @@ const subbarProblems = []
     for (const p of materialProblems) problems.push(`横栏材质：${p}`)
     console.log('')
     console.log(
-      `横栏材质断言：${materialProblems.length ? `✗ ${materialProblems.length} 处` : '✓ 与全局顶栏的渐变底 / 内高光 / 折射层逐项一致（深浅色各验一遍）'}`,
+      `横栏材质断言：${materialProblems.length ? `✗ ${materialProblems.length} 处` : '✓ 与顶栏的渐变底 / 内高光逐项一致、且不再带折射（深浅色各验一遍）'}`,
     )
   }
 }
