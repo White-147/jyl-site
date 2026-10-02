@@ -269,7 +269,7 @@ for (const vp of VIEWPORTS) {
     const ids = page.toc.map((t) => t.id)
     /**
      * xl 及以上、且本篇实际标题 ≤2 条时，右栏大纲**故意不渲染**（见 Docs.tsx），
-     * 而「当前页小节内联」是 `xl:hidden` —— 这一档确实没有任何可点的大纲入口。
+     * 而「当前页小节内联」是 xl:hidden —— 这一档确实没有任何可点的大纲入口。
      * 这是设计如此，不是缺陷，所以这些条目跳过而不是判失败。
      */
     const outlineHidden = page.toc.length <= 3 && vp.width >= 1280
@@ -337,17 +337,24 @@ const smoke = []
     if (typeof got === 'string' && got.length <= 90) console.log(`      ↳ ${got}`)
   }
 
-  // 1) 分区入口 `#/docs`（不带分区）应落到第一个分区，并渲染出正文
+  /**
+   * 1) 分区入口 #/docs（不带分区）→ 落到第一个分区。
+   *
+   * ⚠️ 2026-09 行为变了：**不再自动跳进第一篇**。current 去掉了"回落到第一页"，
+   *    所以"没有页 id"成为一个真实状态 —— 中间那列显示**分区封面页**
+   *    （横幅 + 分区名 + 说明），左栏停在一级文档列表。
+   *    断言随之改成「落到第一个分区、且渲染出分区名」。
+   */
   await call('Page.navigate', { url: `${BASE}#/docs` })
-  await new Promise((r) => setTimeout(r, 1000))
+  await new Promise((r) => setTimeout(r, 1200))
   await check(
-    '#/docs 落到第一个分区且渲染出正文',
+    '#/docs 落到第一个分区并显示分区封面',
     `(() => {
-       const h = document.querySelector('h1');
-       const c = document.querySelector('.doc-content');
-       return (h ? h.textContent.trim() : '(无 h1)') + ' | ' + (!!c && c.textContent.trim().length > 50);
+       const h = document.querySelector('main h2, main h1');
+       const cover = document.querySelector('main img[alt*="封面"], main img[alt*="徽标"]');
+       return (h ? h.textContent.trim() : '(无标题)') + ' | cover=' + !!cover;
      })()`,
-    `${firstPage.title} | true`,
+    `${manifest.sections[0].label} | cover=true`,
   )
 
   // 2) 目录里点一个页应换页（标题跟着变）——**必须在切到空分区之前做**，
@@ -365,17 +372,24 @@ const smoke = []
     'navigated',
   )
 
-  // 3) 分区切换：点「UE 实战」（原文只有标题、尚无正文）应显示空态而不是白屏
+  /**
+   * 3) 分区切换：点「UE 实战」→ 落到该分区（现在是**有内容的**：闯关游戏实战 8 页）。
+   *
+   * ⚠️ 2026-09 起这条断言的前提变了：早先 UE 实战只有标题、没有正文，断言它"显示空态"。
+   *    现在那里有真实内容，所以改成断言**渲染出分区内容**（横幅封面 + 分区名）。
+   */
   await check(
-    '切到 UE 实战显示空态',
+    '切到 UE 实战渲染出分区封面',
     `(async () => {
        const btn = [...document.querySelectorAll('[role="tab"]')].find(b => b.textContent.includes('UE 实战'));
        if (!btn) return 'no-tab';
        btn.click();
-       await new Promise(r => setTimeout(r, 700));
-       return document.body.textContent.includes('还没有可以阅读的内容') ? 'empty-state' : 'no-empty-state';
+       await new Promise(r => setTimeout(r, 1200));
+       const h = document.querySelector('main h2, main h1');
+       const cover = document.querySelector('main img[alt*="封面"]');
+       return (h ? h.textContent.trim() : '(无标题)') + ' | cover=' + !!cover;
      })()`,
-    'empty-state',
+    'UE 实战 | cover=true',
   )
 
   // 4) 论文 → 项目：论文页头必须有「配套项目」入口，落点要**到具体那一行**（不是只到项目区）
@@ -471,9 +485,30 @@ const linkProblems = []
         if (!a) return { error: 'no-link' };
         const before = { hash: location.hash, h1: document.querySelector('h1')?.textContent.trim() ?? '' };
         a.click();
-        await new Promise(r => setTimeout(r, 1000));
+        /**
+         * ⚠️ **轮询等待正文渲染**，不要只等一个固定时长。
+         *    正文是异步 fetch 加载的（Docs.tsx 里按 p.html 拉静态 HTML 再渲染），
+         *    固定 1000ms 在负载高时不够 —— 实测会出现"**换页了但正文没渲染出来**"这种假失败
+         *    （6 条互链全报错，但手工点同一位置其实是正常的）。现在最多等 6 秒。
+         * ⚠️⚠️ **这段注释里绝不能出现反引号** —— 它整体位于一个模板字面量内部，
+         *    一个反引号就会提前闭合那个字符串（实测直接 SyntaxError: missing ) after argument list）。
+         */
+        /**
+         * ⚠️ 判据要**宽**：有的页正文全是列表/图片（如「2. 自助答疑方法」整页就是一组 <ul>），
+         *    只看 h2/h3/p 会误判成"没渲染出来"（实测 6 条互链全报假失败）。
+         * ⚠️⚠️ 本段位于模板字面量内部：**注释里不能出现反引号**，否则提前闭合字符串。
+         */
+        const isRendered = function () {
+          var c = document.querySelector('.doc-content');
+          return !!c && !!c.querySelector('p, h2, h3, h4, ul, ol, figure, img');
+        };
+        let ok = false;
+        for (let t = 0; t < 30; t++) {
+          await new Promise(function (r) { setTimeout(r, 200); });
+          if (isRendered()) { ok = true; break; }
+        }
         const after = { hash: location.hash, h1: document.querySelector('h1')?.textContent.trim() ?? '' };
-        return { label: a.textContent.trim(), before, after, rendered: !!document.querySelector('.doc-content h2, .doc-content h3, .doc-content p') };
+        return { label: a.textContent.trim(), before, after, rendered: ok };
       })()`)
       if (r.error) {
         linkProblems.push(`[${page.title}] 第 ${i + 1} 条互链：${r.error}`)
@@ -744,7 +779,20 @@ const railProblems = []
 const collapseProblems = []
 {
   await call('Emulation.setDeviceMetricsOverride', { width: 1440, height: 900, deviceScaleFactor: 1, mobile: false })
-  const deep = manifest.pages.find((p) => p.source === 'blueprint-program-base' && p.ancestors.length > 0 && p.status === 'ready')
+  /**
+   * ⚠️⚠️ 这里必须挑一个**叶子页**（自己没有子页的页）。
+   *
+   * 为什么：左栏里"自己有子页"的页是一个**可展开的分组行**，折叠它只会藏住它的**子页**，
+   * 它**自己的链接仍然可见**（这是定稿的行为 —— 父页标题保持可点）。
+   * 早先随手挑了该源第一个有 ancestors 的页（`1. 新增游戏模板基础`，它带 1.1/1.2/1.3 三个子页），
+   * 于是折叠后链接照样在 → 假失败"折叠没生效"（实测该组只有 2 页、链接数确实从 41 掉到 39）。
+   */
+  const isLeaf = (p) => !manifest.pages.some((q) => q.status === 'ready' && (q.ancestors ?? []).includes(p.title))
+  const deep =
+    manifest.pages.find(
+      (p) => p.source === 'blueprint-program-base' && (p.ancestors ?? []).length > 0 && p.status === 'ready' && isLeaf(p),
+    ) ??
+    manifest.pages.find((p) => p.source === 'blueprint-program-base' && (p.ancestors ?? []).length > 0 && p.status === 'ready')
 
   // 甲：每一个折叠按钮都必须真的能收起再展开（含当前页所在的那个）
   for (const hash of ['#/docs/theory', `#/docs/${deep.section}/${encodeURIComponent(deep.id)}`]) {
@@ -777,32 +825,109 @@ const collapseProblems = []
     else console.log(`  · ${hash}：${r.total} 个按钮全部可收起可展开`)
   }
 
-  // 乙：收起某个源之后跳进它，必须自动展开（否则"跳过去了却找不到自己在哪"）
+  // 乙：收起某个分组之后跳进它，必须自动展开（否则"跳过去了却找不到自己在哪"）
   const deepHref = `#/docs/${deep.section}/${encodeURIComponent(deep.id)}`
+  /**
+   * 另一篇的页（用来把"当前页"挪出目标路径）——必须**不在** deep 的路径上，
+   * 否则收起来会被渲染期兜底强制展开（见下面那段注释）。
+   */
+  const otherPage = manifest.pages.find(
+    (p) =>
+      p.section === deep.section &&
+      p.status === 'ready' &&
+      p.id !== deep.id &&
+      p.source !== deep.source &&
+      !(p.ancestors ?? []).includes(deep.title),
+  )
+  const otherHref = otherPage ? `#/docs/${otherPage.section}/${encodeURIComponent(otherPage.id)}` : ''
   await go('#/docs/theory')
   const guard = await evaluate(`(async () => {
     const rail = [...document.querySelectorAll('aside')].find(a => a.getBoundingClientRect().width > 0);
     const sc = rail.querySelector('.docs-scroll') || rail;
     const targetHref = ${JSON.stringify(deepHref)};
-    if (!sc.querySelector('a[href="' + targetHref + '"]')) return { error: '收起前就找不到目标页链接：' + targetHref };
-    // 收起目标页所在的那个源
-    const srcBtn = [...sc.querySelectorAll('button[aria-expanded]')].find(b => (b.getAttribute('aria-label')||'').includes('蓝图编程基础'));
-    if (!srcBtn) return { error: '找不到「蓝图编程基础」的折叠按钮' };
-    srcBtn.click();
-    await new Promise(r => setTimeout(r, 250));
-    const hiddenAfterCollapse = !sc.querySelector('a[href="' + targetHref + '"]');
+    const deepTitle = ${JSON.stringify(deep.title)};
+    /** 叶子页那一行的完整文字 = 页标题 + 「N 页」计数（分组行才有计数） */
+    const leafRowText = deepTitle;
+    /**
+     * ⚠️⚠️ 左栏现在是**两级下钻**（2026-09）：分区根址显示的是「文档列表」，
+     *    具体页链接要点进某一篇之后才出现。所以这里先点进文档，再去找目标页
+     *    （早先直接从一级列表里找页链接，必然找不到）。
+     * ⚠️ 本段位于模板字面量内部：注释里不能出现反引号。
+     */
+    const docBtn = [...sc.querySelectorAll('button')].find(b => (b.textContent || '').includes('蓝图编程基础'));
+    if (!docBtn) return { error: '一级文档列表里找不到「蓝图编程基础」' };
+    docBtn.click();
+    await new Promise(r => setTimeout(r, 700));
+
+    /**
+     * 叶子页所在的那一行。判据用「**整行文字等于页标题**」而不是 href：
+     *    链接的 href 是页 id，而左栏里**父页行**的可点区文字是「父标题」，与它的子页 href 不同，
+     *    但用行文字判断最稳（分组行会多出「N 页」计数，不会与叶子页行混淆）。
+     */
+    const linkRow = () => [...sc.querySelectorAll('a[href^="#/docs/"]')]
+      .find(a => (a.parentElement ? a.parentElement.textContent : a.textContent).trim() === leafRowText);
+    if (!linkRow()) return { error: '收起前找不到叶子页那一行：' + leafRowText };
+
+    /**
+     * 收起这个叶子页**所在的分组**。
+     * ⚠️⚠️ 定位必须按 **aria-label**：左栏的可展开按钮是箭头本身（textContent 是空的），
+     *    但它的可访问名是「展开/收起 + 分组标题」—— 唯一可靠的钥匙。
+     *    踩过的坑：① 按按钮文字找 → 永远找不到（候选全是空串）；
+     *    ② 沿 DOM 从链接往上找最近的箭头 → 抓到的是**这一页自己那一组**的箭头；
+     *    ③ 随手取一个可展开按钮 → 收的不是目标所在组（叶子页照旧可见）。
+     *    分组标题 = 该页的第一级祖先。
+     */
+    const anc0 = ${JSON.stringify((deep.ancestors ?? [])[0] ?? '')};
+    const findChevron = () => [...sc.querySelectorAll('button[aria-expanded]')].find((b) => {
+      const l = b.getAttribute('aria-label') || '';
+      return l.endsWith(anc0);
+    });
+    const srcBtn = findChevron();
+    if (!srcBtn) return { error: '找不到「' + anc0 + '」的箭头' };
+
+    /**
+     * ⚠️⚠️ 场景要分两步，直接"收起再跳进来"是**测不出来的**：
+     *    停在目标页时点收起，渲染期的兜底逻辑（Docs.tsx 的 forcedOpen）会立刻把路径强制展开，
+     *    aria-expanded 马上变回 true → 假失败"折叠没生效"（实测过）。
+     *    而"当前页路径必须可见"本身**是需求**（跳过去了就得看得见自己在哪），不是 bug。
+     *
+     * 所以真实场景是：**先把这一组收起来 → 挪到别的页 → 再跳回这一页**，
+     * 此时验证两件事：① 目标页在左栏可见；② 收起状态**已被真正清掉**（localStorage）。
+     * 第②条才是那个 effect 的职责（只靠兜底的话，收起状态会一直留在本地存储里）。
+     */
+    const collapseState = () => localStorage.getItem('docs.nav.collapsed') || '[]';
+    if (srcBtn.getAttribute('aria-expanded') === 'true') { srcBtn.click(); await new Promise(r => setTimeout(r, 300)); }
+    // 挪到同分区另一篇，让当前页离开这条路径
+    const other = ${JSON.stringify(otherHref)};
+    if (other) {
+      location.hash = other;
+      await new Promise(r => setTimeout(r, 1200));
+    }
+    const collapsedKept = collapseState().indexOf(anc0) >= 0;
+    // 回到目标页
     location.hash = targetHref;
-    await new Promise(r => setTimeout(r, 1000));
+    await new Promise(r => setTimeout(r, 1500));
     const rail2 = [...document.querySelectorAll('aside')].find(a => a.getBoundingClientRect().width > 0);
     const sc2 = rail2.querySelector('.docs-scroll') || rail2;
-    const cur = sc2.querySelector('a[aria-current="page"]');
-    return { hiddenAfterCollapse, currentVisible: !!cur, currentLabel: cur ? cur.textContent.trim() : null };
+    /**
+     * ⚠️ 判据要同时认 aria-current="page"（叶子页）与 aria-current="true"
+     *    （**分组行**的链接 —— 当某一页自己有子页时，它在左栏是可展开的分组行，
+     *      高亮打在那一行上，值为 "true"）。只查 "page" 会漏判（实测报假失败）。
+     */
+    const cur = sc2.querySelector('a[aria-current="page"], a[aria-current="true"]');
+    return {
+      collapsedKept,
+      clearedAfterReturn: collapseState().indexOf(anc0) < 0,
+      currentVisible: !!cur,
+      currentLabel: cur ? cur.textContent.trim() : null,
+    };
   })()`)
   if (guard.error) collapseProblems.push(guard.error)
   else {
-    if (!guard.hiddenAfterCollapse) collapseProblems.push('收起源之后它下面的页仍可见 —— 折叠没生效')
-    if (!guard.currentVisible) collapseProblems.push('跳进被收起的源之后，当前页在左栏仍不可见 —— 自动展开失效')
-    else console.log(`  · 收起源 → 跳进去 → 自动展开并在左栏可见（${guard.currentLabel}）`)
+    if (!guard.collapsedKept) collapseProblems.push('收起之后收起状态没被记下来 —— 折叠没生效')
+    if (!guard.clearedAfterReturn) collapseProblems.push('跳回被收起的分组后，收起状态没被清掉 —— 自动展开 effect 失效')
+    if (!guard.currentVisible) collapseProblems.push('跳回被收起的分组后，当前页在左栏仍不可见')
+    else console.log(`  · 收起 → 挪走 → 跳回：自动展开并在左栏高亮（${guard.currentLabel}）`)
   }
 
   for (const p of collapseProblems) problems.push(`左栏折叠：${p}`)

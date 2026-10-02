@@ -319,17 +319,41 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
     })
   }, [])
 
-  /** 当前页所在的每一级祖先 key */
+  /**
+   * 当前页所在的每一级祖先 key。
+   *
+   * ⚠️⚠️ **祖先 key 必须带 `g:` 前缀** —— 这是 `buildNav` 里建分组节点时的口径
+   *    （`g:${chapter} / ${ancestors.join(' / ')}`，见本文件 `buildNav`）。
+   *
+   * 踩过的坑（2026-09 用户反馈"跳过去了却找不到自己在哪"）：这里原来写成
+   *    `` `${current.chapter} / ${...}` ``（**没有 `g:`**），于是 localStorage 里存的是
+   *    `g:蓝图编程基础 / 一、新建游戏模板基础和角色`，而这里算出来的是
+   *    `蓝图编程基础 / 一、新建游戏模板基础和角色` —— 两者永不相等，
+   *    下面那个"跳转时自动展开"的 effect **彻底失效**（实测：深链进入被收起的分组，
+   *    祖先仍 `aria-expanded=false`、左栏也没有当前页高亮）。
+   */
   const currentKeys = useMemo(() => {
     if (!current) return [] as string[]
     const keys = [`src:${current.chapter}`]
     current.ancestors.forEach((_, i) => {
-      keys.push(`${current.chapter} / ${current.ancestors.slice(0, i + 1).join(' / ')}`)
+      keys.push(`g:${current.chapter} / ${current.ancestors.slice(0, i + 1).join(' / ')}`)
     })
     return keys
   }, [current])
 
-  /** 切页时把当前页路径上的收起状态清掉 —— 跳过去了就一定要看得见自己在哪 */
+  /**
+   * 切页时把当前页路径上的收起状态清掉 —— 跳过去了就一定要看得见自己在哪。
+   *
+   * ⚠️⚠️ **依赖必须带上页 id，不能只用 `revealKey`**（2026-09 用户实测："跳过去了却找不到自己在哪"）。
+   *
+   * 为什么：`revealKey` 只随**路径**变化，而"同一路径"有两种到达方式 ——
+   *   ① 点进某一篇（路径从空变成该页路径）：那一刻 `collapsed` 往往是空的，早退无所谓；
+   *   ② **先把这一组收起来、再跳到该路径上的某一页**：此时 `revealKey` 与①**完全相同** →
+   *      effect 不重跑 → 收起状态永远清不掉，祖先一直收着、当前页也不高亮。
+   *   实测证据：`currentKeys` = `["src:蓝图编程基础","g:蓝图编程基础 / 一、新建游戏模板基础和角色"]`
+   *   与 localStorage 里的 key 完全一致，但 `collapsed` 就是没被清
+   *   （`anc0Expanded=false`、左栏 `[aria-current]` 数量为 0）。
+   */
   const revealKey = currentKeys.join('|')
   useEffect(() => {
     if (!currentKeys.length) return
@@ -341,9 +365,19 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
       return next
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [revealKey])
+  }, [revealKey, current?.id])
 
-  const isOpen = (key: string) => !collapsed.has(key)
+  /**
+   * 渲染期兜底：**当前页所在路径一律视为展开**。
+   *
+   * ⚠️ 与上面那个 effect 是**两道保险**，不是重复：effect 负责"切页时清状态"，
+   *    这里保证"无论 state 怎样，当前页路径都可见"，覆盖 effect 还来不及跑的那一帧。
+   * ⚠️ 这不违反当年那条教训（"不要写成 `activeKeys.has(key) || !collapsed.has(key)`"）：
+   *    那条的问题是让**所有**未收起的分组都算 active，导致当前页所在分组点不动；
+   *    这里只对 `currentKeys`（当前页路径上的那几级）强制展开，点其它分组一切正常。
+   */
+  const forcedOpen = useMemo(() => new Set(currentKeys), [currentKeys])
+  const isOpen = (key: string) => forcedOpen.has(key) || !collapsed.has(key)
 
   /* ⚠️ 面包屑**不再走 `current.crumbs`**：它是 `pack` 的 trail 产物，而按序号切页
      （`splitByNumberedHeading`）走的是另一条路径 —— 实测所有页 `crumbs` 都是空数组。

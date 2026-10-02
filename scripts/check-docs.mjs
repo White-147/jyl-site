@@ -42,9 +42,22 @@ for (const p of ready) {
     continue
   }
   const html = readFileSync(file, 'utf8')
-  // 46 字节 = 只有一个空 span 的壳（历史上真出现过：块只渲染了自身、丢了子孙）
-  if (html.replace(/<[^>]+>/g, '').trim().length < 40 && !html.includes('<img')) {
-    fail(`页面是空壳：${p.section}/${p.id}（${html.length} 字节）`)
+  /**
+   * 「空壳页」判据。
+   *
+   * ⚠️ 历史背景：早先这里是「正文 < 40 字且无图」，用来抓一种真事故 ——
+   *    页面的块**只渲染了自身、丢了子孙**（46 字节的空 span）。
+   * ⚠️⚠️ 2026-09 起这个判据**不再有意义**：切页改成"每个标题各自成页"，
+   *    每页的块都是**叶子**（`children` 恒空），"丢了子孙"这种失败模式从结构上消失了。
+   *    而源里确实存在**极短的真内容**（实测 9 页：`用于编辑选中的对象` 9 字、
+   *    `参见 蓝图基础知识文件` 20 字…），旧判据把它们全报成"空壳"（9 条假报）。
+   *
+   * 新判据只抓**真的什么都没有**：剥完标签后一个字都没有、也没有图。
+   *    那种页要么是渲染管线坏了，要么是切页切出了空页，都必须拦下。
+   */
+  const bare = html.replace(/<[^>]+>/g, '').replace(/[\s\u3000]/g, '')
+  if (bare.length === 0 && !html.includes('<img')) {
+    fail(`页面是空壳：${p.section}/${p.id}（${html.length} 字节，剥标签后无任何文字与图）`)
   }
   if (html.includes('doc-anchor')) {
     fail(`页面里还有标题锚点 #：${p.section}/${p.id}`)
@@ -175,12 +188,18 @@ const sourceFile = (section, id) => {
     const srcHeadings = isHtml
       ? [...raw.matchAll(/<h[1-4][^>]*>([\s\S]*?)<\/h[1-4]>/g)].map((m) => norm(m[1]))
       : [...raw.matchAll(/^#{1,4}[ \t]+(.+)$/gm)].map((m) => norm(m[1]))
-    // 源里的配图（归一成「路径去扩展名」这一种键）
+    /**
+     * 源里的配图。键**只取文件名（去扩展名）**。
+     *
+     * ⚠️⚠️ 早先源侧保留子目录（`蓝图基础/新建文件夹`）、产物侧只留文件名（`新建文件夹`），
+     *    两边键永远不相等 → **每一张图都报"内容丢失（配图）"**（实测 31 条假报）。
+     *    两侧必须用同一种归一：**basename + 去扩展名**。
+     *    网页侧图片路径形如 `docs/ue5/images/../images/蓝图基础/x.webp`，取 basename 最稳。
+     */
+    const imgKey = (p) => p.replace(/\\/g, '/').split('/').pop().replace(/\.(png|jpe?g|webp)$/i, '')
     const srcImages = [
       ...new Set(
-        [...raw.matchAll(/(?:src="|!\[[^\]]*\]\()([^")\s]+\.(?:png|jpe?g|webp))/g)].map((m) =>
-          m[1].replace(/\\/g, '/').replace(/^.*?images\//, '').replace(/\.(png|jpe?g|webp)$/i, ''),
-        ),
+        [...raw.matchAll(/(?:src="|!\[[^\]]*\]\()([^")\s]+\.(?:png|jpe?g|webp))/g)].map((m) => imgKey(m[1])),
       ),
     ]
 
@@ -193,7 +212,8 @@ const sourceFile = (section, id) => {
       const html = readFileSync(f, 'utf8')
       for (const m of html.matchAll(/<h[1-4][^>]*>([\s\S]*?)<\/h[1-4]>/g)) pageHeadings.add(norm(m[1]))
       for (const m of html.matchAll(/(?:src=")([^"]+\.webp)/g)) {
-        pageImages.add(m[1].replace(/^.*?images\//, '').replace(/\.webp$/i, ''))
+        /* ⚠️ 与源侧同一口径：**basename + 去扩展名**（见上面 srcImages 的注释，两侧不一致会全量假报） */
+        pageImages.add(imgKey(m[1]))
       }
       // 页面标题、祖先链、本页小节名都算"这条标题被承载了"：
       // dropFirstHeading 会把页面第一个标题从正文里去掉，改由页面头部/左栏显示
