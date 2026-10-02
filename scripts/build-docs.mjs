@@ -1027,25 +1027,6 @@ for (const src of SOURCES) {
 
 /* --- 3) 页 id 在分区内去重 --- */
 {
-  /**
-   * 丢掉**纯文档标题页**（用户：「虚幻5引擎学习笔记 那个 H1 标题页」要收掉；
-   * 并提醒「少于一屏全部去掉肯定会有连带的问题，不能只看这一篇」）。
-   *
-   * ⚠️⚠️ 判据必须**又准又窄**。前后试错三版、两版误伤，记录在此防止再犯：
-   *   ① `prose === 0` —— 不命中：实测这些页的 prose 是 **6~10 字**（标题文字被计入）；
-   *   ② `prose < 40` —— **误删真正的首页**：单 h1 的源里文档名（H1）会**并进第一个内容页**
-   *      （`虚幻5引擎学习笔记` + `1. 版本说明`），那页标题也是文档名、prose 也可能很小 →
-   *      整页被删、**第一节内容跟着没了**（用户实测："UE 理论其他的内容少了一大截"）；
-   *   ③ `blocks.length === 1 && blocks[0].level === 1` —— **论文 19 → 14 页、少 5500 字**：
-   *      论文走 `pack` 路径，那个"一个块"是树节点、**带着整棵子树**，不是纯标题页。
-   *
-   * ✅ 现在**三个条件同时满足**才丢（实测精准命中 6 张、零误伤）：
-   *   · `title === docTitles[source]` —— 它就叫文档名（`虚幻5引擎学习笔记` 这种）；
-   *   · `toc.length === 1` —— 页内只有它自己一个标题、**没有任何下级标题**；
-   *   · `chars < 40` —— 没有实质正文（只有标题那一行）。
-   * 关键在 `toc.length === 1`：它把"并进了第一节"的页排除掉（那种页 toc 至少 2 项），
-   * 也把 `6. 界面基础操作`（标题不是文档名）这类**真内容短页**排除掉。
-   */
   const seen = new Set()
   for (const p of pages) {
     const base = p.id
@@ -1150,6 +1131,36 @@ for (const p of pages) {
   if (droppedTitles.length) console.log('  纯标题页已收掉 %d 张：%s', droppedTitles.length, droppedTitles.join('、'))
 }
 
+/**
+ * ⚠️ **丢掉纯文档标题页**（用户：「虚幻5引擎学习笔记 那个 H1 标题页」要收掉）。
+ *
+ * 判据三条同时满足（实测精准命中 6 张、零误伤）：
+ *   · `title === docTitles[source]` —— 它就叫文档名；
+ *   · `toc.length === 1` —— 页内只有它自己一个标题、没有下级标题；
+ *   · `chars < 40` —— 没有实质正文。
+ *
+ * ⚠️⚠️ **必须在这里做**（渲染之后、生成 `manifestPages` 之前）：
+ *    早先放在"页 id 去重"那一步（更早），结果 `pages` 里删了、而 `manifestPages`
+ *    仍按 `pages` 的原始顺序生成 —— 于是**「下一篇」导航取到的第一页是被删掉的标题页**，
+ *    生成 `#/docs/theory/蓝图编程基础` 这种**指向不存在页**的链接，点下去正文空白
+ *    （用户实测：「新增前置操作里面的跳转是失效的」—— 那条正是该文档最后一页的"下一篇"）。
+ *    两个数组必须看到同一份 pages。
+ * 判据里 `toc` 是渲染阶段填的，所以也只能放在渲染之后。
+ */
+{
+  const dropped = []
+  for (let i = pages.length - 1; i >= 0; i--) {
+    const pg = pages[i]
+    if (pg.status !== 'ready') continue
+    if (pg.title !== docTitles[pg.source]) continue
+    if ((pg.toc ?? []).length !== 1) continue
+    if ((pg.stats?.chars ?? 0) >= 40) continue
+    dropped.push(`${pg.title}(${pg.stats?.chars ?? 0}字)`)
+    pages.splice(i, 1)
+  }
+  if (dropped.length) console.log('  纯标题页已收掉 %d 张：%s', dropped.length, dropped.join('、'))
+}
+
 /* --- 6) 回填文档互链 --- */
 for (const src of SOURCES) {
   const entry = parsed.get(src.id)
@@ -1192,15 +1203,30 @@ for (const src of SOURCES) {
      *    就是为了这个，页内定位必须补上。
      */
     const anchor = hash ? decodeURIComponent(hash) : null
-    if (process.env.TRACE_LINK === '1' && anchor) {
-      const hit = anchorPage.get(`${target}#${anchor}`)
-      console.log(
-        'LINK target=%s anchor=%j hit=%s allIdsHas=%s title=%j needAnchor=%s',
-        target, anchor, hit ? hit.id : 'NO', hit ? hit.allIds?.has(anchor) : '-', hit ? hit.title : '-',
-        hit && hit.allIds?.has(anchor) && slugify(hit.title) !== anchor ? 'YES' : 'no',
-      )
+    /**
+     * ⚠️⚠️ **兜底不能再落到 `list[0]`**（2026-09 用户实测报出死链）。
+     *
+     * `list[0]` 是**文档标题页**（如「蓝图编程基础」这一页，整篇只有一行文档名），
+     * 而构建期最后会把这类纯标题页**删掉** → 它已经不在 `pages` 里 →
+     * 生成的 href 指向一个**不存在的页 id**，点下去**正文空白**。
+     * 用户实测正是这条：`新增前置操作` 里的「蓝图编程基础…」点了没内容
+     * （锚点 `#2.实现角色移动` 在笔记更新后改名了，解析失败 → 走兜底 → 死链）。
+     *
+     * 所以兜底改成：**取该源"删页之后"仍在的第一页**；若某源一页不剩，
+     * 则退到**分区首页**（`#/docs/<section>`），绝不会出现"指向不存在页"的链接。
+     */
+    // ⚠️ 用**最终清单**（`pages`）过滤：早先用 `list[0]`，而 `list[0]` 是"文档标题页"（随后被删）
+    const readyList = list.filter((p) => p.status === 'ready' && pages.includes(p))
+
+    if (process.env.TRACE_LINK === '1') {
+      console.log('LINK src=%s target=%s anchor=%j list=%d readyList=%d firstId=%j',
+        src.id, target, anchor, list.length, readyList.length, readyList[0] ? readyList[0].id : '-')
     }
-    const page = (anchor && anchorPage.get(`${target}#${anchor}`)) || list.find((p) => p.status === 'ready')
+    const page = (anchor && anchorPage.get(`${target}#${anchor}`)) || readyList[0] || null
+    if (!page) {
+      /* 目标源在本站一页都不剩（理论上不会发生，留个安全出口）→ 指向分区首页 */
+      return `<a class="doc-link" href="#/docs/${list[0].section}">${label}</a>`
+    }
     /* 目标锚点就是这一页的主题 → 不必再带页内锚点（`doc-top` 与主题标题是同一位置） */
     const needAnchor = anchor && page.allIds?.has(anchor) && slugify(page.title) !== anchor
     return `<a class="doc-link" href="#/docs/${page.section}/${encodeURIComponent(page.id)}${needAnchor ? `?s=${encodeURIComponent(anchor)}` : ''}">${label}</a>`
