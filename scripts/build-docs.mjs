@@ -557,11 +557,30 @@ function isNumberedHeading(title) {
  *    而 `pack` 传给它的 trail 是**空的** → 所有页 `ancestors=[]`、左栏层级全塌。
  */
 function splitByNumberedHeading(tree, budget) {
+  /**
+   * ⚠️ h1 的待遇分两种情况（早先写漏了 `multiH1`，构建直接 ReferenceError）：
+   *   · 一个源里有**多个 h1** → 它们是**章**（毕业论文：摘要 / 1 绪论 / 2 系统相关技术介绍…），各自成页；
+   *   · 只有**一个 h1** → 它就是**文档名**（`# 虚幻5引擎学习笔记`），不参与分页，下钻到 h2/h3。
+   */
+  const multiH1 = tree.filter((n) => n.level === 1).length > 1
+
   /** 展平成线性序列，同时把祖先链累积到每一项上 */
   const seq = []
   const walk = (nodes, chain) => {
     for (const node of nodes) {
-      const splits = node.level === 1 ? false : node.level >= 2 && isNumberedHeading(node.title)
+      /**
+       * 分页边界（用户 2026-09 最终口径）：
+       *   · 多 h1 的源：每个 h1 都是章，各自成页；单 h1 的源里 h1 是文档名，不参与分页；
+       *   · **h3 一律成页** —— 不管带不带序号。用户实测：「创建蓝图里面步骤和各父类讲解是平级的，
+       *     都是 H3，视口同理，不应该进行合并」；
+       *   · **h4 及以下并进它所属的 h3 页**（`Actor`/`Pawn`/`角色`/`输入引脚`… 不单独成页）；
+       *   · 带序号的 h2 仍是边界（它有正文就是页，没正文就作分组头）。
+       * 实测影响：UE 两区 49 → 约 92 页（界面基础 8→17、界面进阶 6→19、蓝图编程 18→34）。
+       */
+      const splits =
+        node.level === 1
+          ? multiH1
+          : node.level === 3 || (node.level === 2 && isNumberedHeading(node.title))
       seq.push({ node, chain, splits })
       /* ⚠️ 无论是不是分页边界都要递归：早先"边界不展开"，导致 h3 边界永远访问不到 */
       if (node.children.length) walk(node.children, [...chain, stripInline(node.title)])
