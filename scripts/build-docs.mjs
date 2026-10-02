@@ -1221,6 +1221,16 @@ for (const p of pages) {
     /** 最近两级祖先（面包屑用；`ancestors` 是完整链） */
     crumbs: (p.crumbs ?? []).slice(-2),
     subtitle: p.subtitle,
+    /**
+     * 文档名（面包屑的根，源里的那个 H1，如 `虚幻5引擎学习笔记`）。
+     *
+     * ⚠️ **每一页都带**，不要靠序号判断"首页"：
+     *    构建期会删掉"纯文档标题页"，而**序号不重排** —— 于是每篇的第一页 `order` 是
+     *    **2 而不是 1**（实测踩过：写成 `order === 1` 时 docName 全是 null）。
+     *    组件按当前页取自己的 `docName` 即可，没有"只给首页"的必要。
+     * ⚠️ 论文（多 h1）的 `docTitles` 是 null —— 它没有单一文档名，面包屑的根退回 `chapter`。
+     */
+    docName: docTitles[p.source] ?? null,
     order: p.order,
     group: p.group,
     prereq: pre ? { id: pre.id, title: pre.title } : null,

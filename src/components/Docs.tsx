@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import docsData from '../data/docs.json'
 import projectsData from '../data/projects.json'
 import type { DocsManifest, DocPage } from '../data/types'
@@ -167,14 +167,24 @@ function buildNav(pages: DocPage[], chapter: string): NavNode[] {
  *   · `ue-theory.webp`  ← header-image.png（1920×335 官方横幅，转 webp 1600 宽，11KB）
  *   · `ue-combat.webp`  ← 闯关游戏封面.png（1334×877，裁成 16:9 横幅，104KB）
  */
-const SECTION_LANDING: Record<string, { cover: string; extra?: string }> = {
+const SECTION_LANDING: Record<string, { cover: string; variant: 'banner' | 'emblem'; extra?: string }> = {
+  thesis: {
+    cover: 'docs/covers/thesis-emblem.webp',
+    /* 论文这张是**校徽**（183×180 方形），铺满整列会糊 → 走 emblem 版式：居中、限宽、白底圆角 */
+    variant: 'emblem',
+    extra:
+      '摘要、绪论、系统需求分析、总体架构与数据库设计、推荐算法与前后端实现、系统测试 —— 完整一篇，按章节顺序读即可。',
+  },
   theory: {
     cover: 'docs/covers/ue-theory.webp',
+    variant: 'banner',
     extra:
       '环境准备、菜单与视口、蓝图类与父类体系、增强输入与角色移动 …… 按顺序读下来，就能把引擎最常用的那部分走一遍。',
   },
   combat: {
+    /* ⚠️ 用户定向：UE 实战封面**与 UE 理论保持一致** → 直接用同一张 UE5 官方横幅 */
     cover: 'docs/covers/ue-combat.webp',
+    variant: 'banner',
     extra: '从新建项目、导入素材，到角色移动、跳跃与动画 —— 一个能跑起来的闯关小游戏。',
   },
 }
@@ -335,8 +345,9 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
 
   const isOpen = (key: string) => !collapsed.has(key)
 
-  /** 面包屑去重：父级标题与页标题/源标题相同时不重复显示 */
-  const crumbs = (current?.crumbs ?? []).filter((c) => c !== current?.title && c !== current?.chapter)
+  /* ⚠️ 面包屑**不再走 `current.crumbs`**：它是 `pack` 的 trail 产物，而按序号切页
+     （`splitByNumberedHeading`）走的是另一条路径 —— 实测所有页 `crumbs` 都是空数组。
+     现在用 `current.ancestors`（构建期写好的完整祖先链）在页头那段渲染里拼。 */
 
   /**
    * 配套项目（论文 ↔ BookRecommendation）。
@@ -1203,14 +1214,54 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
               <span className="font-mono text-xs tabular-nums text-slate-400 dark:text-slate-500">
                 {String(current?.order ?? 1).padStart(2, '0')}
               </span>
-              <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-500 dark:bg-slate-800 dark:text-slate-400">
-                {current?.chapter ?? section.label}
-              </span>
-              {crumbs.map((c) => (
-                <span key={c} className="text-[11px] text-slate-400 dark:text-slate-500">
-                  {c}
-                </span>
-              ))}
+              {/**
+               * ⚠️ **完整路径面包屑**（用户 2026-09 定向）：
+               *    `虚幻5引擎学习笔记 › 一、概况说明 › 1. 版本说明`
+               *
+               * 早先这里是「一个胶囊显示 `chapter`（配置里的篇名，如「虚幻引擎总览」）
+               * + `crumbs` 里那两级」。两个问题：
+               *   ① `crumbs` 来自构建期的 `pack` trail，而按序号切页走的是另一条路径 ——
+               *      实测**所有页 `crumbs` 都是空数组**，所以面包屑实际只有那个胶囊；
+               *   ② 胶囊显示的是**配置里的篇名**，不是**源里的文档名**（用户要的是后者）。
+               * 现在改成用 `docName`（源里的 H1，构建期写入 manifest）+ `ancestors`（祖先链）
+               * + 本页标题拼出来，并**逐段去重**（`ancestors` 末项有时等于本页标题）。
+               */}
+              {(() => {
+                /* ⚠️ 用 `ancestors`（构建期写好的**完整祖先链**），**不要用 `crumbs`** ——
+                   实测 `crumbs` 恒为空数组（它来自 `pack` 的 trail，而按序号切页走另一条路径），
+                   用它的话面包屑会退化成"文档名 › 页标题 › 页标题"（重复两遍，实测踩过）。 */
+                const chain = [
+                  current?.docName ?? current?.chapter ?? section.label,
+                  ...(current?.ancestors ?? []),
+                ]
+                  .filter(Boolean)
+                  .filter((c, i, arr) => arr.indexOf(c) === i)
+                if (current?.title && chain[chain.length - 1] !== current.title) chain.push(current.title)
+                /** ⚠️ 用 `Fragment` 而不是再套一层 `<span>`：外层的 `gap` 会和父级的 `gap` 叠加，
+                    同一段路径在视觉上间距不一致（实测）。分隔符与文字都当**直接子元素**。 */
+                return chain.map((c, i) => {
+                  const last = i === chain.length - 1
+                  return (
+                    <Fragment key={`${c}-${i}`}>
+                      {i > 0 && (
+                        <span aria-hidden="true" className="text-[11px] text-slate-300 dark:text-slate-600">
+                          ›
+                        </span>
+                      )}
+                      <span
+                        className={
+                          last
+                            ? 'text-[12px] font-medium text-slate-600 dark:text-slate-300'
+                            : 'text-[11px] text-slate-400 dark:text-slate-500'
+                        }
+                        aria-current={last ? 'page' : undefined}
+                      >
+                        {c}
+                      </span>
+                    </Fragment>
+                  )
+                })
+              })()}
               {relatedProject && (
                 <a
                   href={`#project-${relatedProject.id}`}
@@ -1245,16 +1296,38 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
                没有配封面的分区（如空的 FPS）保留原来的"还没有内容"提示。 */
             SECTION_LANDING[section.id] ? (
               <div className="mx-auto w-full max-w-3xl">
-                <figure className="overflow-hidden rounded-2xl border border-slate-200/70 shadow-sm dark:border-slate-700/60">
-                  <img
-                    src={`${import.meta.env.BASE_URL}${SECTION_LANDING[section.id].cover}`}
-                    alt={`${section.label} 封面`}
-                    className="block h-auto w-full"
-                    loading="eager"
-                  />
-                </figure>
-                <h2 className="mt-6 text-2xl font-bold text-slate-800 dark:text-slate-100">{section.label}</h2>
-                <p className="mt-2 text-[15px] leading-relaxed text-slate-600 dark:text-slate-300">
+                {SECTION_LANDING[section.id].variant === 'emblem' ? (
+                  /* 校徽：居中、限宽、白底圆角（原图只有 183px，铺满整列会糊） */
+                  <figure className="flex justify-center">
+                    <img
+                      src={`${import.meta.env.BASE_URL}${SECTION_LANDING[section.id].cover}`}
+                      alt={`${section.label} 徽标`}
+                      className="h-28 w-28 rounded-2xl border border-slate-200/70 bg-white object-contain p-1.5 shadow-sm sm:h-32 sm:w-32 dark:border-slate-700/60"
+                      loading="eager"
+                    />
+                  </figure>
+                ) : (
+                  <figure className="overflow-hidden rounded-2xl border border-slate-200/70 shadow-sm dark:border-slate-700/60">
+                    <img
+                      src={`${import.meta.env.BASE_URL}${SECTION_LANDING[section.id].cover}`}
+                      alt={`${section.label} 封面`}
+                      className="block h-auto w-full"
+                      loading="eager"
+                    />
+                  </figure>
+                )}
+                <h2
+                  className={`mt-6 text-2xl font-bold text-slate-800 dark:text-slate-100 ${
+                    SECTION_LANDING[section.id].variant === 'emblem' ? 'text-center' : ''
+                  }`}
+                >
+                  {section.label}
+                </h2>
+                <p
+                  className={`mt-2 text-[15px] leading-relaxed text-slate-600 dark:text-slate-300 ${
+                    SECTION_LANDING[section.id].variant === 'emblem' ? 'text-center' : ''
+                  }`}
+                >
                   {section.blurb}
                 </p>
                 {SECTION_LANDING[section.id].extra && (

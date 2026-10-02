@@ -181,6 +181,8 @@ export interface DocPage {
   /** 最近两级祖先（正文头部的面包屑用） */
   crumbs: string[]
   subtitle?: string | null
+  /** 文档名（源里的 H1）；**只有每篇第一页有值**，用作页头面包屑的根 */
+  docName?: string | null
   /** 在本源内的页序（01、02…） */
   order?: number
   /** 分区内的主题分组（入门 / 界面 / 蓝图…） */
