@@ -576,27 +576,31 @@ function splitByNumberedHeading(tree, budget) {
    *    所以 `carries` 用来判断"它上面还有没有内容"，而不是判断"它自己是不是页"。
    */
   const TINY = 40
-  const carries = new Map()
-  const computeCarries = (n) => {
-    const hasBody = (n.ownChars ?? 0) >= TINY || (n.ownImages ?? 0) > 0
-    const kids = (n.children ?? []).map(computeCarries).some(Boolean)
-    const v = hasBody || kids
-    carries.set(n, v)
-    return v
-  }
-  tree.forEach(computeCarries)
-  /** 这一节自己能不能撑起一页：有正文，或下面挂着**不带序号**的子节（那些会并进它这一页） */
-  const solida = (n) => {
-    const hasBody = (n.ownChars ?? 0) >= TINY || (n.ownImages ?? 0) > 0
-    const hasPlainKid = (n.children ?? []).some((k) => !isNumberedHeading(k.title) && (k.ownChars ?? 0) > 0)
-    return hasBody || hasPlainKid
-  }
+  /**
+   * 这一节自己能不能撑起一页（方案"甲"，用户 2026-09 定向）。
+   *
+   * ⚠️ **只看它自己有没有正文**，不看子孙：
+   *   · `1.虚幻引擎和Fab` 自己 0 字、子孙全是带序号的 h3 → **纯容器，整条不收**，
+   *     它的 h3 直接当页（用户原话：「引擎的下载和安装就是 1.虚幻引擎和Fab 的实际内容，
+   *     但是 1.虚幻引擎和Fab 又做成了可点击可进入的页面」）；
+   *   · 早先写成"或下面挂着不带序号的子节"→ 它的 H4 有正文，于是它又被判成能撑起一页，
+   *     而 H4 各自成页之后那一页只剩标题 → 就是用户看到的**空白可点页**（实测残留）。
+   */
+  const solidPage = (n) => (n.ownChars ?? 0) >= TINY || (n.ownImages ?? 0) > 0
 
   const groups = []
   let cur = []
   let curChain = []
   const flush = () => {
-    if (cur.length) groups.push({ blocks: cur, chain: curChain })
+    /**
+     * ⚠️ 最后一道兜底：**页里没有任何"实际内容块"就不成页**。
+     *
+     * 专治一种自相矛盾：某个分页节自己只有标题（够不上 `TINY`），而它的**非边界子节**
+     * 各自成页之后，这一页里**只剩下它自己的标题** → 用户看到的"空白可点击页"。
+     * 内容块 = 非 `isSelf` 的块，或自带正文（≥TINY 字 / 有图）的块。
+     */
+    const hasContent = cur.some((b) => !b.isSelf || (b.chars ?? 0) >= TINY || (b.images ?? 0) > 0)
+    if (cur.length && hasContent) groups.push({ blocks: cur, chain: curChain })
     cur = []
     curChain = []
   }
@@ -604,7 +608,7 @@ function splitByNumberedHeading(tree, budget) {
   for (const { node, chain, splits } of seq) {
     if (splits) {
       /* 自己撑不起一页的边界 → 整条不收（它只作为祖先出现在子节的链里） */
-      if (!solida(node)) continue
+      if (!solidPage(node)) continue
       if (cur.length) flush()
       cur.push(toLeaf(node, { isSelf: true }))
       curChain = chain
