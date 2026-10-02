@@ -1238,6 +1238,7 @@ for (const src of SOURCES) {
      *    就是为了这个，页内定位必须补上。
      */
     const anchor = hash ? decodeURIComponent(hash) : null
+
     if (process.env.TRACE_A === '1' && anchor && src.id === 'ue5-window-base') {
       const key = `${target}#${slugify(anchor)}`
       console.log('A target=%s rawAnchor=%j slug=%j keyHit=%s keys=%j',
@@ -1263,11 +1264,17 @@ for (const src of SOURCES) {
       console.log('LINK src=%s target=%s anchor=%j list=%d readyList=%d firstId=%j',
         src.id, target, anchor, list.length, readyList.length, readyList[0] ? readyList[0].id : '-')
     }
+    /**
+     * ⚠️⚠️ 查表**必须先用 `slugify(anchor)`** —— `anchorPage` 的键是**标题的 slug**
+     *    （`5-实现角色移动`），而源里的锚点是**标题原文**（`5. 实现角色移动`）。
+     *    早先拿原文直接查 → 永远不命中 → 每条互链都退回 `readyList[0]`
+     *    （实测：`新增前置操作` 里那条本该落到「5. 实现角色移动」，却落到了文档第一页）。
+     */
     const page =
       (anchor &&
-        (anchorPage.get(`${target}#${anchor}`) ||
-          /* 宽松兜底：去掉序号前缀再找（`自助答疑方法` → `2-自助答疑方法`）；撞键时值为 null，视为找不到 */
-          anchorLoose.get(`${target}#${NO_NUM(anchor)}`))) ||
+        (anchorPage.get(`${target}#${slugify(anchor)}`) ||
+          /* 宽松兜底：去掉序号前缀再找（`自助答疑方法` → `2. 自助答疑方法`）；撞键时值为 null，视为找不到 */
+          anchorLoose.get(`${target}#${NO_NUM(slugify(anchor))}`))) ||
       readyList[0] ||
       null
     if (!page) {

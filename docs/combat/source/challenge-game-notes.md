@@ -42,7 +42,7 @@
 
 在Input目前下新增输入-`输入操作`，命名为IA_Move和IA_Look，新增输入-`输入映射上下文`，命名为IMC_Challenge，其中IA_Move和IA_Look命名重复，可以通过资产所在路径判断区分
 
-后续操作可以参考[**蓝图编程基础的实现角色移动部分内容**](..\theory\blueprint-program-base.md#2.实现角色移动)
+后续操作可以参考[**蓝图编程基础的实现角色移动部分内容**](../theory/blueprint-program-base#5.%20实现角色移动)
 
 输入映射上下文修改器配置：
 
@@ -59,7 +59,7 @@
 
 #### 1.2 设置相关操作
 
-双击BP_ChallengeCharacter，进入视口界面，左键单击左侧组件页中的网格体，在右侧细节页中的网格体栏的骨骼网格体资产选择**SK_Adventurer**，调整角色位置，位置Z轴为-87，旋转Z轴位置为-90，详见[**蓝图编程基础的调整角色模型**](..\theory\blueprint-program-base.md#调整角色模型)，点击编译和保存
+双击BP_ChallengeCharacter，进入视口界面，左键单击左侧组件页中的网格体，在右侧细节页中的网格体栏的骨骼网格体资产选择**SK_Adventurer**，调整角色位置，位置Z轴为-87，旋转Z轴位置为-90，详见[**蓝图编程基础的调整角色模型**](../theory/blueprint-program-base#2.%20调整角色模型)，点击编译和保存
 
 <img src="..\images\闯关游戏实战\实现角色移动\绑定网格体.png" style="zoom:67%;" />
 
@@ -67,7 +67,7 @@
 
 <img src="..\images\闯关游戏实战\实现角色移动\修改默认游戏模式.png" style="zoom:67%;" />
 
-返回BP_ChallengeCharacter的视口界面，在组件页右键新增弹簧臂和摄像机，详见[**蓝图编程基础的设置第三人称视角**](..\theory\blueprint-program-base.md#设置第三人称视角)
+返回BP_ChallengeCharacter的视口界面，在组件页右键新增弹簧臂和摄像机，详见[**蓝图编程基础的设置第三人称视角**](../theory/blueprint-program-base#3.%20设置第三人称视角)
 
 <img src="..\images\闯关游戏实战\实现角色移动\设置第三人称视角.png" style="zoom:67%;" />
 
@@ -81,17 +81,17 @@
 
 <img src="..\images\闯关游戏实战\实现角色移动\蓝图添加映射上下文.png" style="zoom:67%;" />
 
-右键搜索输入IA Move，会出现两个同名节点，依旧根据路径区分，选择/Game/Code目录开头的，后续可见[**蓝图编程基础的编写角色移动**](..\theory\blueprint-program-base.md#编写角色移动)，完成后点击**编译和保存**
+右键搜索输入IA Move，会出现两个同名节点，依旧根据路径区分，选择/Game/Code目录开头的，后续可见[**蓝图编程基础的编写角色移动**](../theory/blueprint-program-base#4.%20编写角色移动)，完成后点击**编译和保存**
 
 <img src="..\images\闯关游戏实战\实现角色移动\路径区分.png" style="zoom:67%;" />
 
 #### 1.4 编写第三人称视角
 
-第三人称游戏角色移动方向为摄像机朝向，因此将新增的摄像机组件左键长按拖到事件图表中，后续可见[**蓝图编程基础的编写第三人称视角**](..\theory\blueprint-program-base.md#编写第三人称视角)，完成后点击**编译和保存**
+第三人称游戏角色移动方向为摄像机朝向，因此将新增的摄像机组件左键长按拖到事件图表中，后续可见[**蓝图编程基础的编写第三人称视角**](../theory/blueprint-program-base#4.%20编写第三人称视角)，完成后点击**编译和保存**
 
 <img src="..\images\闯关游戏实战\实现角色移动\角色移动蓝图.png" style="zoom:67%;" />
 
-右键搜索输入IA Look，同理根据路径区分，右键搜索输入add yaw，添加`Add Controller Yaw Input`，右键搜索输入add pitch，添加`Add Controller Pitch Input`，后续可以见[**蓝图编程基础的编写视角移动**](..\theory\blueprint-program-base.md#编写视角移动)和[**蓝图编程基础的设置第三人称视角**](..\theory\blueprint-program-base.md#设置第三人称视角)
+右键搜索输入IA Look，同理根据路径区分，右键搜索输入add yaw，添加`Add Controller Yaw Input`，右键搜索输入add pitch，添加`Add Controller Pitch Input`，后续可以见[**蓝图编程基础的编写视角移动**](../theory/blueprint-program-base#4.%20编写视角移动)和[**蓝图编程基础的设置第三人称视角**](../theory/blueprint-program-base#3.%20设置第三人称视角)
 
 角色视角移动相关勾选和取消勾选类目：
 
@@ -117,7 +117,7 @@
 
 返回ABP_ChallengeCharacter的AnimaGraph，打开右下角资产浏览器窗口，左键长按拖动BS1D_Challenge到AnimaGraph中，将混合空间播放器的右侧引脚连接到输出姿势的左侧引脚
 
-返回BP_ChallengeCharacter，选择组件中的网格体，在右侧细节-动画-动画类中选择ABP_ChallengeCharacter，完成动画类和蓝图类-角色的绑定，这样在ABP_ChallengeCharacter的事件图标的`Try Get Pawn Owner`中可以获取到BP_ChallengeCharacter，后续可以见[**蓝图编程基础的编写动画蓝图**](..\theory\blueprint-program-base.md#编写动画蓝图)
+返回BP_ChallengeCharacter，选择组件中的网格体，在右侧细节-动画-动画类中选择ABP_ChallengeCharacter，完成动画类和蓝图类-角色的绑定，这样在ABP_ChallengeCharacter的事件图标的`Try Get Pawn Owner`中可以获取到BP_ChallengeCharacter，后续可以见[**蓝图编程基础的编写动画蓝图**](../theory/blueprint-program-base#3.%20编写动画蓝图)
 
 <img src="..\images\闯关游戏实战\实现角色移动\角色动画获取实时速度蓝图.png" style="zoom:67%;" />
 
