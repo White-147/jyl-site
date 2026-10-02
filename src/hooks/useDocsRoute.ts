@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { flushSync } from 'react-dom'
 import { parseDocsHash, type DocsRoute } from '../data/docs'
 
 /**
@@ -13,13 +14,82 @@ import { parseDocsHash, type DocsRoute } from '../data/docs'
 const read = (): DocsRoute | null =>
   typeof window === 'undefined' ? null : parseDocsHash(window.location.hash)
 
+/**
+ * 路由级过渡：用 **View Transitions API** 给"换分区 / 退回一级 / 回主站"做丝滑淡入。
+ *
+ * ⚠️ 为什么用 View Transitions 而不是自己写两层 DOM 交叉淡入：
+ *    它由浏览器**快照新旧两帧**再交叉播放，不用我们把旧视图留在 DOM 里 ——
+ *    而这里的"视图"是整棵文档区（左栏 + 正文 + 表格），自己搭双缓冲代价太大、易出 bug。
+ *    **同文档 View Transitions 已于 2025-10 成为 Baseline**（Chrome 111+ / Safari 18+ /
+ *    Firefox 144+），不支持的浏览器会**直接跳过动画**（属性不存在 → 走原逻辑），
+ *    属于纯增强，不需要 polyfill。
+ *
+ * ⚠️⚠️ 必须 `flushSync`：`startViewTransition` 在回调返回后**立刻**给 DOM 拍照，
+ *    而 React 的 `setState` 是异步的 —— 不强制同步刷新的话拍到的还是旧 DOM，动画等于没有。
+ *    `flushSync` 只在这一个事件回调里用，不影响别处的并发渲染。
+ *
+ * ⚠️ 只在**视图真的会变**的时候起过渡（避免初始加载也淡入一次、以及同一路由的重复点击）。
+ */
+type VTDoc = Document & { startViewTransition?: (cb: () => void) => { finished: Promise<void> } }
+
+/** 路由指纹：**必须把"不在文档区"也算进去**，否则"文档区 → 主站"这条路径永远判为没变化、不起过渡 */
+const fp = (r: DocsRoute | null) => (r ? `${r.section ?? ''}/${r.pageId ?? ''}` : '(main)')
+
+/**
+ * ⚠️⚠️ **必须做成模块级单例**：`useDocsRoute` 被**两个组件**调用
+ *    （`App.tsx` 取整条路由、`TopBar.tsx` 只取 `isDocs`）。
+ *    早先每个实例各挂一个 `hashchange` 监听器 —— 一次换页会**触发两次 View Transition**
+ *    （实测拦截 `startViewTransition` 得到每步 2 次调用，时间戳完全相同），
+ *    而且两套 `lastKey` 各算各的，其中一套会把 `location.hash` 已变过的值当成初值，
+ *    于是 ①「一级 → 二级」和 ④「回主站」那两步的过渡被静默跳过。
+ *    现在：**只有一处监听、一次过渡、一次 setState**，所有实例订阅同一份状态。
+ */
+let currentRoute: DocsRoute | null = typeof window === 'undefined' ? null : parseDocsHash(window.location.hash)
+let lastRouteKey = fp(currentRoute)
+let started = false
+const subscribers = new Set<(r: DocsRoute | null) => void>()
+
+function startStore() {
+  if (started || typeof window === 'undefined') return
+  started = true
+  window.addEventListener('hashchange', () => {
+    const next = read()
+    const changed = lastRouteKey !== fp(next)
+    const doc = document as VTDoc
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const publish = () => {
+      currentRoute = next
+      for (const fn of subscribers) fn(next)
+    }
+    lastRouteKey = fp(next)
+    /** 路由没变（例如重复点同一个条目）→ 不起过渡，也不打扰订阅者 */
+    if (!changed) return
+    if (!doc.startViewTransition || reduced) {
+      publish()
+      return
+    }
+    doc.startViewTransition(() => {
+      flushSync(publish)
+    })
+  })
+}
+
+function subscribe(fn: (r: DocsRoute | null) => void) {
+  startStore()
+  subscribers.add(fn)
+  /* ⚠️ 清理函数必须返回 void：`subscribers.delete()` 返回 boolean，直接返回会被 TS 拒（EffectCallback） */
+  return () => {
+    subscribers.delete(fn)
+  }
+}
+
 export function useDocsRoute(): { isDocs: boolean; section?: string; pageId?: string; anchor?: string } {
-  const [route, setRoute] = useState<DocsRoute | null>(read)
+  const [route, setRoute] = useState<DocsRoute | null>(currentRoute)
 
   useEffect(() => {
-    const onHash = () => setRoute(read())
-    window.addEventListener('hashchange', onHash)
-    return () => window.removeEventListener('hashchange', onHash)
+    /** 订阅前先把当前值同步一次：另一个实例可能已经换过页了 */
+    setRoute(currentRoute)
+    return subscribe(setRoute)
   }, [])
 
   // 视图切换时把滚动位置交还给新视图（否则从文档底部切回主页会落在半空）。

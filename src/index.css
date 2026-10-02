@@ -2353,6 +2353,59 @@ details[open] .chevron-up-down {
    这里把它收细、轨道设为透明、滑块半透明：需要滚时仍然看得见，不需要时几乎不可见。
    ⚠️ 用标准属性 `scrollbar-width/color`（Firefox、Chrome 121+）+
    `::-webkit-scrollbar`（更旧的 WebKit/Blink）两条腿，缺一条就会有浏览器露出原生样式。 */
+/* ===== 文档区视图过渡（View Transitions）：换分区 / 退回一级 / 回主站 =====
+ *
+ * 用户 2026-09 反馈：「文档区推到一级目录、退到主站、以及切换不同分区的效果过于生硬」。
+ *
+ * 机制：`useDocsRoute` 在 hashchange 时用 `document.startViewTransition` 包住 `setRoute`
+ *   （见那个文件里的注释）。浏览器在回调前后各拍一张快照，然后**交叉淡入** ——
+ *   默认 250ms 十字淡入。这里只做微调：时长/缓动对齐站内 token；左栏单独命名，
+ *   让它的层级切换走**方向性平移**（见下面 `.docs-rail-panel`），不与整体淡入糊在一起。
+ *
+ * ⚠️⚠️ **同文档 View Transitions 是 2025-10 的 Baseline**（Chrome 111+ / Safari 18+ /
+ *    Firefox 144+）。不支持的浏览器直接硬切 —— 这是可接受的降级，**不要为它引 polyfill**。
+ * ⚠️ `view-transition-name` 在同一时刻**必须唯一**：同名会让快照直接失败
+ *    （控制台报 "Duplicate view-transition-name"）。所以这里只用根快照 + 一个左栏名。
+ * ⚠️ 那两处 `backdrop-filter` 折射层（顶栏 / 文档横栏）过渡期间会被卷进快照，
+ *    视觉上是"跟着一起淡"，正常；不影响 `check-anchors.mjs` 的 backdrop-filter 预算断言。
+ */
+.docs-rail {
+  view-transition-name: docs-rail;
+}
+::view-transition-old(root),
+::view-transition-new(root),
+::view-transition-old(docs-rail),
+::view-transition-new(docs-rail) {
+  animation-duration: var(--duration-panel);
+  animation-timing-function: var(--ease-out-soft);
+}
+/* 「减少动态效果」：UA 已会把 View Transitions 钳到极短，这里再显式关一次，双保险 */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root),
+  ::view-transition-old(docs-rail),
+  ::view-transition-new(docs-rail) {
+    animation: none;
+  }
+}
+
+/* 左栏两级之间的**方向性平移**：一级 ⇄ 二级。
+ *
+ * ⚠️ 由 `navDepth` 触发的 WAAPI 驱动（见 Docs.tsx 里那个 useEffect），
+ *    **不要在 CSS 里写 transform 过渡**。原因（当年踩过，注释保留）：
+ *    React 在同一次提交里挂载新面板时，CSS 过渡拿不到"旧值快照"，位置会**一帧到位**、
+ *    看不到位移；WAAPI 不依赖前后两帧的样式差，因此没有这个问题。
+ * ⚠️ 只动 `transform` + `opacity`（合成器友好，不触发布局）。
+ */
+.docs-rail-panel {
+  will-change: transform;
+}
+@media (prefers-reduced-motion: reduce) {
+  .docs-rail-panel {
+    will-change: auto;
+  }
+}
+
 .docs-scroll {
   scrollbar-width: thin;
   scrollbar-color: rgb(148 163 184 / 0.45) transparent;

@@ -411,6 +411,37 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
   // ⚠️ 文档区的滚动容器（md 及以上）。**不是 window** ——
   // 布局是「固定外壳 + 内部滚动」：左栏与右栏钉在视口里不动，只有中间正文列滚动。
   const scrollRef = useRef<HTMLDivElement>(null)
+  const railPanelRef = useRef<HTMLDivElement>(null)
+
+  /**
+   * 左栏「一级 ⇄ 二级」的**丝滑平移**（用户第十五轮的原始诉求："还可以做一个丝滑平移特效"）。
+   *
+   * 一级（文档列表）与二级（某篇目录）是**两块交替挂载**的面板，所以这里不做"两块同时在位、
+   * 整体平移"的轨道式动画（那需要把两级塞进同一个 grid、代价大且没必要），而是让**新出现的那块**
+   * 从**它来的方向**滑进来：
+   *   · 进二级（点进一篇）→ 新面板从**右侧**滑入（前进）
+   *   · 回一级（点「返回 UE 理论」）→ 新面板从**左侧**滑入（后退）
+   * 这样方向感与"下钻 / 返回"一致，观感上就是一次平移。
+   *
+   * ⚠️ 用 WAAPI 而不是 CSS 过渡：React 同一次提交里挂载新面板时，CSS 过渡拿不到"旧值快照"，
+   *    位置会**一帧到位**（当年踩过，注释在 index.css 的 `.docs-rail-panel` 上）。
+   * ⚠️ 依赖里必须带 `section.id`：**切分区**时 `navDepth` 可能不变（都是 1），
+   *    但面板内容整块换了，也该滑一次。
+   * ⚠️ `prefers-reduced-motion` 下**完全不做**（不是缩短）：与全站口径一致。
+   */
+  useEffect(() => {
+    const el = railPanelRef.current
+    if (!el) return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    const dir = navDepth === 2 ? 1 : -1
+    el.animate(
+      [
+        { transform: `translateX(${dir * 22}px)`, opacity: 0 },
+        { transform: 'translateX(0)', opacity: 1 },
+      ],
+      { duration: 240, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' },
+    )
+  }, [navDepth, section.id])
 
   /**
    * 锚点落点的**唯一来源**。
@@ -1209,7 +1240,7 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
             ⚠️ 高度必须与"自然位置 → 容器底"这一段**严格相等**：aside 的自然位置在
               y=160（顶栏 64 + spacer 48 + 横栏 48），只剩 `100dvh - 64 - 48 - 48` 可用。
               高一点就会溢出视口、低一点就浪费下半屏 —— 这条 5 处断言抓到过两次，改高度前先跑断言。 */}
-        <aside className="hidden md:sticky md:top-[var(--docs-subbar-h)] md:flex md:h-[calc(100dvh-var(--site-bar-h)-var(--docs-subbar-h)-var(--docs-subbar-h))] md:flex-col">
+        <aside className="docs-rail hidden md:sticky md:top-[var(--docs-subbar-h)] md:flex md:h-[calc(100dvh-var(--site-bar-h)-var(--docs-subbar-h)-var(--docs-subbar-h))] md:flex-col">
           {/* ⚠️ 横向余量口径（第十二轮定稿，用户原话：「我的想法是直接把左侧边往右侧缩一些就可以，
               整个宽度都已经给你让地方了」）：
               **左 44px / 右 20px 的不对称内边距**（`-mx-5` + `ps-11 pe-5`）。
@@ -1220,7 +1251,12 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
               ⚠️ 净偏移仍为 0：`-mx-5`（-20px）与右内边距 20px 抵消，
                  左内边距的 +24px 由 `--docs-rail-w` 的加宽吸收（文字列因此右移 24px，
                  这正是用户要的"往右侧缩"）。 */}
-          <div className="docs-scroll -mx-5 min-h-0 flex-1 overflow-y-auto pb-6 pe-5 ps-11 pt-6">{pageTree}</div>
+          <div
+            ref={railPanelRef}
+            className="docs-rail-panel docs-scroll -mx-5 min-h-0 flex-1 overflow-y-auto pb-6 pe-5 ps-11 pt-6"
+          >
+            {pageTree}
+          </div>
         </aside>
 
         {/* 中：正文。data-copyable = 只读保护白名单，放开这一整块的选择与复制。
