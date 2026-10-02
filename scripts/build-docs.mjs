@@ -1009,27 +1009,24 @@ for (const src of SOURCES) {
 /* --- 3) 页 id 在分区内去重 --- */
 {
   /**
-   * ⚠️ 先丢掉**文档标题页**（用户：「虚幻5引擎学习笔记 那个 H1 标题页」要收掉）。
+   * 丢掉**纯文档标题页**（用户：「虚幻5引擎学习笔记 那个 H1 标题页」要收掉；
+   * 并提醒「少于一屏全部去掉肯定会有连带的问题，不能只看这一篇」）。
    *
-   * 它是 `# 虚幻5引擎学习笔记` 那个 H1 自己成的一页（实测是 8 页里的第 1 页，0 字 0 图）。
-   * 左栏一级目录里已经有「虚幻引擎总览」这个名字了，页内再出现一次纯属重复。
-   * 判据两条都满足才丢：**标题就是文档名**（`docTitles[source]`）、且**整页没有任何正文**。
-   * ⚠️ 加上"没有正文"是为了安全：若该页还并进了别的节（有正文），必须留着，否则丢内容。
+   * ⚠️⚠️ 判据必须**又准又窄**。前后试错三版、两版误伤，记录在此防止再犯：
+   *   ① `prose === 0` —— 不命中：实测这些页的 prose 是 **6~10 字**（标题文字被计入）；
+   *   ② `prose < 40` —— **误删真正的首页**：单 h1 的源里文档名（H1）会**并进第一个内容页**
+   *      （`虚幻5引擎学习笔记` + `1. 版本说明`），那页标题也是文档名、prose 也可能很小 →
+   *      整页被删、**第一节内容跟着没了**（用户实测："UE 理论其他的内容少了一大截"）；
+   *   ③ `blocks.length === 1 && blocks[0].level === 1` —— **论文 19 → 14 页、少 5500 字**：
+   *      论文走 `pack` 路径，那个"一个块"是树节点、**带着整棵子树**，不是纯标题页。
+   *
+   * ✅ 现在**三个条件同时满足**才丢（实测精准命中 6 张、零误伤）：
+   *   · `title === docTitles[source]` —— 它就叫文档名（`虚幻5引擎学习笔记` 这种）；
+   *   · `toc.length === 1` —— 页内只有它自己一个标题、**没有任何下级标题**；
+   *   · `chars < 40` —— 没有实质正文（只有标题那一行）。
+   * 关键在 `toc.length === 1`：它把"并进了第一节"的页排除掉（那种页 toc 至少 2 项），
+   * 也把 `6. 界面基础操作`（标题不是文档名）这类**真内容短页**排除掉。
    */
-  /**
-   * ⚠️ 阈值用 40（与 `TINY` 同口径），**不能写 `prose === 0`** ——
-   *    实测这些标题页的 `prose` 不是 0，而是 **6~10 字**（标题文字本身被计入）：
-   *      `虚幻5引擎学习笔记` 9、`蓝图基础知识` 6、`虚幻引擎界面基础操作` 10、
-   *      `虚幻引擎界面进阶操作` 10、`蓝图编程基础` 6、`闯关游戏实战` 6。
-   *    所以判据是"**几乎只有标题、没有实质正文**"（< 40 字）。
-   */
-  for (let i = pages.length - 1; i >= 0; i--) {
-    const pg = pages[i]
-    if (pg.status !== 'ready' || pg.title !== docTitles[pg.source]) continue
-    const prose = (pg.blocks ?? []).reduce((a2, b2) => a2 + (b2.chars ?? 0) + (b2.images ?? 0), 0)
-    if (prose < 40) pages.splice(i, 1)
-  }
-
   const seen = new Set()
   for (const p of pages) {
     const base = p.id
@@ -1102,6 +1099,36 @@ for (const p of pages) {
   if (!p.allIds) continue
   for (const id of p.allIds) anchorPage.set(`${p.source}#${id}`, p)
   if (p.droppedIds?.length) for (const id of p.droppedIds) anchorPage.set(`${p.source}#${id}`, p)
+}
+
+/**
+ * 丢掉**纯文档标题页**（用户：「虚幻5引擎学习笔记 那个 H1 标题页」要收掉；并提醒
+ * 「少于一屏全部去掉肯定会有连带的问题，不能只看这一篇」）。
+ *
+ * ⚠️⚠️ **必须放在渲染循环之后**：`toc` 是渲染时才填的（第 5 步），
+ *    放在第 3 步时 `toc.length` 恒为 0，判据永远不命中（我因此白跑了一轮）。
+ *
+ * 判据**三个条件同时满足**（实测精准命中 6 张、零误伤）：
+ *   · `title === docTitles[source]` —— 它就叫文档名（`虚幻5引擎学习笔记` 这种）；
+ *   · `toc.length === 1` —— 页内只有它自己一个标题、没有任何下级标题；
+ *   · `chars < 40` —— 没有实质正文（只有标题那一行）。
+ * ⚠️ 试错记录（两版都误伤，别再犯）：
+ *   · `prose < 40` → 误删"文档名 + 第一节"合并的那一页 → 第一节内容跟着没了；
+ *   · `blocks.length === 1 && level === 1` → 论文走 pack、那个块带整棵子树 → 论文 19→14 页。
+ * 关键在 `toc.length === 1`：并进了第一节的页 toc ≥ 2，会被排除。
+ */
+{
+  const droppedTitles = []
+  for (let i = pages.length - 1; i >= 0; i--) {
+    const pg = pages[i]
+    if (pg.status !== 'ready') continue
+    if (pg.title !== docTitles[pg.source]) continue
+    if ((pg.toc ?? []).length !== 1) continue
+    if ((pg.stats?.chars ?? 0) >= 40) continue
+    droppedTitles.push(`${pg.title}(${pg.stats?.chars ?? 0}字)`)
+    pages.splice(i, 1)
+  }
+  if (droppedTitles.length) console.log('  纯标题页已收掉 %d 张：%s', droppedTitles.length, droppedTitles.join('、'))
 }
 
 /* --- 6) 回填文档互链 --- */
