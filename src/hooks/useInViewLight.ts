@@ -60,35 +60,25 @@ export function useInViewLight(root: RefObject<HTMLElement | null>) {
     const anchorY = () => window.innerHeight * 0.42
 
     /**
-     * 判定线的**有效位置**：末尾（没有内容的那一段）够不到时，把线拉回够得到的地方。
+     * ⚠️⚠️ 这里**曾经**有一版"靠近页尾时把判定线夹到内容末尾"的补丁，已删除。
+     *    原因（2026-10 实测，用户症状："教育背景的证书/奖项会在第二项卡住、跳号"）：
+     *    夹取用的"内容末尾"取了 `#contact` 的 bottom，而 `#contact` 是**753px 高的整段**
+     *    （top≈10182 / bottom≈10935），它的 bottom 在 y≈10091 就进入视口 ——
+     *    于是**从 y≈9100 起判定线就被一路拖着走**，整个教育背景区间都在用一条
+     *    错误的（偏高的）线，导致真实的"跨线者"被跳过：
+     *      实测 y=9640 时 `#4 蓝桥杯` 明明跨过 42%=354，scan 却因为线被拉到 ~400
+     *      而选中了上面的 `#3`，序列变成 #1→#2→#3→#5，**#4 永远轮不到**。
+     *    教训：**不能用"大段容器"的边界当内容末尾** —— 要用"候选元素自己"的边界。
      *
-     * ⚠️⚠️ 为什么必须有这条（2026-10 用户实拍："教育背景的证书和奖项位置会卡住，
-     *    联系我部分只显示第一个邮箱选中"）：
-     *    锚点固定在视口 42%，而**内容末尾之下还有一大段滚不到的东西**（页脚 + 收尾呼吸区）。
-     *    实测（390×844）：`scrollHeight = 11084`，但 `#contact` 的底大约在 10935 ——
-     *    文档末尾比内容末尾还低 **1100px 左右**。于是滚到底时，内容末尾早已升到视口顶部附近
-     *    （`contact.bottom ≈ 90`，链接卡片在 **top 263~462**），而锚点还在 354：
-     *    最后几张卡的中心要么在锚点下方、要么已经"滑过去"，**永远等不到被选中那一刻**。
-     *    表现就是"卡在证书/奖项中间"、"只亮第一个邮箱"，再滚也不换。
-     *
-     * 修法：把线**夹到末尾**（`Math.min`）——
-     *   · 正常滚动（末尾还在视口下方）→ `contentEnd >= viewportH` → 返回 `anchorY()`，**行为不变**；
-     *   · 滚到末尾那一段 → 线跟着末尾一起往下走，最后几张卡于是能依次跨过它。
-     * ⚠️ 用 `#contact`（内容末尾）而不是 `scrollHeight`（文档末尾）：后者含页脚与呼吸区，
-     *    到底时算出来是 **0**，会把线拉到视口顶，反而"选中视口里最上面那个"（实测踩过）。
+     *    删掉夹取之后页尾依然正常：联系区那张 353px 高的面板进入视口后**本身就会跨过
+     *    42% 这条线**（实测到底时它的 top=156、bottom=509，跨线），所以高亮会稳稳停在它上面。
+     *    真正解决"页尾卡住"的是**把底部 Tab Bar 排除出候选集**（见 index.css /
+     *    MobileTabBar 的 `data-scroll-lit="off"` 注释）—— 那 5 个 tab 是 `fixed bottom-0`、
+     *    永远在视口里，才会在页尾一直抢走高亮。
      */
-    const contentEndEl = document.getElementById('contact')
-    const effectiveAnchorY = () => {
-      const viewportH = window.innerHeight
-      const endRect = contentEndEl?.getBoundingClientRect()
-      const contentEnd = endRect ? endRect.bottom : document.documentElement.scrollHeight - window.scrollY
-      if (contentEnd >= viewportH) return anchorY()
-      return Math.min(anchorY(), contentEnd)
-    }
-
     const scan = () => {
       raf = 0
-      const y0 = effectiveAnchorY()
+      const y0 = anchorY()
       let best: Element | null = null
       let bestDist = Infinity
       for (const el of live) {
@@ -132,13 +122,13 @@ export function useInViewLight(root: RefObject<HTMLElement | null>) {
             }
           }
         }
+        // ⚠️ 这里只负责维护 `live` 成员；**几何重算一律交给 scroll**（见下）。
         schedule()
       },
-      // 整视口为根：进出各回调一次，中途不再打扰
       { root: null, rootMargin: '0px', threshold: 0 },
     )
 
-    /** 参与照亮的候选选择器：排除带 `data-scroll-lit="off"` 的那些（筛选胶囊 / 文档区目录） */
+    /** 参与照亮的候选选择器：排除带 `data-scroll-lit="off"` 的那些（筛选胶囊 / 文档区目录 / 底部 Tab Bar） */
     const SELECTOR = '.glass-lit:not([data-scroll-lit="off"])'
 
     for (const el of host.querySelectorAll(SELECTOR)) io.observe(el)
@@ -155,6 +145,25 @@ export function useInViewLight(root: RefObject<HTMLElement | null>) {
     })
     mo.observe(host, { childList: true, subtree: true })
 
+    /**
+     * ⚠️⚠️ **必须有这条滚动监听**（2026-10 定位到的真凶）。
+     *
+     * 这里原来只靠 IntersectionObserver 回调来触发重算，注释还写着"整视口为根：
+     * 进出各回调一次，中途不再打扰"。这个假设是错的：
+     *   IO 只在元素**进出视口**时回调。而一屏里往往同时"住着"好几张卡（教育背景 5 张
+     *   全都已进入视口），此时**继续滚动不会再有任何进出事件** → 回调不触发 →
+     *   `schedule()` 不被调用 → **选中结果就此冻结**。
+     *
+     * 实测证据（本次排查的决定性一条）：`__d.sy`（scan 那一帧的 scrollY）在真实滚动
+     * 9600 → 9680 期间**始终停在 9600** —— 也就是 scan 压根没再跑过。
+     * 于是"该亮的是 `#4 蓝桥杯`"算不出来，界面卡在上一张 `#3` 上，
+     * 用户看到的就是"证书/奖项之间卡住、跳号、往下只显示 134、往上卡在 3 或 4"。
+     *
+     * scroll 是高频率事件，但 `schedule()` 自带 rAF 合并（`if (!raf)`），
+     * 所以每帧最多算一次，不会因滚动而变重。{ passive: true } 保证不阻塞滚动。
+     */
+    window.addEventListener('scroll', schedule, { passive: true })
+
     // 视口变化（旋转 / 地址栏收放）后锚点会变，重扫一次
     window.addEventListener('resize', schedule, { passive: true })
     window.visualViewport?.addEventListener('resize', schedule, { passive: true })
@@ -163,6 +172,7 @@ export function useInViewLight(root: RefObject<HTMLElement | null>) {
     return () => {
       io.disconnect()
       mo.disconnect()
+      window.removeEventListener('scroll', schedule)
       window.removeEventListener('resize', schedule)
       window.visualViewport?.removeEventListener('resize', schedule)
       if (raf) cancelAnimationFrame(raf)
