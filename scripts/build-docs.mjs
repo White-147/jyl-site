@@ -286,12 +286,63 @@ function webpSize(file) {
 
 /* ============================ markdown → 块 ============================ */
 
-/** 笔记里的图片路径 → 站点路径。反斜杠换正斜杠、去 `images/` 前缀、后缀换 .webp。 */
+/**
+ * 笔记里的图片路径 → 站点路径（**站点根相对**，任何页面地址下都能解析）。
+ *
+ * ⚠️⚠️ 这里必须**归一化前缀**，不能只认死一种写法。历史上有过两种源写法：
+ *   ① 旧：`images/<子目录>/<名>.png`
+ *   ② 新（2026-10 第十八轮起）：`../../../../public/docs/ue5/images/<子目录>/<名>.png`
+ *      —— 改成磁盘相对路径是为了**在编辑器里能直接预览**，这个好处要保留。
+ *
+ * 但第一版 `mdImageSrc()` 只剥 `images/`，剥不掉 ② 的 `../../../../public/`，却**照样**
+ * 在前面硬拼 `docs/ue5/images/`，于是产出的 src 变成：
+ *   `docs/ue5/images/../../../../public/docs/ue5/images/x.webp`   ← 双前缀
+ * 这条路径：
+ *   · 在 `public/docs/pages/<区>/` 里 `existsSync` **居然为真**（`..` 按字面解析会退回仓库根，
+ *     再进 public/docs/ue5/images 命中真文件）→ **自检长期报"配图全部落位"**；
+ *   · 在浏览器里由页面 URL 解析 → `/jyl-site/docs/ue5/images/../../../../public/...` → **404**。
+ * 结果线上 250/288 张配图全裂（论文那 38 张恰好是正确形态，所以只有 UE 部分坏）。
+ *
+ * 所以现在的口径是：**先归一化到"库内相对路径"，再统一拼一次 urlBase。**
+ * 兜底逻辑写成"取 `docs/ue5/images/` 之后的片段"，因此 ①② 两种写法、以及将来可能
+ * 又变的写法，只要路径里出现过这个资源根，就都能落到正确位置。
+ */
+const MD_IMAGE_ROOT_SEG = 'docs/ue5/images/'
+
 function mdImageSrc(raw) {
-  const rel = String(raw).replace(/\\/g, '/').replace(/^\.?\//, '')
-  const withoutPrefix = rel.startsWith('images/') ? rel.slice('images/'.length) : rel
-  const webp = withoutPrefix.replace(/\.(png|jpe?g)$/i, '.webp')
-  return { file: withoutPrefix, url: `${IMAGE_ROOTS.md.urlBase}/${webp}` }
+  // 反斜杠换正斜杠
+  let rel = String(raw).replace(/\\/g, '/')
+
+  // ① 若路径里出现过资源根，取它之后的片段（兼容任意前缀写法）
+  const at = rel.indexOf(MD_IMAGE_ROOT_SEG)
+  if (at >= 0) {
+    rel = rel.slice(at + MD_IMAGE_ROOT_SEG.length)
+  } else {
+    // ② 否则按"相对源文件目录"的写法剥前缀：去 ./ ../ 与开头/结尾的 /
+    rel = rel.replace(/^(?:\.{1,2}\/)+/, '').replace(/^\/+/, '')
+    // `public/` 也一并剥掉（`public/docs/...` 这种漏网的写法）
+    rel = rel.replace(/^public\//, '')
+    if (rel.startsWith('images/')) rel = rel.slice('images/'.length)
+  }
+
+  // 去掉可能残留的 ./ 段，压掉重复斜杠
+  rel = rel.split('/').filter((s) => s && s !== '.').join('/')
+
+  const webp = rel.replace(/\.(png|jpe?g)$/i, '.webp')
+  return { file: rel, url: `${IMAGE_ROOTS.md.urlBase}/${encodeUrlPath(webp)}` }
+}
+
+/**
+ * 逐段 URL 编码（保留 `/` 分隔符）。
+ * ⚠️ 有 7 个真实文件名带**空格**（如 `Filp Flop.webp`）。裸空格在 `src` 里虽然多数浏览器
+ *    会容忍，但它是非法 URL 字符，也会干扰自检里的字符串匹配 —— 统一编码更稳。
+ * ⚠️ 只编码"输出的 URL"，**不动磁盘路径**（`file` 仍是原始相对路径，供 makeFigure 读尺寸用）。
+ */
+function encodeUrlPath(p) {
+  return String(p)
+    .split('/')
+    .map((seg) => encodeURIComponent(seg))
+    .join('/')
 }
 
 function shortUrl(u) {
@@ -313,8 +364,8 @@ function makeInline(ctx) {
 
     // markdown 图片
     out = out.replace(/!\[([^\]]*)\]\(([^)\s]+)\)/g, (_m, alt, src) => {
-      const { url } = mdImageSrc(src)
-      return keep(ctx.figure(url, alt))
+      const { url, file } = mdImageSrc(src)
+      return keep(ctx.figure(url, file, alt))
     })
 
     // 链接
@@ -335,8 +386,8 @@ function makeInline(ctx) {
       const src = (attrs.match(/src="([^"]*)"/) ?? [])[1]
       if (!src) return ''
       const alt = (attrs.match(/alt="([^"]*)"/) ?? [])[1] ?? ''
-      const { url } = mdImageSrc(src)
-      return ctx.figure(url, alt)
+      const { url, file } = mdImageSrc(src)
+      return ctx.figure(url, file, alt)
     })
     out = out.replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>')
     out = out.replace(/(^|[\s(])\*([^*\n]+)\*/g, '$1<em>$2</em>')
@@ -387,8 +438,8 @@ function renderMarkdownBody(lines, ctx, inline) {
       flush()
       const src = (trimmed.match(/src="([^"]*)"/) ?? [])[1]
       if (src) {
-        const { url } = mdImageSrc(src)
-        html.push(ctx.figure(url, (trimmed.match(/alt="([^"]*)"/) ?? [])[1] ?? ''))
+        const { url, file } = mdImageSrc(src)
+        html.push(ctx.figure(url, file, (trimmed.match(/alt="([^"]*)"/) ?? [])[1] ?? ''))
       }
       i++
       continue
@@ -873,9 +924,14 @@ function mergeSmall(pages, budget) {
 
 /* ============================ 渲染 ============================ */
 
-/** 图片统一包 figure。width/height 必填 —— 原因见文件头第 4 条。 */
-function makeFigure(url, alt, index) {
-  const size = webpSize(join(root, 'public', url))
+/** 图片统一包 figure。width/height 必填 —— 原因见文件头第 4 条。
+ *
+ *  ⚠️ `rel` 是**未编码**的库内相对路径（`<子目录>/<名>.webp`），用来读磁盘量尺寸；
+ *     `url` 是**已编码**的站点路径，写进 `src`。两者必须分开：
+ *     文件名带空格的那 7 张（如 `Filp Flop.webp`）编码后是 `%20`，
+ *     拿它去 `join(root,'public',…)` 读文件会量不到尺寸 → 少了 width/height → 锚点跳转失准。 */
+function makeFigure(url, rel, alt, index) {
+  const size = rel ? webpSize(join(IMAGE_ROOTS.md.fsRoot, rel)) : webpSize(join(root, 'public', url))
   const dim = size ? ` width="${size.w}" height="${size.h}"` : ''
   // 只有第一张懒加载，其余 eager + 低优先级：懒加载会让文档高度随滚动继续增长，
   // 靠后的锚点就永远跳不到（见文件头第 4 条）。
@@ -955,11 +1011,10 @@ for (const src of SOURCES) {
     const ctx = {
       images: new Set(),
       imgIndex: 0,
-      figure(url, alt) {
-        if (url.startsWith(IMAGE_ROOTS.md.urlBase)) {
-          ctx.images.add(url.slice(IMAGE_ROOTS.md.urlBase.length + 1).replace(/\.webp$/, '.png'))
-        }
-        return makeFigure(url, alt, ctx.imgIndex++)
+      figure(url, rel, alt) {
+        // ⚠️ 存**未编码**的相对路径（`url` 现在是编码过的，拿它去查磁盘会因 %20 之类失配）
+        if (rel) ctx.images.add(rel)
+        return makeFigure(url, rel, alt, ctx.imgIndex++)
       },
       docLink(url, labelHtml) {
         links.push({ url, label: labelHtml })
@@ -981,6 +1036,7 @@ for (const src of SOURCES) {
     accumulate(tree)
     parsed.set(src.id, { tree, links })
     // 图片自检：引用了但没转出来的直接报出来（避免上线后 404）
+    // ⚠️ `ctx.images` 存的是**库内相对路径**（未编码），与 `mdImageSrc().file` 同源
     for (const f of ctx.images) {
       const webp = join(IMAGE_ROOTS.md.fsRoot, f.replace(/\.(png|jpe?g)$/i, '.webp'))
       if (!existsSync(webp)) warnings.push({ title: `图片缺失 ${f}`, chars: 0, images: 0, cost: 0 })

@@ -9,7 +9,7 @@
 //   · 预算被悄悄突破（某次改版面常量后普遍变长）
 // 这些都是"构建成功但功能坏了"，只能靠断言拦。改动版面 / 拆分逻辑后请跑一次。
 import { readFileSync, existsSync, statSync, readdirSync } from 'node:fs'
-import { join, dirname } from 'node:path'
+import { join, dirname, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
@@ -78,7 +78,22 @@ for (const p of ready) {
   }
 }
 
-/* ---- 3. 页面里的图片必须存在 ---- */
+/* ---- 3. 页面里的图片必须存在 ----
+ *
+ * ⚠️⚠️ 这一段曾经**完全测不出**一次真实事故（2026-10 第十八轮，线上 250 张配图全裂）：
+ *    当时生成出来的 src 是
+ *      `docs/ue5/images/../../../../public/docs/ue5/images/x.webp`
+ *    旧写法是 `existsSync(join(root, 'public', src))` —— `existsSync` 会把 `..` **按字面解析**，
+ *    于是路径从 `public/docs/pages/<区>/` 一路退出仓库根、再进 `public/docs/ue5/images/`，
+ *    **命中真文件**，自检长期报"配图全部落位"，而浏览器按页面 URL 解析必然 404。
+ *
+ *    所以现在的判据换成**与浏览器一致**的口径，两条缺一不可：
+ *      ① `src` 里**不允许出现 `..`** —— 相对路径的解析基准是页面 URL（hash 路由下尤其绕），
+ *         带 `..` 就说明构建归一化没做干净，直接判失败，不给它"恰好能对上"的机会。
+ *      ② 解析后的绝对路径必须**仍在 `public/` 之内** —— 用 path.resolve 真解析，
+ *         而不是把 `..` 交给 existsSync。这样任何"逃出目录"的写法都会被拦下。
+ *    另外还要拦"没编码的非法 URL 字符"（空格），它会干扰匹配、也可能被服务器拒。
+ */
 let imgTotal = 0
 for (const p of ready) {
   const file = join(OUT_ROOT, p.html)
@@ -89,7 +104,30 @@ for (const p of ready) {
     const src = (tag.match(/\bsrc="([^"]+)"/) ?? [])[1]
     if (!src) continue
     imgTotal++
-    if (!existsSync(join(root, 'public', src))) fail(`配图缺失：${p.section}/${p.id} → ${src}`)
+
+    if (src.split('/').includes('..')) {
+      fail(`配图 src 含 ".."（浏览器会按页面 URL 解析成 404）：${p.section}/${p.id} → ${src}`)
+      continue
+    }
+    if (/ /.test(src)) {
+      fail(`配图 src 有未编码的空格（应写成 %20）：${p.section}/${p.id} → ${src}`)
+    }
+
+    /**
+     * ⚠️ 必须先 `decodeURIComponent` 再落到磁盘 —— **浏览器/服务器就是按这个口径解码的**，
+     *    生成的 src 是百分号编码（中文与空格都在内），直接用编码串 `existsSync` 永远找不到文件。
+     *    （编码失败时退回原文，交给下面的 existsSync 报"缺失"，不吞掉错误。）
+     */
+    let decoded = src
+    try { decoded = decodeURIComponent(src) } catch { /* 保留原文，让缺失检查报出来 */ }
+
+    const abs = resolve(root, 'public', decoded)
+    const pubRoot = resolve(root, 'public')
+    if (!abs.startsWith(pubRoot + sep)) {
+      fail(`配图 src 逃出了 public/：${p.section}/${p.id} → ${src}`)
+      continue
+    }
+    if (!existsSync(abs)) fail(`配图缺失：${p.section}/${p.id} → ${src}`)
     if (!/\bwidth="\d+"/.test(tag) || !/\bheight="\d+"/.test(tag)) {
       fail(`配图缺 width/height（会导致锚点跳转失准）：${p.section}/${p.id} → ${src}`)
     }
@@ -222,8 +260,13 @@ const sourceFile = (section, id) => {
       const html = readFileSync(f, 'utf8')
       for (const m of html.matchAll(/<h[1-4][^>]*>([\s\S]*?)<\/h[1-4]>/g)) pageHeadings.add(norm(m[1]))
       for (const m of html.matchAll(/(?:src=")([^"]+\.webp)/g)) {
-        /* ⚠️ 与源侧同一口径：**basename + 去扩展名**（见上面 srcImages 的注释，两侧不一致会全量假报） */
-        pageImages.add(imgKey(m[1]))
+        /* ⚠️ 与源侧同一口径：**basename + 去扩展名**（见上面 srcImages 的注释，两侧不一致会全量假报）
+           ⚠️ 还要**先解码**：产物里的 src 是百分号编码（中文/空格都被编码），
+              不解码则键是 `%E6%96%B0...`、源侧是 `新建文件夹`，两边永远不相等 → 全量假报"内容丢失"。
+              这正是"两侧必须同一种归一"的又一处 —— 归一里必须包含解码这一步。 */
+        let s = m[1]
+        try { s = decodeURIComponent(s) } catch { /* 保留原文 */ }
+        pageImages.add(imgKey(s))
       }
       // 页面标题、祖先链、本页小节名都算"这条标题被承载了"：
       // dropFirstHeading 会把页面第一个标题从正文里去掉，改由页面头部/左栏显示

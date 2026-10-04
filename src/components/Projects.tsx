@@ -93,10 +93,20 @@ function buildProjectActions(project: Project): ProjectAction[] {
 }
 
 /** 项目索引行：行号 + 图（左右交错）+ 概要 + 要点折叠 + 技术栈展开 + 链接。
- *  信息平等，编辑感来自行号与交错节奏（替代重点标注）。 */
-function ProjectRow({ project, index }: { project: Project; index: number }) {
+ *  信息平等，编辑感来自行号与交错节奏（替代重点标注）。
+ *
+ *  ⚠️⚠️ 灯箱**不在这里渲染**（2026-10 用户反馈"项目区点开放大后的灯箱有问题"）。
+ *    原来 `<Lightbox>` 写在本组件的 `<Reveal>` 内部，而 `Reveal` 用 `transform` 做入场动画 ——
+ *    **transform 一旦不是 none，该元素就成为 `position: fixed` 的包含块**，
+ *    于是灯箱的 `inset-0` 不再相对视口，而是相对这一张卡：
+ *      实测 overlay 变成 **1008×210 @ (168,489)**，只有卡片那么大、还盖不住页面
+ *      （教育背景那套放在 `<section>` 下与内容平级，实测 1440×900 铺满视口，是对的）。
+ *    祖先里 `article` 的 `.glass-lit`（`isolation: isolate`）也会给它加一层，
+ *    但主因是 `Reveal` 的 transform。
+ *    所以灯箱状态**提升到 `Projects`**，在那个 `<section>` 里与内容平级渲染 —— 照抄教育背景的结构。
+ */
+function ProjectRow({ project, index, onZoom }: { project: Project; index: number; onZoom: (p: Project) => void }) {
   const reverse = index % 2 === 1
-  const [lightbox, setLightbox] = useState(false)
   const [stackOpen, setStackOpen] = useState(false)
   const shownStack = stackOpen ? project.stack : project.stack.slice(0, 5)
   const projectActions = buildProjectActions(project)
@@ -122,7 +132,7 @@ function ProjectRow({ project, index }: { project: Project; index: number }) {
             <div className={`relative ${reverse ? 'sm:order-2' : ''}`}>
               <button
                 type="button"
-                onClick={() => setLightbox(true)}
+                onClick={() => onZoom(project)}
                 aria-label={`放大查看 ${project.name} 界面截图`}
                 title="点击放大查看界面"
                 className="group/img relative block w-full cursor-zoom-in overflow-hidden rounded-xl border border-slate-200 shadow-sm transition-all hover:border-brand-300 hover:shadow-md dark:border-slate-800 dark:hover:border-brand-500/60"
@@ -135,23 +145,6 @@ function ProjectRow({ project, index }: { project: Project; index: number }) {
                 />
               </button>
             </div>
-
-            {lightbox && project.screenshot && (
-              <Lightbox
-                src={project.screenshot}
-                alt={`${project.name} 界面截图（放大）`}
-                onClose={() => setLightbox(false)}
-              >
-                <p className="text-sm font-medium text-slate-200">{project.name} · 界面截图</p>
-                <button
-                  type="button"
-                  onClick={() => setLightbox(false)}
-                  className="rounded-lg border border-slate-500 px-3.5 py-2 text-sm font-semibold text-slate-200 transition-colors hover:border-slate-300 hover:text-white"
-                >
-                  关闭
-                </button>
-              </Lightbox>
-            )}
 
             <div className={reverse ? 'sm:order-1' : ''}>
               {/* 标题行：项目名（纯文本）+ GitHub 入口图标（不重复链接，不单独占行），右侧标签/时间 */}
@@ -265,6 +258,8 @@ function ProjectRow({ project, index }: { project: Project; index: number }) {
 
 export default function Projects() {
   const [active, setActive] = useState<'全部' | ProjectTag>('全部')
+  /** 放大的项目（null = 灯箱关闭）。⚠️ 存在这一层而不是 `ProjectRow` 里 —— 原因见 ProjectRow 顶部注释 */
+  const [zoomed, setZoomed] = useState<Project | null>(null)
 
   const filtered = useMemo(
     () => (active === '全部' ? projects : projects.filter((p) => p.tags.includes(active))),
@@ -329,7 +324,7 @@ export default function Projects() {
 
         <div className="mt-8 sm:mt-10">
           {filtered.map((project, i) => (
-            <ProjectRow key={project.id} project={project} index={i} />
+            <ProjectRow key={project.id} project={project} index={i} onZoom={setZoomed} />
           ))}
         </div>
 
@@ -342,6 +337,28 @@ export default function Projects() {
             顶栏那个是常驻的（任何滚动位置都可用），这里再放一张只是重复。
             真要把 UE 笔记当成"作品"展示时，应该走 projects 数据 + 截图，而不是一张纯导航卡。 */}
       </div>
+
+      {/* 项目截图灯箱。
+          ⚠️⚠️ 位置是**本组件最关键的一点**：必须放在这里 —— `<section>` 下、与上面那个内容
+             `<div>` **平级**，也就是 `Reveal` 之外。放进任何带 `transform` 的祖先里，
+             `position: fixed` 就会以那个祖先为包含块，灯箱缩成卡片大小、盖不住页面。
+             这一条与教育背景（`Education.tsx` 末尾）的写法一致 —— 那边一直是好的。 */}
+      {zoomed?.screenshot && (
+        <Lightbox
+          src={zoomed.screenshot}
+          alt={`${zoomed.name} 界面截图（放大）`}
+          onClose={() => setZoomed(null)}
+        >
+          <p className="text-sm font-medium text-slate-200">{zoomed.name} · 界面截图</p>
+          <button
+            type="button"
+            onClick={() => setZoomed(null)}
+            className="rounded-lg border border-slate-500 px-3.5 py-2 text-sm font-semibold text-slate-200 transition-colors hover:border-slate-300 hover:text-white"
+          >
+            关闭
+          </button>
+        </Lightbox>
+      )}
     </section>
   )
 }
