@@ -1039,13 +1039,53 @@ html.docs-shell .footer-seal-mark {
  *
  * 代价（已向用户说明并接受）：环同时承担「图形边界 ≥3:1」的对比度；去掉左右后，
  * 选中态仍由 `.glass-chip-on` 的**底与字色**表达，不缺"我在哪"的线索。
+ *
+ * ⚠️⚠️ 2026-10 追加：`:hover` / `:focus-visible` 也必须在选择器里（用户实拍的第二轮问题）。
+ *    第一版只写了 `.glass-lit.glass-lit-on.mobile-tab-active`，于是**点过之后再滚开**，
+ *    环的侧边又回来了。根因是**触屏的 `:hover` 会焊住**（只被后续点击解除）：
+ *    实测点一下「关于」→ `matches(':hover') = true`；滚开 1200px 再回顶 → **仍然 true**，
+ *    `box-shadow` 变成 `0 0 0 1px` 整圈，tab 右边界跳变 **−76.1**（那就是用户看到的竖线）。
+ *    所以这三档都要并进来 —— 它们本来就该是同一种材质（选中 = 把悬停固定住）。
+ *    ⚠️ 权重：`.glass-lit:hover` 是 (0,2,0)，`.glass-lit.glass-lit-on.mobile-tab-active` 是 (0,3,0)，
+ *       `.glass-lit:hover.mobile-tab-active` 也是 (0,3,0)，靠**源序在后**赢（见 ②）。
  */
-.glass-lit.glass-lit-on.mobile-tab-active {
+.glass-lit.glass-lit-on.mobile-tab-active,
+.glass-lit:hover.mobile-tab-active,
+.glass-lit:focus-visible.mobile-tab-active {
   box-shadow:
     inset 0 1px 0 var(--glass-rim-lit),
     inset 0 1px 0 var(--glass-edge-lit),
     inset 0 -1px 0 var(--glass-edge-lit),
     inset 0 0 22px -14px var(--glass-glow-warm);
+}
+
+/* Tab Bar 的 tab 在**未选中**时，别把"点过一下就焊住的 hover 面光"留在上面。
+ *
+ * ⚠️ 用户实拍问题的另一半：点一下「关于」之后，那个 tab 一直泛着一层暖光，滚开也不脱开 ——
+ *    而首屏本来**没有任何 tab 该被选中**（`#top` 不在 Tab Bar 里），
+ *    看着就像"关于 莫名其妙被选中了"。
+ *
+ * 修法（两段，缺一不可）：
+ *   ① 面光（`::after` 的 opacity）在这里压掉；
+ *   ② 琥珀环在这里也**彻底断开** —— 只压面光是不够的：环仍在，右边界跳变实测 **−76.1**。
+ *
+ * ⚠️⚠️ 为什么不靠 `.touch-tap`（那个 60ms 的钩子）来挡环：**它只活 60ms，而 `:hover` 是焊住的**。
+ *    实测：点一下 → 滚开 1200px → 回顶，`matches(':hover')` 还是 `true`，而 `.touch-tap` 早没了。
+ *    "点一下别焊死"这件事对 `.glass-lit` 一族本来就没解（触屏的 `:hover` 只被后续点击解除），
+ *    所以这里不去治根，而是**让 hover 在 Tab Bar 上不产生任何视觉** ——
+ *    本组件的"当前项"由 `.glass-lit-on` + `.mobile-tab-active` 表达，本来就不需要 hover 这一档。
+ *
+ * ⚠️ 副作用（已知并接受）：**触屏笔记本 / 带鼠标的平板**上，底部 tab 不再有悬停反馈。
+ *    用触屏是主场景（这一栏只在小屏出现），代价可接受；真机与真鼠标都验过形状没变。
+ * ⚠️ 别用 `.touch-tap` 那套全局兜底（index.css 里记着它为什么被撤：会与
+ *    `.glass-lit-scrolled` 打架，出现"一按就灭"）—— 这里只点名 Tab Bar 一族。
+ */
+.glass-lit.mobile-tab:hover:not(.glass-lit-on):not(.glass-lit-press):not(.glass-lit-scrolled) {
+  box-shadow: none;
+}
+
+.glass-lit.mobile-tab:hover:not(.glass-lit-on):not(.glass-lit-press):not(.glass-lit-scrolled)::after {
+  opacity: 0;
 }
 
 /* ===== 触屏上的两级反馈（2026-09 第十四轮）=====

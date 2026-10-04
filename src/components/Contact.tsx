@@ -11,9 +11,19 @@ import SectionHeading from './SectionHeading'
  * 差别只有图标与文案。`--chip-*` / `--glass-*` 两套 token 已经覆盖深浅色，
  * 这里不需要任何 `dark:` 变体（旧的 `border-slate-300 bg-white … dark:bg-slate-900`
  * 手工配对正是"框纯色"的来源，已删）。
+ *
+ * ⚠️⚠️ 2026-10 用户定向：「联系我改成亮**外部的**大卡片，不亮内部的几个小按钮」。
+ *    这里就是把"照亮"从这四颗小件上摘掉 —— `.glass-lit` 整族去掉，改用
+ *    `glass-chip` + 需要的手势样式：
+ *      · `.glass-lit` 同时提供「悬停泛光」与「滚动照亮（`.glass-lit-scrolled`）」，
+ *        两者都挂在这个类上，所以只去掉 `data-scroll-lit` 是摘不干净的（外层卡片会与
+ *        这四颗小件**同时**亮，正是用户否掉的"一起动起来很乱"）。
+ *      · 去掉后：四颗按钮仍有 `glass-chip` 的底/边/文字色与 `transition-colors`，
+ *        **按下仍是可点的**，只是不再有那层暖色泛光。
+ *    代价（用户已明确选择）：悬停/按压的暖光反馈也一并消失。
  */
 const chipClass =
-  'glass-chip glass-lit inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold transition-colors'
+  'glass-chip inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold transition-colors'
 
 export default function Contact() {
   const toast = useToast()
@@ -30,11 +40,18 @@ export default function Contact() {
         />
 
         <Reveal delay={100} className="mt-12">
-          {/* ⚠️ 这块大面板**不加** `.glass-lit`：面积太大，整面泛光会显得浮夸，
-                而且面板内部四颗按钮各有自己的泛光，一起动起来很乱
-                （用户 2026-09：「外面那个大框不需要玻璃特效，太浮夸，一起动起来不好看」）。
-                玻璃材质本身照旧由 `.glass-panel` 提供。 */}
-            <div className="glass-panel relative overflow-hidden rounded-3xl p-8 text-center sm:p-12">
+          {/* ⚠️ 材质说明（两轮用户的取向，别只看一半）：
+              · 2026-09：「外面那个大框不需要玻璃特效，太浮夸，一起动起来不好看」
+                → 当时**故意不加** `.glass-lit`；
+              · 2026-10 定向（本条）：**改成亮外面这块大卡片、不亮里面那四颗小按钮**
+                → 所以 `.glass-lit` 加回来（它是"可被照亮"的入口），
+                  同时把四颗小按钮的 `.glass-lit` 摘掉（见 `chipClass`）。
+              两句合起来的新口径是：**整块面板一个光源，内部小件不各自泛光** ——
+              既满足"不要一起动"，又让"视线所在"落到这块卡片上。
+              ⚠️ 面板本身已经是 `position: relative` + `overflow-hidden`，
+                 `.glass-lit` 只要求 `position: relative` 与 `isolation: isolate`，
+                 所以加它不会动到既有布局。 */}
+            <div className="glass-panel glass-lit relative overflow-hidden rounded-3xl p-8 text-center sm:p-12">
             {/* 联系区原本有一层"局部网格"。⚠️ 2026-09 第十二轮**整层删除**，
                 理由同 Hero：与 `body::before` 的全局网格叠成两层。
                 现在全站背景只有"暖画布 + 宣纸纤维"（`.paper-layer`）。 */}

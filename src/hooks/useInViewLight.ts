@@ -59,9 +59,36 @@ export function useInViewLight(root: RefObject<HTMLElement | null>) {
     /** ② 锚点：视口高度的 42% 处 */
     const anchorY = () => window.innerHeight * 0.42
 
+    /**
+     * 判定线的**有效位置**：末尾（没有内容的那一段）够不到时，把线拉回够得到的地方。
+     *
+     * ⚠️⚠️ 为什么必须有这条（2026-10 用户实拍："教育背景的证书和奖项位置会卡住，
+     *    联系我部分只显示第一个邮箱选中"）：
+     *    锚点固定在视口 42%，而**内容末尾之下还有一大段滚不到的东西**（页脚 + 收尾呼吸区）。
+     *    实测（390×844）：`scrollHeight = 11084`，但 `#contact` 的底大约在 10935 ——
+     *    文档末尾比内容末尾还低 **1100px 左右**。于是滚到底时，内容末尾早已升到视口顶部附近
+     *    （`contact.bottom ≈ 90`，链接卡片在 **top 263~462**），而锚点还在 354：
+     *    最后几张卡的中心要么在锚点下方、要么已经"滑过去"，**永远等不到被选中那一刻**。
+     *    表现就是"卡在证书/奖项中间"、"只亮第一个邮箱"，再滚也不换。
+     *
+     * 修法：把线**夹到末尾**（`Math.min`）——
+     *   · 正常滚动（末尾还在视口下方）→ `contentEnd >= viewportH` → 返回 `anchorY()`，**行为不变**；
+     *   · 滚到末尾那一段 → 线跟着末尾一起往下走，最后几张卡于是能依次跨过它。
+     * ⚠️ 用 `#contact`（内容末尾）而不是 `scrollHeight`（文档末尾）：后者含页脚与呼吸区，
+     *    到底时算出来是 **0**，会把线拉到视口顶，反而"选中视口里最上面那个"（实测踩过）。
+     */
+    const contentEndEl = document.getElementById('contact')
+    const effectiveAnchorY = () => {
+      const viewportH = window.innerHeight
+      const endRect = contentEndEl?.getBoundingClientRect()
+      const contentEnd = endRect ? endRect.bottom : document.documentElement.scrollHeight - window.scrollY
+      if (contentEnd >= viewportH) return anchorY()
+      return Math.min(anchorY(), contentEnd)
+    }
+
     const scan = () => {
       raf = 0
-      const y0 = anchorY()
+      const y0 = effectiveAnchorY()
       let best: Element | null = null
       let bestDist = Infinity
       for (const el of live) {

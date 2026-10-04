@@ -65,11 +65,25 @@ export default function MobileTabBar() {
               href={`#${tab.id}`}
               onClick={(e) => onAnchorClick(e, tab.id)}
               aria-current={isActive ? 'page' : undefined}
-              className={`glass-lit flex min-h-[3.25rem] flex-1 flex-col items-center justify-center gap-0.5 text-[11px] font-medium transition-colors ${
+              className={`glass-lit mobile-tab flex min-h-[3.25rem] flex-1 flex-col items-center justify-center gap-0.5 text-[11px] font-medium transition-colors ${
                 isActive
                   ? 'glass-lit-on glass-chip-on mobile-tab-active font-semibold'
                   : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
               }`}
+              /**
+               * ⚠️⚠️ `data-scroll-lit="off"`：**不要让底部 tab 参与「滚动照亮」**。
+               *
+               * 这一栏是 `fixed bottom-0`，永远落在视口里、且 5 个 tab 都带 `.glass-lit` ——
+               * 于是 `useInViewLight` 的候选集里一直有它们，而靠近页面末尾时，
+               * **内容卡片都被"内容末尾"这条线推到锚点上方或下方，tab 却永远稳稳压在视口底部附近**，
+               * 结果高亮会选中一个 tab（视觉上就是"什么都没亮"），
+               * 真实症状就是用户看到的「联系我部分只亮第一个邮箱 / 教育背景卡住」。
+               *
+               * 这个属性是 `useInViewLight` 本来就支持的例外机制（用于筛选胶囊与文档区目录，
+               * 理由见那边的注释："照亮材质与已选中的分辨不出来"）—— 底部 tab 属于同一族：
+               * 它自己的选中态本来就常驻点亮，不该再叠一层"视线所在"。
+               */
+              data-scroll-lit="off"
             >
               <svg viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5" aria-hidden="true">
                 <path d={tab.icon} />
