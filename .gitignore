@@ -22,11 +22,24 @@ scripts/_*.mjs
 .dsh-chk/
 .dsh-live/
 .dsh-msg.txt
+# ⚠️ 2026-10 补两条（审计抓到过实际残留）：
+#   ① `.dsh-shots/.chrome-profile/` 是**验证脚本用的 Chrome 用户目录**，实测累积到 26.5 MB / 450 个文件
+#      （缓存、Login Data、扩展状态）。它躺在 `.dsh-shots/` 里所以没进 git，但白占体积 ——
+#      上面那条目录规则已经盖住它，这里显式写出来是为了让下一个人知道它是什么、可以随时删。
+#   ② 根目录的 `.tmp-*/` 是"一次性排查"的落点：`.tmp-thesis/`（论文转换）与 `.tmp-scroll/`（滚动侦测实测）
+#      都踩过"既没进 git、也没被忽略"的状态 —— 不是漏洞，但会让 `git status` 一直挂着噪音。
+.dsh-shots/.chrome-profile/
+.tmp-*/
 # 文档区的构建产物：源在 docs/<分区>/source/，页面与清单由 build-docs.mjs 生成。
 # predev / prebuild 钩子会自动重建，所以不需要提交 —— 提交了反而会「忘了重跑 →
 # 站点还是旧内容」而构建照样成功（这个坑以前在 docs/联动维护点.md 里记着）。
 public/docs/pages/
 src/data/docs.json
+# 原件 PDF 的**复制品**（2026-10 B-2 起）：源在 docs/<区>/source/pdf/（进 git），
+# build-docs.mjs 每次构建会把它复制到 public/docs/<区>/source/pdf/ —— 那份是产物，别提交。
+# ⚠️ 只忽略 source/ 这一层，不要写成 `public/docs/theory/`：那条会连将来可能放进来的
+#    images/ 资产一起忽略掉（教训同下）。
+public/docs/*/source/
 # ⚠️ 例外：docs/thesis/source/thesis.html **是源不是产物**（Word → pandoc 的一次性转换结果，
 #    平时不动、改论文才重跑 npm run docs:thesis）。上面那条 `src/data/docs.json` 之类的规则
 #    很容易被顺手扩写成 `docs/thesis/source/`，所以这里显式钉一条否定规则。

@@ -27,7 +27,7 @@
 //
 // 5. 生成物（`public/docs/**/*.html` 与 `src/data/docs.json`）**不进 git**，
 //    由 `predev` / `prebuild` 钩子自动重建。源在 `docs/<区>/source/`，那才是要提交的东西。
-import { readFileSync, writeFileSync, mkdirSync, existsSync, rmSync, readdirSync } from 'node:fs'
+import { readFileSync, writeFileSync, mkdirSync, existsSync, rmSync, readdirSync, statSync, copyFileSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -95,26 +95,51 @@ const SOURCES = [
     file: 'thesis/source/thesis.html',
     format: 'html',
     title: '基于借阅大数据的图书推荐系统的设计与实现',
+    /**
+     * 面包屑里显示的**文档名**（比 `title` 短）。
+     *
+     * 为什么需要它（2026-10 定稿）：面包屑在手机上被收成**恒定一行**，而这一篇的文档名
+     * 「基于借阅大数据的图书推荐系统的设计与实现」15 字 ≈ 220px（11px 字号），
+     * 加上序号与本页标题就顶到 390px 的眼睛上了 —— 实测它是全站**唯一**会被省略号截断的文档名。
+     * 用户定向：「像这种实际看着会很长的都可以单独处理」。
+     *
+     * ⚠️ 只影响**页头面包屑那一段**，论文正文标题、左栏、清单都不受影响；
+     *    完整名字仍进面包屑的 `title` 属性（悬停可看）与读屏文本。
+     */
+    displayName: '借阅大数据图书推荐系统',
     subtitle: '本科毕业设计 · 数据科学与大数据技术 · 2023',
     order: 1,
     split: { levels: [1, 2, 3, 4] },
+    /**
+     * 按**标题原文**覆盖页头的显示标题（键是构建期算出来的页标题）。
+     *
+     * ⚠️ 为什么用标题原文当键而不是页 id：页 id 是 slug 产物（`摘-要-abstract`），
+     *    改一次标题就静默失配；标题原文改了本来就要重新确认，失配会**看得见**。
+     *    目前只有这一条：`摘 要 / Abstract` 混了中英文，在窄屏上是全站最长的一个标题。
+     */
+    pageDisplayTitles: { '摘 要 / Abstract': '摘要' },
   },
 
   {
     id: 'unreal5-notes',
     section: 'theory',
-    file: 'theory/source/unreal5-notes.md',
+    // ⚠️ 2026-10 起源按类型分区：`source/md/` 放 markdown，`source/pdf/` 放原件（见 docs/联动维护点.md 13.9-F）
+    file: 'theory/source/md/unreal5-notes.md',
     format: 'md',
     title: '虚幻引擎总览',
     subtitle: '环境准备、Fab、项目模板、界面与快捷键',
     order: 1,
     group: '入门',
     split: { mode: 'per-heading' },
+    /**
+     * ⚠️ **不配 `download`**（用户 2026-10 定向）：这一篇后续还要继续更新，
+     *    捆绑一份会过期的 PDF 反而更糟。其余四篇已定稿，才配原件下载。
+     */
   },
   {
     id: 'blueprint-base',
     section: 'theory',
-    file: 'theory/source/blueprint-base.md',
+    file: 'theory/source/md/blueprint-base.md',
     format: 'md',
     title: '蓝图基础',
     subtitle: '蓝图类、父类体系与 UE 对象模型',
@@ -122,11 +147,12 @@ const SOURCES = [
     group: '蓝图',
     prereq: 'unreal5-notes',
     split: { mode: 'per-heading' },
+    download: { file: 'theory/source/pdf/blueprint-base.pdf' },
   },
   {
     id: 'ue5-window-base',
     section: 'theory',
-    file: 'theory/source/ue5-window-base.md',
+    file: 'theory/source/md/ue5-window-base.md',
     format: 'md',
     title: '界面基础操作',
     subtitle: '菜单栏、标签页、主工具栏、视口工具栏、大纲视图、底边栏',
@@ -134,11 +160,12 @@ const SOURCES = [
     group: '界面',
     prereq: 'unreal5-notes',
     split: { mode: 'per-heading' },
+    download: { file: 'theory/source/pdf/ue5-window-base.pdf' },
   },
   {
     id: 'ue5-window-advanced',
     section: 'theory',
-    file: 'theory/source/ue5-window-advanced.md',
+    file: 'theory/source/md/ue5-window-advanced.md',
     format: 'md',
     title: '界面进阶操作',
     subtitle: '菜单栏、视口工具栏、大纲视图、内容侧滑菜单',
@@ -146,11 +173,12 @@ const SOURCES = [
     group: '界面',
     prereq: 'ue5-window-base',
     split: { mode: 'per-heading' },
+    download: { file: 'theory/source/pdf/ue5-window-advanced.pdf' },
   },
   {
     id: 'blueprint-program-base',
     section: 'theory',
-    file: 'theory/source/blueprint-program-base.md',
+    file: 'theory/source/md/blueprint-program-base.md',
     format: 'md',
     title: '蓝图编程基础',
     subtitle: '增强输入、角色与视角移动、自动门、第三人称运动与动画',
@@ -158,12 +186,13 @@ const SOURCES = [
     group: '蓝图',
     prereq: 'blueprint-base',
     split: { mode: 'per-heading' },
+    download: { file: 'theory/source/pdf/blueprint-program-base.pdf' },
   },
 
   {
     id: 'fps-game-notes',
     section: 'combat',
-    file: 'combat/source/fps-game-notes.md',
+    file: 'combat/source/md/fps-game-notes.md',
     format: 'md',
     title: 'FPS 游戏实战',
     subtitle: '从零做一个可玩的第一人称射击关卡',
@@ -174,7 +203,7 @@ const SOURCES = [
   {
     id: 'challenge-game-notes',
     section: 'combat',
-    file: 'combat/source/challenge-game-notes.md',
+    file: 'combat/source/md/challenge-game-notes.md',
     format: 'md',
     /* 用户 2026-09：这一篇是「闯关游戏实战」，不是「挑战游戏实战」（源里的 H1 就是「闯关游戏实战」） */
     title: '闯关游戏实战',
@@ -200,6 +229,8 @@ const IMAGE_ROOTS = {
 }
 
 const OUT_ROOT = join(root, 'public', 'docs', 'pages')
+/** 站点静态根（`public/` 里的 `docs/`）—— 原件 PDF 的**复制目标**也在这里。 */
+const PUB_DOCS = join(root, 'public', 'docs')
 const MANIFEST_PATH = join(root, 'src', 'data', 'docs.json')
 
 /* ============================ 工具 ============================ */
@@ -1065,6 +1096,36 @@ for (const p of pages) {
 }
 const firstReady = (sourceId) => (pagesOfSource.get(sourceId) ?? []).find((p) => p.status === 'ready') ?? null
 
+/**
+ * 源的「原件下载」信息 → 写进 manifest。
+ *
+ * ⚠️ 断言的是**复制之后**在 `public/docs/<download.file>` 的位置 —— 源在 `docs/<区>/source/pdf/`，
+ *    由上面那段「PDF 复制」搬过去（两处路径必须一起改）。
+ *
+ * 为什么在**构建期 stat 一次**、而不是把大小写死在配置里：
+ *   大小是文件的事实，写死就会漂移（换了 PDF 忘了改数，页面上写着 8.2 MB 实际 16 MB）。
+ *   这里读不到文件时**直接抛**，让构建当场红掉 —— 否则会安静地生成一个 404 的下载按钮。
+ *
+ * `href` 是**相对 public/ 的路径**（与 `html` 字段同一口径），前端按 `import.meta.env.BASE_URL`
+ * 补前缀、再补 `DOCS_FETCH_BASE`（`docs`）—— 见 `Docs.tsx` 里那条长注释与 `types.ts` 的提醒。
+ */
+function downloadInfo(srcCfg) {
+  const rel = srcCfg.download.file
+  const abs = join(PUB_DOCS, rel)
+  if (!existsSync(abs)) {
+    throw new Error(
+      `[docs] ${srcCfg.id} 声明了原件下载，但 public/docs/${rel} 不存在。\n` +
+        `        源应在 docs/${rel}（由 scripts/compress_attachments.py 生成），构建会把它复制过去。`,
+    )
+  }
+  const bytes = statSync(abs).size
+  return {
+    href: rel, // 相对 public/：`theory/source/pdf/x.pdf`
+    bytes,
+    mb: Math.round((bytes / 1048576) * 10) / 10, // 一位小数，界面直接用
+  }
+}
+
 /* --- 5) 渲染正文 --- */
 /** 把整段 HTML 里的标题层级整体平移 delta（用于把页面主题标题归一到 h2） */
 function relevelHtml(html, delta) {
@@ -1318,6 +1379,28 @@ for (const entry of existsSync(join(root, 'public', 'docs')) ? readdirSync(join(
   }
 }
 
+/**
+ * 原件（PDF）**从 docs/ 复制到 public/**。
+ *
+ * ⚠️⚠️ 为什么必须有这一步（2026-10 实测踩过）：
+ *    用户定向 B-2 要「md 与 pdf 分文件夹、都放在 docs/<区>/source/ 下」，
+ *    所以 PDF 的**唯一来源**在 `docs/<区>/source/pdf/`（进 git）。
+ *    但站点只能从 `public/` 出东西 —— PDF 不复制过去，浏览器拿到的是静态服务器
+ *    兜底的 index.html（表现是"点下载得到一张网页"，实测就是这个）。
+ *    `downloadInfo()` 的 `href` 断言的是**复制之后**在 public/ 里的位置，
+ *    所以这一步必须排在 `manifestPages` 之前（下面 downloadInfo 会 stat 目标文件）。
+ *    ⚠️ 与 `public/docs/pages/` 不同：那份是**产物**、不进 git（见 .gitignore），
+ *       而这份复制品同样不进 git —— 源在 docs/ 里，是它进 git。
+ */
+for (const src of SOURCES) {
+  if (!src.download) continue
+  const from = join(root, 'docs', src.download.file)
+  const to = join(PUB_DOCS, src.download.file)
+  if (!existsSync(from)) continue // 交给 downloadInfo 抛，报错口径统一在一处
+  mkdirSync(dirname(to), { recursive: true })
+  copyFileSync(from, to)
+}
+
 const manifestPages = []
 for (const p of pages) {
   const relHtml = `${p.section}/${p.id}.html`
@@ -1327,12 +1410,22 @@ for (const p of pages) {
     writeFileSync(join(OUT_ROOT, relHtml), `<span id="doc-top" aria-hidden="true"></span>\n${p.content}`, 'utf8')
   }
   const pre = p.prereqId ? firstReady(p.prereqId) : null
+  const srcCfg = SOURCES.find((s) => s.id === p.source)
   manifestPages.push({
     id: p.id,
     section: p.section,
     source: p.source,
     chapter: p.chapter,
     title: p.title,
+    /**
+     * 页头显示用的短标题（可选）。键是源的 `pageDisplayTitles`，**按标题原文匹配**。
+     * 没配就是 `title` 本身 —— 组件那边 `displayTitle ?? title`。
+     */
+    displayTitle: srcCfg?.pageDisplayTitles?.[p.title] ?? null,
+    /** 文档名的短显示名（可选）。面包屑的根那一段用；没配就用 `docName`/`chapter`。 */
+    docDisplayName: srcCfg?.displayName ?? null,
+    /** 本源的「原件下载」（可选）。**构建期 stat 出真实字节数**，界面侧的 MB 数永不漂移。 */
+    download: srcCfg?.download ? downloadInfo(srcCfg) : null,
     /** 左栏的分组层级（源 → 这些标题 → 本页）。空数组 = 直接挂在源下面 */
     ancestors: p.ancestors ?? [],
     /** 本页实际装了哪几节（>1 时左栏悬停提示「还包含…」） */

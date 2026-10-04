@@ -4,6 +4,7 @@ import {
   SCROLL_MARGIN_MOBILE_PX,
 } from '../data/scrollTargets'
 import { HERO_ID } from '../data/navigation'
+import { announceAnchorScroll, announceAnchorScrollEnd } from './useScrollSpy'
 
 /**
  * 锚点跳转（统一入口）。
@@ -67,15 +68,25 @@ export function useAnchorScroll() {
     const el = document.getElementById(id)
     // 首屏：直接回到 0，不需要 scroll-margin 参与
     if (id === HERO_ID || !el) {
+      announceAnchorScroll(HERO_ID)
       window.scrollTo({ top: 0, behavior: 'smooth' })
       window.clearTimeout(pending.current)
       void settleAndMeasure(null, 0).then((err) => {
         if (err > TOLERANCE_PX) window.scrollTo(0, 0)
+        // ⚠️ 恢复侦测必须放在**纠正之后**：先释放的话，纠正那一次瞬时跳会再触发一遍侦测
+        announceAnchorScrollEnd()
       })
       return
     }
 
     const expected = expectedOffset()
+    /**
+     * ⚠️ 顺序不能反（2026-10 修「高亮一路接力」）：
+     *    先广播抑制 + 把高亮置到目标，**再**开始平滑滚动。
+     *    反过来的话，滚动动画的头几帧仍会被侦测按真实位置收走，
+     *    高亮会先跳到"关于我"再跳到目标 —— 那正是要消掉的现象。
+     */
+    announceAnchorScroll(id)
     el.scrollIntoView({ block: 'start', behavior: 'smooth' })
 
     window.clearTimeout(pending.current)
@@ -84,6 +95,7 @@ export function useAnchorScroll() {
       if (err > TOLERANCE_PX) {
         el.scrollIntoView({ block: 'start', behavior: 'instant' as ScrollBehavior })
       }
+      announceAnchorScrollEnd()
     })
   }, [])
 

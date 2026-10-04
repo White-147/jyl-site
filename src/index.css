@@ -825,6 +825,27 @@ html.docs-shell .footer-seal-mark {
   }
 }
 
+/* ===== 「去侧边」修饰符：只摘掉玻璃面板的左右 1px 边 =====
+ *
+ * 用户 2026-10 定向（手机端底部 Tab Bar）：「除了选中高亮以外，还有个两侧边框，
+ * 那个看着很奇怪，我希望可以删掉」。
+ *
+ * ⚠️⚠️ **不能用 Tailwind 的 `border-x-0` / `border-t-0` 工具类做这件事** ——
+ *    `.glass-panel` 的 `border: 1px solid var(--panel-edge)` 是**简写属性**，而本文件的所有规则
+ *    都写在 `@import "tailwindcss"` **之后**，源序上排在工具类后面，于是简写每次都赢。
+ *    实测：`Docs.tsx` 的手机吸顶条上早就写了 `border-x-0 border-t-0`（本意是"只留底边"），
+ *    但四条边实测全是 **1px / 1px / 1px / 1px** —— 那三个工具类从来没生效过。
+ *    所以这里用一个普通类，与本文件其它"要覆盖 Tailwind"的地方同一套做法。
+ *
+ * ⚠️ 为什么只摘左右、保留上下：上下两条是玻璃的「受光 / 压地」内高光边，
+ *    整块去掉就不像一块玻璃了；而且只摘左右时圆角处不会断开（四条全去才会）。
+ * ⚠️ `border-inline` 而不是 `border-left/right`：逻辑属性，与 `border` 简写的四条同源，
+ *    将来若要接 RTL 也不用改。
+ */
+.glass-panel-sides-off {
+  border-inline: 0;
+}
+
 /* 卡片层级（DESIGN.md）：薄玻璃与实心面板两档，色值同样只走变量。
    原 glass-card / glass-card-strong 带 backdrop-filter，但静态卡片坐在固定背景层上，
    模糊的视觉收益接近零、合成开销真实存在，故这两档**不加折射**（折射只在 .glass-panel）。

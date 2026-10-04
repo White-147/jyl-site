@@ -174,6 +174,28 @@ export interface DocPage {
    *    而这一页实际装的是 2.1 大数据平台 —— 真正的主题反而看不到。
    */
   title: string
+  /**
+   * 页头显示用的**短标题**（可选，构建期由 `SOURCES[].pageDisplayTitles` 按标题原文写入）。
+   *
+   * 用途：有些标题本身在窄屏上就是全站最长的（如 `摘 要 / Abstract`），
+   * 页头面包屑只留一行时它会把别的段挤没。没配时组件用 `title` 本身。
+   * ⚠️ 只影响页头；正文标题、左栏、篇尾「下一篇」都仍用 `title`。
+   */
+  displayTitle?: string | null
+  /**
+   * 文档名的**短显示名**（可选，构建期由 `SOURCES[].displayName` 写入）。
+   * 面包屑根那一段优先用它；没配时回落到 `docName` / `chapter`。完整名进 `title` 属性。
+   */
+  docDisplayName?: string | null
+  /**
+   * 本源的「原件下载」（可选）。构建期 stat 出真实字节数，界面直接用，**不在组件里算**。
+   *
+   * ⚠️ `href` 相对 **`public/`**（与 `html` 字段同口径，如 `theory/source/pdf/x.pdf`），
+   *    但文件实际落在 `public/docs/...` 下 —— 前端拼地址时**必须带上 `DOCS_FETCH_BASE`**
+   *    （`src/data/docs.ts` 的 `docs`），漏了会请求到一个不存在的路径、
+   *    被静态服务器兜底成 index.html（表现是"下载得到一张网页"）。
+   */
+  download?: { href: string; bytes: number; mb: number } | null
   /** 左栏层级：源 → ...ancestors → 本页。空数组 = 直接挂在源下面 */
   ancestors: string[]
   /** 本页实际装了哪几节（装箱会把相邻小节并成一页）；>1 时左栏提示「还包含…」 */
@@ -213,4 +235,26 @@ export interface DocsManifest {
   docTitles?: Record<string, string | null>
   sections: DocSection[]
   pages: DocPage[]
+}
+
+/* ---------- 页头「动作」的派生类型（Docs.tsx 用，不在数据里） ---------- */
+
+/**
+ * 页头动作行的**一项**。
+ *
+ * ⚠️ 口径（用户 2026-10 定向）：**每个区恒一个动作**，不是每页多个 ——
+ *    毕业论文 = 「配套项目 →」；UE 理论 = 「原件下载 PDF」；UE 实战 = 「配套项目 →」（Demo）。
+ *    所以动作行永远不会因为条目变多而长高，页头高度是确定的。
+ * ⚠️ 优先级写在 `Docs.tsx` 的 `pageActions` 里：原件下载 > 配套项目 > 前置。
+ */
+export interface DocAction {
+  key: 'download' | 'project'
+  label: string
+  href: string
+  /** 悬停提示。⚠️ 不放进可见文案（用户否掉了「在按钮里写 8.2 MB」），完整名与体积都进这里 */
+  title: string
+  /** 是否新窗口打开（跨视图的 `#` 锚点不需要） */
+  external: boolean
+  /** 触发浏览器下载（同源文件；跨域时该属性会被忽略，所以只对本站文件用） */
+  download?: boolean
 }

@@ -8,7 +8,7 @@
 //   · 一篇源拆出来的页数变了，但路由 / 互链还停在旧页
 //   · 预算被悄悄突破（某次改版面常量后普遍变长）
 // 这些都是"构建成功但功能坏了"，只能靠断言拦。改动版面 / 拆分逻辑后请跑一次。
-import { readFileSync, existsSync } from 'node:fs'
+import { readFileSync, existsSync, statSync, readdirSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -157,13 +157,23 @@ const norm = (s) =>
     .replace(/\s+/g, '')
     .trim()
 
-/** 源 id → 它的源文件（按分区找 .html 或 .md） */
+/**
+ * 源 id → 它的源文件。
+ *
+ * ⚠️ 2026-10 起目录按**类型**分区（用户定向 B-2）：
+ *      `docs/<区>/source/md/*.md`（markdown 快照）
+ *      `docs/<区>/source/pdf/*.pdf`（原件，浏览器下载用）
+ *    论文那份是 pandoc 产物，仍留在 `source/thesis.html` 原位（它是 html，不属于 md 这一类）。
+ *    ⚠️ 旧的「直接放 source/ 下」这一档**必须保留**：论文（和将来可能的新源）就是这种，
+ *       去掉它会让对账直接报「找不到源文件」。
+ */
 const sourceFile = (section, id) => {
-  for (const ext of ['.html', '.md']) {
-    const p = join(root, 'docs', section, 'source', `${id}${ext}`)
-    if (existsSync(p)) return p
-  }
-  return null
+  const candidates = [
+    join(root, 'docs', section, 'source', 'md', `${id}.md`),
+    join(root, 'docs', section, 'source', `${id}.html`),
+    join(root, 'docs', section, 'source', `${id}.md`),
+  ]
+  return candidates.find((p) => existsSync(p)) ?? null
 }
 
 {
@@ -178,7 +188,7 @@ const sourceFile = (section, id) => {
   for (const [id, info] of bySource) {
     const file = sourceFile(info.section, id)
     if (!file) {
-      fail(`找不到源文件：docs/${info.section}/source/${id}.(html|md)`)
+      fail(`找不到源文件：docs/${info.section}/source/md/${id}.md（或 source/${id}.html）`)
       continue
     }
     const raw = readFileSync(file, 'utf8')
@@ -269,6 +279,47 @@ for (const p of ready) {
   if ((p.ancestors ?? []).some((a) => a.replace(/\s+/g, '') === first)) {
     fail(`正文从祖先标题开始：[${p.section}/${p.id}] 页面标题是「${p.title}」，正文却从「${first}」开始`)
   }
+}
+
+/* ---- 8. 原件下载：声明了就必须在 public/ 里真有那个文件，且与清单里的字节数一致 ----
+ *
+ * 2026-10 加（B-2 目录规整的配套断言）。为什么必须有一条：
+ *   PDF 的**源**在 `docs/<区>/source/pdf/`，站点只能从 `public/` 出东西 ——
+ *   `build-docs.mjs` 每次构建会把它复制到 `public/docs/<区>/source/pdf/`。
+ *   这一步一旦被删/写错路径，**构建照样成功**，症状是"点了下载得到一张网页"
+ *   （静态服务器把不存在的路径兜底成 index.html）。实测就是这么踩到的，
+ *   所以这里按 manifest 里记的字节数逐个核对，不靠肉眼。
+ */
+{
+  const withDl = ready.filter((p) => p.download)
+  const checkedSources = new Set()
+  let n = 0
+  for (const p of withDl) {
+    if (checkedSources.has(p.source)) continue
+    checkedSources.add(p.source)
+    const abs = join(OUT_ROOT, p.download.href)
+    if (!existsSync(abs)) {
+      fail(`原件缺失：public/docs/${p.download.href}（源 ${p.source}）—— 检查 build-docs.mjs 的复制步骤`)
+      continue
+    }
+    const bytes = statSync(abs).size
+    if (bytes !== p.download.bytes) {
+      fail(`原件体积与清单不一致：${p.download.href} 实际 ${bytes} 字节，清单写 ${p.download.bytes} —— 重跑 docs:build`)
+      continue
+    }
+    notes.push(`原件 ${p.download.href} · ${p.download.mb} MB · ${bytes} 字节，与清单一致`)
+    n++
+  }
+  /* 反向：清单没声明下载的源，public/ 里不该多出 PDF（多出来就是没清理干净的残留） */
+  for (const s of manifest.sections) {
+    const dir = join(OUT_ROOT, s.id, 'source', 'pdf')
+    if (!existsSync(dir)) continue
+    for (const f of readdirSync(dir)) {
+      const owner = ready.find((p) => p.download && p.download.href.endsWith(`/${f}`))
+      if (!owner) fail(`多余的 PDF：public/docs/${s.id}/source/pdf/${f}（清单里没有源声明它）`)
+    }
+  }
+  if (n) notes.push(`原件下载共 ${n} 个源`)
 }
 
 /* ---- 汇总 ---- */

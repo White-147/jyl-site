@@ -1,7 +1,7 @@
 import { Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import docsData from '../data/docs.json'
 import projectsData from '../data/projects.json'
-import type { DocsManifest, DocPage } from '../data/types'
+import type { DocsManifest, DocPage, DocAction } from '../data/types'
 import { DOCS_FETCH_BASE, docsHref } from '../data/docs'
 import Lightbox from './Lightbox'
 
@@ -393,6 +393,54 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
     const id = section.relatedProject
     return id ? (projectsData.projects.find((p) => p.id === id) ?? null) : null
   }, [section.relatedProject])
+
+  /**
+   * 页头「动作行」的内容 —— **每个区恒一个动作**（用户 2026-10 定向，见 `DocAction` 的注释）。
+   *
+   * | 区 | 动作 | 来源 |
+   * | --- | --- | --- |
+   * | 毕业论文 | 「配套项目 →」 | `SECTIONS[].relatedProject`（构建期声明，双向互链的另一半在 `projects.docs_url`） |
+   * | UE 理论 | 「原件下载 PDF」 | `SOURCES[].download`（**只给已定稿的四篇**；`unreal5-notes` 后续还要更新，不配） |
+   * | UE 实战 | 「配套项目 →」 | 同上，将来接 Demo 预览 |
+   *
+   * ⚠️ 优先级写死在这里、**不在数据里判断 id**：原件下载 > 配套项目 > 前置。
+   *    之所以"整区只有一个"是数据事实（`relatedProject` 只配在 thesis/combat，`download` 只配在 theory 四篇），
+   *    不是靠这里的顺序凑出来的 —— 万一将来同区两样都配了，顺序决定谁在前面，不会叠成两行。
+   */
+  const pageActions = useMemo<DocAction[]>(() => {
+    const out: DocAction[] = []
+    if (current?.download) {
+      const { href, mb } = current.download
+      out.push({
+        key: 'download',
+        label: '原件下载 PDF',
+        /* ⚠️⚠️ 必须补上 `DOCS_FETCH_BASE`（= `docs`）这一段。
+               manifest 里的 `href` 是**相对 public/** 的（`theory/source/pdf/x.pdf`），
+               PDF 落在 `public/docs/...` 下 —— 只拼 `BASE_URL` 会请求
+               `/theory/source/pdf/x.pdf`，被静态服务器的 index.html 兜底成 HTML，
+               表现是"点了下载得到一张网页"（实测踩过：返回 200 + text/html）。
+               与正文 HTML 的取法同源（那边是 `docs/` + manifest 的 `html` 字段）。 */
+        href: `${import.meta.env.BASE_URL}${DOCS_FETCH_BASE}/${href}`,
+        /* ⚠️ 体积与完整名都放 title，不进可见文案（用户 2026-10 定向）：
+              "原件下载 PDF" 本身 111px，再加 "· 8.2 MB" 会挤到动作行放不下第二项。 */
+        title: `${current.docName ?? current.chapter} · PDF 原件 · 约 ${mb} MB · 点击下载`,
+        external: false,
+        download: true,
+      })
+    }
+    if (relatedProject) {
+      out.push({
+        key: 'project',
+        label: '配套项目 →',
+        href: `#project-${relatedProject.id}`,
+        /* ⚠️ 项目名（BookRecommendation）只进 title：实测这一个链接宽 186.5px，
+              占 390px 行宽的一半，会把面包屑那一行挤爆（用户 2026-10 定向收进 title）。 */
+        title: `${relatedProject.name}：项目简介、技术栈与演示入口`,
+        external: false,
+      })
+    }
+    return out
+  }, [current, relatedProject])
 
   const [html, setHtml] = useState('')
   const [loading, setLoading] = useState(true)
@@ -1302,82 +1350,172 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
                 页头现在只回答「我在哪」：页码 + 来源文档 + 面包屑 + 前置 + 配套项目。
                 ⚠️ 但页面仍需一个 h1：用 `sr-only`（视觉隐藏、读屏与爬虫可见），
                    否则整页没有一级标题，文档结构不合法。 */}
-            <h1 className="sr-only">{current?.title ?? section.label}</h1>
-            <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1.5">
-              <span className="font-mono text-xs tabular-nums text-slate-400 dark:text-slate-500">
-                {String(current?.order ?? 1).padStart(2, '0')}
-              </span>
-              {/**
-               * ⚠️ **完整路径面包屑**（用户 2026-09 定向）：
-               *    `虚幻5引擎学习笔记 › 一、概况说明 › 1. 版本说明`
-               *
-               * 早先这里是「一个胶囊显示 `chapter`（配置里的篇名，如「虚幻引擎总览」）
-               * + `crumbs` 里那两级」。两个问题：
-               *   ① `crumbs` 来自构建期的 `pack` trail，而按序号切页走的是另一条路径 ——
-               *      实测**所有页 `crumbs` 都是空数组**，所以面包屑实际只有那个胶囊；
-               *   ② 胶囊显示的是**配置里的篇名**，不是**源里的文档名**（用户要的是后者）。
-               * 现在改成用 `docName`（源里的 H1，构建期写入 manifest）+ `ancestors`（祖先链）
-               * + 本页标题拼出来，并**逐段去重**（`ancestors` 末项有时等于本页标题）。
-               */}
+            <h1 className="sr-only">{current?.displayTitle ?? current?.title ?? section.label}</h1>
+            {/**
+             * ⚠️⚠️ **页头是「两行」，不是一行 flex-wrap**（2026-10 定稿，用户定向 A1+A2）。
+             *
+             * 旧结构把四件事塞进同一个 `flex-wrap` 容器：页码、面包屑、动作、前置。
+             * 于是**每个新链接都可能把页头撑高一行**（实测：手机上挂一个「原件下载 PDF」
+             * 会让页头从 84 → 126.8px，最长的论文页 320px 下到 149px）。用户原话：
+             * 「后续的跳转文本会进一步拉长顶部显示的长度」。
+             *
+             * 现在拆成两行，各自负责自己的溢出：
+             *   · 行 1 = 页码 + 面包屑 —— **恒一行**（`<640px` 只留 序号 › 文档名 › 本页标题，
+             *            中间的祖先段隐藏、文档名可收缩加省略号）；
+             *   · 行 2 = 动作 —— 一区一个，永远放得下，页头高度因此**确定**。
+             *
+             * ⚠️ 只在 `<640px` 拆行（`max-sm:`）。≥640px 一行放得下，拆了反而多 22.5px
+             *    （实测 1440px：39 → 69）。这是这一轮唯一的分端行为，别顺手改成全端。
+             *
+             * ⚠️ `leading-none` 不能省：外层容器继承正文的 `line-height: 1.85`，
+             *    每一行会被撑大 6–12px（实测踩过，量出来"越改越高"就是这个原因）。
+             *
+             * 完整链仍可从行 1 的 `title` 属性看到（悬停），读屏也读得到（文本节点没删，只是隐藏）。
+             */}
+            <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1.5 leading-none max-sm:flex-col max-sm:items-start max-sm:gap-y-2">
               {(() => {
                 /* ⚠️ 用 `ancestors`（构建期写好的**完整祖先链**），**不要用 `crumbs`** ——
                    实测 `crumbs` 恒为空数组（它来自 `pack` 的 trail，而按序号切页走另一条路径），
                    用它的话面包屑会退化成"文档名 › 页标题 › 页标题"（重复两遍，实测踩过）。 */
-                const chain = [
-                  current?.docName ?? current?.chapter ?? section.label,
-                  ...(current?.ancestors ?? []),
-                ]
+                const root = current?.docDisplayName ?? current?.docName ?? current?.chapter ?? section.label
+                const full = [root, ...(current?.ancestors ?? [])]
                   .filter(Boolean)
                   .filter((c, i, arr) => arr.indexOf(c) === i)
-                if (current?.title && chain[chain.length - 1] !== current.title) chain.push(current.title)
-                /** ⚠️ 用 `Fragment` 而不是再套一层 `<span>`：外层的 `gap` 会和父级的 `gap` 叠加，
-                    同一段路径在视觉上间距不一致（实测）。分隔符与文字都当**直接子元素**。 */
-                return chain.map((c, i) => {
-                  const last = i === chain.length - 1
-                  return (
-                    <Fragment key={`${c}-${i}`}>
-                      {i > 0 && (
-                        <span aria-hidden="true" className="text-[11px] text-slate-300 dark:text-slate-600">
-                          ›
+                const pageTitle = current?.displayTitle ?? current?.title
+                if (pageTitle && full[full.length - 1] !== pageTitle) full.push(pageTitle)
+                /* 窄屏只留「根 + 本页标题」；中间的祖先段由 CSS 隐藏（`max-sm:hidden`），
+                   而不是在这里删 —— 这样 ≥640px 一个数据源就够，不用两套链。 */
+                const hideFrom = 1
+                const hideTo = full.length - 2
+                return (
+                  <>
+                    {/* 行 1 的容器。`max-sm:flex-nowrap` + `min-w-0` 是"A2 恒一行"的关键：
+                        不写 nowrap 时它是 flex-wrap，照样会换行（试过，没用）。 */}
+                    <span className="contents max-sm:flex max-sm:w-full max-sm:flex-nowrap max-sm:items-baseline max-sm:gap-x-2.5">
+                      {current?.order != null && (
+                        <span className="shrink-0 font-mono text-xs tabular-nums text-slate-400 dark:text-slate-500">
+                          {String(current.order).padStart(2, '0')}
                         </span>
                       )}
-                      <span
-                        className={
-                          last
-                            ? 'text-[12px] font-medium text-slate-600 dark:text-slate-300'
-                            : 'text-[11px] text-slate-400 dark:text-slate-500'
-                        }
-                        aria-current={last ? 'page' : undefined}
-                      >
-                        {c}
+                      {/**
+                       * ⚠️ 用 `Fragment` 而不是再套一层 `<span>`：外层的 `gap` 会和父级的 `gap` 叠加，
+                          同一段路径在视觉上间距不一致（实测）。分隔符与文字都当**直接子元素**。
+                       */}
+                      {full.map((c, i) => {
+                        const last = i === full.length - 1
+                        const hidden = i >= hideFrom && i <= hideTo
+                        return (
+                          <Fragment key={`${c}-${i}`}>
+                            {i > 0 && (
+                              <span
+                                aria-hidden="true"
+                                className={`shrink-0 text-[11px] text-slate-300 dark:text-slate-600 ${
+                                  i - 1 >= hideFrom && i - 1 <= hideTo ? 'max-sm:hidden' : ''
+                                }`}
+                              >
+                                ›
+                              </span>
+                            )}
+                            <span
+                              /* `title` 给被省略号截断的那一段留后路（悬停可看全名）；
+                                 最后一段是"我在哪"，不截断。 */
+                              title={c}
+                              className={[
+                                last
+                                  ? 'text-[12px] font-medium text-slate-600 dark:text-slate-300'
+                                  : 'text-[11px] text-slate-400 dark:text-slate-500',
+                                hidden ? 'max-sm:hidden' : '',
+                                /* 文档名那一段（i === 1）允许收缩并加省略号；其余不缩 */
+                                i === hideFrom && hideTo >= hideFrom
+                                  ? 'max-sm:min-w-0 max-sm:shrink max-sm:overflow-hidden max-sm:text-ellipsis max-sm:whitespace-nowrap'
+                                  : 'shrink-0',
+                                i === 0 && hideTo < hideFrom ? 'max-sm:shrink' : '',
+                              ]
+                                .filter(Boolean)
+                                .join(' ')}
+                              aria-current={last ? 'page' : undefined}
+                            >
+                              {c}
+                            </span>
+                          </Fragment>
+                        )
+                      })}
+                    </span>
+                    {/* 行 2（动作）。`max-sm` 下独占一行；≥640px 回到行内。 */}
+                    {(pageActions.length > 0 || current?.prereq) && (
+                      <span className="contents max-sm:flex max-sm:w-full max-sm:flex-wrap max-sm:items-center max-sm:gap-x-2.5 max-sm:gap-y-1.5">
+                        {pageActions.map((a) => (
+                          <a
+                            key={a.key}
+                            href={a.href}
+                            title={a.title}
+                            {...(a.download ? { download: '' } : {})}
+                            {...(a.external ? { target: '_blank', rel: 'noopener noreferrer nofollow' } : {})}
+                            /* 动作型玻璃件：与篇尾「下一节」同一套（`.glass-btn`）。
+                               ⚠️ `shrink-0` + `whitespace-nowrap`：正是不让它被挤成两行。 */
+                            className="glass-lit glass-chip glass-btn inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-lg px-3.5 py-2 text-sm font-semibold transition-colors"
+                          >
+                            {a.key === 'download' && (
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5" aria-hidden="true">
+                                <path d="M12 3v12m0 0 4-4m-4 4-4-4M4 21h16" />
+                              </svg>
+                            )}
+                            {a.label}
+                          </a>
+                        ))}
+                        {/* 前置：告诉读者"这一篇不是入口"，避免从中间开始读而卡住 */}
+                        {current?.prereq && (
+                          <span className="shrink-0 text-xs text-slate-400 dark:text-slate-500">
+                            前置：
+                            <a
+                              href={docsHref(current.section, current.prereq.id)}
+                              className="text-brand-700 underline decoration-brand-300 underline-offset-2 hover:text-brand-800 dark:text-brand-200 dark:decoration-brand-500/50"
+                            >
+                              {current.prereq.title}
+                            </a>
+                          </span>
+                        )}
                       </span>
-                    </Fragment>
-                  )
-                })
+                    )}
+                  </>
+                )
               })()}
-              {relatedProject && (
-                <a
-                  href={`#project-${relatedProject.id}`}
-                  title={`${relatedProject.name}：项目简介、技术栈与演示入口`}
-                  className="text-[11px] text-brand-700 underline decoration-brand-300 underline-offset-2 hover:text-brand-800 dark:text-brand-200 dark:decoration-brand-500/50"
-                >
-                  配套项目：{relatedProject.name} →
-                </a>
-              )}
-              {/* 前置：告诉读者"这一篇不是入口"，避免从中间开始读而卡住 */}
-              {current?.prereq && (
-                <span className="text-xs text-slate-400 dark:text-slate-500">
-                  前置：
-                  <a
-                    href={docsHref(current.section, current.prereq.id)}
-                    className="text-brand-700 underline decoration-brand-300 underline-offset-2 hover:text-brand-800 dark:text-brand-200 dark:decoration-brand-500/50"
-                  >
-                    {current.prereq.title}
-                  </a>
-                </span>
-              )}
             </div>
-            {current?.subtitle && <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">{current.subtitle}</p>}
+            {/**
+             * 窄屏的**完整路径播报**（用户 2026-10 定向：「读屏能听全路径可以加」）。
+             *
+             * 为什么需要它：`<640px` 时中间的祖先段是 `display:none`（视觉上只留
+             * 序号 › 文档名 › 本页标题），而 `display:none` 的元素**不在可访问树里** ——
+             * 读屏听不到「5 系统实现 › 5.2 实时推荐系统的实现 › …」这几级，
+             * 也就答不出"这是论文的哪一章"。
+             *
+             * ⚠️ 三件事必须一起成立，少一个都会出问题：
+             *   ① `sr-only`（不是 `hidden`）：视觉隐藏但**留在可访问树**里；
+             *   ② `<nav aria-label="面包屑">`：读屏把它当导航区，能跳过、不被当成正文句子；
+             *   ③ `sm:hidden`：≥640px 面包屑本来就是完整链，这一段必须**不播** ——
+             *      否则路径会被念两遍（可见的那一遍 + 这一遍）。
+             */}
+            {(() => {
+              const root = current?.docDisplayName ?? current?.docName ?? current?.chapter ?? section.label
+              const pageTitle = current?.displayTitle ?? current?.title
+              const crumbPath = [root, ...(current?.ancestors ?? []), pageTitle].filter(Boolean)
+              return crumbPath.length > 1 ? (
+                <nav aria-label="面包屑" className="sr-only sm:hidden">
+                  {crumbPath.join(' › ')}
+                </nav>
+              ) : null
+            })()}
+            {/* 副标题（只有论文那一篇有）。
+                ⚠️ 窄屏换成 `text-xs` + 紧行距：实测它是全站唯一会折成两行的副标题
+                   （「本科毕业设计 · 数据科学与大数据技术 · 2023」在 390px 下折两行 = 40.9px），
+                   把这一页的页头从 80.6 顶到 **107.4px** —— 比第二高的页高 27px，
+                   而多出来的高度与面包屑、动作都无关，纯粹是这行字。用户 2026-10 定向：
+                   「像这种实际看着会很长的都可以单独处理」。≥640px 维持原样。 */}
+            {current?.subtitle && (
+              <p className="mt-1.5 text-xs leading-snug text-slate-500 sm:mt-2 sm:text-sm sm:leading-normal dark:text-slate-400">
+                {current.subtitle}
+              </p>
+            )}
           </header>
 
           {emptySection ? (
