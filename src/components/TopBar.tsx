@@ -27,7 +27,7 @@ import { DOCS_HOME } from '../data/docs'
  *   这是语义需要，不是样式不一致。历史上主题钮带持久边框、另外两个没有，那才是真的不统一。
  *   ⚠️ 不要给其中任何一个单独加实底/边框：那会立刻破坏这一组的整体感。
  *
- * ⚠️ 联动维护点（见 MAINTAINING.md 第 6 条）：本栏高度直接决定锚点停靠位
+ * ⚠️ 联动维护点（见 MAINTAINING.md 第 4 条）：本栏高度直接决定锚点停靠位
  *   `scrollTargets.ts` 的取值与 `.rail-tube` 的起点；改 h-16 必须同步改那两处。
  */
 export default function TopBar() {

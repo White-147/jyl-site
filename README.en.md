@@ -78,7 +78,7 @@ Content and presentation are fully separated: projects, skills, experience and c
 jyl-site/
 ├── database/
 │   └── portfolio.db          # SQLite content database (source of truth)
-├── MAINTAINING.md            # Engineering maintenance (coupled edits, conventions, revision log)
+├── MAINTAINING.md            # Engineering maintenance (coupled edits, conventions, pitfalls)
 ├── materials/                # Source materials (originals, raw images, font sources; gitignored)
 ├── docs/                     # Docs-section **content sources**
 │   ├── thesis/source/{md,pdf}/   # Thesis source (pandoc HTML converted from .docx)
@@ -206,4 +206,4 @@ GitHub Actions is already configured (`.github/workflows/deploy.yml`), so pushin
 
 - [DESIGN.md](./DESIGN.md) - design system: colour, typography, elevation, components, prohibitions
 - [PRODUCT.md](./PRODUCT.md) - product brief: target users, anti-references, design principles, accessibility
-- [MAINTAINING.md](./MAINTAINING.md) - engineering maintenance: coupled-edit checklist, directory and build conventions, revision log (**read before changing code**)
+- [MAINTAINING.md](./MAINTAINING.md) - engineering maintenance: coupled-edit checklist, directory and build conventions, pitfalls (**read before changing code**)

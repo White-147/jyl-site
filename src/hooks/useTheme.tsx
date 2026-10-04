@@ -11,7 +11,7 @@ import {
 /**
  * 主题状态（全站单一来源）。
  *
- * ⚠️ 为什么要有这个 Provider（见 MAINTAINING.md 第 3 条）
+ * ⚠️ 为什么要有这个 Provider（见 MAINTAINING.md 第 2 条）
  * `ThemeToggle` 会出现**两个实例**（常驻顶栏 `TopBar` 与移动端底部 `MobileTabBar`）。
  * 之前每个实例各自持有 `useState`，靠 `localStorage` 间接同步 —— 没有订阅机制，
  * 一处切换另一处不会重渲染，理论上会漂移（实际未复现，但属隐患）。

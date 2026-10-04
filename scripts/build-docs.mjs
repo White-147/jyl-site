@@ -123,7 +123,7 @@ const SOURCES = [
   {
     id: 'unreal5-notes',
     section: 'theory',
-    // ⚠️ 2026-10 起源按类型分区：`source/md/` 放 markdown，`source/pdf/` 放原件（见 MAINTAINING.md 13.9-F）
+    // ⚠️ 2026-10 起源按类型分区：`source/md/` 放 markdown，`source/pdf/` 放原件（见 MAINTAINING.md「目录：md 与 pdf 分家」）
     file: 'theory/source/md/unreal5-notes.md',
     format: 'md',
     title: '虚幻引擎总览',
@@ -676,7 +676,7 @@ function isNumberedHeading(title) {
  *    所以任何"让论文也走这条路径"的改动，都要先把 `chain` 一起补上。
  *
  * ⚠️ 页的 `id` 由 `slugify(标题原文)` 生成，标题改了 id 就变 —— 锚点与互链会一起失效，
- *    见 `MAINTAINING.md` 的 13.9-B。
+ *    见 `MAINTAINING.md` 的「拆分与编号」。
  */
 function splitByNumberedHeading(tree, budget) {
   /**

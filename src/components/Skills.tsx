@@ -132,7 +132,7 @@ export default function Skills() {
                   onClick={() => setActiveId(p.id)}
                   /* ⚠️ `data-scroll-lit="off"`：筛选胶囊排除在触屏的「滚动照亮」之外
                      （2026-09 第十五轮，理由见 Projects.tsx 同名字段与
-                      `MAINTAINING.md` 第 17 条：照亮材质与"已选中"无法分辨）。 */
+                      `MAINTAINING.md` 第 16 条：照亮材质与"已选中"无法分辨）。 */
                   data-scroll-lit="off"
                   /* 选中态 = 悬停态固定住（`.glass-lit-on` 出光 + `.glass-chip-on` 出底与字色），
                      与项目区筛选、顶栏控件悬停同一套材质。不要退回 `bg-brand-700 text-white`。 */

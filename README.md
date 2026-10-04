@@ -78,7 +78,7 @@ flowchart LR
 jyl-site/
 ├── database/
 │   └── portfolio.db          # ★ SQLite 内容库（内容源）
-├── MAINTAINING.md            # ★ 工程维护（联动点清单 / 目录与构建约定 / 修订记录）
+├── MAINTAINING.md            # ★ 工程维护（联动点清单 / 目录与构建约定 / 踩坑记录）
 ├── materials/                # ★ 源素材（未加工的原料：原件 / 原图 / 字体源；整目录 gitignore）
 │   ├── resumes/              #   简历原件（蒋宇龙简历.pdf、蒋宇龙附件简历.pdf）
 │   ├── certificates/         #   证书 / 奖项原件（PNG/JPG）
@@ -212,4 +212,4 @@ npm run build      # = db:export + 类型检查 + 构建
 
 - [DESIGN.md](./DESIGN.md)：设计系统 —— 颜色 / 字体 / 层级 / 组件 / 禁忌
 - [PRODUCT.md](./PRODUCT.md)：产品口径 —— 目标用户 / 反参考 / 设计原则 / 可访问性要求
-- [MAINTAINING.md](./MAINTAINING.md)：工程维护 —— 联动点清单、目录与构建约定、历次修订记录（**改代码前必读**）
+- [MAINTAINING.md](./MAINTAINING.md)：工程维护 —— 联动点清单、目录与构建约定、踩过的坑（**改代码前必读**）

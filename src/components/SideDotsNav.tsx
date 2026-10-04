@@ -108,7 +108,7 @@ function Rail() {
 
   // 测量各节点在液柱上的位置比例。
   //
-  // ⚠️ 必须与液柱用**同一套度量**（见 MAINTAINING.md 第 6 条）
+  // ⚠️ 必须与液柱用**同一套度量**（见 MAINTAINING.md 第 4 条）
   // 液柱高度 = scrollY / maxScroll（maxScroll = docH − viewportH）。
   // 所以某个板块"刚滚到停靠位"时，液柱正好填到
   //     (sectionTop − 锚点偏移) / maxScroll
