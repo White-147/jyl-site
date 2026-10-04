@@ -142,6 +142,38 @@ for (const p of ready) {
     if (/<figure[^>]*style="background-image/.test(before)) {
       fail(`配图不该带 LQIP 占位图（第二十轮已撤，会引入"先糊再清晰"中间态）：${p.section}/${p.id} → ${src}`)
     }
+    /**
+     * ⚠️ 同一个 `<img>` 标签里 `data-doc-image` 只能出现一次（第二十一轮补）。
+     *    重复的成因是"按页打优先级"那一步没把旧属性洗干净 —— 功能没坏（浏览器取第一个），
+     *    但属性是脏的，也会让"每页前 2 张 high"看起来没生效。实测抓到过 292 处。
+     */
+    if ((tag.match(/data-doc-image/g) ?? []).length > 1) {
+      fail(`配图 <img> 属性重复（data-doc-image 出现多次）：${p.section}/${p.id} → ${src}`)
+    }
+  }
+
+  /* ---- 3b. 结构完整性：figure 必须闭合、且不能待在 <p> 里 ----
+   *
+   * ⚠️⚠️ 这两条是 2026-10 第二十一轮补的，对应用户截图反馈的「圆角面板套娃」
+   *    （`5.1.1 用户行为日志获取` 页有 4~5 层圆角面板叠在一起）。根因两条：
+   *      ① `prepare-thesis.mjs` 生成 figure 时**没写 `</figure>`** ——
+   *         全篇 71 个 `<figure>` 只有 33 个闭合，缺的 38 个正好是"没有图注的图"；
+   *      ② `<p>` 里出现 `<figure>` 时浏览器会**隐式闭合 `<p>`**，于是
+   *         `<p><figure>A</figure></p><p><figure>B…` 被解析成 figure 层层嵌套。
+   *    实测修复前祖先链上有 **4 个 `.doc-figure` 互为父子**（宽度都是 874、高度递增），
+   *    页面上就是套娃；修复后只剩 1 个（图片 + figure + 正文卡片，后两层本该如此）。
+   *
+   * ⚠️ 这两条只能在这里查：嵌套发生在**浏览器解析阶段**，源码看着"只是标签顺序有点怪"，
+   *    构建、tsc、锚点断言全都不会报 —— 属于典型的"静默坏掉"。
+   */
+  const figOpen = (html.match(/<figure\b/g) ?? []).length
+  const figClose = (html.match(/<\/figure>/g) ?? []).length
+  if (figOpen !== figClose) {
+    fail(`figure 未闭合：${p.section}/${p.id} —— <figure> ${figOpen} 个、</figure> ${figClose} 个`)
+  }
+  const pFig = (html.match(/<p>\s*<figure/g) ?? []).length
+  if (pFig > 0) {
+    fail(`<p> 里包着 <figure>（浏览器会把后续 figure 套成子元素 → 圆角面板套娃）：${p.section}/${p.id} —— ${pFig} 处`)
   }
 }
 

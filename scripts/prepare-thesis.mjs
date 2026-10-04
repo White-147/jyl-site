@@ -195,13 +195,33 @@ html = html.replace(/<img\s+src="([^"]+)"[^>]*?\/?>/g, (_m, src) => {
   // 与 UE 笔记同一口径：只有第一张懒加载，其余 eager + 低优先级（原因见 build-docs.mjs）
   const loading = imgIndex++ === 0 ? ' loading="lazy"' : ' fetchpriority="low"'
   imgCount++
-  return `<figure class="doc-figure"><img data-doc-image src="${SITE_IMAGE_DIR}/${key}.webp" alt="${escapeHtml(key)}"${dim}${loading} decoding="async" />`
+  /**
+   * ⚠️⚠️ `</figure>` **必须写出来**（2026-10 第二十一轮修）。
+   *    原来自闭合 `<img … />` 却开着 `<figure>`，于是全篇 **71 个 `<figure>` 只有 33 个闭合** ——
+   *    缺的 38 个正好等于"没有图注的图"（图注合并那一步要求有 `</figure>` 才生效）。
+   *    未闭合的 figure 会把后续内容全吞进去，也是「圆角面板套娃」的另一半成因。
+   */
+  return `<figure class="doc-figure"><img data-doc-image src="${SITE_IMAGE_DIR}/${key}.webp" alt="${escapeHtml(key)}"${dim}${loading} decoding="async" /></figure>`
 })
 console.log(`      插图 ${imgCount} 张`)
 
 /** 3c. 把 figure 从 pandoc 的 `<p>` 里提出来 —— `<figure>` 不能待在 `<p>` 里，
- *      浏览器解析到它会提前闭合段落，导致图注与图分家、并多出一堆空段落。 */
-html = html.replace(/<p>\s*(<figure class="(?:doc-figure|doc-code)">[\s\S]*?<\/figure>)\s*<\/p>/g, '$1')
+ *      浏览器解析到它会提前闭合段落，导致图注与图分家、并多出一堆空段落。
+ *
+ *  ⚠️⚠️ 必须**一次吃掉 `<p>` 里的全部 figure**（2026-10 第二十一轮修）。
+ *     原来只替换一次（`replace` 配一个 `[\s\S]*?</figure>`），一个 `<p>` 里挤着多个 figure 时
+ *     只能提出第一个，剩下的连同 `</p>` 一起留在原地 —— 浏览器解析时又把后续 figure
+ *     套成子元素，页面上就是「圆角面板套娃」（用户截图：`5.1.1` 页有 4~5 层）。
+ *     ⚠️ 而且**不能靠"反复跑单次替换"收敛**：第二次要匹配的是
+ *     `figure B</figure></p>` 这种形态（`<p>` 在前一次已被吃掉），永远匹配不上。
+ *     ⚠️⚠️ 匹配式必须**同时覆盖"已闭合"与"自闭合 img"两种 figure** ——
+ *     历史产物里有 38 个 figure 压根没有 `</figure>`（见上面那段注释），
+ *     只认闭合形态的正则对它们**一条都匹配不上**（实测：改了正则仍然 38 处残留）。
+ */
+html = html.replace(
+  /<p>\s*((?:<figure\b[\s\S]*?(?:<\/figure>|\/>)\s*)+)<\/p>/g,
+  (_m, inner) => inner.trim(),
+)
 
 /** 3d. 图注合入 figure：紧跟图片的 `<p>图 5-1 xxx</p>` 提为该图的 <figcaption> */
 html = html.replace(

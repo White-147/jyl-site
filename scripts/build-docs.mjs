@@ -988,9 +988,18 @@ function decoratePageImages(html) {
     /<figure class="doc-figure"[^>]*>\s*<img\b([^>]*?)\bsrc="([^"]+)"/g,
     (_m, attrsBeforeSrc, src) => {
       const prio = i++ < EAGER ? 'fetchpriority="high"' : 'loading="lazy" fetchpriority="low"'
-      // 保留 img 上原有的其它属性（alt / width / height / decoding），去掉可能重复的优先级属性
+      /**
+       * ⚠️ 这里要把 img 上原有的属性洗干净，否则会**重复输出**（实测踩过）：
+       *      `<img data-doc-image fetchpriority="high" src="…" data-doc-image alt="…" fetchpriority="low" …>`
+       *    —— `data-doc-image` 出现两次、`fetchpriority` 一 high 一 low。
+       *    浏览器取第一个值，所以功能没坏，但属性是脏的（也会让"按页优先级"看起来没生效）。
+       *    成因：`attrsBeforeSrc` 里已经含着 `data-doc-image`（`makeFigure`/论文源都带），
+       *    而我又在返回串里补了一个；`loading|fetchpriority` 同理没删干净。
+       */
       const rest = attrsBeforeSrc
-        .replace(/\s*(?:loading|fetchpriority)="[^"]*"/g, '')
+        .replace(/\s*(?:loading|fetchpriority|data-doc-image)\s*=\s*"[^"]*"/g, '')
+        .replace(/\s*\bdata-doc-image\b\s*/g, ' ')
+        .replace(/\s+/g, ' ')
         .replace(/\s+$/, '')
       return `<figure class="doc-figure"><img data-doc-image ${prio} src="${src}"${rest}`
     },
@@ -1241,6 +1250,38 @@ function relevelHtml(html, delta) {
   return html.replace(/<(\/?)h([1-6])\b/g, (m, slash, n) => `<${slash}h${Math.min(6, Math.max(1, Number(n) + delta))}`)
 }
 
+/**
+ * 把 `<p>` 里的 `<figure>` **解包**成兄弟节点。
+ *
+ * ⚠️⚠️ 这是 2026-10 第二十一轮修的"圆角面板套娃"根源，别删。
+ *    站内配图有两种写法，只有一种会被包进 `<p>`：
+ *      · `<p><figure …></figure></p>`            ← 独占段落的图（论文源与 md 的行内 HTML 图都可能是这种）
+ *      · `<figure><img …></figure>`（无 p 包裹）  ← 行内 md 图（`makeInline` 自己的分支）
+ *    而 **`<p>` 里出现 `<figure>` 这类块级元素时，`<p>` 会被浏览器隐式闭合**。于是
+ *      `<p><figure>A</figure></p><p><figure>B</figure></p>`
+ *    被解析成：`p` 闭 → `figure A` → 剩下的 `</p>` 被忽略 → **`<p>` 又被打开**
+ *    → `figure B` 成了它的子元素 → 一层套一层。
+ *
+ *    实测后果（用户截图反馈）：`5.1.1 用户行为日志获取` 页里 4 个 `.doc-figure`
+ *    **互为父子**（宽度都是 874、高度 255→636→1644→2254 递增），
+ *    页面上就是 4~5 个圆角面板套娃 —— 而**纯文本页不会出现**，因为那里没有 figure。
+ *
+ * ⚠️ 要**一次吃掉 `<p>` 里的全部 figure**，不能只替换一个再重复跑：
+ *    一个 `<p>` 里可能挤着多个 `<figure>`，只提第一个的话，剩下的会连同 `</p>` 留在原地，
+ *    而下一轮要匹配的形态已经变成 `figure B</figure></p>`（前面的 `<p>` 被吃掉了），**永远匹配不上**。
+ * ⚠️⚠️ 匹配式必须**同时覆盖"已闭合"与"自闭合 img"两种 figure**：
+ *    论文源里历史上有 38 个 figure 压根没有 `</figure>`（`prepare-thesis.mjs` 早期生成时漏了闭合标签），
+ *    只认 `</figure>` 的正则对它们**一条都匹配不上**（实测：改完仍然 38 处残留）。
+ * ⚠️ 不能用 CSS 修（比如给 figure 加 display:block）—— 嵌套发生在**解析阶段**，
+ *    树结构已经错了，样式改不回来。
+ */
+function unwrapFiguresFromParagraphs(html) {
+  return html.replace(
+    /<p>\s*((?:<figure\b[\s\S]*?(?:<\/figure>|\/>)\s*)+)<\/p>/g,
+    (_m, inner) => inner.trim(),
+  )
+}
+
 const usedIds = new Set()
 for (const p of pages) {
   if (!p.blocks) continue
@@ -1270,7 +1311,12 @@ for (const p of pages) {
    * 平移整页而不是只改主题标题，是为了保住页内的相对层级。
    */
   const topicLevel = p.blocks[dropCount]?.level ?? 2
-  const raw = relevelHtml(p.blocks.map(fullHtml).join('\n'), 2 - topicLevel)
+  /**
+   * ⚠️ 先解包 `<p><figure>`（见 `unwrapFiguresFromParagraphs` 的注释）——
+   *    必须在这一步做：此后还有 `decorateHeadings` / `dropLeadingHeadings` 等会改动结构，
+   *    越早把树弄正越好；而且这一趟覆盖**所有源**（md 与 pandoc 都汇到这里）。
+   */
+  const raw = unwrapFiguresFromParagraphs(relevelHtml(p.blocks.map(fullHtml).join('\n'), 2 - topicLevel))
   // ⚠️ 用 fullHtml（含子孙），不是 ownHtml —— 原因见 fullHtml 的注释
   const { html, toc } = decorateHeadings(raw, usedIds)
   /**

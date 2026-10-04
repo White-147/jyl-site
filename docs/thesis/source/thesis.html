@@ -30,21 +30,18 @@
 <h2 id="大数据平台">2.1 大数据平台</h2>
 <h3 id="hadoop分布式文件系统hdfs">2.1.1 Hadoop分布式文件系统HDFS</h3>
 <p>HDFS（Hadoop Distributed File System）是一种高效的分布式数据库，它能够支持大规模的数据集，支持多个服务器之间的数据交换，而且它的访问界面也比传统的文档管理软件更加友好。架构组成上（如图2-1），HDFS是一个主/从体系结构<sup>[3]</sup>。其中Master被称为NameNode，主要负责管理和维护系统所有文件和目录的元数据和数据块的映射信息，而Slave被称为DataNode，主要负责存储实际的数据块以及执行数据块的读写。</p>
-<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image4.webp" alt="image4" width="589" height="351" fetchpriority="low" decoding="async" /></p>
-<p>图2-1 HDFS架构</p>
+<figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image4.webp" alt="image4" width="589" height="351" fetchpriority="low" decoding="async" /><figcaption>图2-1 HDFS架构</figcaption></figure>
 <h3 id="基于hadoop的数据仓库工具-hive">2.1.2 基于Hadoop的数据仓库工具 Hive</h3>
 <p>Hive是一款强大的Hadoop数据仓库工具，它能够把复杂的数据转换成一张清晰的表格，并且采用类SQL查询的方式，极大地提高了对大规模数据的管控能力，减轻了传统的数据分析者的负担<sup>[4]</sup>。Hive通过提供JDBC/ODBC接口，采用统一的元数据管理，能够更轻松地将Spark和Pig这些大数据应用程序进行集成和开发<sup>[5]</sup>。</p>
 <h3 id="计算引擎spark">2.1.3 计算引擎Spark</h3>
 <p>Spark是一款基于内存式的专为大规模数据处理而设计的快速通用计算引擎，Spark与传统的MapReduce相比，不仅具备出色的运行效率、便捷的操作体验以及广泛的应用范围，而且还具备更多的功能。</p>
 <p>在底层架构上，Spark采用类似于Hadoop的主从分布式架构，更可根据需求灵活改变运行模式和对应的架构，其主要组件分别为:负责管理和调度集群整体资源的ClusterManger，负责实际计算的节点Worker，控制应用生命周期的SparkContext，负责创建和关闭SparkContext的Driver，通用架构如图2-2。</p>
-<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image5.webp" alt="image5" width="825" height="354" fetchpriority="low" decoding="async" /></p>
-<p>图2-2 Spark通用架构</p>
+<figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image5.webp" alt="image5" width="825" height="354" fetchpriority="low" decoding="async" /><figcaption>图2-2 Spark通用架构</figcaption></figure>
 <p>技术栈构成中包括5个部件,Spark Core提供内存计算Spark Streaming提供实时计算,Spark SQL为用户提供即时查询,MLlib是机器学习的提供者,GraphX给出了图处理。</p>
 <p>Spark 可以和Hadoop 的生态系统实现完美的融合，因此可以更高效的访问大数据平台，如HDFS、HBase 和Hive，从而提升了数据处理的效率和可靠性<sup>[6]</sup>。</p>
 <h3 id="分布式发布订阅消息系统-kafka">2.1.4 分布式发布订阅消息系统 Kafka</h3>
 <p>Kafka原为Linkedin研发的分布式产品、支持分区和多副本功能，基于ZooKeeper协同工作的分布式消息系统，具体结构见图2-3。Kafka的核心作用之一，就是可以做到快速有效的数据处理，从而适应各种应用场景。</p>
-<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image6.webp" alt="image6" width="1674" height="769" fetchpriority="low" decoding="async" /></p>
-<p>图2-3 Kafka架构图</p>
+<figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image6.webp" alt="image6" width="1674" height="769" fetchpriority="low" decoding="async" /><figcaption>图2-3 Kafka架构图</figcaption></figure>
 <p>基于Kafka架构，Kafka提供了两种消息队列的通信模式:点对点模式和发布订阅模式。点对点模式通常是基于拉取或者轮询的消息传送模型，它的核心思想是一个消息被一个消费者接收，并且只能接受一个消息。在这种模式下，消费者无法确定哪些消息需要被消费，也不能确定其他消息的存在</p>
 <p>发布订阅模式是一种基于消息推送的消息传输方式，它允许多个用户加入其中。当用户加入消息队列时，系统会自动将消息推送给已经加入其中的用户。</p>
 <h2 id="基于协同过滤的推荐算法">2.2 基于协同过滤的推荐算法</h2>
@@ -64,13 +61,12 @@
 步骤3:基于UGM和GM，得出推荐物品评分矩阵GRM，按照评分降序排列，得出推荐矩阵RM。</code></pre></figure>
 <h2 id="皮尔逊相关性系数">2.3 皮尔逊相关性系数</h2>
 <p>皮尔逊相关是英国统计学家皮尔逊于20世纪提出的一种测算平行线相关的方法，皮尔逊相关性系数是协方差与标准偏差的比率,其公式计算如2-1所显示。皮尔逊系数绝对值取值范围为[0,1]且绝对值愈趋近于1,则相关性愈强。</p>
-<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image7.webp" alt="image7" width="763" height="96" fetchpriority="low" decoding="async" /></p>
+<figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image7.webp" alt="image7" width="763" height="96" fetchpriority="low" decoding="async" /></figure>
 <p>公式2-1 皮尔逊系数公式</p>
 <p>计算皮尔逊相关系数，首先需要获得公式中X和Y值，本系统通过用户行为日志中用户是否对物品是否做出操作来构建用户行为向量，再根据用户行为向量得出用户-图书向量矩阵，于是可以构建如图2-4所示的用户-图书向量矩阵。</p>
-<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image8.webp" alt="image8" width="445" height="209" fetchpriority="low" decoding="async" /></p>
-<p>图2-4 用户-图书向量矩阵</p>
+<figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image8.webp" alt="image8" width="445" height="209" fetchpriority="low" decoding="async" /><figcaption>图2-4 用户-图书向量矩阵</figcaption></figure>
 <p>上图所示矩阵是由四位用户对四本书的行为向量构成的矩阵，譬如(1,1)代表第一位用户对第一本书的操作，当某位用户对某本书进行操作之后，就会产生行为向量，矩阵中对应位置就会变为1。此时可以根据矩阵得出每个向量的均值μ，将公式2-1中标准差写成带有向量均值μ的形式（公式2-2），带入公式2-2中即可求出皮尔逊系数。</p>
-<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image9.webp" alt="image9" width="841" height="138" fetchpriority="low" decoding="async" /></p>
+<figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image9.webp" alt="image9" width="841" height="138" fetchpriority="low" decoding="async" /></figure>
 <p>公式2-2 皮尔逊系数完整表示</p>
 <h2 id="爬虫技术">2.4 爬虫技术</h2>
 <p>Selenium是2004年在芝加哥ThoughtWorks公司的一个叫 Jason Huggins的程序员为了实现自动化测试实现的JavaScriptTestRunner程序演化而来，目前Selenium是Selenium WebDriver、Selenium RC、Selenium IDE、Selenium Grid等等一系列工具的总称，支持的开发语言有Java、Python、C#、ruby<sup>[8]</sup>。</p>
@@ -85,8 +81,7 @@
 <p>最初浏览器页面向服务器请求数据时，整个页面都会刷新，当我们只需要请求部分数据时，返回整个页面会造成网络资源的占用，为了提高数据请求效率，异步网络请求Ajax应运而生，它能够要求页面不被刷新的前提下载入数据，这就意味着Ajax能够在没有重新载入全页时，更新网页某一部分。Promise技术为ajax提供了一种封装，它可以支持node.js、浏览器以及其他多种应用程序，从而实现了从前端到后端的高效连接，这就是Axios。</p>
 <h3 id="spring-boot框架">2.5.4 Spring Boot框架</h3>
 <p>Spring是一个 Java SE/EE应用的开放式框架，反转控制面向切面编程为内核，其中包括用户界面访问控制、用户界面访问等。Spring体系结构如图2-5所示。</p>
-<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image10.webp" alt="image10" width="368" height="277" fetchpriority="low" decoding="async" /></p>
-<p>图2-5 Spring体系架构</p>
+<figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image10.webp" alt="image10" width="368" height="277" fetchpriority="low" decoding="async" /><figcaption>图2-5 Spring体系架构</figcaption></figure>
 <p>Spring Boot旨在大大减少Spring应用的开发复杂度，它以Boot这个术语来表达迅速启动的概念，取代以往使用SpringMVC+Spring+Mybatis的复杂步骤，使得Spring Boot的使用更加便捷、高效。通过使用更多的标准配置，可以有效地减少Spring的编写时间。 Spring Boot汇聚了众多流行的第三方库，并且几乎无须额外的配置就可以为开发者使用。</p>
 <h3 id="spring-security框架">2.5.5 Spring Security框架</h3>
 <p>Spring Security基于Spring框架，为Web应用的安全性提供一个完整的解决方案。安全领域的两个主要领域是“认证”和“授权”（或者访问控制），一般而言,Web应用程序的安全性由用户认证（Authentication）和用户授权（Authorization）两部分组成，这两个点也正是Spring Security的重要核心功能之一。</p>
@@ -107,14 +102,12 @@
 <h1 id="系统设计">4 系统设计</h1>
 <h2 id="系统总架构设计">4.1 系统总架构设计</h2>
 <p>系统架构分为前后端架构和大数据架构，分别如图4-1和图4-2所示。</p>
-<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image11.webp" alt="image11" width="556" height="563" fetchpriority="low" decoding="async" /></p>
-<p>图4-1 前后端系统架构图</p>
+<figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image11.webp" alt="image11" width="556" height="563" fetchpriority="low" decoding="async" /><figcaption>图4-1 前后端系统架构图</figcaption></figure>
 <p>（1）数据存储层:通过MySQL为系统提供原始数据的保存以及初步的数据预处理。</p>
 <p>（2）数据处理层:通过SQL语句对数据进行初步处理，通过Spring Boot获取保存在MySQL中的系统原始数据并以字符串、数组等不同的格式发送到前端。</p>
 <p>（3）数据安全层:通过JWT实现Token数据的生成和验证；通过Spring Security的过滤器将请求头中未携带Token信息的请求进行拦截；通过Spring Security的加密算法实现对用户登录密码的加密。</p>
 <p>（4）数据可视化层:通过Element完成对网页的布局、组件的设计与实现；通过Vue提供Element实现的平台，完成动态数据的绑定，自带的Router路由组件实现路由跳转的守卫功能；通过ECharts更直观的展示用户借阅数据的频次。</p>
-<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image12.webp" alt="image12" width="525" height="518" fetchpriority="low" decoding="async" /></p>
-<p>图4-2 大数据系统架构</p>
+<figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image12.webp" alt="image12" width="525" height="518" fetchpriority="low" decoding="async" /><figcaption>图4-2 大数据系统架构</figcaption></figure>
 <p>（1）数据生成层:用户通过Vue.js搭建的网页进行操作，Axios向Spring Boot发送请求，Spring Boot向Kafka中生产数据。</p>
 <p>（2）数据传输层: Spark Streaming组件通过spark-streaming-kafka连接依赖消费Kafka的topic中的数据，Spark SQL组件通过spark-hive连接依赖保存到Hive中。</p>
 <p>（3）数据存储层:Hive存储大数据算法计算的过程数据，计算的推荐结果数据保存在MySQL中。</p>
@@ -125,11 +118,9 @@
 <p>功能模型是从用户的角度展示系统的功能，包括用例图，常在概要设计阶段使用；对象模型是采用对象、属性、操作、关联等概念展示系统的结构和基础，包括类别图、对象图，常在详细设计阶段使用；动态模型是展现系统的内部行为，包括序列图，活动图，状态图，常在详细设计阶段使用。本节通过用例图对系统概要设计进行介绍。</p>
 <h3 id="系统用例设计">4.2.2 系统用例设计</h3>
 <p>本系统参与者有游客和登录用户两种，用例图分别如图4-3和图4-4所示。</p>
-<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image13.webp" alt="image13" width="898" height="591" fetchpriority="low" decoding="async" /></p>
-<p>图4-3 游客用例图</p>
+<figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image13.webp" alt="image13" width="898" height="591" fetchpriority="low" decoding="async" /><figcaption>图4-3 游客用例图</figcaption></figure>
 <p>上图展示的是用户未登录时的参与者状态，可以对注册、登录和忘记密码三个用例进行关联。当用户注册、登录、忘记密码时，会对账户和密码进行校验。</p>
-<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image14.webp" alt="image14" width="1158" height="558" fetchpriority="low" decoding="async" /></p>
-<p>图4-4 登录用户用例图</p>
+<figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image14.webp" alt="image14" width="1158" height="558" fetchpriority="low" decoding="async" /><figcaption>图4-4 登录用户用例图</figcaption></figure>
 <p>上图展示的是用户登录成功后的参与者状态，可以对图书管理和用户管理两个用例进行关联。图书管理有浏览图书、图书推荐、新书速递三个拓展用例，三个拓展用例各自都有图书详情查看、图书借阅、图书收藏三个拓展用例，其中图书详情查看还有相似图书推荐的拓展用例；用户管理有修改用户信息、用户归还图书和用户取消收藏三个拓展用例。</p>
 <h2 id="数据库设计">4.3 数据库设计</h2>
 <h3 id="系统e-r图设计">4.3.1 系统E-R图设计</h3>
@@ -137,12 +128,10 @@
 <p>由于用户主要为本校登记学生或教师，故采用学号作为用户主键，校外人员采用账号替代学号。作为推荐系统的用户，需要登录的账号和密码信息，登录之后需要用户名、头像和登录日期的相关信息。</p>
 <p>本校图书馆保存图书信息由图书编号、图书名、图书作者、图书出版社和图书出版时间组成，其中图书编号与图书一一对应，故设为主键。为方便图书信息展示，本系统采用爬虫技术对图书封面信息进行补充。</p>
 <p>一位用户可以借阅多本图书，一本图书一次只能被一位用户借阅，因此用户和图书是一对多的关系。根据逻辑结构设计出的系统E-R图如图4-5所示。</p>
-<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image15.webp" alt="image15" width="1045" height="409" fetchpriority="low" decoding="async" /></p>
-<p>图4-5 系统E-R图</p>
+<figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image15.webp" alt="image15" width="1045" height="409" fetchpriority="low" decoding="async" /><figcaption>图4-5 系统E-R图</figcaption></figure>
 <h3 id="数据库表设计">4.3.2 数据库表设计</h3>
 <p>根据需求分析和系统E-R图设计，本系统数据库搭建了图书表、学生表、用户表、借阅信息表、收藏信息表、新书信息表、相似图书信息表、推荐图书信息表，数据库结构如图4-6所示。</p>
-<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image16.webp" alt="image16" width="205" height="291" fetchpriority="low" decoding="async" /></p>
-<p>图4-6 数据库结构图</p>
+<figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image16.webp" alt="image16" width="205" height="291" fetchpriority="low" decoding="async" /><figcaption>图4-6 数据库结构图</figcaption></figure>
 <p>图中book为图书表，reader为学生表，newbook为新书信息表，lend为借阅信息表，collect为收藏信息表，user为用户表，relatedbook为相似图书信息表，recommend为推荐图书信息表。本章对数据库表进行详细说明。</p>
 <p>（1）图书表（book）：图书表中包括图书编号、图书名、图书作者、图书出版社、图书出版年份等信息，主要保存图书的相关信息。图书表的数据结构如表4-1所示。</p>
 <p class="doc-table-caption">表4-1 图书表</p>
@@ -346,14 +335,13 @@ kafkaTemplate.send(&quot;userLog&quot;, str);
 return bookExtendService.queryBookByCallNo(certId, callNo);
 }</code></pre></figure>
 <p>代码-2会将用户学号、图书编号和用户行为以指定格式生产到Kafka的topic中，以此获取用户的行为。topic中消费的数据如图5-1所示。</p>
-<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image17.webp" alt="image17" width="1111" height="99" fetchpriority="low" decoding="async" /></p>
-<p>图5-1 topic用户行为日志</p>
+<figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image17.webp" alt="image17" width="1111" height="99" fetchpriority="low" decoding="async" /><figcaption>图5-1 topic用户行为日志</figcaption></figure>
 <h3 id="用户偏好值计算规则">5.1.2 用户偏好值计算规则</h3>
 <p>在偏好值的隐式分值转化中，需要给予“借阅”、“收藏”、“查看”相应的偏好值，根据各个行为在图书兴趣中的占比，给予占比赋予相应的分值，其中“借阅”代表兴趣度最高，赋予60%的占比，“收藏”兴趣度高于“查看”，因此“收藏”赋予25%占比，“查看”赋予15%占比。占比赋值代码如代码-3所示。</p>
 <figure class="doc-code"><figcaption>代码-3</figcaption><pre><code>val consultCountRDD: RDD[((String, String), BigDecimal)] =
 getCountRDD(logRDD, &quot;consultBook&quot;, BigDecimal(0.15))</code></pre></figure>
 <p>在实际用户操作过程中，会出现“查看”的操作频率远高于“借阅”的情况，这时“查看”的用户偏好值远大于“借阅”的用户偏好值，导致推荐结果不准确。因此，系统通过实现具有水平渐近线的单调递增函数来限制各个行为能够隐式转化的分值上限，本系统实现的是反比函数，关于占比上限公式S由公式5-1得出，实现代码如代码-4所示。</p>
-<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image18.webp" alt="image18" width="236" height="104" fetchpriority="low" decoding="async" /></p>
+<figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image18.webp" alt="image18" width="236" height="104" fetchpriority="low" decoding="async" /></figure>
 <p>公式5-1 占比上限公式</p>
 <p>上式中，S对应用户实际偏好值，P对应preference，C对应用户行为次数，为防止出现用户只操作过一次导致偏好值为零的情况，反比函数的分子取占比值的一半，即各个占比的实际偏好值的取值范围为[P/2,P)。隐式转化结果如图5-2所示。</p>
 <figure class="doc-code"><figcaption>代码-4</figcaption><pre><code>private def getCountRDD(lineRDD: RDD[((String, String, String), Int)],
@@ -369,11 +357,9 @@ val result = preference - ((preference / 2.0) / BigDecimal(value.toDouble))
 }).reduceByKey((_: BigDecimal).+(_: BigDecimal))
 }</code></pre></figure>
 <p>代码-4传参情况如代码-3所示，lineRDD为读取的每一行用户行为对应的用户编号、图书编号、用户操作以及用户对图书某一种操作的次数，action为当前转化的用户行为，preference则为转化的用户行为对应的偏好值。代码首先通过过滤，留下转换对应的用户行为，然后通过实现公式2-1限制各个行为能够隐式转化的分值上限，最后进行相加后返回，为防止出现浮点数精度问题，返回值为BigDecimal类型。</p>
-<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image19.webp" alt="image19" width="473" height="121" fetchpriority="low" decoding="async" /></p>
-<p>图5-2 隐式转化结果</p>
+<figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image19.webp" alt="image19" width="473" height="121" fetchpriority="low" decoding="async" /><figcaption>图5-2 隐式转化结果</figcaption></figure>
 <p>上图CERT_ID为用户学号，CALL_NO为图书编号，preference为用户偏好值。以图书编号为键，对用户和用户偏好值进行归约即可得出用户偏好矩阵（如图5-3）。</p>
-<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image20.webp" alt="image20" width="524" height="118" fetchpriority="low" decoding="async" /></p>
-<p>图5-3 用户偏好矩阵</p>
+<figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image20.webp" alt="image20" width="524" height="118" fetchpriority="low" decoding="async" /><figcaption>图5-3 用户偏好矩阵</figcaption></figure>
 <h3 id="物品相关性计算规则">5.1.3 物品相关性计算规则</h3>
 <p>本系统采用通过Scala实现皮尔逊相关性系数来反映物品之间的相关性，第二章中曾介绍，计算皮尔逊系数首先需要计算出用户行为向量，而用户行为向量需要商品的共现关系，商品共现关系计算代码如代码-5所示。</p>
 <figure class="doc-code"><figcaption>代码-5</figcaption><pre><code>val sqlRDD: RDD[(String, String)] = spark.table(&quot;step1&quot;).rdd.map((x: Row) =&gt; {
@@ -386,8 +372,7 @@ for (item &lt;- bookIdList)
 for (item1 &lt;- bookIdList)
 resultList = resultList :+ item + &quot;\t&quot; + item1</code></pre></figure>
 <p>代码-5首先获取图5-3中的图书编号列存入列表中，然后对列表自身进行笛卡尔积，去除自身和自身的共现关系后即可获得商品的共现关系，结果如图5-4所示。</p>
-<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image21.webp" alt="image21" width="245" height="118" fetchpriority="low" decoding="async" /></p>
-<p>图5-4 商品共现关系</p>
+<figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image21.webp" alt="image21" width="245" height="118" fetchpriority="low" decoding="async" /><figcaption>图5-4 商品共现关系</figcaption></figure>
 <p>根据图5-4中结果即可计算用户行为向量，代码如代码-6所示。</p>
 <figure class="doc-code"><figcaption>代码-6</figcaption><pre><code>step3RDD.map((bookId: (String, String)) =&gt; {
 val line: Array[String] = new Array[String](4)
@@ -427,8 +412,7 @@ line(3) = userid
 (line(0), line(1), line(2), line(3), &quot;step4&quot;)
 })</code></pre></figure>
 <p>代码-6中，step2Array存储的是图3-3中的用户偏好矩阵，step3RDD中存储的是图5-4中的商品共现关系，首先通过用户偏好矩阵中preference列获取用户学号列表，再根据商品共现关系中的图书编号对应偏好矩阵中CALL_NO列，将对应的用户学号列表进行拼接，得出用户行为向量，结果如图5-5所示。</p>
-<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image22.webp" alt="image22" width="966" height="116" fetchpriority="low" decoding="async" /></p>
-<p>图5-5 用户行为向量</p>
+<figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image22.webp" alt="image22" width="966" height="116" fetchpriority="low" decoding="async" /><figcaption>图5-5 用户行为向量</figcaption></figure>
 <p>根据上图用户行为向量即可进行向量矩阵的计算，实现代码如代码-7所示。</p>
 <figure class="doc-code"><figcaption>代码-7</figcaption><pre><code>val union: Int = firstUsers.length + lastUsers.length - intersection
 val firstMatrix = new Array[Int](union)
@@ -470,11 +454,9 @@ pearsonCoefficient = scala.math.sqrt(scala.math.pow(pearsonCoefficient.toDouble,
 }
 recommend = pearsonCoefficient}</code></pre></figure>
 <p>代码-8中计算分为分母分子两部分，分母通过Scala中math.pow方法实现开方运算，运算过程中浮点数将转化为BigDecimal类型进行运算。经实验发现，分子分母运算所需元素具有一定相关性，在分母运算为0时，分子也同时为0，因此在分子为0时将结果赋值为0，避免出现相除运算分母为0的情况。运算结果如图5-6所示。</p>
-<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image23.webp" alt="image23" width="441" height="115" fetchpriority="low" decoding="async" /></p>
-<p>图5-6 皮尔逊系数结果</p>
+<figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image23.webp" alt="image23" width="441" height="115" fetchpriority="low" decoding="async" /><figcaption>图5-6 皮尔逊系数结果</figcaption></figure>
 <p>以CALL_NO列第一个图书编号为主键，第二个图书编号和系数值作为值构建物品相似矩阵，结果如图5-7所示。</p>
-<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image24.webp" alt="image24" width="1268" height="118" fetchpriority="low" decoding="async" /></p>
-<p>图5-7 物品相似矩阵</p>
+<figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image24.webp" alt="image24" width="1268" height="118" fetchpriority="low" decoding="async" /><figcaption>图5-7 物品相似矩阵</figcaption></figure>
 <h3 id="推荐值计算规则">5.1.4 推荐值计算规则</h3>
 <p>推荐值由用户偏好值和物品相关性相乘得出，实现代码如代码-9所示。</p>
 <figure class="doc-code"><figcaption>代码-9</figcaption><pre><code>val user: Array[(String, String, String)] =
@@ -510,8 +492,7 @@ resultList = resultList :+ (item._2 + &quot;,&quot; + item1._2,
 (BigDecimal(item._3.toDouble) * BigDecimal(item1._3.toDouble)).toDouble)</code></pre></figure>
 <p>代码-9中step2RDD中存储的是图5-3的用户偏好矩阵，step6RDD中存储的是图5-7的物品相似矩阵。step2RDD最后以（图书编号，用户学号，偏好值）的格式保存在user变量中。Step6RDD将coefficient列中多个图书的相似值进行分割，最后以（被推荐图书编号，推荐图书编号，图书相似值）的格式保存在book变量中。</p>
 <p>遍历user和book两个列表，当列表中被推荐图书编号相同时，将用户对被推荐图书的偏好值和图书的相似值进行相乘，得出对用户的推荐图书的推荐值，最后在推荐列表中去除用户已经借阅过的即为最终的图书推荐表，结果如图5-8所示。</p>
-<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image25.webp" alt="image25" width="454" height="118" fetchpriority="low" decoding="async" /></p>
-<p>图5-8 图书推荐表</p>
+<figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image25.webp" alt="image25" width="454" height="118" fetchpriority="low" decoding="async" /><figcaption>图5-8 图书推荐表</figcaption></figure>
 <h2 id="实时推荐系统的实现">5.2 实时推荐系统的实现</h2>
 <h3 id="数据获取模块">5.2.1 数据获取模块</h3>
 <h4 id="系统数据补充">5.2.1.1 系统数据补充</h4>
@@ -554,8 +535,7 @@ kafkaTemplate.send(&quot;userLog&quot;, str);}
 return bookExtendService.queryBookByCallNo(certId, callNo);
 }</code></pre></figure>
 <p>代码-11指定了向Kafka中userlog的topic发送数据，此时Spring Boot作为生产者向Kafka生产数据。</p>
-<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image26.webp" alt="image26" width="925" height="241" fetchpriority="low" decoding="async" /></p>
-<p>图5-9 spring-kafka配置</p>
+<figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image26.webp" alt="image26" width="925" height="241" fetchpriority="low" decoding="async" /><figcaption>图5-9 spring-kafka配置</figcaption></figure>
 <p>图5-4配置指定了Kafka所搭建的主机IP和对应的端口，以及发送信息的格式。</p>
 <p>在Kafka正常启动，Spring Boot成功发送信息到topic中后，Spark可以通过spark-streaming-kafka组件，获取userlog的topic中的数据并写入数据库，Spark Streaming代码如代码-12所示，配置工具类代码如代码-13所示。</p>
 <figure class="doc-code"><figcaption>代码-12</figcaption><pre><code>val sparkConf = new SparkConf()
@@ -589,17 +569,14 @@ ssc: StreamingContext): InputDStream[ConsumerRecord[String, String]] = {
 KafkaUtils.createDirectStream[String, String](ssc,LocationStrategies.PreferConsistent,
 ConsumerStrategies.Subscribe[String, String](Array(topic), consumerConfigs))}</code></pre></figure>
 <p>代码-13首先通过读取配置文件中搭建Kafka的主机IP和对应端口获取Kafka，其次通过可变的Map对象配置当前消费的服务器列表、消费时获取信息的类型、消费的topic名称、获取topic消息后开始消费的偏移量等。</p>
-<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image27.webp" alt="image27" width="829" height="127" fetchpriority="low" decoding="async" /></p>
-<p>图5-10 用户行为日志</p>
+<figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image27.webp" alt="image27" width="829" height="127" fetchpriority="low" decoding="async" /><figcaption>图5-10 用户行为日志</figcaption></figure>
 <p>图5-2中cert_id为用户学号，call_no为图书编号，action为用户操作，partition为Hive表的分区。第二章中介绍Hive是基于Hadoop的数据仓库，因此在启动Hive前需要将Hadoop相关工具启动。</p>
 <h3 id="数据展示模块">5.2.2 数据展示模块</h3>
 <h4 id="推荐系统界面">5.2.2.1 推荐系统界面</h4>
 <p>系统界面使用Vue+ElementUI框架和ECharts实现数据可视化，注册界面和主页界面如图5-11和图5-12所示。</p>
-<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image28.webp" alt="image28" width="1229" height="684" fetchpriority="low" decoding="async" /></p>
-<p>图5-11 注册界面</p>
+<figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image28.webp" alt="image28" width="1229" height="684" fetchpriority="low" decoding="async" /><figcaption>图5-11 注册界面</figcaption></figure>
 <p>图5-11中注册表格会进行数据校验，部分数据校验规则代码如代码-14所示。</p>
-<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image29.webp" alt="image29" width="1255" height="711" fetchpriority="low" decoding="async" /></p>
-<p>图5-12 主页界面</p>
+<figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image29.webp" alt="image29" width="1255" height="711" fetchpriority="low" decoding="async" /><figcaption>图5-12 主页界面</figcaption></figure>
 <p>图5-12中的系统首页界面主要负责展示信息，其中包括用户相关信息、用户借书预览信息、用户归还图书提醒、用户借阅频次统计图，其中用户借阅频次统计图通过ECharts实现，代码如代码15和代码-16所示。</p>
 <figure class="doc-code"><figcaption>代码-14</figcaption><pre><code>let checkAccount = (rule, value, callback) =&gt; {
 let regAccount = /[a-zA-z0-9]$/
@@ -645,12 +622,10 @@ myECharts.setOption(option);</code></pre></figure>
 <p>代码-16负责设置ECharts表格的标题、xy轴数据等，tooltip中设置当鼠标悬浮在ECharts表格中时，展示表格中放置点的详细数据。</p>
 <h4 id="前后端可视化工具">5.2.2.2 前后端可视化工具</h4>
 <p>在Windows控制台中通过命令进入Vue的项目目录，输入vue ui命令，即可进入Vue的项目可视化管理界面，部分界面如图5-13所示。</p>
-<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image30.webp" alt="image30" width="1219" height="688" fetchpriority="low" decoding="async" /></p>
-<p>图5-13 Vue项目依赖管理界面</p>
+<figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image30.webp" alt="image30" width="1219" height="688" fetchpriority="low" decoding="async" /><figcaption>图5-13 Vue项目依赖管理界面</figcaption></figure>
 <p>上图展示的是Vue的项目依赖管理界面，此界面中可以进行项目依赖的添加，查看已添加依赖的详情信息、对应依赖的官网跳转以及已添加依赖的删除或版本修改等功能。</p>
 <p>系统后端使用Spring Boot实现数据的处理和对接<sup>[12]</sup>，并通过实现Swagger完成后端对接文档，实现了后端接口数据的可视化，Swagger部分界面如图5-14所示。</p>
-<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image31.webp" alt="image31" width="1171" height="530" fetchpriority="low" decoding="async" /></p>
-<p>图5-14 Swagger主页部分界面</p>
+<figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image31.webp" alt="image31" width="1171" height="530" fetchpriority="low" decoding="async" /><figcaption>图5-14 Swagger主页部分界面</figcaption></figure>
 <p>上图展示为Swagger主页界面，展示后端文档的项目名称、作者等信息。菜单栏中借阅信息等模块对应Spring Boot中Controller模块，关键代码如代码-17所示。</p>
 <figure class="doc-code"><figcaption>代码-17</figcaption><pre><code>@Api(tags = &quot;图书馆图书&quot;, value = &quot;Book&quot;)
 @RestController
@@ -662,33 +637,25 @@ private IBookService bookService;
 public PageUtils list(@ApiParam(&quot;查询的条件&quot;) BookQueryDTO queryDTO) {
 return bookService.queryPage(queryDTO);}</code></pre></figure>
 <p>第二章曾介绍，Spring Boot简化了Spring的开发过程，其中使用注释可以减少代码量。Api注释设置Swagger菜单栏信息，RequestMapping注释设置接口访问的路径，Autowired注释注入Service模块实现，ApiOperation注释和ApiParam注释设置Swagger文档以及调试模块（图5-15和图5-16）的提示信息，GetMapping注释定义请求类型为get请求。</p>
-<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image32.webp" alt="image32" width="1320" height="828" fetchpriority="low" decoding="async" /></p>
-<p>图5-15 Swagger接口文档界面</p>
-<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image33.webp" alt="image33" width="1331" height="847" fetchpriority="low" decoding="async" /></p>
-<p>图5-16 Swagger接口调试界面</p>
+<figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image32.webp" alt="image32" width="1320" height="828" fetchpriority="low" decoding="async" /><figcaption>图5-15 Swagger接口文档界面</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image33.webp" alt="image33" width="1331" height="847" fetchpriority="low" decoding="async" /><figcaption>图5-16 Swagger接口调试界面</figcaption></figure>
 <p>图5-15中列举了代码-17查询分页图书接口的详细信息，包括接口路径、请求类型、请求参数列表信息等，图5-16调试界面可以输入参数列表，点击发送后，可以在相应内容中查看前端获取的数据信息。输入的参数列表中红框标识的代表必须输入的信息。</p>
 <h4 id="大数据工具可视化平台">5.2.2.3 大数据工具可视化平台</h4>
 <p>由于Kafka支持分布式安装，在多机器消费生产数据时难以查看和管理各个主机上Zookeeper和Kafka的启动状态和消费情况，于是本系统搭建了EFAK(Eagle For Apache Kafka)实现了Kafka启动数据的可视化等功能，部分界面如图5-17所示。</p>
-<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image34.webp" alt="image34" width="1159" height="648" fetchpriority="low" decoding="async" /></p>
-<p>图5-17 EFAK主页</p>
+<figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image34.webp" alt="image34" width="1159" height="648" fetchpriority="low" decoding="async" /><figcaption>图5-17 EFAK主页</figcaption></figure>
 <p>图5-17最上方会显示当前访问Kafka的主机数量，已建立的topic数量，正在运行的Zookeeper数量；中部会显示各个时间段不同主机消费生产的数据占比；下方会显示当前正常运行的topic占比，当前topic消费生产的具体数据大小以及近期消费生产数据的柱状图分布。菜单栏中可选择Topics或Consumers可进一步获取更详细的访问统计信息。</p>
 <p>HDFS启动成功后会开启网页访问端口9870，而Yarn会开启网页访问端口8088，通过可以访问网页查看和操作组件信息，HDFS文件系统界面如图5-18所示，Yarn网页界面如图5-19所示。</p>
-<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image35.webp" alt="image35" width="1206" height="567" fetchpriority="low" decoding="async" /></p>
-<p>图5-18 HDFS文件系统界面</p>
-<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image36.webp" alt="image36" width="1257" height="403" fetchpriority="low" decoding="async" /></p>
-<p>图5-19 Yarn网页界面</p>
+<figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image35.webp" alt="image35" width="1206" height="567" fetchpriority="low" decoding="async" /><figcaption>图5-18 HDFS文件系统界面</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image36.webp" alt="image36" width="1257" height="403" fetchpriority="low" decoding="async" /><figcaption>图5-19 Yarn网页界面</figcaption></figure>
 <p>图5-18界面可以查看目录的权限，目录的创建者名称等信息，进行文件系统的文件上传或下载，目录的跳转和删除或是文件详细信息的查看和删除等操作，同第二章介绍一样，HDFS的操作和普通文件系统几乎一致。图5-19中可以查看Hadoop中正在运行的任务的ID、创建任务的用户名等信息。</p>
 <h3 id="数据处理模块">5.2.3 数据处理模块</h3>
 <h4 id="数据预处理">5.2.3.1 数据预处理</h4>
 <p>本系统大数据平台相关数据存储在Hive数据仓库中，Hive可以通过建立分区表，将一张表根据业务逻辑分为多个功能区，当单张表数据量巨大，而且查询又经常限定某一个类别，那么可以将表按照该类别进行分区，以提高数据查询效率，减少资源开销。分区底层实现逻辑为:在一个表对应的目录下，一个分区对应一个目录，HDFS存储的分区表数据如图5-20所示。</p>
-<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image37.webp" alt="image37" width="1248" height="383" fetchpriority="low" decoding="async" /></p>
-<p>图5-20 HDFS分区表数据</p>
+<figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image37.webp" alt="image37" width="1248" height="383" fetchpriority="low" decoding="async" /><figcaption>图5-20 HDFS分区表数据</figcaption></figure>
 <p>上图为userlog表的userlog分区在HDFS中的表数据，Hive表数据默认存储在HDFS的/user/hive/warehouse目录下，userlog目录下存储对应的表信息，part=userlog目录下存储表分区为userlog的分区信息。第二章中介绍过Hive是将MapReduce语句转化成SQL语句，图中为Spark执行Hive的write语句后保存的数据。</p>
 <p>在数据备份功能上，Hive可以通过类SQL语句，将查询结果以指定的数据格式和字段的分割符导出到本地或HDFS上，命令如图5-21所示，导出结果如图5-22所示。</p>
-<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image38.webp" alt="image38" width="804" height="101" fetchpriority="low" decoding="async" /></p>
-<p>图5-21 Hive数据导出命令</p>
-<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image39.webp" alt="image39" width="670" height="99" fetchpriority="low" decoding="async" /></p>
-<p>图5-22 Hive导出数据</p>
+<figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image38.webp" alt="image38" width="804" height="101" fetchpriority="low" decoding="async" /><figcaption>图5-21 Hive数据导出命令</figcaption></figure>
+<figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image39.webp" alt="image39" width="670" height="99" fetchpriority="low" decoding="async" /><figcaption>图5-22 Hive导出数据</figcaption></figure>
 <p>图5-21中展示的是进入Hive数据仓库控制台之后输入的数据导出命令。第一行通过file协议设置将数据输出到本地指定目录中；第二行设置导出数据的分隔符；第三行设置导出数据的文件格式，Hive底层为MapReduce程序，默认同时生成文本文件和文件完整检验文件；第四行设置需要导出的数据，Hive导出的数据为SQL查询语句的结果。图5-22中通过输出命令cat查看导出数据的内容。</p>
 <h4 id="推荐功能的实现">5.2.3.2 推荐功能的实现</h4>
 <p>本系统除第三章介绍的基础推荐功能外，还有新书速递和相似图书两个推荐功能。新书速递实现代码如代码-18所示。</p>
@@ -916,8 +883,7 @@ auth.userDetailsService(userDetailsService).passwordEncoder(new BCryptPasswordEn
 </table>
 <h2 id="问题与调试">6.3 问题与调试 </h2>
 <p>Vue的路由组件在向自身跳转时可实现页面刷新的功能，但向自身路由跳转时，路由组件会向网页开发者控制台返回错误信息，如图6-1所示。</p>
-<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image40.webp" alt="image40" width="1065" height="203" fetchpriority="low" decoding="async" /></p>
-<p>图6-1 Vue跳转自身报错信息</p>
+<figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image40.webp" alt="image40" width="1065" height="203" fetchpriority="low" decoding="async" /><figcaption>图6-1 Vue跳转自身报错信息</figcaption></figure>
 <p>由于该报错不影响系统功能，因此本系统重写Vue的路由组件中的跳转路由方法，将该报错信息进行捕获，代码如代码-28所示。</p>
 <figure class="doc-code"><figcaption>代码-28</figcaption><pre><code>const originalPush = VueRouter.prototype.push
 VueRouter.prototype.push = function push (location) {
@@ -925,8 +891,7 @@ return originalPush.call(this, location).catch(err =&gt; err)
 }</code></pre></figure>
 <p>Vue支持快捷的动态数据绑定，其中包括图片的动态数据绑定，但在img标签的src属性动态绑定的数据为拼接的字符串时（代码如代码-29所示），网页开发者控制台会返回错误信息，如图6-2所示。</p>
 <figure class="doc-code"><figcaption>代码-29</figcaption><pre><code>&lt;img :src=&quot;'@/assets/image/head/' + this.loginForm.head&quot; alt=&quot;暂未找到图片&quot;&gt;</code></pre></figure>
-<p><figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image41.webp" alt="image41" width="787" height="563" fetchpriority="low" decoding="async" /></p>
-<p>图6-2 动态绑定拼接字符报错</p>
+<figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image41.webp" alt="image41" width="787" height="563" fetchpriority="low" decoding="async" /><figcaption>图6-2 动态绑定拼接字符报错</figcaption></figure>
 <p>对网页解析的实际HTML代码分析后发现直接拼接字符会解析错误，将拼接字符封装成方法返回值即可解决解析问题，封装方法代码如代码-30所示。</p>
 <figure class="doc-code"><figcaption>代码-30</figcaption><pre><code>getPath() {return this.loginForm.head ?require('@/assets/image/head/' + this.loginForm.head) : ''}</code></pre></figure>
 <p>Spring Security过滤链会对Spring Boot获取的数据库数据和Spring Boot项目中的静态资源都进行权限认证，由于Swagger属于非登录用户访问资源，因此开放静态资源的访问权限前，Swagger网页无法访问，开放静态资源代码如代码-31所示。</p>
