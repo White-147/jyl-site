@@ -99,13 +99,11 @@ for (const p of ready) {
   const file = join(OUT_ROOT, p.html)
   if (!existsSync(file)) continue
   const html = readFileSync(file, 'utf8')
-  let imgTotalInPage = 0
   for (const m of html.matchAll(/<img\b[^>]*>/g)) {
     const tag = m[0]
     const src = (tag.match(/\bsrc="([^"]+)"/) ?? [])[1]
     if (!src) continue
     imgTotal++
-    imgTotalInPage++
 
     if (src.split('/').includes('..')) {
       fail(`配图 src 含 ".."（浏览器会按页面 URL 解析成 404）：${p.section}/${p.id} → ${src}`)
@@ -133,23 +131,17 @@ for (const p of ready) {
     if (!/\bwidth="\d+"/.test(tag) || !/\bheight="\d+"/.test(tag)) {
       fail(`配图缺 width/height（会导致锚点跳转失准）：${p.section}/${p.id} → ${src}`)
     }
-  }
-  /**
-   * ⚠️ LQIP 占位图必须逐张落实（2026-10 第十九轮新增）。
-   * 没有它，那块按 width/height 预留的区域在真图到达前就是一块**深色空盒** ——
-   * 真机 Fast 3G 实测空窗约 5.9 秒，正是用户反馈的"图片默认黑屏、过一会才显示"。
-   *
-   * ⚠️ 判据用**计数相等**，不要去"每张图往前找 figure"：
-   *    那条路踩过坑 —— LQIP 是约 200 字符的 base64，往回找的窗口开小了
-   *    就只能看到 base64 尾巴、看不到 `<figure`，于是**明明有 LQIP 却报缺失**（实测假报 41 条）。
-   *    计数相等能可靠地拦住真实故障（"加了新图、忘了重跑 gen_lqip.py"）。
-   */
-  const lqipCount = (html.match(/<figure class="doc-figure" style="background-image:url\(&quot;data:image\/webp/g) ?? []).length
-  if (lqipCount !== imgTotalInPage) {
-    fail(
-      `配图 LQIP 数量不符（跑 python scripts/gen_lqip.py 重建）：${p.section}/${p.id} —— ` +
-        `配图 ${imgTotalInPage} 张、占位图 ${lqipCount} 个`,
-    )
+    /**
+     * ⚠️ 配图**不允许**带 `background-image`（2026-10 第二十轮起）。
+     * 第十九轮这里曾断言"每张图都要有 LQIP 占位图"，那一版已整体撤掉：
+     * LQIP 引入了主站没有的「先糊再清晰」中间态，缩略图放大后的噪点还会变成细密网纹。
+     * 现在与主站同构：未加载时只是一层很淡的中性底（在 CSS 里），图到了直接出现。
+     * 这条反向断言是为了防止有人再把占位图塞回 `figure`（那会重新引入中间态）。
+     */
+    const before = html.slice(Math.max(0, m.index - 60), m.index)
+    if (/<figure[^>]*style="background-image/.test(before)) {
+      fail(`配图不该带 LQIP 占位图（第二十轮已撤，会引入"先糊再清晰"中间态）：${p.section}/${p.id} → ${src}`)
+    }
   }
 }
 

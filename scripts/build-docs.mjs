@@ -234,47 +234,25 @@ const PUB_DOCS = join(root, 'public', 'docs')
 const MANIFEST_PATH = join(root, 'src', 'data', 'docs.json')
 
 /**
- * LQIP（低清占位图）表：`库内相对路径 → data:image/webp;base64,…`
+ * ⚠️ 这里曾经有一版 **LQIP（低清占位图）**，2026-10 第二十轮**整体撤掉**了。留个记录免得有人再加回来：
  *
- * 由 `python scripts/gen_lqip.py` 生成（**要提交**，构建才对所有人可复现）。
- * 缺项不报错、退化成原来的深色底 —— 但 `check-docs.mjs` 会把缺项判为失败，
- * 所以"加了新图忘了重跑"会在验证阶段被拦住，而不是悄悄退回黑框。
+ * 做它的原因：`figure img` 上有 `background: #201d18`，图片按 width/height 预留出的那块
+ * 在数据到达前是一块**深色空盒**（用户原话："图片默认黑屏，过一会才显示"）。
+ *
+ * 撤掉的原因：它**引入了主站没有的中间态**。用户实测对比后说：
+ *   「我说的不一样，就是单纯的我从看到这个图片、到他完全加载出来的时间，给我的感觉是主站比文档区要短，
+ *     你换上 LQIP 之后也没有改善，反而还多出了问题」
+ * 而限速实测（各测 3 次取中位）证明**两边空等一样长**：
+ *   主站 Hero 头像 看图前空等 2783ms ｜ 文档页首图 2889ms
+ * 真正的差别是"等待期间画什么"：主站**什么都不画**（图到了才出现），
+ * LQIP 画一张拉大到整列宽的 20px 模糊图 → 于是有「先糊一下、再变清晰」这个主站没有的过程。
+ * 而且那张缩略图被放大后，其压缩噪点在某些缩放比例下会变成一层**细密网纹**，
+ * PC 端上甚至盖到正文观感上（用户截图反馈）。
+ *
+ * 现在的口径（"甲"）：**与主站同构** —— 图没到就显示一块很淡的中性占位底（见 index.css），
+ * 图到了直接出现，没有任何中间态。另外给每页前几张图做**运行时 preload**（见 Docs.tsx），
+ * 让首屏那几张尽早开始下载（实测主站首图有 `<link rel=preload as=image>` 而文档区没有）。
  */
-const LQIP_TABLE = (() => {
-  const p = join(root, 'src', 'data', 'doc-lqip.json')
-  if (!existsSync(p)) {
-    // 不静默：提示一句，构建照常（首次 checkout 后还没跑过 gen_lqip.py 的情况）
-    console.warn('  ⚠️ 缺少 src/data/doc-lqip.json —— 配图会退回深色空框。跑：python scripts/gen_lqip.py')
-    return {}
-  }
-  return JSON.parse(readFileSync(p, 'utf8'))
-})()
-
-/**
- * 从 `<img data-doc-image>` 的 `src` 反查 LQIP 键。
- *
- * 键的口径 = **库内相对路径带前缀**（`ue5/<子目录>/<名>.webp` / `thesis/<名>.webp`），
- * 与 `gen_lqip.py` 写出的表一致。`src` 是百分号编码的站点路径，先解码再去掉 `docs/` 前缀。
- *
- * ⚠️ 反查而不是"渲染时传下来"，是因为 LQIP 的注入点被**统一放在页面装配阶段**
- *    （见 `decoratePageImages`）：论文源走 pandoc HTML、不经过 `makeFigure`，
- *    渲染期传参会漏掉一整批图（实测漏了 41 张论文配图）。
- */
-function lqipKeyFromSrc(src) {
-  let s = src
-  try { s = decodeURIComponent(s) } catch { /* 保留原文 */ }
-  /**
-   * ⚠️ 要同时剥掉 `docs/` 与 `images/` 两段 —— 表里的键是
-   *    `ue5/<子目录>/<名>.webp` / `thesis/<名>.webp`（以**图片根**为基准），
-   *    而 src 是 `docs/ue5/images/<子目录>/<名>.webp`（以站点根为基准）。
-   *    少剥一段的后果是**静默漏配**：正则改了、优先级也打上了（看起来"跑过了"），
-   *    只有 LQIP 一个都查不到，自检报 41 条缺项才暴露出来（2026-10 实测）。
-   */
-  if (s.startsWith('docs/')) s = s.slice('docs/'.length)
-  if (s.startsWith('ue5/images/')) s = 'ue5/' + s.slice('ue5/images/'.length)
-  else if (s.startsWith('thesis/images/')) s = 'thesis/' + s.slice('thesis/images/'.length)
-  return s
-}
 
 /* ============================ 工具 ============================ */
 
@@ -978,11 +956,10 @@ function makeFigure(url, rel, alt) {
   const dim = size ? ` width="${size.w}" height="${size.h}"` : ''
   const caption = alt && String(alt).trim() ? `<figcaption>${escapeHtml(stripInline(alt))}</figcaption>` : ''
   /**
-   * ⚠️ 这里**只出结构**，不打 `loading` / `fetchpriority`，也不挂 LQIP ——
-   *    全部交给装配阶段的 `decoratePageImages()`。两个原因（都是实测踩出来的）：
-   *      ① 优先级：`makeFigure` 按**源**计数，而一个源会被切成十几页，
-   *         于是只有每个源的第一页拿到高优先级（实测 119 页全是 low）。"首屏"是**页**的概念。
-   *      ② LQIP：论文源走 pandoc HTML、**不经过这里**，在这挂会漏掉 41 张论文配图。
+   * ⚠️ 这里**只出结构**，不打 `loading` / `fetchpriority` ——
+   *    交给装配阶段的 `decoratePageImages()`：`makeFigure` 按**源**计数，
+   *    而一个源会被切成十几页，在这判断"前几张"会让 119 页全都拿不到高优先级
+   *    （实测：high=2 的页仅 5 个）。"首屏"是**页**的概念，不是源的概念。
    */
   return (
     `<figure class="doc-figure">` +
@@ -994,39 +971,28 @@ function makeFigure(url, rel, alt) {
 /**
  * 页面装配阶段的配图统一装饰（**必须在装箱之后**调用，一处覆盖所有源）。
  *
- * 干两件事：
- *   ① **LQIP**：从 `src` 反查低清占位图，挂到 `figure` 的 `background-image` 上。
- *      没有它，那块按 width/height 预留的区域在真图到达前就是一块**深色空盒** ——
- *      真机 Fast 3G 实测空窗 **约 5.9 秒**（4G 良好 1.9 秒），正是用户反馈的"图片默认黑屏"。
- *   ② **加载优先级**：每页前 2 张 `fetchpriority="high"`，其余 `loading="lazy" fetchpriority="low"`。
+ * 只干一件事：**按页打加载优先级** —— 每页前 2 张 `fetchpriority="high"`，
+ * 其余 `loading="lazy" fetchpriority="low"`。
  *
  * ⚠️ 旧口径的错误（2026-10 第十九轮实测纠正）：原来是"只有第一张 `loading="lazy"`、
  *    其余 286 张全部 `fetchpriority="low"`" —— 首图被懒加载压后（文档内容是取回 HTML 后
  *    由 React 注入的，注入时布局未稳），其余被降级到文本/字体/脚本之后。
  * ⚠️ 别把"其余"也改成 eager：一页最多 11 张，全部 eager 会挤占正文与字体的带宽。
- * ⚠️ 别把 LQIP 挪回渲染期：那会漏掉论文源（见 makeFigure 的注释）。
+ * ⚠️ 这里**不再挂 LQIP**（第二十轮撤掉，原因见文件头 PUB_DOCS 上方的长注释）。
+ *    正则仍写得宽容些：`doc-figure` 后面可能残留属性，绷太紧会**静默不匹配**。
  */
 function decoratePageImages(html) {
   const EAGER = 2
   let i = 0
-  /**
-   * ⚠️ 正则要**宽容**（2026-10 实测踩过）：
-   *    `doc-figure` 后面可能已经带了 ` style="…"`（上一轮构建留下的，或渲染期挂的），
-   *    也允许 figure 与 img 之间有空白/换行 —— 绷得太紧会**一条都不匹配**，
-   *    而且是"静默不匹配"（构建照常成功、只是占位图没了）。所以这里用 `[^>]*` + `\s*`。
-   *    另外 `[^>]*?` 匹配 img 的属性时不会跨过 `>`，不会误吃下一个标签。
-   */
   return html.replace(
     /<figure class="doc-figure"[^>]*>\s*<img\b([^>]*?)\bsrc="([^"]+)"/g,
     (_m, attrsBeforeSrc, src) => {
-      const lqip = LQIP_TABLE[lqipKeyFromSrc(src)]
-      const style = lqip ? ` style="background-image:url(&quot;${lqip}&quot;)"` : ''
       const prio = i++ < EAGER ? 'fetchpriority="high"' : 'loading="lazy" fetchpriority="low"'
       // 保留 img 上原有的其它属性（alt / width / height / decoding），去掉可能重复的优先级属性
       const rest = attrsBeforeSrc
         .replace(/\s*(?:loading|fetchpriority)="[^"]*"/g, '')
         .replace(/\s+$/, '')
-      return `<figure class="doc-figure"${style}><img data-doc-image ${prio} src="${src}"${rest}`
+      return `<figure class="doc-figure"><img data-doc-image ${prio} src="${src}"${rest}`
     },
   )
 }

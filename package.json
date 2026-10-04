@@ -14,8 +14,6 @@
     "docs:anchors": "node scripts/check-anchors.mjs",
     "docs:verify": "npm run docs:check && npm run docs:anchors",
     "docs:thesis": "node scripts/prepare-thesis.mjs",
-    "docs:lqip": "python scripts/gen_lqip.py",
-    "docs:lqip:check": "python scripts/gen_lqip.py --check",
     "db:seed": "node scripts/seed-db.mjs",
     "db:export": "node scripts/export-db.mjs",
     "fonts:subset": "npm run docs:build && node scripts/subset-fonts.mjs && node scripts/inline-firstscreen-fonts.mjs",

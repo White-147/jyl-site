@@ -191,6 +191,44 @@ const SECTION_LANDING: Record<string, { cover: string; variant: 'banner' | 'embl
 
 /** 折叠状态存 localStorage：刷新后还保持收起的样子 */
 const COLLAPSE_KEY = 'docs.nav.collapsed'
+const PRELOAD_COUNT = 3
+/** 给运行时 preload 插的 link 打个标记，换页时好清掉（避免越积越多） */
+const PRELOAD_ATTR = 'data-doc-img-preload'
+
+/**
+ * 把文档页前几张配图提前 **preload** 出去（2026-10 第二十轮）。
+ *
+ * 为什么需要：文档正文是**运行时 fetch** 的，图要等「bundle → fetch HTML → React 注入」
+ * 之后才被浏览器发现并开始下载 —— 这段时间是**串行**的。主站首图则在 `index.html` 里
+ * 就有 `<link rel="preload" as="image">`，与正文**并行**下载。用户在限速下的体感差异
+ * （"主图比文档区先出来"）主要来自这里。
+ *
+ * 做法：从刚取回的 HTML 里解析出前 N 张 `data-doc-image` 的 `src`，插入 preload link。
+ * 调用点在 `setHtml` **之前**，让下载与 React 渲染重叠，而不是排在渲染之后。
+ *
+ * ⚠️ 只 preload 前几张：文档页最多 11 张图，全 preload 会跟正文/字体抢带宽，反而更慢。
+ * ⚠️ `src` 是页面内的**相对路径**（`docs/ue5/images/…`），页面地址是 `/…/#/docs/…`，
+ *    所以相对路径直接可用 —— 与 `<img src>` 的解析口径一致，不要另外拼 base，否则会双重前缀
+ *    （这个坑在配图那轮踩过：拼成 `docs/ue5/images/../../../../public/…` 全线 404）。
+ */
+function preloadDocImages(html: string, count: number) {
+  if (typeof document === 'undefined') return
+  // 换页时先清掉上一页插的，避免 <head> 里越积越多
+  for (const el of document.querySelectorAll(`link[${PRELOAD_ATTR}]`)) el.remove()
+  const srcs: string[] = []
+  const re = /<img\b[^>]*\bdata-doc-image\b[^>]*\bsrc="([^"]+)"/g
+  let m: RegExpExecArray | null
+  while ((m = re.exec(html)) && srcs.length < count) srcs.push(m[1])
+  for (const src of srcs) {
+    const link = document.createElement('link')
+    link.rel = 'preload'
+    link.as = 'image'
+    link.href = src
+    link.setAttribute(PRELOAD_ATTR, '')
+    document.head.appendChild(link)
+  }
+}
+
 function loadCollapsed(): Set<string> {
   try {
     return new Set(JSON.parse(localStorage.getItem(COLLAPSE_KEY) ?? '[]'))
@@ -564,7 +602,22 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
         return r.text()
       })
       .then((t) => {
-        if (alive) setHtml(t)
+        if (!alive) return
+        /**
+         * ⚠️ **拿到 HTML 就立刻 preload 首屏那几张配图**（2026-10 第二十轮）。
+         *
+         * 为什么需要：文档正文是**运行时 fetch** 的，图片要等
+         * 「bundle → fetch HTML → React 注入」之后才由浏览器发现并开始下载 ——
+         * 也就是这段时间是**串行**的。主站首图则在 `index.html` 里就有
+         * `<link rel="preload" as="image">`，与正文**并行**下载。
+         * 用户在限速下的体感差异（"主站更快"）主要来自这里。
+         *
+         * 做法：解析出正文里前几张 `data-doc-image` 的 `src`，插 `<link rel=preload as=image>`。
+         * 放在 `setHtml` **之前**，让下载与 React 的渲染重叠起来，而不是排在后面。
+         * 只 preload 前 `PRELOAD_COUNT` 张：再多就会与正文/字体抢带宽（文档页最多 11 张图）。
+         */
+        preloadDocImages(t, PRELOAD_COUNT)
+        setHtml(t)
       })
       .catch(() => {
         if (alive) setFailed(true)

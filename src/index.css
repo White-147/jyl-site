@@ -2163,17 +2163,23 @@ details[open] .chevron-up-down {
 /* 图片：可点击放大（灯箱在 React 侧用事件委托接管），宽度放到容器满宽 */
 .doc-content .doc-figure {
   margin: 1.25rem 0;
-  /* ⚠️ 2026-10 第十九轮：圆角 + 深色底从 `img` **上移到 `figure`**，并加 `overflow: hidden`。
-     因为这一层要承载构建期内联的 **LQIP 低清占位图**（`background-image`，见 gen_lqip.py）：
-       · 占位图挂在 figure 上；真图是不透明位图，加载完自然盖住它，两者不打架；
-       · 若底色仍留在 img 身上，就会整块盖住 figure 的占位图 —— 所以底色必须上移；
-       · 圆角要在 figure 上裁（`overflow: hidden`），否则占位图方角会露在圆角外。
-     实测：真机 Fast 3G 下"文本已就绪但图还黑着"的空窗 **约 5.9s → 0**（立刻见模糊图）。 */
+  /* ⚠️ 圆角 + 底色放在 `figure` 上，并加 `overflow: hidden`：
+     图片有 width/height，浏览器会**立刻按真实比例预留**出这块空间，圆角要在这里裁才盖得住。
+   *
+   * ⚠️⚠️ 这里换过三版底色，别再改回去（2026-10 第二十轮定稿）：
+   *   ① 初版 `img` 上 `background: #201d18` —— 预留区是一块**近黑空盒**，
+   *      用户反馈"图片默认黑屏，过一会才显示"；
+   *   ② 第十九轮改成 LQIP（内联 20px 缩略图拉伸当背景）—— 黑框没了，
+   *      但**引入了主站没有的中间态**：先糊一下再变清晰；而且那张缩略图放大后，
+   *      压缩噪点在某些缩放比例下会变成一层**细密网纹**，PC 端上甚至影响正文观感。
+   *      用户实测后明确："换上 LQIP 之后也没有改善，反而还多出了问题"；
+   *   ③ 现在：一块**很淡的中性底**，与主站同构 —— 图没到就淡淡空着，图到了直接出现，
+   *      **没有任何中间态**。不再是深色（所以不"黑屏"），也不再是模糊图（所以不"糊"）。
+   * 主站对照：Hero 头像未加载时也是空的，到了才出现；限速实测两边空等一样长
+   * （主站 2783ms / 文档区 2889ms），差别只在"等待期间画什么"。 */
   border-radius: 0.75rem;
   overflow: hidden;
-  /* UE 编辑器截图是深色底：给它一块中性深底，浅色模式下不会"白底贴深图"显得割裂。
-     这同时是 **LQIP 缺失时**的兜底外观（查不到占位图就还是原来的深色空框）。 */
-  background-color: #201d18;
+  background-color: rgb(127 127 127 / 0.07);
 }
 .doc-content .doc-figure img {
   display: block;
@@ -2182,11 +2188,8 @@ details[open] .chevron-up-down {
   cursor: zoom-in;
   border-radius: 0.75rem;
   border: 1px solid rgb(0 0 0 / 0.35);
-  /* ⚠️ 2026-10 第十九轮：这里原来是 `background: #201d18`（不透明深色）。
-     它正是用户反馈的"图片默认黑屏"的直接来源 —— 图片有 width/height，
-     浏览器立刻按真实比例预留好空间，而那块空间在数据到达前被这层底色涂成深色。
-     改成 **transparent**，把"未加载时的样子"交给 `figure` 上的 LQIP 低清占位图
-     （构建期内联，见 gen_lqip.py）。深色底没有丢，它移到了 `figure` 上作兜底。 */
+  /* ⚠️ 必须透明：不透明的话会整块盖住 `figure` 上那层淡底，
+     于是"未加载"又变回一块实心色（第十九轮的黑框就是这么来的）。 */
   background: transparent;
   transition: border-color var(--duration-micro) var(--ease-out-soft);
 }

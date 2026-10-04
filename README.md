@@ -110,7 +110,6 @@ jyl-site/
 │   ├── subset-fonts.mjs      #   五层字体子集化（新增文案后重跑）
 │   ├── inline-firstscreen-fonts.mjs   # 首屏字体 base64 内联（随上一步自动运行）
 │   ├── gen_icons.py          #   站点图标：从柳建毛草渲染「蒋」字标
-│   ├── gen_lqip.py           #   文档配图的低清占位图（LQIP）表
 │   ├── build-docs.mjs        #   文档区构建：把源拆成页并生成导航与清单
 │   ├── check-docs.mjs        #   文档产物自检（配图缺失 / 大纲悬空 / 路由冲突）
 │   ├── check-anchors.mjs     #   真浏览器断言（锚点落点 / 横栏材质 / 互链 / 左栏折叠 / 导航冒烟）
@@ -122,7 +121,6 @@ jyl-site/
 │   └── start-all.ps1 / .bat  #   一键启动本站与各项目（本地演示）
 ├── src/
 │   ├── data/*.json           #   构建数据（由数据库导出生成）
-│   ├── data/doc-lqip.json    #   文档配图占位图表（gen_lqip.py 生成，进 git）
 │   ├── data/navigation.ts    #   区块注册表（导航 / 滚动侦测共用）
 │   ├── data/scrollTargets.ts #   锚点偏移单一来源
 │   ├── data/contact.ts       #   联系方式混淆层
