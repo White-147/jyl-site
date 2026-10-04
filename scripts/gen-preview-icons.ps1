@@ -1,8 +1,13 @@
 # 为 jyl-site 各预览页生成 apple-touch-icon.png (180x180) 与缺失的 favicon（请在 pwsh 中运行）
 # 说明：变量名不得与参数量名大小写重复（PowerShell 变量大小写不敏感）。
+#
+# ⚠️ 2026-10 第十九轮：两个路径原来**硬编码成 `D:\code\jyl-site\...`**，换机器/换盘符就废。
+#    改成相对本脚本定位（`$PSScriptRoot` 的上一级即仓库根）。
+#    `$assetsDir` 也从 `scripts/assets` 改到 `materials/icons`（素材集中到 materials/ 了）。
 Add-Type -AssemblyName System.Drawing
-$root = 'D:\code\jyl-site\public\preview'
-$assetsDir = 'D:\code\jyl-site\scripts\assets'
+$repoRoot = Split-Path -Parent $PSScriptRoot
+$root = Join-Path $repoRoot 'public\preview'
+$assetsDir = Join-Path $repoRoot 'materials\icons'
 
 function New-ContainIcon {
   param([string]$SourcePath, [string]$OutPath, [int]$Size = 180)

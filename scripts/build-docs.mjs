@@ -233,6 +233,49 @@ const OUT_ROOT = join(root, 'public', 'docs', 'pages')
 const PUB_DOCS = join(root, 'public', 'docs')
 const MANIFEST_PATH = join(root, 'src', 'data', 'docs.json')
 
+/**
+ * LQIP（低清占位图）表：`库内相对路径 → data:image/webp;base64,…`
+ *
+ * 由 `python scripts/gen_lqip.py` 生成（**要提交**，构建才对所有人可复现）。
+ * 缺项不报错、退化成原来的深色底 —— 但 `check-docs.mjs` 会把缺项判为失败，
+ * 所以"加了新图忘了重跑"会在验证阶段被拦住，而不是悄悄退回黑框。
+ */
+const LQIP_TABLE = (() => {
+  const p = join(root, 'src', 'data', 'doc-lqip.json')
+  if (!existsSync(p)) {
+    // 不静默：提示一句，构建照常（首次 checkout 后还没跑过 gen_lqip.py 的情况）
+    console.warn('  ⚠️ 缺少 src/data/doc-lqip.json —— 配图会退回深色空框。跑：python scripts/gen_lqip.py')
+    return {}
+  }
+  return JSON.parse(readFileSync(p, 'utf8'))
+})()
+
+/**
+ * 从 `<img data-doc-image>` 的 `src` 反查 LQIP 键。
+ *
+ * 键的口径 = **库内相对路径带前缀**（`ue5/<子目录>/<名>.webp` / `thesis/<名>.webp`），
+ * 与 `gen_lqip.py` 写出的表一致。`src` 是百分号编码的站点路径，先解码再去掉 `docs/` 前缀。
+ *
+ * ⚠️ 反查而不是"渲染时传下来"，是因为 LQIP 的注入点被**统一放在页面装配阶段**
+ *    （见 `decoratePageImages`）：论文源走 pandoc HTML、不经过 `makeFigure`，
+ *    渲染期传参会漏掉一整批图（实测漏了 41 张论文配图）。
+ */
+function lqipKeyFromSrc(src) {
+  let s = src
+  try { s = decodeURIComponent(s) } catch { /* 保留原文 */ }
+  /**
+   * ⚠️ 要同时剥掉 `docs/` 与 `images/` 两段 —— 表里的键是
+   *    `ue5/<子目录>/<名>.webp` / `thesis/<名>.webp`（以**图片根**为基准），
+   *    而 src 是 `docs/ue5/images/<子目录>/<名>.webp`（以站点根为基准）。
+   *    少剥一段的后果是**静默漏配**：正则改了、优先级也打上了（看起来"跑过了"），
+   *    只有 LQIP 一个都查不到，自检报 41 条缺项才暴露出来（2026-10 实测）。
+   */
+  if (s.startsWith('docs/')) s = s.slice('docs/'.length)
+  if (s.startsWith('ue5/images/')) s = 'ue5/' + s.slice('ue5/images/'.length)
+  else if (s.startsWith('thesis/images/')) s = 'thesis/' + s.slice('thesis/images/'.length)
+  return s
+}
+
 /* ============================ 工具 ============================ */
 
 const escapeHtml = (s) =>
@@ -930,17 +973,61 @@ function mergeSmall(pages, budget) {
  *     `url` 是**已编码**的站点路径，写进 `src`。两者必须分开：
  *     文件名带空格的那 7 张（如 `Filp Flop.webp`）编码后是 `%20`，
  *     拿它去 `join(root,'public',…)` 读文件会量不到尺寸 → 少了 width/height → 锚点跳转失准。 */
-function makeFigure(url, rel, alt, index) {
+function makeFigure(url, rel, alt) {
   const size = rel ? webpSize(join(IMAGE_ROOTS.md.fsRoot, rel)) : webpSize(join(root, 'public', url))
   const dim = size ? ` width="${size.w}" height="${size.h}"` : ''
-  // 只有第一张懒加载，其余 eager + 低优先级：懒加载会让文档高度随滚动继续增长，
-  // 靠后的锚点就永远跳不到（见文件头第 4 条）。
-  const loading = index === 0 ? ' loading="lazy"' : ' fetchpriority="low"'
   const caption = alt && String(alt).trim() ? `<figcaption>${escapeHtml(stripInline(alt))}</figcaption>` : ''
+  /**
+   * ⚠️ 这里**只出结构**，不打 `loading` / `fetchpriority`，也不挂 LQIP ——
+   *    全部交给装配阶段的 `decoratePageImages()`。两个原因（都是实测踩出来的）：
+   *      ① 优先级：`makeFigure` 按**源**计数，而一个源会被切成十几页，
+   *         于是只有每个源的第一页拿到高优先级（实测 119 页全是 low）。"首屏"是**页**的概念。
+   *      ② LQIP：论文源走 pandoc HTML、**不经过这里**，在这挂会漏掉 41 张论文配图。
+   */
   return (
     `<figure class="doc-figure">` +
-    `<img data-doc-image src="${escapeAttr(url)}" alt="${escapeAttr(stripInline(alt ?? ''))}"${dim}${loading} decoding="async" />` +
+    `<img data-doc-image src="${escapeAttr(url)}" alt="${escapeAttr(stripInline(alt ?? ''))}"${dim} decoding="async" />` +
     `${caption}</figure>`
+  )
+}
+
+/**
+ * 页面装配阶段的配图统一装饰（**必须在装箱之后**调用，一处覆盖所有源）。
+ *
+ * 干两件事：
+ *   ① **LQIP**：从 `src` 反查低清占位图，挂到 `figure` 的 `background-image` 上。
+ *      没有它，那块按 width/height 预留的区域在真图到达前就是一块**深色空盒** ——
+ *      真机 Fast 3G 实测空窗 **约 5.9 秒**（4G 良好 1.9 秒），正是用户反馈的"图片默认黑屏"。
+ *   ② **加载优先级**：每页前 2 张 `fetchpriority="high"`，其余 `loading="lazy" fetchpriority="low"`。
+ *
+ * ⚠️ 旧口径的错误（2026-10 第十九轮实测纠正）：原来是"只有第一张 `loading="lazy"`、
+ *    其余 286 张全部 `fetchpriority="low"`" —— 首图被懒加载压后（文档内容是取回 HTML 后
+ *    由 React 注入的，注入时布局未稳），其余被降级到文本/字体/脚本之后。
+ * ⚠️ 别把"其余"也改成 eager：一页最多 11 张，全部 eager 会挤占正文与字体的带宽。
+ * ⚠️ 别把 LQIP 挪回渲染期：那会漏掉论文源（见 makeFigure 的注释）。
+ */
+function decoratePageImages(html) {
+  const EAGER = 2
+  let i = 0
+  /**
+   * ⚠️ 正则要**宽容**（2026-10 实测踩过）：
+   *    `doc-figure` 后面可能已经带了 ` style="…"`（上一轮构建留下的，或渲染期挂的），
+   *    也允许 figure 与 img 之间有空白/换行 —— 绷得太紧会**一条都不匹配**，
+   *    而且是"静默不匹配"（构建照常成功、只是占位图没了）。所以这里用 `[^>]*` + `\s*`。
+   *    另外 `[^>]*?` 匹配 img 的属性时不会跨过 `>`，不会误吃下一个标签。
+   */
+  return html.replace(
+    /<figure class="doc-figure"[^>]*>\s*<img\b([^>]*?)\bsrc="([^"]+)"/g,
+    (_m, attrsBeforeSrc, src) => {
+      const lqip = LQIP_TABLE[lqipKeyFromSrc(src)]
+      const style = lqip ? ` style="background-image:url(&quot;${lqip}&quot;)"` : ''
+      const prio = i++ < EAGER ? 'fetchpriority="high"' : 'loading="lazy" fetchpriority="low"'
+      // 保留 img 上原有的其它属性（alt / width / height / decoding），去掉可能重复的优先级属性
+      const rest = attrsBeforeSrc
+        .replace(/\s*(?:loading|fetchpriority)="[^"]*"/g, '')
+        .replace(/\s+$/, '')
+      return `<figure class="doc-figure"${style}><img data-doc-image ${prio} src="${src}"${rest}`
+    },
   )
 }
 
@@ -1010,11 +1097,10 @@ for (const src of SOURCES) {
     const links = []
     const ctx = {
       images: new Set(),
-      imgIndex: 0,
       figure(url, rel, alt) {
         // ⚠️ 存**未编码**的相对路径（`url` 现在是编码过的，拿它去查磁盘会因 %20 之类失配）
         if (rel) ctx.images.add(rel)
-        return makeFigure(url, rel, alt, ctx.imgIndex++)
+        return makeFigure(url, rel, alt)
       },
       docLink(url, labelHtml) {
         links.push({ url, label: labelHtml })
@@ -1221,7 +1307,12 @@ for (const p of pages) {
   const raw = relevelHtml(p.blocks.map(fullHtml).join('\n'), 2 - topicLevel)
   // ⚠️ 用 fullHtml（含子孙），不是 ownHtml —— 原因见 fullHtml 的注释
   const { html, toc } = decorateHeadings(raw, usedIds)
-  p.content = dropLeadingHeadings(html, dropCount)
+  /**
+   * ⚠️ 按**页**给配图打加载优先级，必须在这里（装箱之后、本页内容定稿之时）。
+   *    放在 `makeFigure` 里是错的：那一步按**源**计数，而一个源会被切成十几页 ——
+   *    详见 `decoratePageImages` 顶部注释（实测 119 页拿不到高优先级）。
+   */
+  p.content = decoratePageImages(dropLeadingHeadings(html, dropCount))
   /**
    * 大纲仍从**主题标题之下**开始：主题标题就是本页标题，列进大纲会与页首那条 `doc-top` 重复。
    * 所以这里比正文多跳过一条。

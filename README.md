@@ -15,7 +15,7 @@
 </p>
 
 <p align="center">
-  <img src="./docs/assets/screenshots/hero.webp" alt="个人作品集网站首屏截图" width="900">
+  <img src="./materials/site/hero.webp" alt="个人作品集网站首屏截图" width="900">
 </p>
 
 个人求职作品集单页应用，围绕「信息技术综合岗位」组织内容，覆盖数据工程、业务系统交付、Windows 原生桌面端工程化与游戏开发（虚幻引擎）四条主线，集中展示 MiLuStudio、XiaoLouAI、SyLabAI 等可验证项目，并内置站内 UE 学习笔记与毕业论文。
@@ -78,14 +78,22 @@ flowchart LR
 jyl-site/
 ├── database/
 │   └── portfolio.db          # ★ SQLite 内容库（内容源）
+├── materials/                # ★ 源素材（未加工的原料：原件 / 原图 / 字体源）
+│   ├── resumes/              #   简历原件（蒋宇龙简历.pdf、蒋宇龙附件简历.pdf）
+│   ├── certificates/         #   证书 / 奖项原件（PNG/JPG）
+│   ├── avatars/              #   头像原件
+│   ├── projects/             #   项目截图原件
+│   ├── thesis/images/        #   论文插图原件
+│   ├── fonts/                #   字体源 TTF（subset-fonts.mjs 的输入）
+│   ├── icons/                #   图标源图形（进 git）
+│   └── site/hero.webp        #   README 展示用站点截图（进 git）
 ├── docs/
 │   ├── thesis/source/        # ★ 毕业论文源（pandoc 从 docx 转出的 HTML）
-│   ├── theory/source/        # ★ UE 理论源（markdown 笔记）
+│   ├── theory/source/        # ★ UE 理论源（markdown 笔记 + 原件 PDF）
 │   ├── combat/source/        # ★ UE 实战源（markdown 笔记；FPS 篇仍是占位页）
-│   ├── 联动维护点.md          #   多处联动的维护清单（改代码前必读）
-│   └── assets/screenshots/   #   README 展示用站点截图
+│   └── 联动维护点.md          #   多处联动的维护清单（改代码前必读）
 ├── public/
-│   ├── resume.pdf            #   站点简历（最新版覆盖即可）
+│   ├── downloads/resume.pdf  #   站点简历（最新版覆盖即可）
 │   ├── 404.html              #   SPA fallback：深链刷新兜底回应用入口
 │   ├── robots.txt            #   抓取策略（放行搜索引擎、拒绝 AI 语料采集）
 │   ├── sitemap.xml           #   站点结构
@@ -93,15 +101,16 @@ jyl-site/
 │   ├── preview/              # ★ 内嵌项目预览（各项目前端静态产物）
 │   ├── docs/pages/           #   文档区页面产物（构建生成，已 gitignore）
 │   ├── favicons/             #   站点图标（由 scripts/gen_icons.py 生成）
-│   ├── assets/               #   传统纹样装饰件（卷草纹章、忍冬印章）
-│   ├── projects/             #   项目截图
-│   └── images/ certificates/ #   头像、证书缩略图
-├── scripts/
+│   └── images/               #   站内全部图片（平铺，靠文件名前缀分辨类别）：
+│                             #     avatar-* 头像 ｜ brand-* 纹样装饰
+│                             #     cert-*   证书奖项 ｜ proj-*  项目截图
+├── scripts/                  #   纯脚本（素材都在 materials/ 下）
 │   ├── seed-db.mjs           #   JSON → 数据库（npm run db:seed）
 │   ├── export-db.mjs         #   数据库 → JSON（npm run db:export）
 │   ├── subset-fonts.mjs      #   五层字体子集化（新增文案后重跑）
 │   ├── inline-firstscreen-fonts.mjs   # 首屏字体 base64 内联（随上一步自动运行）
 │   ├── gen_icons.py          #   站点图标：从柳建毛草渲染「蒋」字标
+│   ├── gen_lqip.py           #   文档配图的低清占位图（LQIP）表
 │   ├── build-docs.mjs        #   文档区构建：把源拆成页并生成导航与清单
 │   ├── check-docs.mjs        #   文档产物自检（配图缺失 / 大纲悬空 / 路由冲突）
 │   ├── check-anchors.mjs     #   真浏览器断言（锚点落点 / 横栏材质 / 互链 / 左栏折叠 / 导航冒烟）
@@ -113,6 +122,7 @@ jyl-site/
 │   └── start-all.ps1 / .bat  #   一键启动本站与各项目（本地演示）
 ├── src/
 │   ├── data/*.json           #   构建数据（由数据库导出生成）
+│   ├── data/doc-lqip.json    #   文档配图占位图表（gen_lqip.py 生成，进 git）
 │   ├── data/navigation.ts    #   区块注册表（导航 / 滚动侦测共用）
 │   ├── data/scrollTargets.ts #   锚点偏移单一来源
 │   ├── data/contact.ts       #   联系方式混淆层
@@ -124,6 +134,13 @@ jyl-site/
 ├── PRODUCT.md                #   产品口径（用户 / 反参考 / 设计原则）
 └── LICENSE
 ```
+
+> **目录分组口径（2026-10 第十九轮整合）**：仓库根只留"功能族"——
+> `src`（应用源码）｜`public`（部署根）｜`docs`（文档管线）｜`materials`（源素材）｜`scripts`（脚本）｜`database`（数据源）。
+> 同一类东西收进同一个子目录，不再有"单份文件自己占一层"（简历曾直接躺在 `public/` 根下）
+> 或"素材混在脚本目录里"（字体源曾在 `scripts/fonts-src/`）。
+> `materials/` 整目录被 `.gitignore` 忽略（原件都是大文件、只服务一次性脚本），
+> 只显式放行 `materials/icons/` 与 `materials/site/` —— 那两样是**源**不是原料。
 
 ## 本地运行
 
@@ -152,7 +169,7 @@ npm run build      # = db:export + 类型检查 + 构建
 
 ```bash
 npm run fonts:subset                            # 新增/修改文案后重跑（新用字不进子集会回退系统字体）
-npm run resume:watermark -- --in <原件.pdf>      # 换简历后重跑（生成带水印的 public/resume.pdf）
+npm run resume:watermark -- --in <原件.pdf>      # 换简历后重跑（生成带水印的 public/downloads/resume.pdf）
 npm run contact:encode                          # 改过邮箱 / GitHub 后重跑
 npm run icons:gen                               # 换图标字或配色后重新生成 favicon
 npm run previews:polish                         # 预览页更新后重跑（演示提示 + iframe 防护）

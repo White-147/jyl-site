@@ -19,7 +19,7 @@ function listFiles(dir) {
   for (const name of readdirSync(dir)) {
     const p = join(dir, name)
     if (statSync(p).isDirectory()) {
-      if (name === 'node_modules' || name === 'dist' || name === '.git' || name === '_archive' || name.startsWith('.')) continue
+      if (name === 'node_modules' || name === 'dist' || name === '.git' || name === 'materials' || name.startsWith('.')) continue
       files.push(...listFiles(p))
     } else {
       files.push(p)
@@ -90,7 +90,7 @@ for (const [weight, file] of NOTO) {
 }
 
 // 2a. 得意黑 Smiley Sans（区块标题展示，斜切墨体）：全量 ttf → 站点字符集子集 woff2
-const SMILEY_SRC = join(root, 'scripts', 'fonts-src', 'smiley-sans', 'SmileySans-Oblique.ttf')
+const SMILEY_SRC = join(root, 'materials', 'fonts', 'smiley-sans', 'SmileySans-Oblique.ttf')
 const smiley = await subsetFont(readFileSync(SMILEY_SRC), text, { targetFormat: 'woff2' })
 const smileyOut = join(root, 'src', 'fonts', 'smiley-sans-oblique.woff2')
 writeFileSync(smileyOut, smiley)
@@ -98,7 +98,7 @@ console.log(`✔ Smiley Sans（得意黑）: ${Math.round(smiley.length / 1024)}
 
 // 2b. 柳建毛草 Liu Jian Mao Cao（名字单独展示，草书）：名字用字 + 拉丁数字保底
 const LIU_CHARS = '蒋宇龙' + '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ ·，。'
-const LIU_SRC = join(root, 'scripts', 'fonts-src', 'liujianmaocao', 'LiuJianMaoCao-Regular.ttf')
+const LIU_SRC = join(root, 'materials', 'fonts', 'liujianmaocao', 'LiuJianMaoCao-Regular.ttf')
 const liu = await subsetFont(readFileSync(LIU_SRC), LIU_CHARS, { targetFormat: 'woff2' })
 const liuOut = join(root, 'src', 'fonts', 'liu-jian-mao-cao-regular.woff2')
 writeFileSync(liuOut, liu)

@@ -7,24 +7,24 @@
     "certs": [
       {
         "name": "大学英语四级 CET-4",
-        "image": "certificates/cet-4.webp",
+        "image": "images/cert-cet-4.webp",
         "date": "2019/12"
       },
       {
         "name": "工业互联网平台开发工程师（初级）",
-        "image": "certificates/industrial-internet.webp",
+        "image": "images/cert-industrial-internet.webp",
         "date": "2022/08"
       }
     ],
     "awards": [
       {
         "name": "第十二届 蓝桥杯 江苏赛区 三等奖",
-        "image": "certificates/bluebridge.webp",
+        "image": "images/cert-bluebridge.webp",
         "date": "2021/05"
       },
       {
         "name": "第十一届 三创赛 江苏赛区 三等奖",
-        "image": "certificates/sanchuang-medal.webp",
+        "image": "images/cert-sanchuang-medal.webp",
         "date": "2021/06"
       }
     ]

@@ -22,7 +22,7 @@
    也极好压。最终整份只增加约 25KB，正文完全不受影响。
 
 用法：
-  python scripts/watermark_resume.py                        # 归档原件 -> public/resume.pdf
+  python scripts/watermark_resume.py                        # 归档原件 -> public/downloads/resume.pdf
   python scripts/watermark_resume.py --in X.pdf --out Y.pdf
   python scripts/watermark_resume.py --text "..." --opacity 0.16 --font-size 10
 """
@@ -34,8 +34,8 @@ from PIL import Image, ImageDraw, ImageFont
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-DEFAULT_IN = os.path.join(ROOT, '_archive', 'resumes', '蒋宇龙简历.pdf')
-DEFAULT_OUT = os.path.join(ROOT, 'public', 'resume.pdf')
+DEFAULT_IN = os.path.join(ROOT, 'materials', 'resumes', '蒋宇龙简历.pdf')
+DEFAULT_OUT = os.path.join(ROOT, 'public', 'downloads', 'resume.pdf')
 DEFAULT_TEXT = '蒋宇龙 · 简历 · 仅限招聘评估使用'
 DEFAULT_SIZE_PT = 10.0
 DEFAULT_OPACITY = 0.16

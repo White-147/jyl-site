@@ -12,7 +12,7 @@
 // 用法要点：
 //   · pandoc 输出走 `-o <文件>` 而不是管道 —— 沙箱下 Node 的 `stdio:'pipe'` 抓子进程输出会 EPERM，
 //     写文件再读回来最稳。
-//   · `--extract-media` 先把插图抽到临时目录，再归档进 `_archive/thesis/images/`；
+//   · `--extract-media` 先把插图抽到临时目录，再归档进 `materials/thesis/images/`；
 //     站点用的是 `public/docs/thesis/images/*.webp`（由 optimize_images.py 生成）。
 //   · 转换后必须重跑图片压缩（脚本末尾会打印命令）。
 import { spawnSync } from 'node:child_process'
@@ -30,7 +30,7 @@ const argVal = (name, fallback) => {
 
 const DOCX = argVal('--docx', 'D:\\work\\毕业答辩\\2121190011_蒋宇龙_基于借阅大数据的图书推荐系统的设计与实现.docx')
 const TMP = join(root, '.tmp-thesis')
-const ARCHIVE = join(root, argVal('--archive', join('_archive', 'thesis', 'images')))
+const ARCHIVE = join(root, argVal('--archive', join('materials', 'thesis', 'images')))
 const OUT = join(root, 'docs', 'thesis', 'source', 'thesis.html')
 /** 站点侧图片目录（与 optimize_images.py 的 --output 一致） */
 const SITE_IMAGE_DIR = 'docs/thesis/images'
@@ -266,7 +266,7 @@ console.log(`[ok] ${OUT}`)
 console.log(`     ${(html.length / 1024).toFixed(0)} KB · 标题 ${headings} 个 · 代码块 ${codeCount} · 插图 ${imgCount} · 表格 ${(html.match(/<table>/g) ?? []).length}`)
 console.log('')
 console.log('下一步（图片产物，幂等）：')
-console.log(`  python scripts/optimize_images.py _archive/thesis/images public/${SITE_IMAGE_DIR} --max-width 1400`)
+console.log(`  python scripts/optimize_images.py materials/thesis/images public/${SITE_IMAGE_DIR} --max-width 1400`)
 console.log('  node scripts/build-docs.mjs')
 if (!existsSync(WEBP_DIR)) {
   console.warn(`[warn] 站点图片目录还不存在：${WEBP_DIR}`)

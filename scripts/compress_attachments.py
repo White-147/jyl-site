@@ -21,7 +21,7 @@
 #    JPEG 是 PDF 里最稳的编码，实测 37/37、106/106 全部成功。
 #
 # ⚠️ 幂等：输出比输入小时才写；已存在且比输入新时跳过。
-# ⚠️ 原件不入 git 之外的地方：本脚本的输出**进 git**（与简历 public/resume.pdf 同一类资产）。
+# ⚠️ 原件不入 git 之外的地方：本脚本的输出**进 git**（与简历 public/downloads/resume.pdf 同一类资产）。
 import argparse
 import io
 import os

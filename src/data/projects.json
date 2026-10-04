@@ -34,7 +34,7 @@
         "FFmpeg"
       ],
       "link": "https://github.com/White-147/MiLuStudio",
-      "screenshot": "projects/milu-studio.webp",
+      "screenshot": "images/proj-milu-studio.webp",
       "previewUrl": "preview/milu-studio/",
       "previewNote": "界面演示（嵌入示例数据）：后端未部署，工作台为 mock 数据"
     },
@@ -68,7 +68,7 @@
         "对象存储"
       ],
       "link": "https://github.com/White-147/XiaoLouAI",
-      "screenshot": "projects/xiao-lou-ai.webp",
+      "screenshot": "images/proj-xiao-lou-ai.webp",
       "previewUrl": "preview/xiao-lou-ai/",
       "previewNote": "静态界面预览：界面可浏览，后端接口未部署"
     },
@@ -100,7 +100,7 @@
         "多渠道接入"
       ],
       "link": "https://github.com/White-147/MiLuAssistantWeb",
-      "screenshot": "projects/milu-assistant-web.webp",
+      "screenshot": "images/proj-milu-assistant-web.webp",
       "previewUrl": "preview/milu-assistant-web/",
       "previewNote": "静态界面预览：登录页可浏览，登录/模型接口未部署"
     },
@@ -127,7 +127,7 @@
         "PowerShell"
       ],
       "link": "https://github.com/White-147/MiLuAssistantDesktop",
-      "screenshot": "projects/milu-assistant-desktop.webp",
+      "screenshot": "images/proj-milu-assistant-desktop.webp",
       "downloadUrl": "https://github.com/White-147/MiLuAssistantDesktop/releases/download/v1.0.1/MiLuAssistantDesktop-Setup-1.0.1.exe",
       "downloadNote": "Windows 安装包（Inno Setup，约 213MB）· 点击直接下载；GitHub 直链下载受限时请稍后重试",
       "downloadHint": "约 213MB · 点击直接下载 · GitHub 受限可稍后重试"
@@ -159,7 +159,7 @@
         "WebService"
       ],
       "link": "https://github.com/White-147/SyLabAI",
-      "screenshot": "projects/sylab-ai.webp",
+      "screenshot": "images/proj-sylab-ai.webp",
       "previewUrl": "preview/sylab-ai/",
       "previewNote": "静态界面预览：界面可浏览，后端接口未部署（默认演示模式离线）"
     },
@@ -195,7 +195,7 @@
       ],
       "link": "https://github.com/White-147/BookRecommendation",
       "docsUrl": "#/docs/thesis",
-      "screenshot": "projects/book-recommendation.webp",
+      "screenshot": "images/proj-book-recommendation.webp",
       "previewUrl": "preview/book-recommendation/",
       "previewNote": "界面演示（内置示例数据）：后端已停用，图书/推荐为演示数据"
     },
@@ -225,7 +225,7 @@
         "Swagger"
       ],
       "link": "https://github.com/White-147/ShopRecommendation",
-      "screenshot": "projects/shop-recommendation.webp",
+      "screenshot": "images/proj-shop-recommendation.webp",
       "demoUrl": "https://shoprecommendation.onrender.com/",
       "demoNote": "演示账号 demo / 123456（免费实例首次打开约需 30s 冷启动）"
     }

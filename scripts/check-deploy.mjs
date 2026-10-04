@@ -46,8 +46,8 @@ const CHECKS = [
   { label: '触屏交互层：按压反馈类', kind: 'text', where: 'css', needle: 'glass-lit-press' },
   { label: '手机首屏纹样 .hero-cao-mark', kind: 'text', where: 'css', needle: 'hero-cao-mark' },
   { label: '手机页脚印章 .footer-seal-mark', kind: 'text', where: 'css', needle: 'footer-seal-mark' },
-  { label: '卷草纹资源可达', kind: 'asset', path: 'assets/cao-mark.webp' },
-  { label: '忍冬印章资源可达', kind: 'asset', path: 'assets/seal-rendong.webp' },
+  { label: '卷草纹资源可达', kind: 'asset', path: 'images/brand-cao-mark.webp' },
+  { label: '忍冬印章资源可达', kind: 'asset', path: 'images/brand-seal-rendong.webp' },
 ]
 
 const bust = () => `?cb=${Date.now()}`

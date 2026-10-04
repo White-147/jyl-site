@@ -194,7 +194,7 @@
      ⚠️ 若将来有人想加回网格：先确认它与现有层不重复，并重跑 `docs:anchors` 的材质断言。 */
 
   /* ===== 卷草纹章（2026-09 第十一轮）=====
-     资源：`public/assets/cao-mark.webp`（560×472，暖墨单色、透明底）。
+     资源：`public/images/brand-cao-mark.webp`（560×472，暖墨单色、透明底）。
      来源：开源图库《中国传统纹样图鉴 · Wényàng》**006 卷草纹**的墨线稿，
            经「提取墨线 → 阈值化 → 转透明底着色」而成。**许可 CC BY-NC 4.0（非商业 + 署名）**，
            署名放页脚。商用需向原作者取授权。
@@ -202,8 +202,15 @@
            无天干透出，最弱」，而官星（事业线）即乙木 —— 2027 丁未年「卯未半合木」正是木被引活之年。
            寓意「生机、延展」（图库原文：生命力、延展、装饰韵律）也正好对应现在这个阶段。
      ⚠️ 它是**角落纹章**（单株，不铺满），不是平铺底纹：既符合传统"边饰"用法，
-        又避开了"具象主体铺满会露馅"这个此前反复踩到的坑。 */
-  --cao-mark: url("/assets/cao-mark.webp");
+        又避开了"具象主体铺满会露馅"这个此前反复踩到的坑。
+     ⚠️⚠️ 路径必须写成 `../images/…`（相对 CSS 自身），**不能**写 `/assets/…`：
+        这里其实有两层坑，2026-10 第十九轮一起修的 ——
+         ① 绝对路径 `/x` 的解析基准是**域名根**，而本站部署在子路径 `/jyl-site/` 下，
+            只是"恰好"因为 `public/assets/` 在部署根同名而能用；一旦换自定义域名/换部署路径就全断。
+         ② 它还是**自定义属性**（`--cao-mark`），Vite 对 custom property 里的 `url()`
+            **不做重写**（普通声明里的相对 `url()` 才会被重写成 `../assets/xxx`），
+            所以必须自己写对相对路径。 */
+  --cao-mark: url("../images/brand-cao-mark.webp");
   /* ⚠️ 分写成两个 token：`width` 不接受 `560px 472px` 这种两值语法（踩过，尺寸会算成 0、纹章整块消失）。
      ⚠️ 尺寸口径：**别按原始 560px 放**，会直接压到正文左列与代码块（实测踩过）。
        现在取 320×270 —— 大约只占内容列左侧那条空带，`left: 0` 时右缘 320px，
@@ -593,7 +600,7 @@ html.docs-shell .cao-mark-layer {
      · 内文：「做 007 忍冬纹，这样不会和左侧卷草纹重复」。
 
    实现：外层 `.seal-mark-layer` 负责定位与那圈**同色细框**，内层 `.seal-mark-inner`
-   放 `seal-rendong.webp`（133×160 琥珀线条 + 透明底，4x）。
+   放 `brand-seal-rendong.webp`（133×160 琥珀线条 + 透明底，4x）。
    ⚠️ 尺寸口径：外框 96×96、内文高 46px。内文必须是 **4x** 图 ——
       用 2x 实测会被浏览器降采样磨细到几乎看不见（踩过）。
    ⚠️ 不透明度压到 0.42：它是"纸上的印"，不是页面上的按钮；再高会与正文抢注意力。 */
@@ -642,7 +649,7 @@ html.docs-shell .cao-mark-layer {
   display: block;
   width: 34px;
   height: 42px;
-  background-image: url("/assets/seal-rendong.webp");
+  background-image: url("../images/brand-seal-rendong.webp");
   background-repeat: no-repeat;
   background-position: center;
   background-size: contain;
@@ -727,7 +734,7 @@ html.docs-shell .cao-mark-layer {
   display: block;
   width: 21px;
   height: 26px;
-  background-image: url("/assets/seal-rendong.webp");
+  background-image: url("../images/brand-seal-rendong.webp");
   background-repeat: no-repeat;
   background-position: center;
   background-size: contain;
@@ -2156,6 +2163,17 @@ details[open] .chevron-up-down {
 /* 图片：可点击放大（灯箱在 React 侧用事件委托接管），宽度放到容器满宽 */
 .doc-content .doc-figure {
   margin: 1.25rem 0;
+  /* ⚠️ 2026-10 第十九轮：圆角 + 深色底从 `img` **上移到 `figure`**，并加 `overflow: hidden`。
+     因为这一层要承载构建期内联的 **LQIP 低清占位图**（`background-image`，见 gen_lqip.py）：
+       · 占位图挂在 figure 上；真图是不透明位图，加载完自然盖住它，两者不打架；
+       · 若底色仍留在 img 身上，就会整块盖住 figure 的占位图 —— 所以底色必须上移；
+       · 圆角要在 figure 上裁（`overflow: hidden`），否则占位图方角会露在圆角外。
+     实测：真机 Fast 3G 下"文本已就绪但图还黑着"的空窗 **约 5.9s → 0**（立刻见模糊图）。 */
+  border-radius: 0.75rem;
+  overflow: hidden;
+  /* UE 编辑器截图是深色底：给它一块中性深底，浅色模式下不会"白底贴深图"显得割裂。
+     这同时是 **LQIP 缺失时**的兜底外观（查不到占位图就还是原来的深色空框）。 */
+  background-color: #201d18;
 }
 .doc-content .doc-figure img {
   display: block;
@@ -2164,8 +2182,12 @@ details[open] .chevron-up-down {
   cursor: zoom-in;
   border-radius: 0.75rem;
   border: 1px solid rgb(0 0 0 / 0.35);
-  /* UE 编辑器截图是深色底：给它一块中性深底，浅色模式下不会"白底贴深图"显得割裂 */
-  background: #201d18;
+  /* ⚠️ 2026-10 第十九轮：这里原来是 `background: #201d18`（不透明深色）。
+     它正是用户反馈的"图片默认黑屏"的直接来源 —— 图片有 width/height，
+     浏览器立刻按真实比例预留好空间，而那块空间在数据到达前被这层底色涂成深色。
+     改成 **transparent**，把"未加载时的样子"交给 `figure` 上的 LQIP 低清占位图
+     （构建期内联，见 gen_lqip.py）。深色底没有丢，它移到了 `figure` 上作兜底。 */
+  background: transparent;
   transition: border-color var(--duration-micro) var(--ease-out-soft);
 }
 /* ⚠️ 悬停进门（同前）：触屏上"点过的图"会一直带琥珀边，看起来像被选中了。 */

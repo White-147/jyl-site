@@ -12,7 +12,7 @@ dist
 .DS_Store
 *.suo
 # 字体源文件（subset-fonts.mjs 从该目录读取，按需从 GitHub release 手动获取）
-scripts/fonts-src/
+materials/fonts/
 # 一次性调试脚本与截图（会话临时产物，不入库）
 scripts/_*.mjs
 # ⚠️ 2026-09 第十二轮：验证脚本会把截图/探针产物写在项目根的隐藏目录里。
@@ -44,17 +44,18 @@ public/docs/*/source/
 #    平时不动、改论文才重跑 npm run docs:thesis）。上面那条 `src/data/docs.json` 之类的规则
 #    很容易被顺手扩写成 `docs/thesis/source/`，所以这里显式钉一条否定规则。
 !docs/thesis/source/thesis.html
-# 配图原图归档（PNG/JPG）。**不入库**（2026-09 第八轮），且**本机也已清理**（2026-09 第十二轮）：
-#   · 站点真正引用的是 public/docs/<分区>/images/*.webp（那才是资产，进 git）；
-#   · _archive/ 现存 14 个原件（5.6 MB，从旧副本 D:\code\Portfolio 统合而来），只服务 `optimize_images.py`；
-#     笔记配图的**原图**在项目外：UE 笔记见 C:\Users\10045\Desktop\ue5-notes\images（149 MB / 251 个），
-#     论文见 D:\work\毕业答辩；历史里那 147 MB 的 _archive 已于 2026-09 从 git 移除。
-#   · _archive/ 曾存 279 个原图（约 146 MB），只服务 `python scripts/optimize_images.py` ——
-#     一个**一次性**的体积治理脚本（把 223 张 2560×1440 PNG 压成 WebP，124 MB → 34 MB）；
-#     它的输出已全部落在 public/（ue5 223 张 + thesis 41 张），原图因此不再被任何流程需要，
-#     已于第十二轮从本机删除、释放 146 MB。需要原图时从外部备份取回。
-#   · 一份图存两份让仓库从 17 MB 涨到 160 MB，克隆与 CI checkout 都白付这份钱。
-# 这条规则保留：万一将来又临时放回原图，别再被误提交。
-_archive/
+# 源素材目录（2026-10 第十九轮整合：原 _archive/ + scripts/fonts-src/ + scripts/assets/ 合并而来）。
+#
+# 为什么整目录忽略：这些是**未加工的原始素材**（简历/证书/头像/项目截图 PDF·PNG·JPG·TTF），
+# 只服务一次性治理脚本（optimize_images.py / watermark_resume.py / subset-fonts.mjs 等）。
+# 站点真正引用的是加工后的 WebP/子集字体，那些在 public/ 与 src/fonts/ 下、正常进 git。
+#
+# ⚠️ 下面两条否定规则**必须留着**：`materials/` 里有两样是**源**不是原料 ——
+#    · materials/icons/shoayuan-emblem.png —— gen-preview-icons.ps1 的输入图形；
+#    · materials/site/hero.webp —— README 里展示的主站首屏截图。
+#    整目录忽略会把它们一起吞掉（历史上 `_archive/` 就是这么把原件挡在库外的）。
+materials/
+!materials/icons/
+!materials/site/
 # pandoc 转换论文时的中间目录
 .tmp-thesis/

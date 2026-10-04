@@ -18,7 +18,7 @@
 用法
   python scripts/gen_icons.py
 输入
-  scripts/fonts-src/liujianmaocao/LiuJianMaoCao-Regular.ttf（subset-fonts 的同款源文件）
+  materials/fonts/liujianmaocao/LiuJianMaoCao-Regular.ttf（subset-fonts 的同款源文件）
 输出
   public/favicons/favicon-16.png
   public/favicons/favicon-32.png
@@ -34,7 +34,7 @@ import os
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-FONT = os.path.join(ROOT, 'scripts', 'fonts-src', 'liujianmaocao', 'LiuJianMaoCao-Regular.ttf')
+FONT = os.path.join(ROOT, 'materials', 'fonts', 'liujianmaocao', 'LiuJianMaoCao-Regular.ttf')
 FAVICON_DIR = os.path.join(ROOT, 'public', 'favicons')
 IMAGE_DIR = os.path.join(ROOT, 'public', 'images')
 

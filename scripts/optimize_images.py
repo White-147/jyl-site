@@ -1,4 +1,4 @@
-# 站点图片压缩：任意目录的 PNG/JPG → WebP（与 public/projects/*.webp 同一套参数口径）
+# 站点图片压缩：任意目录的 PNG/JPG → WebP（与 public/images/proj-*.webp 同一套参数口径）
 #
 # 用法：
 #   python scripts/optimize_images.py <源目录> <输出目录> [--max-width 1600] [--quality 82] [--threads 8]
@@ -9,7 +9,7 @@
 # 实测同类 UI 截图可压到 60–150KB，视觉上仍能看清编辑器里的文字。
 #
 # ⚠️ 已存在且不比源文件旧的输出会跳过（幂等、可重复跑）。
-# ⚠️ 原图不入 public/，只归档在 _archive/ 下；本脚本只负责生成站点用的 WebP。
+# ⚠️ 原图不入 public/，只归档在 materials/ 下；本脚本只负责生成站点用的 WebP。
 import argparse
 import re
 import sys

@@ -14,13 +14,22 @@
     "docs:anchors": "node scripts/check-anchors.mjs",
     "docs:verify": "npm run docs:check && npm run docs:anchors",
     "docs:thesis": "node scripts/prepare-thesis.mjs",
+    "docs:lqip": "python scripts/gen_lqip.py",
+    "docs:lqip:check": "python scripts/gen_lqip.py --check",
     "db:seed": "node scripts/seed-db.mjs",
     "db:export": "node scripts/export-db.mjs",
     "fonts:subset": "npm run docs:build && node scripts/subset-fonts.mjs && node scripts/inline-firstscreen-fonts.mjs",
     "icons:gen": "python scripts/gen_icons.py",
     "contact:encode": "node scripts/encode-contact.mjs --write",
     "resume:watermark": "python scripts/watermark_resume.py",
-    "previews:polish": "node scripts/polish-previews.mjs"
+    "previews:polish": "node scripts/polish-previews.mjs",
+    "previews:icons": "pwsh -File scripts/gen-preview-icons.ps1",
+    "previews:sync": "node scripts/sync-preview.mjs",
+    "images:optimize": "python scripts/optimize_images.py",
+    "attachments:compress": "python scripts/compress_attachments.py",
+    "check:controls": "node scripts/check-controls.mjs",
+    "check:deploy": "node scripts/check-deploy.mjs",
+    "start:all": "pwsh -File scripts/start-all.ps1"
   },
   "dependencies": {
     "gsap": "^3.15.0",

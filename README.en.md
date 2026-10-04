@@ -15,7 +15,7 @@
 </p>
 
 <p align="center">
-  <img src="./docs/assets/screenshots/hero.webp" alt="Portfolio site hero section screenshot" width="900">
+  <img src="./materials/site/hero.webp" alt="Portfolio site hero section screenshot" width="900">
 </p>
 
 A personal job-hunting portfolio single-page app, organised around an "IT comprehensive role" and covering four focus areas: data engineering, business system delivery, Windows native desktop engineering, and game development (Unreal Engine). It showcases verifiable projects such as MiLuStudio, XiaoLouAI and SyLabAI, and ships an in-site UE study-notes section plus the graduation thesis.

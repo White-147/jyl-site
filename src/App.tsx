@@ -89,7 +89,7 @@ export default function App() {
             用户定的形制是**阳文**：「里面是印章琥珀色，外面拿个同色外框就行」
             —— 所以是透明底 + 琥珀线条的忍冬纹，外面一圈同色细框，**不是**实底白字。
             内文取 **007 忍冬纹**（不是卷草纹）：「这样不会和左侧卷草纹重复」。
-            资源：`public/assets/seal-rendong.webp`（133×160 琥珀线条 + 透明底，4x）。
+            资源：`public/images/brand-seal-rendong.webp`（133×160 琥珀线条 + 透明底，4x）。
             ⚠️ 位置口径与卷草纹完全对称：左下一株纹样、右下这枚印章，都 `fixed` 常驻。
             ⚠️ `<1024px`、文档区、打印同样隐藏（见 index.css 的 `.seal-mark-layer`）。 */}
         <div aria-hidden="true" className="seal-mark-layer">
