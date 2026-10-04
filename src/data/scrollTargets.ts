@@ -1,7 +1,7 @@
 /**
  * 锚点滚动偏移。
  *
- * ⚠️ 联动维护点（详见 docs/联动维护点.md 第 6 条）
+ * ⚠️ 联动维护点（详见 MAINTAINING.md 第 6 条）
  *
  * 这两个值在**四个地方**各有一份，改一处就必须改全部（2026-09 核对后的完整清单）：
  *   1. 本文件的 MOBILE_ANCHOR_OFFSET_PX / DESKTOP_ANCHOR_OFFSET_PX（JS 侧判定线）

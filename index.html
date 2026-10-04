@@ -26,7 +26,7 @@
     <link rel="preload" as="image" href="images/avatar-blue.webp" />
     <script>
       // 主题初始化：默认自动（跟随系统深浅色），避免首屏闪烁。
-      // ⚠️ 联动维护点（详见 docs/联动维护点.md 第 3 条）
+      // ⚠️ 联动维护点（详见 MAINTAINING.md 第 3 条）
       // 这里的判定逻辑必须与 src/hooks/useTheme.tsx 的一致：
       //   localStorage 键名固定 'theme'，取值集合固定 auto | light | dark；
       //   画布色 #fbf8f3 / #15120f 与 index.css 的 body 背景、useTheme 的 CANVAS 三处一致。
@@ -95,7 +95,7 @@
     <!-- 首屏静态骨架：React 挂载前直接可见（消除 JS 加载期白屏）；
          挂载后 createRoot 替换 #root 内容，<style> 常驻 body 兜底样式过渡。
 
-         ⚠️ 联动维护点（详见 docs/联动维护点.md 第 1 条）
+         ⚠️ 联动维护点（详见 MAINTAINING.md 第 1 条）
          本骨架的**盒模型必须与 src/components/Hero.tsx 逐项一致**，否则交接时会跳动。
          历史上正是因为两处不一致，导致挂载瞬间 H1 下移 84px、副题横向收窄 224px。
          改动 Hero.tsx 的以下任一项时，必须同步改下面的 <style>：

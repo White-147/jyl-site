@@ -38,7 +38,7 @@ function resolveTab(active: string): string {
  *  与顶栏成为一套语言 —— 原来的满宽纯色条正是"太传统"的那个观感。
  *
  *  ⚠️ 高度与占位**故意不变**（`min-h-14` 的条目 + 安全区）：`#contact` 末尾的收尾呼吸区
- *  是按"页面最大滚动量"校准过的（见 docs/联动维护点.md 第 6 条），改高度会让它滚不到停靠位。
+ *  是按"页面最大滚动量"校准过的（见 MAINTAINING.md 第 6 条），改高度会让它滚不到停靠位。
  *  浮动胶囊用 `pb-[env(safe-area-inset-bottom)]` 保留安全区，容器高度因此与改版前一致。
  */
 export default function MobileTabBar() {

@@ -53,7 +53,7 @@ export interface AboutPara {
 }
 
 /** About 能力链路卡：数字**内联在卡内**，不再引用全局 stats 下标
- *  （下标式引用是漂移源：改 stats 顺序会静默串卡，见 docs/联动维护点.md 的约定）。 */
+ *  （下标式引用是漂移源：改 stats 顺序会静默串卡，见 MAINTAINING.md 的约定）。 */
 export interface AboutLink {
   title: string
   tag: string

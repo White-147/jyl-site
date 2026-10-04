@@ -4,7 +4,7 @@
    `lg:grid-cols-[15rem_minmax(0,1fr)]` / `xl:grid-cols-[15rem_minmax(0,1fr)_13rem]`。
    它们能被正常扫描生成（2026-09 构建产物已逐条核对）。
    之所以记在这里：这类「静默不生成」的失败不会报错，只会让版式悄悄塌掉
-   （同类事故见 docs/联动维护点.md 第 6 条的 @utility 丢嵌套 @media）。
+   （同类事故见 MAINTAINING.md 第 6 条的 @utility 丢嵌套 @media）。
    **新增带方括号的任意值类后，请在 dist/assets/*.css 里 grep 一次确认它真的生成了。** */
 
 /* 站点专用字体子集（node scripts/subset-fonts.mjs 生成，仅含站点用字）
@@ -1151,7 +1151,7 @@ html.docs-shell .footer-seal-mark {
       兜底把它的光压掉，观感是"一按就灭"。
       真正解决问题的还是能力门（`@media (hover: hover) and (pointer: fine)`），
       这条钩子留着只作**将来的入口**：真出现某条漏门且压不住的规则时，在这里点名处理。
-      判定方法见 `docs/联动维护点.md` 第 17 条。 */
+      判定方法见 `MAINTAINING.md` 第 17 条。 */
 
 
 /* 「点亮态的底」：与 `.bar-control:hover` 同一组值（0.16 白 + 琥珀字）。
@@ -1350,7 +1350,7 @@ details[open] .chevron-up-down {
   display: none;
 }
 
-/* 锚点停靠偏移（单一来源，见 src/data/scrollTargets.ts 与 docs/联动维护点.md 第 6 条）。
+/* 锚点停靠偏移（单一来源，见 src/data/scrollTargets.ts 与 MAINTAINING.md 第 6 条）。
    ⚠️ 不能用 `@utility` + 嵌套 `@media` 实现：实测 Tailwind v4 的 @utility 会把嵌套的
    @media 丢掉，只生成基础声明（.anchor-offset{scroll-margin-top:112px}），
    结果是所有断点都取同一个值 —— 手机端的值会一直被用到桌面端。
@@ -1628,7 +1628,7 @@ details[open] .chevron-up-down {
 
      ⚠️ 对比度：填充是**半透明白**，底下仍是顶栏玻璃，明度变化很小；
         文字色取 `--chip-text`（浅 11.45:1 / 深 5.88:1），在加入填充后只会更安全。
-        **改填充透明度或 --chip-text 后必须重测**（见 docs/联动维护点.md 第 3 条）。 */
+        **改填充透明度或 --chip-text 后必须重测**（见 MAINTAINING.md 第 3 条）。 */
   /* ===== 静置材质：**与 `.glass-chip` 同源**（2026-09 第九轮，用户定向）=====
      用户原话：「静态状态下，把顶栏的右侧按钮对齐到现在技能区和项目区的静态」。
      实测两者原来只差两项 —— 底（0.04 vs 0.5）与边框（无 vs 1px 发丝边），内高光早就一致。

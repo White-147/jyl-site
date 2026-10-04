@@ -7,65 +7,37 @@
 
 ---
 
-> ⚠️ **2026-09 第五轮：静态 Hero 骨架已删除**（index.html 里那段 `<style id="hero-shell-style">` 与 `#root` 内的 `<section class="hero-shell">`）。
-> `check-hero-skeleton.mjs` 与它约束的「骨架盒模型必须与 Hero.tsx 逐项一致」这条契约**已作废**，不要再按它维护。
-> React 挂载前的空窗现在由 `#boot` 加载页独占，见 DESIGN.md 的 The Boot-Screen Rule。
-## 1. 首屏骨架 ↔ 真实 Hero
+> ⚠️ **这份文档面向维护者，不随站点发布**（第十九、二十一轮：从 `docs/` 移到仓库根，与 README / DESIGN / PRODUCT 并列）。
+> `docs/` 现在只装**文档区要交付的内容源**（论文、UE 笔记）。
 
-**为什么存在两份**
-`index.html` 里的 `<style id="hero-shell-style">` + `<div id="root">` 内的骨架，
-用于消除 JS 加载期的白屏。它必须独立生效，所以不能依赖外部样式表，只能手写一份等价 CSS。
+## 修订记录：已废弃的联动点
 
-**涉及文件**
+> 这一节只留**结论与原因**，操作步骤全部删除 —— 留着完整的"涉及文件 / 怎么改 / 怎么验证"
+> 会让人以为它们仍然有效（这是这类文档最危险的状态：**会撒谎的文档比没有更糟**）。
 
-| 文件 | 角色 |
-| --- | --- |
-| `index.html` → `<style id="hero-shell-style">` | 骨架样式（手写 CSS） |
-| `index.html` → `<div id="root">` 内的 `<section class="hero-shell">` | 骨架 DOM |
-| `src/components/Hero.tsx` | 真实 Hero（React） |
-| `src/index.css` → `@theme` 的 `--text-*` | 流体字号来源（骨架的 `clamp` 值抄自这里） |
+### 已废弃：首屏骨架 ↔ 真实 Hero（2026-09 第五轮）
 
-**漂移后的症状**
-首屏刷新时文字「跳一下」：位置、宽度或字号在 React 挂载瞬间变化。
+静态 Hero 骨架已删除（`index.html` 里的 `<style id="hero-shell-style">` 与 `#root` 内的
+`<section class="hero-shell">`），约束它的 `scripts/check-hero-skeleton.mjs` 一并删除。
+**不要再按"骨架盒模型必须与 `Hero.tsx` 逐项一致"维护** —— 没有骨架了，这条契约不存在。
 
-**历史故障（实测数据）**
-2026-09 修过一次：骨架 H1 写到 `y=104`、真实 Hero 在 `y=188`，挂载瞬间**下移 84px**；
-副题块宽度从 1120px 收到 896px（**横向收窄 224px**）。原因是六处盒模型不一致：
-内容缺 `max-w-4xl`、内边距写死、`min-height` 用 `62vh` 而非 `100svh - 4rem`、
-H1 字号写死 `4.25rem` 而非 `clamp()`、字重写成 900（app 是 400）、
-`justify-content` 与 app 的 `sm:justify-center` 不一致。
+React 挂载前的空窗现在由 `#boot` 加载页独占（见 `DESIGN.md` 的 The Boot-Screen Rule）。
 
-**当前约定（重要）**
-骨架的**内容列 `.hero-col` 设为 `visibility: hidden`**，骨架只负责背景层与光斑。
-原因：app 的首项位置 = `0.706 × 容器高度`，而容器高度 = `max(731px, 100svh - 4rem)`。
-这是一个随视口高度连续变化的比例，骨架无法用与容器高度同源的度量复现它。已逐一验证并排除：
+<details>
+<summary>历史记录（为什么当年放弃了骨架的文字对齐）</summary>
 
-| 方案 | 实测偏差 |
-| --- | --- |
-| 固定 px | 640–1500px 视口高度区间内偏差 12–818px |
-| 百分比 `padding` | 按**宽度**解析而非高度，偏出 900px 以上 |
-| grid `fr` 轨道 | 单行自动放置时轨道塌陷，偏差 56–409px |
-| `vh` / `svh` | 生产环境可响应，但无头仿真下不随视口变化，无法回归验证 |
+- 2026-09 修过一次错位：骨架 H1 在 `y=104`、真实 Hero 在 `y=188`，挂载瞬间**下移 84px**；
+  副题块宽度从 1120px 收到 896px（**横向收窄 224px**）。成因是六处盒模型不一致。
+- 后来发现**根本对不齐**：app 的首项位置 = `0.706 × 容器高度`，而容器高度 = `max(731px, 100svh - 4rem)`，
+  是一个随视口高度连续变化的比例，骨架无法用同源度量复现。逐一验证并排除：
+  固定 px（640–1500px 视口高度区间内偏差 12–818px）、百分比 padding（按宽度解析，偏出 900px+）、
+  grid `fr` 轨道（单行自动放置时塌陷，偏差 56–409px）、`vh`/`svh`（生产可响应但无头仿真下不变化，无法回归验证）。
+- 结论：骨架只负责背景层与光斑，**内容列 `visibility: hidden`**，不渲染前景内容就没有可错位的东西。
 
-所以**不要再尝试对齐骨架的文字位置**。骨架不渲染前景内容，就没有可错位的东西。
-
-**怎么改**
-- 只改 `Hero.tsx` 的视觉样式（颜色、圆角、图标）→ 无需动骨架
-- 改 `Hero.tsx` 的**背景层**（光斑位置、网格）→ 同步改 `.hero-shell::before`
-- 改首屏文案 → 同步改骨架 DOM（虽然不可见，但改掉更省心；文案也会影响 `subset-fonts` 的字符集）
-- 想恢复骨架显示文字 → 必须同时满足：两处盒模型逐项一致 **且** 能接受垂直方向仍有偏差
-
-**怎么验证**
-
-```bash
-npm run build && npx vite preview --port 5231
-# 逐断点比较「骨架阶段」与「应用稳定后」的 H1 视口坐标
-node <诊断脚本> http://localhost:5231/ 1440 900
-```
-
-判定标准：`x` 与宽度必须为 0 误差；CLS 必须为 0。
+</details>
 
 ---
+
 
 ## 2. 首屏内联字体 ↔ 字体子集
 
@@ -611,11 +583,15 @@ npm run contact:encode
 由此：**历史里那 147 MB 的 `materials` PNG 已从 git 移除**（`git filter-repo --invert-paths --path materials`），
 仓库体积 205 → **44 MB**。要重新生成 WebP，用上表的原图目录即可；派生的 WebP 一直在仓库里，站点不依赖原图。
 
-**⚠️ `materials/` 已在 2026-09 第九轮移出 git**（`.gitignore` 加 `materials/`、`git rm -r --cached materials`，**本地文件保留**）。
-- 为什么：它是**配图原图**（PNG/JPG，264 张 ≈ 143 MB），只服务 `scripts/optimize_images.py`，
-  而那个脚本只在「新增笔记配图 / 论文改版」时手动跑一次；站点真正引用的是
-  `public/docs/<分区>/images/*.webp`（≈ 16.5 MB，仍进 git，是**资产**）。
-  一份图存两份把仓库从 17 MB 撑到 160 MB，克隆与 CI checkout 白付这份钱。
+**⚠️ `materials/` 是"源素材"目录，**整目录被 `.gitignore` 忽略**（本地文件保留，不进 git）。
+- 沿革：它原叫 `_archive/`，2026-09 第九轮移出 git；2026-10 第十九轮**目录整合**时改名 `materials/`，
+  并把原先散落的 `scripts/fonts-src/`（字体源 TTF）与 `scripts/assets/`（图形源）一并收进来，
+  统一成 `materials/{resumes,certificates,avatars,projects,thesis,fonts,icons,site}/`。
+- 为什么整目录忽略：里面是**未加工的原料**（简历/证书/头像/项目截图的原件、字体 TTF、论文插图原图），
+  只服务一次性治理脚本（`optimize_images.py` / `watermark_resume.py` / `subset-fonts.mjs` 等）；
+  站点真正引用的是加工后的 WebP / 子集字体，那些在 `public/` 与 `src/fonts/` 下、正常进 git。
+- ⚠️ 两条**否定规则**必须留着：`!materials/icons/`、`!materials/site/` ——
+  那两样是**源**不是原料（图标源图形、README 展示图），整目录忽略会把它们一起吞掉。
 - 代价：**换机器要先从备份恢复 `materials/`**，否则上面两条更新流程里的 `optimize_images.py` 跑不了
   （站点本身不受影响 —— 构建只读 `docs/<区>/source/` 与 `public/docs/**`）。
 - ⚠️ 别把 `materials/` 当"垃圾目录"删掉：删了就没法再生成任何一张配图的 WebP。
@@ -626,9 +602,11 @@ npm run contact:encode
 
 ```bash
 # 1) 把新原文覆盖到快照目录（原文仍在桌面目录里编辑）
-copy "<桌面>\ue5-notes\theory\<name>.md" docs\theory\source\<name>.md
+#    ⚠️ 第十八轮起源按类型分目录：md 在 docs/theory/source/md/、原件 PDF 在 docs/theory/source/pdf/
+copy "C:\Users\10045\Desktop\ue5-notes\theory\<name>.md" docs\theory\source\md\<name>.md
 # 2) 转图片（幂等，只处理新增/变更的；中文路径必须用 --only-from-md 传，别用 --only）
-python scripts/optimize_images.py materials/ue5-notes/images public/docs/ue5/images --only-from-md docs/theory/source/<name>.md
+#    ⚠️ 原图在**桌面**目录，不在本仓库（见上面那张表）——写成 materials/ue5-notes/images 是过期的
+python scripts/optimize_images.py "C:\Users\10045\Desktop\ue5-notes\images" public/docs/ue5/images --only-from-md docs/theory/source/md/<name>.md
 # 3) 新汉字要进字体子集，否则回退系统字体
 npm run fonts:subset
 # 4) 构建（predev / prebuild 会自动跑 docs:build）
@@ -1076,7 +1054,7 @@ npm run docs:anchors -- --shots   # 顺带截图到 .dsh-shots/
 1. 原文放桌面目录（Typora 编辑）；H2/H3/H4 **按上面的编号规范**；
 2. 快照进 `docs/<分区>/source/md/<name>.md`（**2026-10 起 md 与 pdf 分目录**，见 13.10）；
 3. `scripts/build-docs.mjs` 的 `SOURCES` 加一条（**数组顺序 = 左栏顺序**；`order` 只是该源内的页序）；
-4. 配图：`python scripts/optimize_images.py materials/ue5-notes/images public/docs/ue5/images --only-from-md docs/theory/source/md/<name>.md`；
+4. 配图：`python scripts/optimize_images.py "C:\Users\10045\Desktop\ue5-notes\images" public/docs/ue5/images --only-from-md docs/theory/source/md/<name>.md`（原图在**桌面**，不在仓库里）；
 5. **`npm run fonts:subset`** —— 它会先跑 `docs:build`。
    ⚠️ 字体子集的 `TARGETS` **必须包含 `public/docs/pages/`**：只扫 `src` 的话，**只出现在笔记正文里的字**（如「闯」）会回退系统字体，和正文其它字不是一套字形；
 6. `npm run build && npm run docs:check && node scripts/check-anchors.mjs`（三件都要过）。
@@ -1381,7 +1359,7 @@ npm run build
 
 ---
 
-## 附：新增联动点时的约定
+## 18. 新增联动点时的约定
 
 1. **能一处定义就不要两处。** 优先用 CSS 变量、Tailwind token、或从单一数据源派生。
 2. **无法避免的重复，必须在两处都写明注释**：指出「与谁联动」「漂移后的症状」「怎么验证」。
@@ -1391,7 +1369,70 @@ npm run build
 
 ---
 
-## 19. 目录整合（2026-10 第十九轮）
+## 20. 第二十~二十二轮：文档区配图的三个坑（都很隐蔽，别再踩）
+
+这三轮全在修"文档区配图/图注"，症状看起来无关，根因却是同一类：
+**生成 HTML 时标签结构错了，而构建、类型检查、锚点断言全都不会报。**
+
+### 20.1 加载期间画什么：`#201d18` → LQIP → 淡中性底（**别再改回去**）
+
+| 版本 | 做法 | 结果 |
+| --- | --- | --- |
+| ① 初版 | `img` 上 `background: #201d18` | 预留区是一块**近黑空盒**，用户反馈"图片默认黑屏" |
+| ② 第十九轮 | LQIP（内联 20px 缩略图拉伸当背景） | 黑框没了，但**引入了主站没有的中间态**（先糊再清晰）；缩略图放大后噪点变成**细密网纹**，PC 端盖到正文观感上 |
+| ③ 现在 | `figure` 一层很淡中性底 `rgb(127 127 127 / 0.07)` | 与主站同构：图没到就淡淡空着、到了直接出现，**无中间态** |
+
+**为什么撤掉 LQIP**：用户实测对比后说「换上 LQIP 之后也没有改善，反而还多出了问题」。
+先量化排除误判（线上 + 限速，各 3 次取中位）：主站 Hero 头像看图前空等 **2783ms**、
+文档页首图 **2889ms** —— **两边空等一样长**，"主站更快"不成立；差别只在"等待期间画什么"。
+
+⚠️ `img` 的 `background` **必须是 transparent**，否则会整块盖住 `figure` 上的淡底。
+⚠️ 配套：`Docs.tsx` 有**运行时 preload**（拿到文档 HTML 后立刻给前 3 张配图插
+`<link rel=preload as=image>`），让下载与 React 渲染重叠。主站首图本来就有 preload，文档区此前没有。
+⚠️ `check-docs.mjs` 有一条**反向断言**：配图不该带 `background-image`，防止有人把 LQIP 塞回来。
+
+### 20.2 「圆角面板套娃」：`figure` 未闭合 + `<p>` 包着 `figure`
+
+- 症状：文档页出现多层圆角面板叠在一起，**纯文本页没有、有图的页才有**，`5.1.1` 最多（4~5 层）。
+- 根因两条：
+  1. `prepare-thesis.mjs` 生成 figure 时**漏了 `</figure>`** —— 全篇 71 个 `<figure>` 只有 33 个闭合，
+     缺的 38 个正好是"没有图注的图"（图注合并要求有 `</figure>` 才生效）。
+  2. `<p>` 里出现 `<figure>` 时浏览器**隐式闭合 `<p>`**，于是
+     `<p><figure>A</figure></p><p><figure>B</figure>…` 被解析成 figure 层层嵌套。
+- 怎么验证：量某张图到 `.doc-content` 之间的 `.doc-figure` 个数（应为 **1**）。
+  修复前后：**4 → 1**（半径圆角层 6 → 3，后两层是图片与正文卡片，本该如此）。
+- ⚠️ 解包正则要**一次吃掉 `<p>` 里的全部 figure**，且**同时认"已闭合"与"自闭合 img"两种形态**：
+  只认 `</figure>` 时对那 38 个未闭合的 figure **一条都匹配不上**；也不能靠"反复跑单次替换"收敛
+  （第二次要匹配的形态已变成 `figure B</figure></p>`）。
+- ⚠️ 不能用 CSS 修（给 figure 加 `display:block` 之类）—— 嵌套发生在**解析阶段**，树已经错了。
+
+### 20.3 三类说明文字：图 / 公式 / 表，各走各的机制
+
+| 类型 | 机制 | 样式 |
+| --- | --- | --- |
+| 图 `图x-y`、公式 `公式x-y` | 合并进 `figure` 的 **`<figcaption>`** | 图注样式（图下方居中） |
+| 表 `表x-y` | 独立段落 **`<p class="doc-table-caption">`** | 表标题样式（表上方） |
+
+- ⚠️ 图注正则**只认 `图`与`公式`**，不要放宽成"任意紧跟的 `<p>`"：正文里
+  「图5-4配置指定了…」「图5-11中注册表格…」这种**以"图"开头的句子**会被误吞（源里实测有 2 条）。
+- ⚠️ 表标题后面跟的**不只是 `<table>`**：论文里"表2-1 基于物品的协同过滤算法计算步骤"后面跟的是
+  `<figure class="doc-code">`（算法步骤排成代码块）。只认 `<table>` 时这 2 条拿不到样式，
+  与另外 4 条观感不一致。
+
+### 20.4 `check-docs.mjs` 为此新增的断言（这类问题只能在这里拦）
+
+- `<p>` 里不许包 `<figure>`
+- `<figure>` 与 `</figure>` 数量必须相等
+- 同一个 `<img>` 里 `data-doc-image` 只能出现一次（"按页打优先级"那步曾输出 292 处重复属性）
+- 配图不该带 `background-image`（LQIP 已撤）
+
+> **为什么必须做成断言**：20.2 那种错，源码看着"只是标签顺序有点怪"，
+> `tsc`、`docs:build`、`docs:anchors` 全都通过，只有浏览器解析时才炸成可见的套娃。
+> 已做反向验证：注入一处 `<p><figure` → 自检如期报错、退出码 1。
+
+---
+
+## 21. 目录整合（2026-10 第十九轮）
 
 用户口径：「按类型分目录，像 docs/<区>/source/{md,pdf}/ 那样」，范围「整个项目全部扫一遍」。
 **不是删减，是归置** —— 同一类东西收进一个子目录，不再有"单份文件自己占一层"。
@@ -1433,7 +1474,8 @@ pm run build 会跑 db:export 用数据库**覆盖**它们。
    而且 --cao-mark 是**自定义属性**，Vite **不重写**其中的 url()，必须自己写成相对路径
    （../images/brand-cao-mark.webp，相对 CSS 自身）。
 3. **public/sitemap.xml 里其实没有简历条目**（此前以为有）—— 简历链接来自 index.html 与
-   src/data/profile.json 的 esumeUrl，两处都要改。
+   src/data/profile.json 的 
+esumeUrl，两处都要改。
 4. **scripts/gen-preview-icons.ps1 里是硬编码绝对路径**（D:\code\jyl-site\scripts\assets），
    已改成 $PSScriptRoot 相对定位 —— 换机器/换盘符不再失效。
 

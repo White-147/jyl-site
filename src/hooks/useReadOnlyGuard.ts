@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 
 /**
- * 内容只读保护（见 docs/联动维护点.md 与本文件注释）。
+ * 内容只读保护（见 MAINTAINING.md 与本文件注释）。
  *
  * 策略：**默认拒绝，白名单放行**。
  *

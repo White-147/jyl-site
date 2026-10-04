@@ -22,7 +22,7 @@ function ModeIcon({ mode, className }: { mode: ThemeMode; className?: string }) 
 /** 三态主题切换（下拉三选一）：自动（默认，跟随系统）/ 浅色 / 深色。
  *  placement: up/down/left（下拉弹出方向）；variant: square 方钮 / dot 圆形小钮 / row 整行
  *
- *  ⚠️ 本组件**不持有**主题 state（见 docs/联动维护点.md 第 3 条）。
+ *  ⚠️ 本组件**不持有**主题 state（见 MAINTAINING.md 第 3 条）。
  *  状态与 `theme-color` 同步统一由 `useTheme()` 提供，多个实例（顶栏 + 底部 Tab Bar）
  *  读的是同一个 Provider，不可能不一致。
  *

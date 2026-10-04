@@ -1185,7 +1185,7 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
   const emptySection = !current || current.status !== 'ready'
 
   return (
-    // ⚠️ 宽度口径（2026-09 第三轮，改之前先看 docs/联动维护点.md 的硬约束表）
+    // ⚠️ 宽度口径（2026-09 第三轮，改之前先看 MAINTAINING.md 的硬约束表）
     //    外层 100rem（1600px）；左栏 15rem、右栏 14rem；间距 gap-6。
     //    左栏从 13rem 加到 15rem 是因为改成了「源 → 分组 → 页」三层树，最深四级缩进，
     //    13rem 下标题只能显示约 8 个字。

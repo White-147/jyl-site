@@ -223,16 +223,34 @@ html = html.replace(
   (_m, inner) => inner.trim(),
 )
 
-/** 3d. 图注合入 figure：紧跟图片的 `<p>图 5-1 xxx</p>` 提为该图的 <figcaption> */
+/** 3d. 图注合入 figure：紧跟图片的 `<p>图 5-1 xxx</p>` / `<p>公式2-1 xxx</p>` 提为该图的 <figcaption>
+ *
+ *  ⚠️ 必须同时认 **图** 与 **公式**（2026-10 第二十二轮补）。
+ *     原先只写 `图\s*\d+[-.]\d+`，于是论文里三条**公式**图注被漏掉，读者只看到一个孤零零的
+ *     公式图片、不知道它是什么：
+ *       · 公式2-1 皮尔逊系数公式
+ *       · 公式2-2 皮尔逊系数完整表示
+ *       · 公式5-1 占比上限公式
+ *     ⚠️ 别顺手把 `表` 也塞进来：`表x-y` 走的是下面 3e 的**表格**标题机制（样式也不同），
+ *        而且论文里"表2-1"指的是代码块形态的算法步骤、并非 `<table>`。
+ *     ⚠️ 也别放宽成"任意紧跟的 <p>"：正文里像「图5-4配置指定了…」这种**以"图"开头的句子**
+ *        只是恰好这么开头，放宽后会把它当图注吞进来（实测源里确有 2 条）。
+ */
 html = html.replace(
-  /(<figure class="doc-figure">[\s\S]*?<\/figure>)\s*<p>\s*(图\s*\d+[-.]\d+[^<]*?)\s*<\/p>/g,
+  /(<figure class="doc-figure">[\s\S]*?<\/figure>)\s*<p>\s*((?:图|公式)\s*\d+[-.]\d+[^<]*?)\s*<\/p>/g,
   (_m, fig, caption) => `${fig.replace(/<\/figure>$/, '')}<figcaption>${escapeHtml(caption.trim())}</figcaption></figure>`,
 )
 
-/** 3e. 表注提到表格之前 */
+/** 3e. 表注提到表格之前并套上 `doc-table-caption` 样式。
+ *
+ *  ⚠️ 紧跟的块**不只是 `<table>`**（2026-10 第二十二轮补）：论文里"表2-1 基于物品的协同过滤
+ *     算法计算步骤"后面跟的是 **`<figure class="doc-code">`**（算法步骤排版成代码块），
+ *     只认 `<table>` 时它落在规则之外，于是 4 条表标题有样式、这 2 条没有 —— 观感不一致。
+ *     改成"任何紧跟的表标题段落都套样式"，两条一起收进来。
+ */
 html = html.replace(
-  /<p>\s*(表\s*\d+[-.]\d+[^<]*?)\s*<\/p>\s*(<table>)/g,
-  (_m, caption, table) => `<p class="doc-table-caption">${escapeHtml(caption.trim())}</p>\n${table}`,
+  /<p>\s*(表\s*\d+[-.]\d+[^<]*?)\s*<\/p>\s*(?=<(?:table|figure)\b)/g,
+  (_m, caption) => `<p class="doc-table-caption">${escapeHtml(caption.trim())}</p>\n`,
 )
 
 /**

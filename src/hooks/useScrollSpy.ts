@@ -43,7 +43,7 @@ export function announceAnchorScrollEnd() {
  * 这与「点锚点跳转后落点恰好等于停靠位」是同一个坐标系：
  * 段落停靠在 X 处 → 它的 top = X ≤ 判定线 → 它成为最靠下的通过者 → 高亮它。
  *
- * ⚠️ 联动维护点（详见 docs/联动维护点.md 第 6 条）
+ * ⚠️ 联动维护点（详见 MAINTAINING.md 第 6 条）
  * 判定线必须等于各 section 的锚点停靠位（`.anchor-offset` 的 scroll-margin-top）。
  * ⚠️ 这里读的是 `scrollTargets.ts` 的常量，而 CSS 侧那两个 scroll-margin-top 是**硬编码**的
  *    —— 值本身仍是同源，但"改一处就够"的保证不存在。完整清单见 scrollTargets.ts 顶部注释。

@@ -34,7 +34,7 @@
 - **关于我**：早期 / 近期 / 日常阶段化叙事 + 四条能力链路数字卡片（数据工程 / 业务交付 / AI 工具链 / UE 游戏开发）
 - **区块导航**：全端常驻玻璃顶栏（品牌 +「笔记 / 主题 / 简历 / 顶部」四个控件）+ 桌面与平板右侧贯穿式玻璃管（章节节点 + 阅读进度液柱）+ 手机端底部浮动胶囊 Tab Bar
 - **项目在线体验**：各项目静态前端嵌入本站（`public/preview/`），卡片「在线体验」直达；无后端项目显示适配其配色的演示提示条（深浅色双态）
-- **文档区**：站内 `#/docs` 收录毕业论文与 UE 学习笔记（157 页），左栏**两级下钻**（文档列表 → 该篇目录）+ 分区封面页 + 标题锚点跳转 + 跨文档互链 + 配图灯箱，正文整块可复制，换分区/退回一级带视图过渡
+- **文档区**：站内 `#/docs` 收录毕业论文与 UE 学习笔记，左栏**两级下钻**（文档列表 → 该篇目录）+ 分区封面页 + 标题锚点跳转 + 跨文档互链 + 配图灯箱，正文整块可复制，换分区/退回一级带视图过渡
 - **教育经历与证书**：学校信息横条 + 证书/奖项 2×2 网格，点击放大查看证明原件
 - **联系区**：邮箱「点击复制」、GitHub 等入口，一键下载带水印的简历 PDF
 - 移动端适配：常驻玻璃顶栏、底部浮动胶囊 Tab Bar、安全区、单列布局
@@ -78,7 +78,8 @@ flowchart LR
 jyl-site/
 ├── database/
 │   └── portfolio.db          # ★ SQLite 内容库（内容源）
-├── materials/                # ★ 源素材（未加工的原料：原件 / 原图 / 字体源）
+├── MAINTAINING.md            # ★ 工程维护（联动点清单 / 目录与构建约定 / 修订记录）
+├── materials/                # ★ 源素材（未加工的原料：原件 / 原图 / 字体源；整目录 gitignore）
 │   ├── resumes/              #   简历原件（蒋宇龙简历.pdf、蒋宇龙附件简历.pdf）
 │   ├── certificates/         #   证书 / 奖项原件（PNG/JPG）
 │   ├── avatars/              #   头像原件
@@ -87,11 +88,10 @@ jyl-site/
 │   ├── fonts/                #   字体源 TTF（subset-fonts.mjs 的输入）
 │   ├── icons/                #   图标源图形（进 git）
 │   └── site/hero.webp        #   README 展示用站点截图（进 git）
-├── docs/
-│   ├── thesis/source/        # ★ 毕业论文源（pandoc 从 docx 转出的 HTML）
-│   ├── theory/source/        # ★ UE 理论源（markdown 笔记 + 原件 PDF）
-│   ├── combat/source/        # ★ UE 实战源（markdown 笔记；FPS 篇仍是占位页）
-│   └── 联动维护点.md          #   多处联动的维护清单（改代码前必读）
+├── docs/                     # ★ 文档区**内容源**（站点要交付的正文）
+│   ├── thesis/source/{md,pdf}/   # 毕业论文源（pandoc 从 docx 转出的 HTML）
+│   ├── theory/source/{md,pdf}/   # UE 理论源（markdown 笔记 + 原件 PDF）
+│   └── combat/source/{md,pdf}/   # UE 实战源（markdown 笔记；FPS 篇仍是占位页）
 ├── public/
 │   ├── downloads/resume.pdf  #   站点简历（最新版覆盖即可）
 │   ├── 404.html              #   SPA fallback：深链刷新兜底回应用入口
@@ -130,15 +130,13 @@ jyl-site/
 ├── .github/workflows/deploy.yml
 ├── DESIGN.md                 #   设计系统（token 与组件规范）
 ├── PRODUCT.md                #   产品口径（用户 / 反参考 / 设计原则）
+├── MAINTAINING.md            #   工程维护（改代码前必读）
 └── LICENSE
 ```
 
-> **目录分组口径（2026-10 第十九轮整合）**：仓库根只留"功能族"——
-> `src`（应用源码）｜`public`（部署根）｜`docs`（文档管线）｜`materials`（源素材）｜`scripts`（脚本）｜`database`（数据源）。
-> 同一类东西收进同一个子目录，不再有"单份文件自己占一层"（简历曾直接躺在 `public/` 根下）
-> 或"素材混在脚本目录里"（字体源曾在 `scripts/fonts-src/`）。
-> `materials/` 整目录被 `.gitignore` 忽略（原件都是大文件、只服务一次性脚本），
-> 只显式放行 `materials/icons/` 与 `materials/site/` —— 那两样是**源**不是原料。
+> 仓库根只留"功能族"：`src`（应用源码）｜`public`（部署根）｜`docs`（文档区内容源）｜
+> `materials`（源素材）｜`scripts`（脚本）｜`database`（数据源）。
+> 分目录口径、`.gitignore` 规则与历史沿革见 [MAINTAINING.md](./MAINTAINING.md)。
 
 ## 本地运行
 
@@ -153,7 +151,7 @@ npm run preview  # 预览生产构建
 
 ## 内容维护（数据流）
 
-**内容源头是 `database/portfolio.db`（SQLite）**，构建时自动从数据库导出 JSON：
+**内容源头是 `database/portfolio.db`（SQLite）**，构建时自动导出 JSON：
 
 ```bash
 npm run db:seed    # 用 src/data/*.json 重建/覆盖数据库（改内容时先改 JSON）
@@ -163,56 +161,29 @@ npm run build      # = db:export + 类型检查 + 构建
 
 日常改内容两种方式：编辑 `src/data/*.json` 后 `npm run db:seed` 入库；或直接用 SQLite 工具改库后 `npm run db:export` 出 JSON。
 
-常用维护动作：
-
-```bash
-npm run fonts:subset                            # 新增/修改文案后重跑（新用字不进子集会回退系统字体）
-npm run resume:watermark -- --in <原件.pdf>      # 换简历后重跑（生成带水印的 public/downloads/resume.pdf）
-npm run contact:encode                          # 改过邮箱 / GitHub 后重跑
-npm run icons:gen                               # 换图标字或配色后重新生成 favicon
-npm run previews:polish                         # 预览页更新后重跑（演示提示 + iframe 防护）
-npm run docs:verify                             # 文档产物自检 + 真浏览器断言
-```
+> 其余维护动作（字体子集、简历水印、图标生成、联系方式编码、预览页注入、文档区各类脚本）
+> 见 [MAINTAINING.md](./MAINTAINING.md)。`package.json` 的 `scripts` 里也都能看到。
 
 ## 文档区（毕业论文 · UE 理论 · UE 实战）
 
 站内文档区位于 `#/docs`（hash 路由，不需要服务端重写），把两类外部原稿转成可读的文档站：
 **左栏两级下钻**（一级 = 文档列表 → 二级 = 该篇目录）、分区封面页、标题锚点跳转、
 配图点击放大（复用站点灯箱）、正文整块放开复制、跨文档互链（可带 `#标题` 锚点）。
-三个分区：**毕业论文 / UE 理论 / UE 实战**（当前 157 页）。
+三个分区：**毕业论文 / UE 理论 / UE 实战**。
 
-源不是「一篇 = 一页」，构建器按**序号标题**逐级拆页（`H2` 一章、`H3` 一节、`H4` 一页；
-论文走 4 屏装箱的 `pack` 模式）—— 避免一篇文章在手机上要滚几十屏才到底。
-
-> ⚠️ **加新笔记 / 改标题格式之前，先读 [`docs/联动维护点.md`](docs/联动维护点.md) 的「13.9 定稿总纲」**：
-> 拆分与编号口径、锚点与互链的硬约束、左栏两级下钻的 key 规则、返回入口、
-> 视图过渡、以及一份「加一篇新文档的清单」。
-
-```bash
-# UE 笔记更新（顺序不能乱）
-python scripts/optimize_images.py <原图目录> public/docs/ue5/images --only-from-md docs/theory/source/<name>.md
-npm run fonts:subset                # 先 docs:build 再收字；新汉字不回退系统字体
-npm run build                       # prebuild 会自动跑 docs:build
-npm run docs:check                  # 产物自检（配图缺失 / 大纲悬空 / 互链死链 / 预算突破）
-node scripts/check-anchors.mjs      # 真浏览器断言（锚点落点 / 互链 / 左栏折叠 / 导航冒烟）
-```
-
-> 页面 HTML 与清单是**构建产物，不进 git**，由 `predev` / `prebuild` 自动重建。
-> 字体子集（`src/fonts/*.woff2`）**是提交进仓库的资产**，所以改了笔记正文要重跑 `fonts:subset` ——
-> 它扫 `public/docs/pages` 里渲染后的正文，只出现在笔记里的字才进得来。
+内容源在 `docs/<分区>/source/`（论文为 pandoc 转出的 HTML，UE 笔记为 markdown），
+构建器按标题层级**贪心拆页**，避免一篇文章在手机上要滚几十屏才到底。
+改动流程、格式硬约束与验证方式见 [MAINTAINING.md](./MAINTAINING.md)。
 
 ## 反爬与内容保护
 
-客户端方案无法真正阻止抓取，这里的目标是提高无差别采集的成本，同时不影响招聘方的正常使用：
+客户端方案无法真正阻止抓取，目标是提高无差别采集的成本，同时不影响招聘方的正常使用：
+`robots.txt` 放行搜索引擎、拒绝 AI 语料采集与批量抓取；`sitemap.xml` 提供结构；
+联系方式不以明文出现；简历 PDF 带全页水印但保留文本层（ATS 可解析）；
+内嵌预览页加 iframe 防护。全站默认禁止选中/复制，仅联系区邮箱与文档区正文放行；
+打印一律拦截并引导至 PDF 简历。
 
-| 层 | 手段 | 位置 |
-| --- | --- | --- |
-| L1 | `robots.txt` 放行搜索引擎、拒绝 AI 语料采集与批量抓取 UA；`sitemap.xml` 提供结构；外链统一 `rel="noopener noreferrer nofollow"` | `public/robots.txt`、`public/sitemap.xml` |
-| L2 | 邮箱与 GitHub 地址以字符码表存储、渲染时才解码；页面内埋入读屏与视觉均不可见的诱饵邮箱 | `src/data/contact.ts`、`scripts/encode-contact.mjs` |
-| L3 | 简历 PDF 全页对角平铺水印，不破坏文本层（ATS 仍可解析）；无文本层的简历原件不进仓库 | `scripts/watermark_resume.py` |
-| L4 | 预览页 iframe 防护（CSP + frame-busting 兜底） | `scripts/polish-previews.mjs` |
-
-另有前端层的内容只读：全站默认禁止选中/复制，仅联系区邮箱与文档区正文放行，邮箱配套「点击复制」按钮。打印一律拦截（站点不提供打印版式），改为提示引导至 PDF 简历。
+> 各层的具体手段与位置见 [MAINTAINING.md](./MAINTAINING.md)。
 
 ## 项目在线体验
 
@@ -221,19 +192,9 @@ node scripts/check-anchors.mjs      # 真浏览器断言（锚点落点 / 互链
 | 项目 | 在线入口 | 数据来源 |
 | --- | --- | --- |
 | SyLabAI / XiaoLouAI / MiLuAssistantWeb | 静态前端 + 演示提示条 | 无后端（界面演示） |
-| MiLuStudio | 嵌入演示模式（`VITE_EMBEDDED_DEMO`） | 内置示例项目，本地确定性流程可交互 |
-| BookRecommendation | 嵌入演示模式（`VUE_APP_EMBEDDED_DEMO`）+ 演示自动登录 | 内置示例数据（图书 / 推荐 / 借阅） |
+| MiLuStudio | 嵌入演示模式 | 内置示例项目，本地确定性流程可交互 |
+| BookRecommendation | 嵌入演示模式 + 演示自动登录 | 内置示例数据（图书 / 推荐 / 借阅） |
 | ShopRecommendation | 独立 Render 部署（另有主页链接） | 完整后端 |
-
-配套机制：`scripts/polish-previews.mjs` 向每个预览页注入与项目品牌配色一致的演示提示条（深浅色双态）并把缺后端报错优雅替换；`scripts/sync-preview.mjs <源工程 dist> public/preview/<名字>` 负责把本地源工程的生产构建拷成站内预览（顺带补图标声明并校验资源引用为相对路径）。
-
-## 图片与命名规范
-
-- 站点图片统一放 `public/` 下，按类型分目录：`projects/`（项目截图）、`certificates/`（证书）、`images/`（头像）、`favicons/`（站点图标）、`assets/`（纹样装饰件）
-- 命名规则：小写 kebab-case；产品名保持紧凑（`milustudio`、`xiaolouai`），通用词用连字符（`milu-assistant-web`、`book-recommendation`、`cet-4`）
-- `public/` 只放压缩后的 WebP（`python scripts/optimize_images.py <原图目录> <目标目录>`），原图一律不入库
-- 站点图标是生成物（`scripts/gen_icons.py` + 柳建毛草字体），改配色或换字只需重跑 `npm run icons:gen`
-- 数据源为 SQLite，其中存储的图片路径与 `public/` 实际文件名严格一致；新增/改名图片后执行 `npm run db:seed` 同步
 
 ## 部署到 GitHub Pages
 
@@ -249,7 +210,6 @@ node scripts/check-anchors.mjs      # 真浏览器断言（锚点落点 / 互链
 
 ## 相关文档
 
-- [DESIGN.md](./DESIGN.md)：设计系统，颜色 / 字体 / 层级 / 组件 / 禁忌
-- [PRODUCT.md](./PRODUCT.md)：产品口径，目标用户 / 反参考 / 设计原则 / 可访问性要求
-- [docs/联动维护点.md](./docs/联动维护点.md)：同一事实写在多处的联动点清单（改代码前必读）
-- 滚动条（全站规范：暖色 + 10px / 栏内 6px + 顶栏折射层让位）见 [DESIGN.md](./DESIGN.md) 的 **Scrollbars** 段
+- [DESIGN.md](./DESIGN.md)：设计系统 —— 颜色 / 字体 / 层级 / 组件 / 禁忌
+- [PRODUCT.md](./PRODUCT.md)：产品口径 —— 目标用户 / 反参考 / 设计原则 / 可访问性要求
+- [MAINTAINING.md](./MAINTAINING.md)：工程维护 —— 联动点清单、目录与构建约定、历次修订记录（**改代码前必读**）

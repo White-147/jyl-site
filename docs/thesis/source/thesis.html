@@ -48,26 +48,24 @@
 <p>协同过滤算法是一个完全依赖于用户与商品间行为关系的推荐算法。协同过滤算法有两种，基于项目的协同过滤算法与基于用户的协同过滤算法，前者是向用户推荐类似于自己以前所喜爱的东西；后者是向使用者推荐和自己兴趣类似的用户所喜爱的东西<sup>[7]</sup>。</p>
 <h3 id="基于物品的协同过滤">2.2.1 基于物品的协同过滤</h3>
 <p>基于物品的协同过滤算法没有使用物品相关的内容属性来计算项目间相似度，其主要是通过对用户行为记录进行分析，来计算出物品间相似度。算法得出物品A与物品B相似度较大是由于喜爱物品A的大部分用户也喜爱物品B所致。基于物品的协同过滤算法可以概括为表2-1。</p>
-<p>表2-1 基于物品的协同过滤算法计算步骤</p>
+<p class="doc-table-caption">表2-1 基于物品的协同过滤算法计算步骤</p>
 <figure class="doc-code"><figcaption>输入:用户历史行为A</figcaption><pre><code>步骤1:根据用户的历史行为A计算出用户对于物品的的偏好值UP，得出用户-物品偏好矩阵PM；
 步骤2:基于PM，计算物品的共现关系CR，结合物品相关性算法ICA，得出物品相似度矩阵SM；
 步骤3:基于PM和SM，得出用户-物品推荐矩阵UGM；
 步骤4:基于UGM，去除用户已感兴趣的物品集合IL后，按照评分降序排列，得出推荐矩阵RM。</code></pre></figure>
 <h3 id="基于用户的协同过滤">2.2.2 基于用户的协同过滤</h3>
 <p>基于用户的协同过滤推荐，其基本原理为，基于所有使用者对于商品或资讯的喜好，找出和当前用户喜好类似的“邻居”用户群。根据邻居历史喜好信息，向当前的用户提供推荐。基于用户的协同过滤算法可总结如表2-2所示。</p>
-<p>表2-2 基于用户的协同过滤算法计算步骤</p>
+<p class="doc-table-caption">表2-2 基于用户的协同过滤算法计算步骤</p>
 <figure class="doc-code"><figcaption>输入:用户-物品评分矩阵UGM</figcaption><pre><code>步骤1:根据用户-物品评分矩阵UGM进行评分,计算所述用户与所述其他用户的相似度，获取用户相似度清单SL；
 步骤2:根据SL进行计算,获取待推荐用户的最近邻用户集合N,去除待推荐用户已感兴趣的物品集合IL后，得出推荐物品矩阵GM；
 步骤3:基于UGM和GM，得出推荐物品评分矩阵GRM，按照评分降序排列，得出推荐矩阵RM。</code></pre></figure>
 <h2 id="皮尔逊相关性系数">2.3 皮尔逊相关性系数</h2>
 <p>皮尔逊相关是英国统计学家皮尔逊于20世纪提出的一种测算平行线相关的方法，皮尔逊相关性系数是协方差与标准偏差的比率,其公式计算如2-1所显示。皮尔逊系数绝对值取值范围为[0,1]且绝对值愈趋近于1,则相关性愈强。</p>
-<figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image7.webp" alt="image7" width="763" height="96" fetchpriority="low" decoding="async" /></figure>
-<p>公式2-1 皮尔逊系数公式</p>
+<figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image7.webp" alt="image7" width="763" height="96" fetchpriority="low" decoding="async" /><figcaption>公式2-1 皮尔逊系数公式</figcaption></figure>
 <p>计算皮尔逊相关系数，首先需要获得公式中X和Y值，本系统通过用户行为日志中用户是否对物品是否做出操作来构建用户行为向量，再根据用户行为向量得出用户-图书向量矩阵，于是可以构建如图2-4所示的用户-图书向量矩阵。</p>
 <figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image8.webp" alt="image8" width="445" height="209" fetchpriority="low" decoding="async" /><figcaption>图2-4 用户-图书向量矩阵</figcaption></figure>
 <p>上图所示矩阵是由四位用户对四本书的行为向量构成的矩阵，譬如(1,1)代表第一位用户对第一本书的操作，当某位用户对某本书进行操作之后，就会产生行为向量，矩阵中对应位置就会变为1。此时可以根据矩阵得出每个向量的均值μ，将公式2-1中标准差写成带有向量均值μ的形式（公式2-2），带入公式2-2中即可求出皮尔逊系数。</p>
-<figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image9.webp" alt="image9" width="841" height="138" fetchpriority="low" decoding="async" /></figure>
-<p>公式2-2 皮尔逊系数完整表示</p>
+<figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image9.webp" alt="image9" width="841" height="138" fetchpriority="low" decoding="async" /><figcaption>公式2-2 皮尔逊系数完整表示</figcaption></figure>
 <h2 id="爬虫技术">2.4 爬虫技术</h2>
 <p>Selenium是2004年在芝加哥ThoughtWorks公司的一个叫 Jason Huggins的程序员为了实现自动化测试实现的JavaScriptTestRunner程序演化而来，目前Selenium是Selenium WebDriver、Selenium RC、Selenium IDE、Selenium Grid等等一系列工具的总称，支持的开发语言有Java、Python、C#、ruby<sup>[8]</sup>。</p>
 <p>Selenium支持以无界面的方式直接访问各种常见的浏览器，从而节省系统资源的同时提高访问效率，能够通过发送指令，实现快速的页面截图、点击等功能，其中包括网络爬虫，并且由于Selenium的自动化操作，它有很多应对网站反爬虫的措施<sup>[9]</sup>。</p>
@@ -341,8 +339,7 @@ return bookExtendService.queryBookByCallNo(certId, callNo);
 <figure class="doc-code"><figcaption>代码-3</figcaption><pre><code>val consultCountRDD: RDD[((String, String), BigDecimal)] =
 getCountRDD(logRDD, &quot;consultBook&quot;, BigDecimal(0.15))</code></pre></figure>
 <p>在实际用户操作过程中，会出现“查看”的操作频率远高于“借阅”的情况，这时“查看”的用户偏好值远大于“借阅”的用户偏好值，导致推荐结果不准确。因此，系统通过实现具有水平渐近线的单调递增函数来限制各个行为能够隐式转化的分值上限，本系统实现的是反比函数，关于占比上限公式S由公式5-1得出，实现代码如代码-4所示。</p>
-<figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image18.webp" alt="image18" width="236" height="104" fetchpriority="low" decoding="async" /></figure>
-<p>公式5-1 占比上限公式</p>
+<figure class="doc-figure"><img data-doc-image src="docs/thesis/images/image18.webp" alt="image18" width="236" height="104" fetchpriority="low" decoding="async" /><figcaption>公式5-1 占比上限公式</figcaption></figure>
 <p>上式中，S对应用户实际偏好值，P对应preference，C对应用户行为次数，为防止出现用户只操作过一次导致偏好值为零的情况，反比函数的分子取占比值的一半，即各个占比的实际偏好值的取值范围为[P/2,P)。隐式转化结果如图5-2所示。</p>
 <figure class="doc-code"><figcaption>代码-4</figcaption><pre><code>private def getCountRDD(lineRDD: RDD[((String, String, String), Int)],
 action: String,
