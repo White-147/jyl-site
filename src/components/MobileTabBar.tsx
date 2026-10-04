@@ -51,15 +51,12 @@ export default function MobileTabBar() {
       className="pointer-events-none fixed inset-x-0 bottom-0 z-40 px-3 pb-[max(0.5rem,env(safe-area-inset-bottom))] md:hidden"
       aria-label="移动端导航"
     >
-      {/* ⚠️ 2026-10 用户定向：**去掉左右两条边框**（`glass-panel-sides-off`）。
-          现象：这一条浮在页面底部，两侧的 1px 竖线正好落在 5 个图标的两端，
-          看着像"多画了两道边"（用户原话：「还有个两侧边框，那个看着很奇怪」）。
-          只去左右、保留上下：上下那两条是玻璃的"受光/压地"边，去掉整块就不像一块玻璃了；
-          而且只去左右时圆角处不会断开（去掉全部四条才会）。
-          ⚠️ 用 `glass-panel-sides-off` 这类名而**不是** `border-x-0`：`.glass-panel` 的
-             `border` 简写排在 Tailwind 工具类之后，工具类赢不了 —— 详见 index.css 里那条规则的注释
-             （`Docs.tsx` 的吸顶条上那组 `border-x-0 border-t-0` 就是这么失效了好几个月的）。 */}
-      <div className="glass-panel glass-panel-sides-off pointer-events-auto mx-auto flex max-w-md items-stretch justify-around overflow-hidden rounded-2xl">
+      {/* ⚠️ 2026-10 用户定向：**面板保留四条边**，两侧竖线的问题不在面板上。
+          真正的元凶是**选中项的琥珀色 1px 环**（`.glass-lit-on` 的 box-shadow），
+          实测 tab 左边界亮度跳变 +75.9、右边界 +45.2；修法见 `index.css` 的 `.mobile-tab-active`。
+          （本组件曾试过 `glass-panel-sides-off` 去掉左右边框，那会让 Tab Bar 丢掉顶部那条受光边，
+            与底部 Tab Bar 的玻璃语言不一致，已回退 —— 不要再往这个方向改。） */}
+      <div className="glass-panel pointer-events-auto mx-auto flex max-w-md items-stretch justify-around overflow-hidden rounded-2xl">
         {tabs.map((tab) => {
           const isActive = active === tab.id
           return (
@@ -70,7 +67,7 @@ export default function MobileTabBar() {
               aria-current={isActive ? 'page' : undefined}
               className={`glass-lit flex min-h-[3.25rem] flex-1 flex-col items-center justify-center gap-0.5 text-[11px] font-medium transition-colors ${
                 isActive
-                  ? 'glass-lit-on glass-chip-on font-semibold'
+                  ? 'glass-lit-on glass-chip-on mobile-tab-active font-semibold'
                   : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
               }`}
             >

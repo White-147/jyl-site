@@ -1166,29 +1166,29 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
         </span>
       </div>
 
-      {/* 手机端吸顶条：返回图标 + 目录入口。`sticky top-16` = 正好贴在常驻顶栏下沿。
-          ⚠️ 高度直接决定锚点落点（`--docs-anchor-offset` 会量它）。加了返回图标后
-          仍然是「py-2 + h-9 + 1px 边框」= 53px，所以落点不变。
+      {/* 手机端吸顶条：目录入口。`sticky top-16` = 正好贴在常驻顶栏下沿。
+          ⚠️ 高度直接决定锚点落点（`--docs-anchor-offset` 会量它）。
+          实测 = 「py-2(16) + 内部 h-9 按钮(36) + 下边框(1) + 上边框(1)」= 54px。
           ⚠️ 2026-09 第十二轮：材质由**硬编码旧冷值**（`rgb(250_251_251/0.92)` /
               `rgb(18_20_21/0.9)`）改为**引用画布变量 + glass-panel 的底**。
               原来那两个值在暖调转向后成了页面里唯一的冷色块，而且没有跟全局顶栏同一套玻璃语言
               （用户第 4 条要的就是"手机端和 PC 端一样对齐"）。
-              高度与 `sticky top-16` 都没动 —— 锚点落点的断言盯着这里。 */}
+          ⚠️⚠️ 2026-10：**左端那个「← 返回作品集」图标按钮已删除**（用户定向）。
+              理由（用户原话）：「它在二级目录也会直接返回主站，这个和我想要的操作逻辑不一致」——
+              那个按钮的 href 写死 `#top`（回作品集首页），而上面那一行的返回入口在二级时是
+              「返回 UE 理论」（回分区封面），两个"返回"目标不同、并排出现就是打架。
+              现在手机端与 PC 端口径一致：**返回入口只有一个**（上面那一行 / PC 的横栏左端）。
+              代价：手机端少了一个"一步回作品集"的入口，用户已接受（「多点一下的事情」）。
+          ⚠️ 删掉它**不影响 54px 高度**（高度由 h-9 的目录按钮 + py-2 决定），
+              所以 `--docs-anchor-offset`（实测 134px）与 `docs:anchors` 的断言都不用动。
+          ⚠️ 那三个 `border-x-0 border-t-0` 已删：它们在 `@layer utilities` 里，
+              **打不过**本文件无层的 `.glass-panel { border: 1px solid … }`，从来没生效过
+              （实测四条边都是 1px）。要真的只留底边，得走 `.glass-panel-sides-off` 那类普通类。 */}
       <div
         ref={stickyBarRef}
         data-docs-stickybar
-        className="glass-panel sticky top-16 z-30 -mx-4 mb-4 flex items-center gap-2 rounded-none rounded-b-xl border-x-0 border-t-0 px-4 py-2 sm:-mx-6 sm:px-6 md:hidden"
+        className="glass-panel sticky top-16 z-30 -mx-4 mb-4 flex items-center gap-2 rounded-none rounded-b-xl px-4 py-2 sm:-mx-6 sm:px-6 md:hidden"
       >
-        <a
-          href="#top"
-          aria-label="返回作品集"
-          title="返回作品集"
-          className="glass-chip flex h-9 w-9 shrink-0 items-center justify-center transition-colors"
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden="true">
-            <path d="M19 12H5M12 19l-7-7 7-7" />
-          </svg>
-        </a>
         <button
           type="button"
           onClick={() => setNavOpen((v) => !v)}
@@ -1443,7 +1443,7 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
                     </span>
                     {/* 行 2（动作）。`max-sm` 下独占一行；≥640px 回到行内。 */}
                     {(pageActions.length > 0 || current?.prereq) && (
-                      <span className="contents max-sm:flex max-sm:w-full max-sm:flex-wrap max-sm:items-center max-sm:gap-x-2.5 max-sm:gap-y-1.5">
+                      <span className="contents max-sm:flex max-sm:w-full max-sm:flex-wrap max-sm:items-center max-sm:gap-x-3 max-sm:gap-y-1.5">
                         {pageActions.map((a) => (
                           <a
                             key={a.key}
@@ -1451,12 +1451,25 @@ export default function Docs({ section: routeSection, pageId, anchor }: Props) {
                             title={a.title}
                             {...(a.download ? { download: '' } : {})}
                             {...(a.external ? { target: '_blank', rel: 'noopener noreferrer nofollow' } : {})}
-                            /* 动作型玻璃件：与篇尾「下一节」同一套（`.glass-btn`）。
-                               ⚠️ `shrink-0` + `whitespace-nowrap`：正是不让它被挤成两行。 */
-                            className="glass-lit glass-chip glass-btn inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-lg px-3.5 py-2 text-sm font-semibold transition-colors"
+                            /**
+                             * ⚠️⚠️ 2026-10 用户定向：**从玻璃按钮改回下划线链接**。
+                             * 原话：「文档区下载和跳转的采用按钮，比起第一行的文本显得太大太强调了，
+                             * 改成带下划线的链接文本吧」。
+                             * 旧口径是 `.glass-lit .glass-chip .glass-btn`（与篇尾「下一节」同一套），
+                             * 实测 390px 下 98.8×36.8 —— 而它上面那行面包屑只有 11–12px，
+                             * 主次确实反了：页头该回答"我在哪"，不是"来点我"。
+                             * 现在与同一行的「前置：xxx」用**同一套**链接样式（品牌色 + 下划线）。
+                             *
+                             * ⚠️ `py-1`（不是只有文字）把触控高度从 ~16px 抬到 ~22px：
+                             *    仍变小了（原来是 36.8px），用户已明确接受（「可接受触控目标变小」）。
+                             * ⚠️ 不要再补可见的体积文案（如「（8.2 MB）」）：用户定向「不需要补长度」，
+                             *    体积与完整名都在 `title` 里。
+                             * ⚠️ `whitespace-nowrap` 保留：它是"动作行恒一行"的一部分。
+                             */
+                            className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap py-1 text-sm font-medium text-brand-700 underline decoration-brand-300 underline-offset-4 transition-colors hover:text-brand-900 dark:text-brand-200 dark:decoration-brand-500/50 dark:hover:text-brand-100"
                           >
                             {a.key === 'download' && (
-                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5" aria-hidden="true">
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5 shrink-0" aria-hidden="true">
                                 <path d="M12 3v12m0 0 4-4m-4 4-4-4M4 21h16" />
                               </svg>
                             )}
